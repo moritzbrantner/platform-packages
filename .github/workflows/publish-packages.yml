@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 permissions:
   contents: write
   packages: write
@@ -14,15 +17,16 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
 
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v5.0.0
         with:
-          version: 9
+          version: 10.32.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6.3.0
         with:
-          node-version: "20"
+          node-version: "24"
+          cache: "pnpm"
           registry-url: "https://npm.pkg.github.com"
           scope: "@moritzbrantner"
 
@@ -42,7 +46,7 @@ jobs:
         run: pnpm test
 
       - name: Version or publish packages
-        uses: changesets/action@v1
+        uses: changesets/action@v1.7.0
         with:
           version: pnpm exec changeset version
           publish: pnpm exec changeset publish
