@@ -1,0 +1,18 @@
+{
+  "name": "platform-packages",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "build": "turbo run build",
+    "changeset": "changeset",
+    "lint": "turbo run lint",
+    "create:package": "./scripts/create-package.sh",
+    "typecheck": "turbo run check-types",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7",
+    "turbo": "^2.8.16",
+    "typescript": "5.9.2"
+  }
+}
