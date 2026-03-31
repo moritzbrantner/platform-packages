@@ -1,27 +1,22 @@
-# Private Platform Packages Scaffold
+# platform-packages
 
-Copy this folder into a dedicated private repository when you are ready to publish shared packages for multiple app repositories.
+Shared runtime packages for the Next.js application stack.
 
-## What this scaffold includes
-- `pnpm` workspace root
-- Turbo pipeline
-- Changesets configuration
-- private GitHub Packages npm publishing workflow
-- starter package manifests for UI and config packages
-- reusable package generator
-- consumer `.npmrc` example
+## Packages
+- `@platform/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
+- `@platform/storytelling`: scroll-driven storytelling components built on top of `@platform/ui`.
 
-## First setup
-1. Create a new private repository, for example `platform-packages`.
-2. Copy this folder's contents to the new repository root.
-3. If you publish from a different GitHub owner, replace every `moritzbrantner` scope/reference with your lowercase GitHub owner.
-4. Install dependencies with `pnpm install`.
-5. Add real package code under `packages/*`.
-6. Commit a changeset for each released change.
-7. Publish from GitHub Actions after merging to `main`.
+## Repository scope
+- Runtime packages only.
+- No shared eslint or TypeScript config packages in this first extraction wave.
+- GitHub Packages publishing is configured through Changesets.
 
-## Create a new package
-Run `pnpm create:package my-package` to scaffold a new publishable package under `packages/my-package`.
+## Local development
+1. Install dependencies with `pnpm install`.
+2. Build packages with `pnpm build`.
+3. Run checks with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
 
-## Release flow
-See `docs/publishing.md` for the exact first-publish and follow-up release steps.
+## Publishing
+- The package names use the neutral `@platform/*` scope in source.
+- Before first GitHub Packages publish, either publish from a matching GitHub org/user scope or rename the packages to your actual GitHub Packages scope.
+- See [`docs/publishing.md`](./docs/publishing.md) for the release workflow and scope caveat.

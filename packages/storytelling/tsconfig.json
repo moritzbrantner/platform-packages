@@ -1,10 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "paths": {
+      "@platform/ui": ["../ui/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
 }
