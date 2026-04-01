@@ -50,7 +50,7 @@ importers:
 
   packages/storytelling:
     dependencies:
-      '@platform/ui':
+      '@moritzbrantner/ui':
         specifier: file:../ui
         version: link:../ui
       motion:

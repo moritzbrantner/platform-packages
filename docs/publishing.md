@@ -3,7 +3,7 @@
 ## First publish
 1. Commit and push this repository to `github.com/moritzbrantner/platform-packages`.
 2. Confirm your package scope matches the GitHub Packages owner. GitHub Packages only accepts npm scopes owned by the publishing user or organization.
-3. If you are not publishing from a `platform` GitHub owner, rename `@platform/*` packages to your real GitHub scope before the first release.
+3. If you are not publishing from a `platform` GitHub owner, rename `@moritzbrantner/*` packages to your real GitHub scope before the first release.
 4. Open a pull request and merge it into `main`.
 5. Wait for the `Release Packages` workflow to finish on `main`.
 
@@ -29,6 +29,6 @@ Every publishable package under `packages/*` must have:
 Consumers need an `.npmrc` entry for the package scope you publish under and a token that can read packages:
 
 ```ini
-@platform:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+@moritzbrantner:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GH_PACKAGES_TOKEN}
 ```

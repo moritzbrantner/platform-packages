@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, cn } from "../src";
 
-describe("@platform/ui", () => {
+describe("@moritzbrantner/ui", () => {
   test("renders shared primitives in jsdom", () => {
     render(
       <Card>
