@@ -24,7 +24,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@platform/ui": "file:../ui",
+    "@moritzbrantner/ui": "file:../ui",
     "motion": "^12.35.0"
   },
   "devDependencies": {

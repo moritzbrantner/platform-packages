@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import { StoryContainer, StoryScene, StorySeries } from "../src";
 
-describe("@platform/storytelling", () => {
+describe("@moritzbrantner/storytelling", () => {
   test("renders a story container in jsdom", () => {
     render(
       <StoryContainer title="History" subtitle="Timeline">

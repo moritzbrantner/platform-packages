@@ -12,7 +12,7 @@ import {
 
 import { useMotionValue } from "motion/react";
 
-import { Button, cn } from "@platform/ui";
+import { Button, cn } from "@moritzbrantner/ui";
 
 import { StoryProvider } from "./story-context";
 import { buildSceneMeta } from "./story-introspection";

@@ -10,7 +10,7 @@ import {
   useTransform,
 } from "motion/react";
 
-import { cn } from "@platform/ui";
+import { cn } from "@moritzbrantner/ui";
 
 import { useStoryContext } from "./story-context";
 import { getStorySceneElements } from "./story-introspection";
