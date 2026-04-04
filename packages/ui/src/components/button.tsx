@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion, type HTMLMotionProps } from "motion/react"
+import { motion } from "motion/react"
 import { Slot } from "radix-ui"
 import { cn } from "../lib/cn"
 
@@ -42,21 +42,14 @@ const buttonVariants = cva(
 
 type SharedProps = VariantProps<typeof buttonVariants> & {
   className?: string
-  /** Render as Radix Slot (native element props) */
   asChild?: boolean
-  /** Enable Motion drag on X axis */
   dragX?: boolean
-  /** Back-compat alias for dragX (your previous API) */
-  onDrag?: boolean
+  // Backward-compatible alias for horizontal drag support.
+  onDrag?: React.ComponentProps<"button">["onDrag"] | boolean
 }
 
-/**
- * If asChild=true -> accept native button props (Slot)
- * else -> accept Motion button props (motion.button)
- */
-type ButtonProps =
-  | (SharedProps & { asChild: true } & React.ComponentProps<"button">)
-  | (SharedProps & { asChild?: false } & Omit<HTMLMotionProps<"button">, "className">)
+type ButtonProps = SharedProps &
+  React.ComponentProps<"button">
 
 function Button(props: ButtonProps) {
   const {
@@ -67,31 +60,27 @@ function Button(props: ButtonProps) {
     dragX,
     onDrag,
     ...rest
-  } = props as ButtonProps
+  } = props
 
   const buttonClassName = cn(buttonVariants({ variant, size, className }))
-  const enableDrag = Boolean(dragX ?? onDrag)
-
+  const legacyDragX = typeof onDrag === "boolean" ? onDrag : undefined
+  const enableDrag = Boolean(dragX ?? legacyDragX)
   const isDisabled =
     "disabled" in rest && typeof rest.disabled === "boolean"
       ? rest.disabled
       : false
 
   if (asChild) {
-    // Native DOM props are fine here (Slot)
     return (
       <Slot.Root
         data-slot="button"
         data-variant={variant}
         data-size={size}
         className={buttonClassName}
-        {...(rest as React.ComponentProps<"button">)}
+        {...(rest as Record<string, unknown>)}
       />
     )
   }
-
-  // Motion props are safe here (no React DOM prop collisions)
-  const motionProps = rest as Omit<HTMLMotionProps<"button">, "className">
 
   return (
     <motion.button
@@ -102,8 +91,8 @@ function Button(props: ButtonProps) {
       whileHover={{ scale: isDisabled ? 1 : 1.01 }}
       whileTap={{ scale: isDisabled ? 1 : 0.98 }}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
-      drag={enableDrag ? "x" : motionProps.drag}
-      {...motionProps}
+      drag={enableDrag ? "x" : undefined}
+      {...(rest as Record<string, unknown>)}
     />
   )
 }
