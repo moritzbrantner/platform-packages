@@ -12,20 +12,33 @@ import { cn } from "../lib/cn"
 import { Button, buttonVariants } from "./button"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
 
+type CalendarCellComponentProps = React.ComponentProps<typeof DayButton> & {
+  locale?: Partial<Locale>
+}
+
+type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  cellComponent?: React.ComponentType<CalendarCellComponentProps>
+}
+
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  cellComponent: CellComponent,
   locale,
   formatters,
   components,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
+}: CalendarProps) {
   const defaultClassNames = getDefaultClassNames()
+  const defaultDayButton = (dayButtonProps: React.ComponentProps<typeof DayButton>) => {
+    const DayButtonComponent = CellComponent ?? CalendarDayButton
+
+    return <DayButtonComponent locale={locale} {...dayButtonProps} />
+  }
 
   return (
     <DayPicker
@@ -161,9 +174,7 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           )
         },
-        DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
-        ),
+        DayButton: defaultDayButton,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -220,3 +231,4 @@ function CalendarDayButton({
 }
 
 export { Calendar, CalendarDayButton }
+export type { CalendarProps, CalendarCellComponentProps }
