@@ -13,8 +13,9 @@ Shared runtime packages for the Next.js application stack.
 
 ## Local development
 1. Install dependencies with `pnpm install`.
-2. Build packages with `pnpm build`.
-3. Run checks with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
+2. Scaffold a new package with `pnpm create:package <name>`.
+3. Build packages with `pnpm build`.
+4. Run checks with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
 
 ## Publishing
 - The package names use the neutral `@moritzbrantner/*` scope in source.

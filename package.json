@@ -5,6 +5,7 @@
   "scripts": {
     "build": "turbo run build",
     "changeset": "changeset",
+    "create:package": "node scripts/create-package.mjs",
     "lint": "turbo run lint",
     "typecheck": "turbo run check-types",
     "test": "turbo run test"
