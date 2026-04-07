@@ -10,12 +10,14 @@ Shared runtime packages for the Next.js application stack.
 - Runtime packages only.
 - No shared eslint or TypeScript config packages in this first extraction wave.
 - GitHub Packages publishing is configured through Changesets.
+- Includes a local playground app for manually testing package behavior.
 
 ## Local development
 1. Install dependencies with `pnpm install`.
 2. Scaffold a new package with `pnpm create:package <name>`.
-3. Build packages with `pnpm build`.
-4. Run checks with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
+3. Start the example pages with `pnpm dev:playground`.
+4. Build packages and the playground with `pnpm build`.
+5. Run checks with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
 
 ## Publishing
 - The package names use the neutral `@moritzbrantner/*` scope in source.

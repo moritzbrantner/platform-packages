@@ -6,7 +6,10 @@
     "build": "turbo run build",
     "changeset": "changeset",
     "create:package": "node scripts/create-package.mjs",
+    "dev:playground": "pnpm --filter @moritzbrantner/playground dev",
     "lint": "turbo run lint",
+    "preview:playground": "pnpm --filter @moritzbrantner/playground preview",
+    "build:playground": "pnpm --filter @moritzbrantner/playground build",
     "typecheck": "turbo run check-types",
     "test": "turbo run test"
   },

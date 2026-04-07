@@ -1,0 +1,27 @@
+@import "@moritzbrantner/ui/styles.css";
+
+@source "./**/*.{ts,tsx}";
+@source "../../../packages/storytelling/src/**/*.{ts,tsx}";
+
+:root {
+  color-scheme: light;
+  background:
+    radial-gradient(circle at top, color-mix(in oklch, var(--primary) 10%, white) 0%, transparent 40%),
+    linear-gradient(180deg, color-mix(in oklch, var(--muted) 40%, white) 0%, var(--background) 42%);
+}
+
+.dark {
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at top, color-mix(in oklch, var(--primary) 18%, black) 0%, transparent 35%),
+    linear-gradient(180deg, color-mix(in oklch, var(--card) 60%, black) 0%, var(--background) 44%);
+}
+
+body {
+  min-height: 100vh;
+  background: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
