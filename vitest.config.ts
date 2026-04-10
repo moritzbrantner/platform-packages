@@ -7,6 +7,7 @@ const rootDir = fileURLToPath(new URL("./", import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
     },

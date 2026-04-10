@@ -12,6 +12,13 @@ function HomePage() {
     >
       <section className="grid gap-4 md:grid-cols-2">
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/parallel-text"
+          title="Parallel text comparison demo"
+          description="Compare original and translated text side by side, hover tokens to inspect link mapping, and validate manual sentence alignment overrides."
+          href="/parallel-text.html"
+          cta="Open parallel text demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/ui"
           title="Interactive UI gallery"
           description="Buttons, form controls, overlays, data display, theme switching, and notification flows built directly from the shared UI package."
@@ -44,6 +51,11 @@ function HomePage() {
               pages intentionally cover stateful components instead of only static
               screenshots.
             </p>
+            <p>
+              The parallel text page is useful for validating text-heavy package work:
+              sentence grouping, hover state clarity, and responsiveness with long
+              bilingual passages.
+            </p>
           </CardContent>
         </Card>
 
@@ -52,6 +64,9 @@ function HomePage() {
             <CardTitle>Quick links</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
+            <Button asChild variant="outline">
+              <a href="/parallel-text.html">Open parallel text package page</a>
+            </Button>
             <Button asChild variant="outline">
               <a href="/ui.html">Open UI package page</a>
             </Button>

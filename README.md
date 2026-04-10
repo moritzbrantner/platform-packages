@@ -3,6 +3,7 @@
 Shared runtime packages for the Next.js application stack.
 
 ## Packages
+- `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
 - `@moritzbrantner/storytelling`: scroll-driven storytelling components built on top of `@moritzbrantner/ui`.
 
