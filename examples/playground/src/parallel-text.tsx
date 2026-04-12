@@ -42,7 +42,7 @@ function ParallelTextPage() {
     <PlaygroundPage
       activePage="parallel-text"
       title="Parallel text package examples"
-      description="A browser-ready demo for aligned bilingual reading with translation switching, paragraph flow, and layered hover context for words, phrases, and sentences."
+      description="A browser-ready demo for aligned bilingual reading with translation switching, paragraph flow, and layered inline outlines for words, phrases, and sentences."
     >
       <section className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
         <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
@@ -58,16 +58,16 @@ function ParallelTextPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
-              Hover or focus a word and confirm the inspector fills in the aligned
-              word, phrase, and sentence instead of only flashing the counterpart token.
+              Hover a word and confirm the text itself carries the interaction:
+              word highlighting inside sentence and phrase outlines, on both sides.
             </p>
             <p>
               Switch translations and make sure the right panel updates without
               disturbing the source text or the hover behavior.
             </p>
             <p>
-              Read through the text blocks and confirm the sentences flow as normal
-              paragraphs rather than isolated cards.
+              Move across whitespace inside a sentence and confirm phrase and
+              sentence-level alignment remains visible even when no token is active.
             </p>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Compare with storytelling demo</a>
@@ -112,7 +112,7 @@ function ParallelTextPage() {
               <CardTitle>Manual sentence alignment</CardTitle>
               <CardDescription>
                 This example reverses the sentence order in translation, so explicit
-                alignment metadata keeps phrase and sentence hover context meaningful.
+                alignment metadata keeps the inline phrase and sentence outlines meaningful.
               </CardDescription>
             </CardHeader>
             <CardContent>

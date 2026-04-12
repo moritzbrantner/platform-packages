@@ -16,6 +16,8 @@ import {
   AccordionTrigger,
   Badge,
   Button,
+  Calendar,
+  CalendarDayButton,
   Card,
   CardContent,
   CardDescription,
@@ -59,6 +61,8 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
+  type CalendarCellComponentProps,
+  type CalendarIcsData,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -77,11 +81,132 @@ const releaseRows = [
   { packageName: "@moritzbrantner/eslint-config", version: "0.1.0", status: "Infra" },
 ] as const;
 
+const releaseCalendarData = [
+  "vcalendar",
+  [
+    ["version", {}, "text", "2.0"],
+    ["prodid", {}, "text", "-//platform-packages//UI Preview//EN"],
+  ],
+  [
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "design-sync-20260414"],
+        ["summary", {}, "text", "Design sync"],
+        ["location", {}, "text", "Studio board"],
+        ["dtstart", {}, "date-time", "2026-04-14T09:00:00+02:00"],
+        ["dtend", {}, "date-time", "2026-04-14T09:45:00+02:00"],
+      ],
+      [],
+    ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "pkg-review-20260414"],
+        ["summary", {}, "text", "Package review"],
+        ["dtstart", {}, "date-time", "2026-04-14T13:30:00+02:00"],
+        ["dtend", {}, "date-time", "2026-04-14T14:15:00+02:00"],
+      ],
+      [],
+    ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "release-window-20260420"],
+        ["summary", {}, "text", "Release window"],
+        ["description", {}, "text", "Three-day ship window for package refresh."],
+        ["dtstart", {}, "date", "2026-04-20"],
+        ["dtend", {}, "date", "2026-04-23"],
+      ],
+      [],
+    ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "qa-hand-off-20260422"],
+        ["summary", {}, "text", "QA hand-off"],
+        ["dtstart", {}, "date-time", "2026-04-22T16:00:00+02:00"],
+        ["dtend", {}, "date-time", "2026-04-22T17:00:00+02:00"],
+      ],
+      [],
+    ],
+  ],
+] as const satisfies CalendarIcsData;
+
+function CalendarPreviewDay({
+  children,
+  events = [],
+  maxEventsPerDay = 3,
+  ...props
+}: CalendarCellComponentProps) {
+  const visibleEvents = events.slice(0, maxEventsPerDay);
+  const hiddenEventsCount = Math.max(events.length - visibleEvents.length, 0);
+
+  return (
+    <CalendarDayButton
+      {...props}
+      events={[]}
+      className="h-full min-h-40 cursor-pointer items-stretch gap-3 rounded-[1.35rem] border border-border/60 bg-background/90 p-3 shadow-sm shadow-black/5 transition hover:border-border hover:bg-accent/10 data-[selected-single=true]:border-primary data-[selected-single=true]:bg-accent/15 data-[selected-single=true]:shadow-md"
+    >
+      <div className="flex w-full items-start justify-between gap-3">
+        <div className="space-y-1">
+          <span className="block text-[0.65rem] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            {props.day.date.toLocaleDateString("en-US", { weekday: "short" })}
+          </span>
+          <span className="block text-2xl font-semibold leading-none">{children}</span>
+        </div>
+        {events.length > 0 ? (
+          <span className="rounded-full bg-accent px-2.5 py-1 text-[0.65rem] font-medium text-accent-foreground">
+            {events.length} event{events.length === 1 ? "" : "s"}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="flex w-full flex-1 flex-col gap-2">
+        {visibleEvents.length > 0 ? (
+          visibleEvents.map((event) => (
+            <div
+              key={`${event.uid ?? event.summary ?? "event"}-${event.start.toISOString()}`}
+              className="rounded-xl border border-border/60 bg-muted/35 px-3 py-2"
+            >
+              <p className="text-sm font-medium leading-tight">
+                {event.summary ?? "Untitled event"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {event.isAllDay
+                  ? "All day"
+                  : event.start.toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                {event.location ? ` · ${event.location}` : ""}
+              </p>
+            </div>
+          ))
+        ) : (
+          <div className="rounded-xl border border-dashed border-border/60 px-3 py-2 text-xs leading-5 text-muted-foreground">
+            No events scheduled.
+          </div>
+        )}
+
+        {hiddenEventsCount > 0 ? (
+          <p className="text-xs font-medium text-muted-foreground">
+            +{hiddenEventsCount} more event{hiddenEventsCount === 1 ? "" : "s"}
+          </p>
+        ) : null}
+      </div>
+    </CalendarDayButton>
+  );
+}
+
 function UiPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(64);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [density, setDensity] = useState("comfortable");
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<Date | undefined>(
+    new Date(2026, 3, 14),
+  );
 
   const chartConfig = useMemo(
     () => ({
@@ -241,6 +366,76 @@ function UiPage() {
       </section>
 
       <section className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5 xl:col-span-2">
+          <CardHeader>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>Calendar preview</CardTitle>
+                <CardDescription>
+                  The calendar accepts jCal-style JSON, extracts `VEVENT`s, and renders the
+                  daily schedule directly inside the day cells.
+                </CardDescription>
+              </div>
+              <Badge variant="outline">ICS JSON</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="w-full rounded-2xl border border-border/60 bg-background/70 p-3">
+              <Calendar
+                cellComponent={CalendarPreviewDay}
+                icsData={releaseCalendarData}
+                defaultMonth={new Date(2026, 3, 1)}
+                maxEventsPerDay={3}
+                mode="single"
+                selected={selectedCalendarDay}
+                showOutsideDays={false}
+                onSelect={setSelectedCalendarDay}
+                className="w-full rounded-[2rem] border border-border/60 bg-background/90 p-4 [--cell-size:10rem]"
+                classNames={{
+                  root: "w-full",
+                  months: "w-full",
+                  month: "relative w-full gap-5 pt-14",
+                  nav: "absolute inset-x-4 top-4 z-10 flex items-center justify-between",
+                  button_previous:
+                    "inline-flex size-10 items-center justify-center rounded-full border border-border/60 bg-background shadow-sm",
+                  button_next:
+                    "inline-flex size-10 items-center justify-center rounded-full border border-border/60 bg-background shadow-sm",
+                  month_caption: "mb-2 min-h-10 px-20 text-lg",
+                  caption_label: "text-lg font-semibold",
+                  table: "w-full border-separate [border-spacing:0.6rem]",
+                  weekdays: "grid grid-cols-7 gap-2",
+                  weekday:
+                    "flex h-10 items-center rounded-xl bg-muted/35 px-3 text-left text-xs font-semibold uppercase tracking-[0.18em]",
+                  week: "mt-0 grid grid-cols-7 gap-2",
+                  day: "min-h-40 rounded-[1.35rem] bg-muted/15",
+                  today: "rounded-[1.35rem] bg-accent/20 text-foreground",
+                }}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-border/60 bg-muted/30 p-4">
+                <p className="text-sm font-medium">Visible event coverage</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  April 14 carries two timed sessions, and April 20 to 22 shows a multi-day
+                  release window sourced from a `date` range, matching all-day ICS semantics.
+                </p>
+                <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                  Click any day card to move the selection state through the month.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-border/60 bg-muted/30 p-4">
+                <p className="text-sm font-medium">Input shape</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  The preview feeds `Calendar` a `vcalendar` tuple with nested `vevent`
+                  tuples, so the example stays close to the JSON form of an `.ics` payload.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
           <CardHeader>
             <CardTitle>Composable navigation patterns</CardTitle>

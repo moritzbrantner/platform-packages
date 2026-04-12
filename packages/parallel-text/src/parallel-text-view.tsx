@@ -41,18 +41,14 @@ interface ModelIndex {
   tokenById: Map<string, ParallelTextToken>;
   sentenceById: Map<string, ParallelTextSentence>;
   sideByTokenId: Map<string, ParallelTextSide>;
+  sideBySentenceId: Map<string, ParallelTextSide>;
   rowByTokenId: Map<string, ParallelTextAlignmentRow>;
+  rowBySentenceId: Map<string, ParallelTextAlignmentRow>;
   linkedTokenIdsByTokenId: Map<string, string[]>;
 }
 
 interface HoverState {
-  originalWordText: string;
-  translatedWordText: string;
-  originalPhraseText: string;
-  translatedPhraseText: string;
-  originalSentenceText: string;
-  translatedSentenceText: string;
-  activeTokenId: string;
+  activeTokenId: string | null;
   linkedTokenIds: Set<string>;
   phraseSentenceIds: Set<string>;
   sentenceIds: Set<string>;
@@ -86,6 +82,7 @@ export function ParallelTextView({
     resolveTranslationId(translationOptions, defaultTranslationId),
   );
   const [hoveredTokenId, setHoveredTokenId] = useState<string | null>(null);
+  const [hoveredSentenceId, setHoveredSentenceId] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedTranslationId((current) => {
@@ -99,6 +96,7 @@ export function ParallelTextView({
 
   useEffect(() => {
     setHoveredTokenId(null);
+    setHoveredSentenceId(null);
   }, [selectedTranslationId]);
 
   const selectedTranslation =
@@ -117,8 +115,8 @@ export function ParallelTextView({
   );
   const modelIndex = useMemo(() => createModelIndex(model), [model]);
   const hoverState = useMemo(
-    () => createHoverState(model, modelIndex, hoveredTokenId),
-    [hoveredTokenId, model, modelIndex],
+    () => createHoverState(modelIndex, hoveredTokenId, hoveredSentenceId),
+    [hoveredSentenceId, hoveredTokenId, modelIndex],
   );
   const currentTranslatedLabel = selectedTranslation?.translatedLabel ?? translatedLabel;
 
@@ -163,23 +161,19 @@ export function ParallelTextView({
         </div>
       </div>
 
-      <HoverInspector
-        hoverState={hoverState}
-        originalLabel={originalLabel}
-        translatedLabel={currentTranslatedLabel}
-      />
-
       <div style={styles.columns}>
         <TextPanel
           label={originalLabel}
           paragraphs={model.originalParagraphs}
           hoverState={hoverState}
+          onSentenceHover={setHoveredSentenceId}
           onTokenHover={setHoveredTokenId}
         />
         <TextPanel
           label={currentTranslatedLabel}
           paragraphs={model.translatedParagraphs}
           hoverState={hoverState}
+          onSentenceHover={setHoveredSentenceId}
           onTokenHover={setHoveredTokenId}
         />
       </div>
@@ -191,6 +185,7 @@ interface TextPanelProps {
   label: string;
   paragraphs: ParallelTextParagraph[];
   hoverState: HoverState | null;
+  onSentenceHover: (sentenceId: string | null) => void;
   onTokenHover: (tokenId: string | null) => void;
 }
 
@@ -198,6 +193,7 @@ function TextPanel({
   label,
   paragraphs,
   hoverState,
+  onSentenceHover,
   onTokenHover,
 }: TextPanelProps) {
   return (
@@ -211,6 +207,7 @@ function TextPanel({
                 <SentenceInline
                   sentence={sentence}
                   hoverState={hoverState}
+                  onSentenceHover={onSentenceHover}
                   onTokenHover={onTokenHover}
                 />
               </Fragment>
@@ -227,12 +224,14 @@ function TextPanel({
 interface SentenceInlineProps {
   sentence: ParallelTextSentence;
   hoverState: HoverState | null;
+  onSentenceHover: (sentenceId: string | null) => void;
   onTokenHover: (tokenId: string | null) => void;
 }
 
 function SentenceInline({
   sentence,
   hoverState,
+  onSentenceHover,
   onTokenHover,
 }: SentenceInlineProps) {
   const isPhraseActive = hoverState?.phraseSentenceIds.has(sentence.id) ?? false;
@@ -240,13 +239,12 @@ function SentenceInline({
 
   return (
     <span
+      data-sentence-id={sentence.id}
       data-phrase-highlighted={isPhraseActive ? "true" : "false"}
       data-sentence-highlighted={isSentenceActive ? "true" : "false"}
-      style={{
-        ...styles.sentence,
-        ...(isPhraseActive ? styles.sentencePhraseActive : null),
-        ...(isSentenceActive ? styles.sentenceActive : null),
-      }}
+      onMouseEnter={() => onSentenceHover(sentence.id)}
+      onMouseLeave={() => onSentenceHover(null)}
+      style={getSentenceStyle(isPhraseActive, isSentenceActive)}
     >
       {sentence.tokens.map((token) => {
         const isActive = hoverState?.activeTokenId === token.id;
@@ -260,9 +258,15 @@ function SentenceInline({
                 type="button"
                 data-token-id={token.id}
                 data-highlighted={isActive || isLinked ? "true" : "false"}
-                onFocus={() => onTokenHover(token.id)}
+                onFocus={() => {
+                  onSentenceHover(sentence.id);
+                  onTokenHover(token.id);
+                }}
                 onBlur={() => onTokenHover(null)}
-                onMouseEnter={() => onTokenHover(token.id)}
+                onMouseEnter={() => {
+                  onSentenceHover(sentence.id);
+                  onTokenHover(token.id);
+                }}
                 onMouseLeave={() => onTokenHover(null)}
                 style={{
                   ...styles.token,
@@ -279,65 +283,6 @@ function SentenceInline({
       })}
       {sentence.trailingText}
     </span>
-  );
-}
-
-interface HoverInspectorProps {
-  hoverState: HoverState | null;
-  originalLabel: string;
-  translatedLabel: string;
-}
-
-function HoverInspector({
-  hoverState,
-  originalLabel,
-  translatedLabel,
-}: HoverInspectorProps) {
-  return (
-    <section aria-live="polite" style={styles.inspector}>
-      <div style={styles.inspectorHeader}>Hover a word to inspect its match.</div>
-      <div style={styles.inspectorGrid}>
-        <div style={styles.inspectorHeading}>Level</div>
-        <div style={styles.inspectorHeading}>{originalLabel}</div>
-        <div style={styles.inspectorHeading}>{translatedLabel}</div>
-
-        <InspectorRow
-          label="Word"
-          originalValue={hoverState?.originalWordText}
-          translatedValue={hoverState?.translatedWordText}
-        />
-        <InspectorRow
-          label="Phrase"
-          originalValue={hoverState?.originalPhraseText}
-          translatedValue={hoverState?.translatedPhraseText}
-        />
-        <InspectorRow
-          label="Sentence"
-          originalValue={hoverState?.originalSentenceText}
-          translatedValue={hoverState?.translatedSentenceText}
-        />
-      </div>
-    </section>
-  );
-}
-
-interface InspectorRowProps {
-  label: string;
-  originalValue?: string;
-  translatedValue?: string;
-}
-
-function InspectorRow({
-  label,
-  originalValue,
-  translatedValue,
-}: InspectorRowProps) {
-  return (
-    <>
-      <div style={styles.inspectorLabel}>{label}</div>
-      <div style={styles.inspectorValue}>{formatInspectorValue(originalValue)}</div>
-      <div style={styles.inspectorValue}>{formatInspectorValue(translatedValue)}</div>
-    </>
   );
 }
 
@@ -382,7 +327,10 @@ function resolveTranslationId(
   translations: ParallelTextTranslationOption[],
   defaultTranslationId?: string,
 ) {
-  if (defaultTranslationId && translations.some((translation) => translation.id === defaultTranslationId)) {
+  if (
+    defaultTranslationId &&
+    translations.some((translation) => translation.id === defaultTranslationId)
+  ) {
     return defaultTranslationId;
   }
 
@@ -393,11 +341,14 @@ function createModelIndex(model: ParallelTextModel): ModelIndex {
   const tokenById = new Map<string, ParallelTextToken>();
   const sentenceById = new Map<string, ParallelTextSentence>();
   const sideByTokenId = new Map<string, ParallelTextSide>();
+  const sideBySentenceId = new Map<string, ParallelTextSide>();
   const rowByTokenId = new Map<string, ParallelTextAlignmentRow>();
+  const rowBySentenceId = new Map<string, ParallelTextAlignmentRow>();
   const linkedTokenIdsByTokenId = new Map<string, string[]>();
 
   for (const sentence of model.originalSentences) {
     sentenceById.set(sentence.id, sentence);
+    sideBySentenceId.set(sentence.id, "original");
 
     for (const token of sentence.tokens) {
       tokenById.set(token.id, token);
@@ -407,6 +358,7 @@ function createModelIndex(model: ParallelTextModel): ModelIndex {
 
   for (const sentence of model.translatedSentences) {
     sentenceById.set(sentence.id, sentence);
+    sideBySentenceId.set(sentence.id, "translated");
 
     for (const token of sentence.tokens) {
       tokenById.set(token.id, token);
@@ -416,6 +368,8 @@ function createModelIndex(model: ParallelTextModel): ModelIndex {
 
   for (const row of model.rows) {
     for (const sentence of [...row.originalSentences, ...row.translatedSentences]) {
+      rowBySentenceId.set(sentence.id, row);
+
       for (const token of sentence.tokens) {
         rowByTokenId.set(token.id, row);
       }
@@ -431,27 +385,35 @@ function createModelIndex(model: ParallelTextModel): ModelIndex {
     tokenById,
     sentenceById,
     sideByTokenId,
+    sideBySentenceId,
     rowByTokenId,
+    rowBySentenceId,
     linkedTokenIdsByTokenId,
   };
 }
 
 function createHoverState(
-  model: ParallelTextModel,
   modelIndex: ModelIndex,
   hoveredTokenId: string | null,
+  hoveredSentenceId: string | null,
 ): HoverState | null {
-  if (!hoveredTokenId) {
-    return null;
+  if (hoveredTokenId) {
+    return createTokenHoverState(modelIndex, hoveredTokenId);
   }
 
-  const sourceToken = modelIndex.tokenById.get(hoveredTokenId);
+  if (hoveredSentenceId) {
+    return createSentenceHoverState(modelIndex, hoveredSentenceId);
+  }
+
+  return null;
+}
+
+function createTokenHoverState(modelIndex: ModelIndex, tokenId: string) {
+  const sourceToken = modelIndex.tokenById.get(tokenId);
   const sourceSentence = sourceToken
     ? modelIndex.sentenceById.get(sourceToken.sentenceId)
     : undefined;
-  const sourceSide = sourceToken
-    ? modelIndex.sideByTokenId.get(sourceToken.id)
-    : undefined;
+  const sourceSide = sourceToken ? modelIndex.sideByTokenId.get(sourceToken.id) : undefined;
   const row = sourceToken ? modelIndex.rowByTokenId.get(sourceToken.id) : undefined;
 
   if (!sourceToken || !sourceSentence || !sourceSide || !row) {
@@ -460,39 +422,60 @@ function createHoverState(
 
   const linkedTokenIds = new Set(modelIndex.linkedTokenIdsByTokenId.get(sourceToken.id) ?? []);
   const linkedTokens = Array.from(linkedTokenIds)
-    .map((tokenId) => modelIndex.tokenById.get(tokenId))
+    .map((linkedTokenId) => modelIndex.tokenById.get(linkedTokenId))
     .filter((token): token is ParallelTextToken => Boolean(token));
   const sourceRowSentences =
     sourceSide === "original" ? row.originalSentences : row.translatedSentences;
   const targetRowSentences =
     sourceSide === "original" ? row.translatedSentences : row.originalSentences;
-  const fallbackTargetSentences =
-    linkedTokens.length > 0
-      ? uniqueSentencesFromTokens(linkedTokens, modelIndex.sentenceById)
-      : selectFallbackTargetSentences(sourceSentence, sourceRowSentences, targetRowSentences);
-  const phraseSentenceIds = new Set(
-    [...row.originalSentences, ...row.translatedSentences].map((sentence) => sentence.id),
-  );
   const sentenceIds = new Set(
-    [sourceSentence, ...fallbackTargetSentences].map((sentence) => sentence.id),
+    [
+      sourceSentence,
+      ...(linkedTokens.length
+        ? uniqueSentencesFromTokens(linkedTokens, modelIndex.sentenceById)
+        : selectFallbackTargetSentences(sourceSentence, sourceRowSentences, targetRowSentences)),
+    ].map((sentence) => sentence.id),
   );
-  const linkedText = joinTokenTexts(linkedTokens);
-  const fallbackSentenceText = joinSentenceTexts(fallbackTargetSentences);
 
   return {
-    originalWordText: sourceSide === "original" ? sourceToken.text : linkedText,
-    translatedWordText: sourceSide === "translated" ? sourceToken.text : linkedText,
-    originalPhraseText: joinSentenceTexts(row.originalSentences),
-    translatedPhraseText: joinSentenceTexts(row.translatedSentences),
-    originalSentenceText:
-      sourceSide === "original" ? sourceSentence.text : fallbackSentenceText,
-    translatedSentenceText:
-      sourceSide === "translated" ? sourceSentence.text : fallbackSentenceText,
     activeTokenId: sourceToken.id,
     linkedTokenIds,
-    phraseSentenceIds,
+    phraseSentenceIds: new Set(
+      [...row.originalSentences, ...row.translatedSentences].map((sentence) => sentence.id),
+    ),
     sentenceIds,
-  };
+  } satisfies HoverState;
+}
+
+function createSentenceHoverState(modelIndex: ModelIndex, sentenceId: string) {
+  const sourceSentence = modelIndex.sentenceById.get(sentenceId);
+  const sourceSide = sourceSentence
+    ? modelIndex.sideBySentenceId.get(sourceSentence.id)
+    : undefined;
+  const row = sourceSentence ? modelIndex.rowBySentenceId.get(sourceSentence.id) : undefined;
+
+  if (!sourceSentence || !sourceSide || !row) {
+    return null;
+  }
+
+  const sourceRowSentences =
+    sourceSide === "original" ? row.originalSentences : row.translatedSentences;
+  const targetRowSentences =
+    sourceSide === "original" ? row.translatedSentences : row.originalSentences;
+
+  return {
+    activeTokenId: null,
+    linkedTokenIds: new Set<string>(),
+    phraseSentenceIds: new Set(
+      [...row.originalSentences, ...row.translatedSentences].map((sentence) => sentence.id),
+    ),
+    sentenceIds: new Set(
+      [
+        sourceSentence,
+        ...selectFallbackTargetSentences(sourceSentence, sourceRowSentences, targetRowSentences),
+      ].map((sentence) => sentence.id),
+    ),
+  } satisfies HoverState;
 }
 
 function appendLinkedTokenId(
@@ -517,7 +500,7 @@ function uniqueSentencesFromTokens(
   const sentenceIds = new Set(tokens.map((token) => token.sentenceId));
 
   return Array.from(sentenceIds)
-    .map((sentenceId) => sentenceById.get(sentenceId))
+    .map((nextSentenceId) => sentenceById.get(nextSentenceId))
     .filter((sentence): sentence is ParallelTextSentence => Boolean(sentence));
 }
 
@@ -543,16 +526,22 @@ function selectFallbackTargetSentences(
   return [targetRowSentences[targetSentenceIndex]];
 }
 
-function joinTokenTexts(tokens: ParallelTextToken[]) {
-  return tokens.map((token) => token.text).join(", ");
-}
-
-function joinSentenceTexts(sentences: ParallelTextSentence[]) {
-  return sentences.map((sentence) => sentence.text).join(" ");
-}
-
-function formatInspectorValue(value?: string) {
-  return value && value.trim() ? value : "No aligned match";
+function getSentenceStyle(isPhraseActive: boolean, isSentenceActive: boolean): CSSProperties {
+  return {
+    ...styles.sentence,
+    ...(isPhraseActive ? styles.sentencePhraseActive : null),
+    ...(isPhraseActive || isSentenceActive
+      ? {
+          boxShadow: [
+            isPhraseActive ? "0 0 0 1px rgba(37, 99, 235, 0.42)" : null,
+            isSentenceActive ? "0 0 0 3px rgba(245, 158, 11, 0.28)" : null,
+          ]
+            .filter(Boolean)
+            .join(", "),
+        }
+      : null),
+    ...(isSentenceActive ? styles.sentenceActive : null),
+  };
 }
 
 const styles: Record<string, CSSProperties> = {
@@ -606,46 +595,6 @@ const styles: Record<string, CSSProperties> = {
     borderColor: "#18181b",
     color: "#fafafa",
   },
-  inspector: {
-    border: "1px solid #e4e4e7",
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.86)",
-    padding: 14,
-  },
-  inspectorHeader: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#52525b",
-    marginBottom: 12,
-  },
-  inspectorGrid: {
-    display: "grid",
-    gap: 10,
-    gridTemplateColumns: "minmax(72px, auto) repeat(2, minmax(0, 1fr))",
-    alignItems: "start",
-  },
-  inspectorHeading: {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    color: "#71717a",
-  },
-  inspectorLabel: {
-    fontSize: 13,
-    fontWeight: 700,
-    color: "#27272a",
-  },
-  inspectorValue: {
-    borderRadius: 12,
-    backgroundColor: "#f4f4f5",
-    color: "#27272a",
-    fontSize: 14,
-    lineHeight: 1.5,
-    minHeight: 44,
-    padding: "10px 12px",
-    whiteSpace: "pre-wrap",
-  },
   columns: {
     display: "grid",
     gap: 14,
@@ -668,15 +617,15 @@ const styles: Record<string, CSSProperties> = {
   sentence: {
     borderRadius: 10,
     boxDecorationBreak: "clone",
-    padding: "1px 2px",
+    WebkitBoxDecorationBreak: "clone",
+    padding: "2px 3px",
     transition: "background-color 120ms ease, box-shadow 120ms ease",
   },
   sentencePhraseActive: {
     backgroundColor: "rgba(191, 219, 254, 0.24)",
   },
   sentenceActive: {
-    backgroundColor: "rgba(254, 240, 138, 0.46)",
-    boxShadow: "inset 0 0 0 1px rgba(217, 119, 6, 0.18)",
+    backgroundColor: "rgba(254, 240, 138, 0.5)",
   },
   token: {
     backgroundColor: "transparent",

@@ -58,7 +58,7 @@ describe("@moritzbrantner/parallel-text", () => {
   });
 
   test("supports multiple translations and shows hover word, phrase, and sentence context", () => {
-    render(
+    const { container } = render(
       <ParallelTextView
         originalText="Hello world."
         originalLabel="English"
@@ -87,15 +87,19 @@ describe("@moritzbrantner/parallel-text", () => {
 
     const hello = screen.getByRole("button", { name: "Hello" });
     const hola = screen.getByRole("button", { name: "Hola" });
+    const englishSentence = container.querySelector(
+      '[data-sentence-id="original-sentence-0"]',
+    ) as HTMLElement;
+    const spanishSentence = container.querySelector(
+      '[data-sentence-id="translated-sentence-0"]',
+    ) as HTMLElement;
 
     fireEvent.mouseEnter(hello);
     expect(hola.getAttribute("data-highlighted")).toBe("true");
-
-    const inspector = screen.getByText("Hover a word to inspect its match.").closest("section");
-    expect(inspector?.textContent).toContain("Hello");
-    expect(inspector?.textContent).toContain("Hola");
-    expect(inspector?.textContent).toContain("Hello world.");
-    expect(inspector?.textContent).toContain("Hola mundo.");
+    expect(englishSentence.getAttribute("data-phrase-highlighted")).toBe("true");
+    expect(englishSentence.getAttribute("data-sentence-highlighted")).toBe("true");
+    expect(spanishSentence.getAttribute("data-phrase-highlighted")).toBe("true");
+    expect(spanishSentence.getAttribute("data-sentence-highlighted")).toBe("true");
 
     fireEvent.click(screen.getByRole("tab", { name: "French" }));
     expect(screen.getByRole("tab", { name: "French" }).getAttribute("aria-selected")).toBe(
@@ -105,6 +109,16 @@ describe("@moritzbrantner/parallel-text", () => {
     const bonjour = screen.getByRole("button", { name: "Bonjour" });
     fireEvent.mouseEnter(screen.getByRole("button", { name: "Hello" }));
     expect(bonjour.getAttribute("data-highlighted")).toBe("true");
-    expect(inspector?.textContent).toContain("Bonjour monde.");
+
+    fireEvent.mouseLeave(screen.getByRole("button", { name: "Hello" }));
+    const frenchSentence = container.querySelector(
+      '[data-sentence-id="translated-sentence-0"]',
+    ) as HTMLElement;
+    fireEvent.mouseEnter(englishSentence);
+    expect(englishSentence.getAttribute("data-phrase-highlighted")).toBe("true");
+    expect(englishSentence.getAttribute("data-sentence-highlighted")).toBe("true");
+    expect(frenchSentence.getAttribute("data-phrase-highlighted")).toBe("true");
+    expect(frenchSentence.getAttribute("data-sentence-highlighted")).toBe("true");
+    expect(bonjour.getAttribute("data-highlighted")).toBe("false");
   });
 });
