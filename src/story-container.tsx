@@ -16,6 +16,7 @@ import { Button, cn } from "@moritzbrantner/ui";
 
 import { StoryProvider } from "./story-context";
 import { buildSceneMeta } from "./story-introspection";
+import { StoryMinimap } from "./story-minimap";
 
 export type StoryContainerProps = {
   title: string;
@@ -27,7 +28,7 @@ export type StoryContainerProps = {
 };
 
 const DEFAULT_INSTRUCTIONS =
-  "Use the story panel scroll, step buttons, reset button, or arrow keys to move through the story.";
+  "Use the story panel scroll, minimap, reset button, or arrow keys to move through the story.";
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -180,34 +181,12 @@ export function StoryContainer({
           className={cn(
             "mx-auto mt-10 max-w-5xl",
             showMenu
-              ? "grid gap-6 md:grid-cols-[120px_1fr] md:items-stretch"
+              ? "grid gap-6 md:grid-cols-[220px_1fr] md:items-stretch"
               : "",
           )}
         >
           {showMenu ? (
-            <ol
-              className="story-steps-scrollbar-hidden order-2 flex gap-3 overflow-x-auto md:order-1 md:flex-col"
-              aria-label="Story steps"
-            >
-              {sceneMeta.map((scene, index) => (
-                <li key={scene.id}>
-                  <button
-                    type="button"
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-sm transition-colors",
-                      index === activeIndex
-                        ? "border-foreground bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                    onClick={() => scrollToScene(index)}
-                    aria-current={index === activeIndex ? "step" : undefined}
-                    aria-label={`Step ${index + 1}: ${scene.title}`}
-                  >
-                    {scene.menuLabel ?? index + 1}
-                  </button>
-                </li>
-              ))}
-            </ol>
+            <StoryMinimap className="order-2 md:order-1" />
           ) : null}
 
           <div className={cn(showMenu ? "order-1 md:order-2" : "")}>

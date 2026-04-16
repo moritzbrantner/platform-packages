@@ -17,6 +17,7 @@ export {
   type StoryContainerProps,
 } from "./story-container";
 export { StoryDefaultStage } from "./story-default-stage";
+export { StoryMinimap, type StoryMinimapProps } from "./story-minimap";
 export {
   StoryAudioFile,
   StorySubtitleFile,
