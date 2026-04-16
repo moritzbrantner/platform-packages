@@ -4,6 +4,7 @@ Shared runtime packages for the Next.js application stack.
 
 ## Packages
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
+- `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
 - `@moritzbrantner/maps`: browser map component plus standalone point aggregation utilities for large clustered datasets.
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.

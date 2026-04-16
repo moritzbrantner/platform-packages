@@ -19,6 +19,13 @@ function HomePage() {
           cta="Open card games demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/flat-design"
+          title="Flat-design scene demo"
+          description="Build layered SVG illustrations, swap palettes, and inspect looping flat-motion presets rendered from the new scene schema."
+          href="/flat-design.html"
+          cta="Open flat-design demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/maps"
           title="Large-scale maps demo"
           description="Pan and zoom through 100,000 synthetic delivery points, watch client-side cluster totals update live, and inspect how single points reappear at close zoom."
@@ -81,6 +88,11 @@ function HomePage() {
               and stack layouts should still read well on small screens.
             </p>
             <p>
+              The flat design page validates the new SVG scene package: palette
+              swapping, layered vector composition, and animation helpers should all
+              remain sharp without a canvas dependency.
+            </p>
+            <p>
               The maps page is the heavy-data manual smoke test: it exercises a
               six-figure dataset, zoom-aware aggregation, and click-to-expand cluster
               behavior inside a real browser map.
@@ -112,6 +124,9 @@ function HomePage() {
           <CardContent className="flex flex-col gap-3">
             <Button asChild variant="outline">
               <a href="/card-games.html">Open card games package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/flat-design.html">Open flat design package page</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/maps.html">Open maps package page</a>

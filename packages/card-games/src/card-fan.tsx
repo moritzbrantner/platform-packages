@@ -28,7 +28,14 @@ export function CardFan({
   const step = items.length > 1 ? spreadDegrees / (items.length - 1) : 0;
 
   return (
-    <div {...divProps} className={cx("mb-card-fan", className)} style={style}>
+    <div
+      {...divProps}
+      className={cx(
+        "mb-card-fan flex max-w-full items-end justify-center px-4 pb-[1.2rem] pt-[0.7rem] max-sm:justify-start max-sm:overflow-x-auto max-sm:pb-[0.8rem]",
+        className,
+      )}
+      style={style}
+    >
       {items.map((child, index) => {
         const distanceFromCenter = index - half;
         const rotate = distanceFromCenter * step;
@@ -37,7 +44,7 @@ export function CardFan({
         return (
           <div
             key={index}
-            className="mb-card-fan__item"
+            className="mb-card-fan__item origin-bottom transition-[transform,filter] duration-200 ease-out [transform:translateY(var(--mb-fan-raise))_rotate(var(--mb-fan-rotate))] hover:[transform:translateY(calc(var(--mb-fan-raise)-var(--mb-fan-hover-lift)))_rotate(var(--mb-fan-rotate))] hover:saturate-105"
             style={
               {
                 "--mb-fan-hover-lift": `${hoverLift}px`,

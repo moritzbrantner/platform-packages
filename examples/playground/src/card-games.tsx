@@ -86,6 +86,7 @@ function CardGamesPage() {
               <button
                 key={`${card.rank}-${card.suit}`}
                 type="button"
+                aria-label={`Select ${card.headline}`}
                 className="rounded-[1.8rem] bg-transparent p-0 text-left"
                 onClick={() => setSelectedCard(index)}
               >

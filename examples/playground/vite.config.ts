@@ -20,6 +20,13 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/flat-design$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/flat-design/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/maps$/,
         replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
       },
@@ -64,6 +71,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: [
       "@moritzbrantner/card-games",
+      "@moritzbrantner/flat-design",
       "@moritzbrantner/maps",
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/speech",
@@ -82,6 +90,7 @@ export default defineConfig({
       input: {
         home: path.resolve(rootDir, "index.html"),
         cardGames: path.resolve(rootDir, "card-games.html"),
+        flatDesign: path.resolve(rootDir, "flat-design.html"),
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
