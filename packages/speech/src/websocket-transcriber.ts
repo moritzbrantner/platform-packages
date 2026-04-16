@@ -292,10 +292,11 @@ function looksLikeTranscriptPayload(payload: unknown): boolean {
 }
 
 async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer =
-    typeof blob.arrayBuffer === "function"
-      ? await blob.arrayBuffer()
-      : await new Response(blob).arrayBuffer();
+  if (typeof blob.arrayBuffer !== "function") {
+    return readBlobAsBase64(blob);
+  }
+
+  const buffer = await blob.arrayBuffer();
   const bytes = new Uint8Array(buffer);
 
   return encodeBase64(bytes);
@@ -330,4 +331,31 @@ function encodeBase64(bytes: Uint8Array): string {
   }
 
   return encoded;
+}
+
+function readBlobAsBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (typeof FileReader !== "function") {
+      reject(new Error("Blob.arrayBuffer and FileReader are not available in this environment."));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onerror = () => {
+      reject(reader.error ?? new Error("Could not read audio blob."));
+    };
+    reader.onload = () => {
+      const value = reader.result;
+
+      if (typeof value !== "string") {
+        reject(new Error("Could not convert audio blob to a base64 string."));
+        return;
+      }
+
+      resolve(value.split(",", 2)[1] ?? "");
+    };
+
+    reader.readAsDataURL(blob);
+  });
 }

@@ -238,15 +238,18 @@ describe("@moritzbrantner/speech utilities", () => {
       }),
     );
 
-    expect(results).toEqual([
-      expect.objectContaining({
-        text: "hello from websocket",
-        isFinal: false,
-      }),
-    ]);
+    await vi.waitFor(() => {
+      expect(results).toEqual([
+        expect.objectContaining({
+          text: "hello from websocket",
+          isFinal: false,
+        }),
+      ]);
+    });
 
     const closePromise = session.close();
-    expect(JSON.parse(socket.sent[2] as string)).toEqual({ type: "stop" });
+    await Promise.resolve();
+    expect(JSON.parse(socket.sent.at(-1) as string)).toEqual({ type: "stop" });
     socket.close();
     await closePromise;
   });
