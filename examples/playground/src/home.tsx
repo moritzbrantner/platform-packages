@@ -32,6 +32,13 @@ function HomePage() {
           href="/storytelling.html"
           cta="Open storytelling demo"
         />
+        <ExampleLinkCard
+          eyebrow="@moritzbrantner/word-prediction"
+          title="Predictive typing demo"
+          description="Train a next-word model on chat-like examples, then inspect live next-word suggestions and partial-word completions as you type."
+          href="/word-prediction.html"
+          cta="Open word prediction demo"
+        />
       </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
@@ -72,6 +79,9 @@ function HomePage() {
             </Button>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Open storytelling page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/word-prediction.html">Open word prediction page</a>
             </Button>
           </CardContent>
         </Card>

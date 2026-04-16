@@ -1,5 +1,7 @@
 packages:
   - examples/*
+  - packages/keyboard
   - packages/parallel-text
   - packages/storytelling
   - packages/ui
+  - packages/word-prediction

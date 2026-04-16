@@ -14,7 +14,7 @@ import {
   Toaster,
 } from "@moritzbrantner/ui";
 
-type PageKey = "home" | "parallel-text" | "ui" | "storytelling";
+type PageKey = "home" | "parallel-text" | "ui" | "storytelling" | "word-prediction";
 
 type AppShellProps = {
   activePage: PageKey;
@@ -28,6 +28,7 @@ const navigation = [
   { key: "parallel-text", href: "/parallel-text.html", label: "Parallel text package" },
   { key: "ui", href: "/ui.html", label: "UI package" },
   { key: "storytelling", href: "/storytelling.html", label: "Storytelling package" },
+  { key: "word-prediction", href: "/word-prediction.html", label: "Word prediction package" },
 ] as const satisfies ReadonlyArray<{
   key: PageKey;
   href: string;

@@ -30,6 +30,13 @@ export default defineConfig({
           "packages/storytelling/src/index.ts",
         ),
       },
+      {
+        find: /^@moritzbrantner\/word-prediction$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/word-prediction/src/index.ts",
+        ),
+      },
     ],
   },
   optimizeDeps: {
@@ -37,6 +44,7 @@ export default defineConfig({
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/ui",
       "@moritzbrantner/storytelling",
+      "@moritzbrantner/word-prediction",
     ],
   },
   server: {
@@ -51,6 +59,7 @@ export default defineConfig({
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),
+        wordPrediction: path.resolve(rootDir, "word-prediction.html"),
       },
     },
   },
