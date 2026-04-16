@@ -1,93 +1,308 @@
+import {
+  startTransition,
+  useState,
+  type ComponentType,
+} from "react";
+
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@moritzbrantner/ui";
 import {
-  StoryContainer,
-  StoryScene,
-  StorySeries,
+  InteractiveStoryPlayer,
+  StoryDefaultStage,
+  buildStoryTimeline,
+  createInteractiveStory,
+  type StoryRenderProps,
 } from "@moritzbrantner/storytelling";
 
 import { PlaygroundPage } from "./app-shell";
 import { mountPage } from "./mount";
 
+type StoryVisualData = {
+  hue: number;
+  orbitSpeed: number;
+};
+
+const story = createInteractiveStory<StoryVisualData>({
+  id: "aurora-station",
+  title: "Aurora Station",
+  subtitle:
+    "Branching story runtime with motion.dev transitions, optional Three.js stages, and Remotion-compatible path planning.",
+  openingNodeId: "signal",
+  nodes: [
+    {
+      id: "signal",
+      eyebrow: "Chapter 1",
+      title: "A pulse reaches the observatory",
+      body: (
+        <>
+          <p>
+            The station wakes to a rhythmic beacon under the ice shelf. The archive says
+            these pulses stopped two centuries ago.
+          </p>
+          <p>
+            You need a first move: answer the call, trace its source, or seal the relay and
+            protect the city above.
+          </p>
+        </>
+      ),
+      prompt: "Choose the branch to follow.",
+      data: { hue: 196, orbitSpeed: 0.8 },
+      choices: [
+        {
+          id: "answer",
+          label: "Answer the beacon",
+          description: "Open a live channel and risk exposing the station.",
+          target: "voice",
+        },
+        {
+          id: "trace",
+          label: "Trace the source",
+          description: "Map the signal geometry before anyone else notices it.",
+          target: "harbor",
+        },
+        {
+          id: "seal",
+          label: "Seal the relay",
+          description: "Lock the channel down and preserve control at all costs.",
+          target: "blackout",
+        },
+      ],
+    },
+    {
+      id: "voice",
+      eyebrow: "Branch A",
+      title: "A pilot answers from the storm wall",
+      body: (
+        <>
+          <p>
+            The pilot’s voice breaks through static: the old trade route is alive again, but
+            the storm is moving too fast for a slow evacuation.
+          </p>
+          <p>
+            You can guide them into the city or reroute them through the abandoned turbines.
+          </p>
+        </>
+      ),
+      prompt: "Where do you send the pilot?",
+      data: { hue: 334, orbitSpeed: 1.15 },
+      choices: [
+        {
+          id: "city",
+          label: "Guide them into the city",
+          description: "Fastest path, highest political cost.",
+          target: "city-ending",
+        },
+        {
+          id: "turbines",
+          label: "Reroute through the turbines",
+          description: "Slower, but harder for patrols to detect.",
+          target: "turbine-ending",
+        },
+      ],
+    },
+    {
+      id: "harbor",
+      eyebrow: "Branch B",
+      title: "The trace reveals a submerged harbor",
+      body: (
+        <>
+          <p>
+            The pulses form a navigation pattern. Beneath the glacier sits a harbor nobody
+            has charted since the first migration.
+          </p>
+          <p>
+            If you descend now, you might recover the route before the city council can bury
+            the evidence.
+          </p>
+        </>
+      ),
+      prompt: "How do you approach the harbor?",
+      data: { hue: 145, orbitSpeed: 0.95 },
+      choices: [
+        {
+          id: "dive",
+          label: "Descend with a small crew",
+          description: "Quiet, fast, and dangerous.",
+          target: "harbor-ending",
+        },
+        {
+          id: "broadcast",
+          label: "Broadcast the coordinates",
+          description: "Force the city to respond in public.",
+          target: "broadcast-ending",
+        },
+      ],
+    },
+    {
+      id: "blackout",
+      eyebrow: "Branch C",
+      title: "The station goes dark",
+      body: (
+        <>
+          <p>
+            You shut the relay down. The city is safe for one more night, but the signal
+            keeps echoing through backup systems you forgot still existed.
+          </p>
+          <p>
+            By morning, someone else will find it without you.
+          </p>
+        </>
+      ),
+      prompt: "This branch ends in control without truth.",
+      data: { hue: 42, orbitSpeed: 0.55 },
+      durationInFrames: 180,
+    },
+    {
+      id: "city-ending",
+      eyebrow: "Ending",
+      title: "The city opens its gates",
+      body: "You turn a hidden route into a public alliance. The station survives because you chose contact over caution.",
+      data: { hue: 210, orbitSpeed: 1.1 },
+      durationInFrames: 180,
+    },
+    {
+      id: "turbine-ending",
+      eyebrow: "Ending",
+      title: "The turbines become a corridor",
+      body: "You keep the pilot alive and the city uninformed. The route is saved, but now it belongs to the people who know how to hide it.",
+      data: { hue: 286, orbitSpeed: 0.9 },
+      durationInFrames: 180,
+    },
+    {
+      id: "harbor-ending",
+      eyebrow: "Ending",
+      title: "You reach the harbor first",
+      body: "The descent uncovers intact ships and a map of every lost crossing. The story shifts from rumor to leverage.",
+      data: { hue: 170, orbitSpeed: 1.25 },
+      durationInFrames: 180,
+    },
+    {
+      id: "broadcast-ending",
+      eyebrow: "Ending",
+      title: "The whole city hears the coordinates",
+      body: "You give up secrecy and gain momentum. By sunrise, nobody can pretend the harbor never existed.",
+      data: { hue: 18, orbitSpeed: 1.05 },
+      durationInFrames: 180,
+    },
+  ],
+});
+
+const cinematicPath = buildStoryTimeline(story, ["trace", "dive"]);
+
 function StorytellingPage() {
+  const [ThreeStageRenderer, setThreeStageRenderer] =
+    useState<ComponentType<StoryRenderProps<StoryVisualData>> | null>(null);
+  const [useThreeStage, setUseThreeStage] = useState(false);
+  const [isLoadingThreeStage, setIsLoadingThreeStage] = useState(false);
+
+  const loadThreeStage = async () => {
+    if (ThreeStageRenderer || isLoadingThreeStage) {
+      return;
+    }
+
+    setIsLoadingThreeStage(true);
+
+    try {
+      const module = await import("./storytelling-three-stage");
+
+      startTransition(() => {
+        setThreeStageRenderer(() => module.StoryThreeStageRenderer);
+        setIsLoadingThreeStage(false);
+      });
+    } catch {
+      setIsLoadingThreeStage(false);
+    }
+  };
+
+  const enableThreeStage = async () => {
+    await loadThreeStage();
+    setUseThreeStage(true);
+  };
+
+  const activeStageRenderer =
+    useThreeStage && ThreeStageRenderer ? ThreeStageRenderer : StoryDefaultStage;
+
   return (
     <PlaygroundPage
       activePage="storytelling"
       title="Storytelling package examples"
-      description="A full-page demo for the scroll-based storytelling primitives. Use the scrollable story panel, step buttons, reset action, or arrow keys to validate how scenes animate and stay in sync."
+      description="Interactive branching narrative primitives with motion.dev transitions, Remotion timeline helpers, and an optional Three.js stage renderer."
     >
-      <section className="grid gap-4 xl:grid-cols-[0.7fr_1.3fr]">
-        <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
-          <CardHeader>
-            <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
-              Test checklist
-            </Badge>
-            <CardTitle>What this page exercises</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
-            <p>Scroll to move through scenes and confirm the active step indicator stays synchronized.</p>
-            <p>Use the step buttons or the keyboard arrows to jump between scenes without touching the scroll wheel.</p>
-            <p>Toggle themes from the page header to check card contrast, sticky viewport rendering, and motion readability.</p>
-            <Button asChild variant="outline">
-              <a href="/ui.html">Compare with UI package page</a>
-            </Button>
-          </CardContent>
-        </Card>
+      <section className="grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
+        <div className="space-y-5">
+          <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
+            <CardHeader>
+              <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
+                Package scope
+              </Badge>
+              <CardTitle>What this demo validates</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
+              <p>Choice-driven story graph with branching nodes and restart/back controls.</p>
+              <p>Motion.dev-powered transitions in the player while the active node changes.</p>
+              <p>Three.js is opt-in, so the story page stays on the lightweight 2D stage unless the user explicitly enables cinematic mode.</p>
+              <p>Remotion path planning stays available from the same story data model.</p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant={useThreeStage ? "secondary" : "default"}
+                  onMouseEnter={() => {
+                    void loadThreeStage();
+                  }}
+                  onFocus={() => {
+                    void loadThreeStage();
+                  }}
+                  onClick={() => {
+                    void enableThreeStage();
+                  }}
+                  disabled={isLoadingThreeStage}
+                >
+                  {isLoadingThreeStage
+                    ? "Loading 3D stage"
+                    : useThreeStage
+                      ? "3D stage enabled"
+                      : "Enable 3D stage"}
+                </Button>
+                {useThreeStage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setUseThreeStage(false);
+                    }}
+                  >
+                    Back to 2D
+                  </Button>
+                ) : null}
+              </div>
+              <Button asChild variant="outline">
+                <a href="/ui.html">Compare with UI package page</a>
+              </Button>
+            </CardContent>
+          </Card>
 
-        <StoryContainer
-          title="How a package idea becomes a shipped experience"
-          subtitle="A four-step narrative built from @moritzbrantner/storytelling."
-          instructions="Scroll inside the story, click the numbered steps, or use the arrow keys while the story region is focused."
-        >
-          <StorySeries ariaLabel="Package development story">
-            <StoryScene id="idea" eyebrow="Step 1" title="Start with a single sharp package boundary">
+          <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
+            <CardHeader>
+              <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
+                Remotion helper
+              </Badge>
+              <CardTitle>Cinematic branch metadata</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
               <p>
-                The useful extraction is rarely “all shared code.” It is the smallest
-                runtime surface that can evolve without dragging application-specific
-                assumptions along with it.
+                The branch <code>signal -&gt; harbor -&gt; harbor-ending</code> produces{" "}
+                <strong className="text-foreground">{cinematicPath.totalFrames}</strong> frames
+                across <strong className="text-foreground">{cinematicPath.scenes.length}</strong>{" "}
+                scenes.
               </p>
               <p>
-                In practice that means building a package around a real interface:
-                UI primitives, a storytelling engine, or another cohesive runtime
-                capability.
+                Use <code>@moritzbrantner/storytelling/remotion</code> when you want to render a
+                chosen path into a video composition.
               </p>
-            </StoryScene>
+            </CardContent>
+          </Card>
+        </div>
 
-            <StoryScene id="compose" eyebrow="Step 2" title="Prove composition with a real page">
-              <p>
-                Static unit tests are necessary, but they do not expose visual regressions,
-                layering bugs, or awkward interaction edges. A focused playground page does.
-              </p>
-              <p>
-                That is why this workspace now includes a dedicated example app instead of
-                only package-level build and test commands.
-              </p>
-            </StoryScene>
-
-            <StoryScene id="iterate" eyebrow="Step 3" title="Iterate against package source, not a published tarball">
-              <p>
-                The example app resolves the packages directly to local source files. That
-                keeps the feedback loop short and makes it obvious when a styling or runtime
-                change breaks the package contract.
-              </p>
-              <p>
-                Tailwind source scanning is wired for package development too, so utility
-                classes from the package source stay available during edits.
-              </p>
-            </StoryScene>
-
-            <StoryScene id="ship" eyebrow="Step 4" title="Ship only after interaction quality holds up">
-              <p>
-                Scroll behavior, keyboard navigation, theme contrast, overlays, charts, and
-                form states should all feel correct before a release is cut. The package API
-                matters, but the working experience matters more.
-              </p>
-              <p>
-                Use this page as a manual smoke test whenever the storytelling primitives or
-                shared UI foundations change.
-              </p>
-            </StoryScene>
-          </StorySeries>
-        </StoryContainer>
+        <InteractiveStoryPlayer story={story} stageRenderer={activeStageRenderer} />
       </section>
     </PlaygroundPage>
   );

@@ -35,6 +35,13 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/storytelling\/three$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/storytelling/src/three.tsx",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/word-prediction$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -66,6 +73,17 @@ export default defineConfig({
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),
         wordPrediction: path.resolve(rootDir, "word-prediction.html"),
+      },
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes("@react-three/fiber") ||
+            id.includes("/node_modules/three/") ||
+            id.includes("/node_modules/.pnpm/three@")
+          ) {
+            return "three-stage-vendor";
+          }
+        },
       },
     },
   },
