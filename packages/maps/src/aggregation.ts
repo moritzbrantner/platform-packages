@@ -51,11 +51,16 @@ export type ViewportAggregation<TProperties = Record<string, unknown>> = {
   summary: VisibleAggregationSummary;
 };
 
-export type PointAggregationIndexOptions = {
+export type MapPointFilter<TProperties = Record<string, unknown>> = (
+  point: IndexedMapPoint<TProperties>,
+) => boolean;
+
+export type PointAggregationIndexOptions<TProperties = Record<string, unknown>> = {
   extent?: number;
   maxZoom?: number;
   minZoom?: number;
   radius?: number;
+  filterPoint?: MapPointFilter<TProperties>;
 };
 
 export type IndexedMapPoint<TProperties = Record<string, unknown>> = Required<
@@ -107,9 +112,11 @@ export type PointAggregationIndex<TProperties = Record<string, unknown>> = {
 
 export function createPointAggregationIndex<TProperties = Record<string, unknown>>(
   points: readonly MapPoint<TProperties>[],
-  options: PointAggregationIndexOptions = {},
+  options: PointAggregationIndexOptions<TProperties> = {},
 ): PointAggregationIndex<TProperties> {
-  const normalizedPoints = points.map((point, index) => normalizePoint(point, index));
+  const normalizedPoints = points
+    .map((point, index) => normalizePoint(point, index))
+    .filter((point) => options.filterPoint?.(point) ?? true);
   const pointLookup = new Map(normalizedPoints.map((point) => [point.id, point]));
   const metricKeys = collectMetricKeys(normalizedPoints);
   const tree = new Supercluster<
