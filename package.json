@@ -11,6 +11,7 @@
     "packages/maps",
     "packages/parallel-text",
     "packages/speech",
+    "packages/subtitles",
     "packages/storytelling",
     "packages/ui",
     "packages/word-prediction"

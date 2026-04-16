@@ -17,6 +17,7 @@ export default defineConfig({
       "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
       "@moritzbrantner/speech": path.resolve(rootDir, "packages/speech/src/index.ts"),
+      "@moritzbrantner/subtitles": path.resolve(rootDir, "packages/subtitles/src/index.ts"),
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
       "@moritzbrantner/word-prediction": path.resolve(rootDir, "packages/word-prediction/src/index.ts"),
