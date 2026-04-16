@@ -8,6 +8,7 @@ export {
   type AggregatedMapPoint,
   type IndexedMapPoint,
   type MapMetricRecord,
+  type MapPointFilter,
   type MapPoint,
   type PointAggregationIndex,
   type PointAggregationIndexOptions,

@@ -65,6 +65,78 @@ describe("@moritzbrantner/maps aggregation", () => {
     expect(leaves[0]?.properties.city).toBe("Berlin");
   });
 
+  test("filters points before building cluster totals", () => {
+    const index = createPointAggregationIndex([
+      {
+        id: "berlin-a",
+        latitude: 52.52,
+        longitude: 13.405,
+        metrics: { orders: 3, revenue: 300 },
+        properties: { city: "Berlin" },
+      },
+      {
+        id: "berlin-b",
+        latitude: 52.5204,
+        longitude: 13.4054,
+        metrics: { orders: 2, revenue: 180 },
+        properties: { city: "Berlin" },
+      },
+      {
+        id: "paris-a",
+        latitude: 48.8566,
+        longitude: 2.3522,
+        metrics: { orders: 7, revenue: 700 },
+        properties: { city: "Paris" },
+      },
+    ], {
+      filterPoint(point) {
+        return point.properties.city === "Berlin";
+      },
+    });
+
+    const aggregation = index.getViewportAggregation({
+      bounds: [-180, -85, 180, 85],
+      zoom: 6,
+    });
+
+    expect(aggregation.summary.visiblePointCount).toBe(2);
+    expect(aggregation.summary.metrics.orders).toBe(5);
+    expect(aggregation.summary.metrics.revenue).toBe(480);
+    expect(index.getPointById("paris-a")).toBeNull();
+  });
+
+  test("returns leaves only from the filtered subset", () => {
+    const index = createPointAggregationIndex(
+      Array.from({ length: 20 }, (_, pointIndex) => ({
+        id: `point-${pointIndex}`,
+        latitude: 52.52 + pointIndex * 0.0002,
+        longitude: 13.405 + pointIndex * 0.0002,
+        metrics: { orders: 1 },
+        properties: {
+          city: pointIndex % 2 === 0 ? "Berlin" : "Hamburg",
+        },
+      })),
+      {
+        filterPoint(point) {
+          return point.properties.city === "Berlin";
+        },
+      },
+    );
+    const aggregation = index.getViewportAggregation({
+      bounds: [13.3, 52.4, 13.6, 52.7],
+      zoom: 4,
+    });
+    const cluster = aggregation.features.find((feature) => feature.kind === "cluster");
+
+    expect(cluster?.kind).toBe("cluster");
+    expect(cluster?.pointCount).toBe(10);
+
+    const leaves = index.getClusterLeaves(cluster!.clusterId, 10, 0);
+
+    expect(leaves).toHaveLength(10);
+    expect(leaves.every((point) => point.properties.city === "Berlin")).toBe(true);
+  });
+
   test("keeps totals intact for large datasets", () => {
     const points = createSyntheticPoints(100_000);
     const index = createPointAggregationIndex(points, {

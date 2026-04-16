@@ -22,6 +22,7 @@ import {
   getBoundsFromPoints,
   type AggregatedMapFeature,
   type AggregatedMapCluster,
+  type MapPointFilter,
   type MapPoint,
   type PointAggregationIndexOptions,
   type ViewportAggregationQuery,
@@ -46,6 +47,7 @@ export type MapViewState = {
 export type ClusteredMapProps<TProperties = Record<string, unknown>> = {
   className?: string;
   clusterRadius?: PointAggregationIndexOptions["radius"];
+  filterPoint?: MapPointFilter<TProperties>;
   fitBoundsPadding?: number;
   fitToData?: boolean;
   initialViewState?: MapViewState;
@@ -83,6 +85,7 @@ export const defaultRasterMapStyle: StyleSpecification = {
 export function ClusteredMap<TProperties = Record<string, unknown>>({
   className,
   clusterRadius,
+  filterPoint,
   fitBoundsPadding = 56,
   fitToData = true,
   initialViewState,
@@ -105,11 +108,12 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
   const index = useMemo(
     () =>
       createPointAggregationIndex(deferredPoints, {
+        filterPoint,
         maxZoom,
         minZoom,
         radius: clusterRadius,
       }),
-    [clusterRadius, deferredPoints, maxZoom, minZoom],
+    [clusterRadius, deferredPoints, filterPoint, maxZoom, minZoom],
   );
 
   const syncSource = useEffectEvent(() => {
