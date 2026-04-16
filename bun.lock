@@ -27,6 +27,7 @@
       "dependencies": {
         "@moritzbrantner/maps": "workspace:*",
         "@moritzbrantner/parallel-text": "workspace:*",
+        "@moritzbrantner/speech": "workspace:*",
         "@moritzbrantner/storytelling": "workspace:*",
         "@moritzbrantner/ui": "workspace:*",
         "@moritzbrantner/word-prediction": "workspace:*",
@@ -84,6 +85,17 @@
       "peerDependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+      },
+    },
+    "packages/speech": {
+      "name": "@moritzbrantner/speech",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/react": "^19.2.2",
+        "react": "^19.2.0",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
       },
     },
     "packages/storytelling": {
@@ -406,6 +418,8 @@
     "@moritzbrantner/parallel-text": ["@moritzbrantner/parallel-text@workspace:packages/parallel-text"],
 
     "@moritzbrantner/playground": ["@moritzbrantner/playground@workspace:examples/playground"],
+
+    "@moritzbrantner/speech": ["@moritzbrantner/speech@workspace:packages/speech"],
 
     "@moritzbrantner/storytelling": ["@moritzbrantner/storytelling@workspace:packages/storytelling"],
 
