@@ -33,6 +33,13 @@ function HomePage() {
           cta="Open parallel text demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/speech"
+          title="Speech transcription demo"
+          description="Record from the microphone, upload chunks to a Whisper-style backend, and watch the returned transcript feed the predictive text model."
+          href="/speech.html"
+          cta="Open speech demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/ui"
           title="Interactive UI gallery"
           description="Buttons, form controls, overlays, data display, theme switching, and notification flows built directly from the shared UI package."
@@ -99,6 +106,9 @@ function HomePage() {
             </Button>
             <Button asChild variant="outline">
               <a href="/parallel-text.html">Open parallel text package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/speech.html">Open speech package page</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/ui.html">Open UI package page</a>
