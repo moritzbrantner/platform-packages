@@ -4,17 +4,7 @@
   "packageManager": "bun@1.3.12",
   "workspaces": [
     "examples/*",
-    "packages/collaboration",
-    "packages/card-games",
-    "packages/flat-design",
-    "packages/keyboard",
-    "packages/maps",
-    "packages/parallel-text",
-    "packages/speech",
-    "packages/subtitles",
-    "packages/storytelling",
-    "packages/ui",
-    "packages/word-prediction"
+    "packages/*"
   ],
   "scripts": {
     "build": "turbo run build",
