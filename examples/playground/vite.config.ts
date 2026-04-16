@@ -27,6 +27,27 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/linguistics-core$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/linguistics-core/src/index.ts",
+        ),
+      },
+      {
+        find: /^@moritzbrantner\/linguistics-corpus$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/linguistics-corpus/src/index.ts",
+        ),
+      },
+      {
+        find: /^@moritzbrantner\/linguistics-learning$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/linguistics-learning/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/maps$/,
         replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
       },
@@ -53,6 +74,13 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/subtitles$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/subtitles/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/storytelling\/three$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -72,10 +100,14 @@ export default defineConfig({
     exclude: [
       "@moritzbrantner/card-games",
       "@moritzbrantner/flat-design",
+      "@moritzbrantner/linguistics-core",
+      "@moritzbrantner/linguistics-corpus",
+      "@moritzbrantner/linguistics-learning",
       "@moritzbrantner/maps",
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/speech",
       "@moritzbrantner/ui",
+      "@moritzbrantner/subtitles",
       "@moritzbrantner/storytelling",
       "@moritzbrantner/word-prediction",
     ],
@@ -93,6 +125,8 @@ export default defineConfig({
         flatDesign: path.resolve(rootDir, "flat-design.html"),
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
+        languagePipeline: path.resolve(rootDir, "language-pipeline.html"),
+        languageStudy: path.resolve(rootDir, "language-study.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         speech: path.resolve(rootDir, "speech.html"),
         ui: path.resolve(rootDir, "ui.html"),

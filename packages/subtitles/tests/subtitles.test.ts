@@ -1,8 +1,10 @@
 import { describe, expect, test } from "vitest";
 
+import { createCorpusIndex, searchCorpus } from "@moritzbrantner/linguistics-corpus";
 import {
   collectTimedTextText,
   detectTimedTextFormat,
+  fromSpeechTranscriptionResult,
   fromTranscriptSegments,
   insertTimedTextCue,
   parseSrt,
@@ -13,6 +15,7 @@ import {
   serializeSrt,
   serializeTimedText,
   shiftTimedText,
+  toTextDocument,
   toTranscriptSegments,
   updateTimedTextCue,
 } from "@moritzbrantner/subtitles";
@@ -181,5 +184,44 @@ General Kenobi
       "A: Hello there\nbrief pause",
     );
     expect(toTranscriptSegments(cleaned)).toEqual(cleaned.cues);
+  });
+
+  test("adapts speech transcription results and converts subtitle text into core documents", () => {
+    const timedText = fromSpeechTranscriptionResult({
+      text: "Hello from speech. Hello again.",
+      language: "en",
+      durationMs: 1800,
+      isFinal: true,
+      segments: [
+        {
+          id: "seg-1",
+          startTimeMs: 0,
+          endTimeMs: 900,
+          text: "Hello from speech.",
+          final: true,
+        },
+        {
+          id: "seg-2",
+          startTimeMs: 900,
+          endTimeMs: 1800,
+          text: "Hello again.",
+          final: true,
+        },
+      ],
+    });
+    const document = toTextDocument(timedText, {
+      id: "subtitle-doc",
+      separator: " ",
+    });
+    const corpus = createCorpusIndex({
+      documents: [document],
+    });
+
+    expect(timedText.cues).toHaveLength(2);
+    expect(document.sentences.map((sentence) => sentence.text)).toEqual([
+      "Hello from speech.",
+      "Hello again.",
+    ]);
+    expect(searchCorpus("hello", { index: corpus })).toHaveLength(2);
   });
 });

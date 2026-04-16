@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { createTextDocument } from "@moritzbrantner/linguistics-core";
 import {
   DEFAULT_WORD_PREDICTION_TEXTS,
   createDefaultWordPredictionModel,
@@ -183,6 +184,26 @@ describe("@moritzbrantner/word-prediction", () => {
     expect(model.predictNextWords("Alpha")[0]).toMatchObject({
       word: "beta",
       contextSize: 1,
+    });
+  });
+
+  test("can train directly from text documents", () => {
+    const model = createWordPredictionModel({
+      documents: [
+        createTextDocument({
+          id: "doc-1",
+          text: "Shared context helps prediction.",
+        }),
+        createTextDocument({
+          id: "doc-2",
+          text: "Shared context helps recall.",
+        }),
+      ],
+    });
+
+    expect(model.predictNextWords("Shared context")[0]).toMatchObject({
+      word: "helps",
+      contextSize: 2,
     });
   });
 });

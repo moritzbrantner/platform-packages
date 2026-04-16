@@ -1,9 +1,12 @@
+import {
+  createTextDocument,
+  normalizeText,
+  normalizeToken,
+  type TextDocument,
+} from "@moritzbrantner/linguistics-core";
+
 import { DEFAULT_WORD_PREDICTION_TEXTS } from "./default-data";
 
-const TRAINING_TOKEN_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*|[.!?\n]+/gu;
-const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
-const TRAILING_WORD_PATTERN = /([\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*)$/u;
-const BOUNDARY_PATTERN = /^[.!?\n]+$/u;
 const CONTEXT_SEPARATOR = "\u0001";
 const DEFAULT_LIMIT = 5;
 const UNIGRAM_WEIGHT = 0.35;
@@ -11,6 +14,7 @@ const RECENCY_WEIGHT = 0.05;
 
 export interface CreateWordPredictionModelOptions {
   texts?: Iterable<string> | string;
+  documents?: Iterable<TextDocument>;
   includeDefaultData?: boolean;
   lowercase?: boolean;
   maxContextSize?: number;
@@ -70,6 +74,7 @@ export function createWordPredictionModel(
   }
 
   trainTexts(trainingData, options.texts, modelOptions);
+  trainDocuments(trainingData, options.documents, modelOptions);
 
   const model: WordPredictionModel = {
     get vocabularySize() {
@@ -90,8 +95,7 @@ export function createWordPredictionModel(
       return predictWords(trainingData, contextTokens, prefix, predictOptions);
     },
     predictNextWords(context, predictOptions) {
-      const contextTokens = extractWords(context, modelOptions);
-      return predictWords(trainingData, contextTokens, "", predictOptions);
+      return predictWords(trainingData, extractWords(context, modelOptions), "", predictOptions);
     },
   };
 
@@ -162,86 +166,94 @@ function trainTexts(
   options: ModelOptions,
 ): void {
   for (const text of iterateTexts(texts)) {
-    trainModel(trainingData, text, options);
+    trainDocument(trainingData, createPredictionDocument(text, options), options);
   }
 }
 
-function trainModel(trainingData: TrainingData, text: string, options: ModelOptions): void {
-  trainingData.maxContextSize = options.maxContextSize;
-  const context: string[] = [];
-
-  for (const token of iterateTrainingTokens(text, options)) {
-    if (token.type === "boundary") {
-      context.length = 0;
-      continue;
-    }
-
-    trainingData.tokenCount += 1;
-    incrementCount(trainingData.unigramCounts, token.normalized);
-    trainingData.lastSeenAt.set(token.normalized, trainingData.tokenCount);
-    rememberSurfaceForm(trainingData.surfaceForms, token.normalized, token.surface);
-
-    const maxContextSize = Math.min(context.length, options.maxContextSize);
-
-    for (let size = 1; size <= maxContextSize; size += 1) {
-      const contextTokens = context.slice(-size);
-      const contextKey = buildContextKey(contextTokens);
-      incrementNestedCount(trainingData.nextWordCountsByContextSize, size, contextKey, token.normalized);
-      incrementNestedTotal(trainingData.totalByContextSize, size, contextKey);
-    }
-
-    context.push(token.normalized);
-
-    if (context.length > options.maxContextSize) {
-      context.shift();
-    }
-  }
-}
-
-function* iterateTrainingTokens(
-  text: string,
+function trainDocuments(
+  trainingData: TrainingData,
+  documents: Iterable<TextDocument> | undefined,
   options: ModelOptions,
-): Generator<{ normalized: string; surface: string; type: "word" } | { type: "boundary" }> {
-  for (const match of text.matchAll(TRAINING_TOKEN_PATTERN)) {
-    const value = match[0];
+): void {
+  if (!documents) {
+    return;
+  }
 
-    if (BOUNDARY_PATTERN.test(value)) {
-      yield { type: "boundary" };
-      continue;
+  for (const document of documents) {
+    trainDocument(trainingData, document, options);
+  }
+}
+
+function trainDocument(
+  trainingData: TrainingData,
+  document: TextDocument,
+  options: ModelOptions,
+): void {
+  trainingData.maxContextSize = options.maxContextSize;
+
+  for (const sentence of document.sentences) {
+    const context: string[] = [];
+
+    for (const token of sentence.tokens) {
+      if (!token.isWord) {
+        continue;
+      }
+
+      const normalized = normalizePredictionToken(token.text, options);
+      trainingData.tokenCount += 1;
+      incrementCount(trainingData.unigramCounts, normalized);
+      trainingData.lastSeenAt.set(normalized, trainingData.tokenCount);
+      rememberSurfaceForm(trainingData.surfaceForms, normalized, token.text);
+
+      const maxContextSize = Math.min(context.length, options.maxContextSize);
+
+      for (let size = 1; size <= maxContextSize; size += 1) {
+        const contextTokens = context.slice(-size);
+        const contextKey = buildContextKey(contextTokens);
+        incrementNestedCount(trainingData.nextWordCountsByContextSize, size, contextKey, normalized);
+        incrementNestedTotal(trainingData.totalByContextSize, size, contextKey);
+      }
+
+      context.push(normalized);
+
+      if (context.length > options.maxContextSize) {
+        context.shift();
+      }
     }
-
-    yield {
-      type: "word",
-      normalized: normalizeWord(value, options),
-      surface: value,
-    };
   }
 }
 
 function extractWords(text: string, options: ModelOptions): string[] {
-  const words = text.match(WORD_PATTERN) ?? [];
-  return words.map((word) => normalizeWord(word, options));
+  return createPredictionDocument(text, options).tokens
+    .filter((token) => token.isWord)
+    .map((token) => normalizePredictionToken(token.text, options));
 }
 
 function parseInput(
   input: string,
   options: ModelOptions,
 ): { contextTokens: string[]; prefix: string } {
-  const trailingWord = input.match(TRAILING_WORD_PATTERN)?.[1] ?? "";
-  const hasTrailingWhitespace = /\s$/u.test(input);
+  const document = createPredictionDocument(input, options);
+  const wordTokens = document.tokens.filter((token) => token.isWord);
+  const hasTrailingWhitespace = /\s$/u.test(document.text);
+  const lastWord = wordTokens.at(-1);
 
-  if (!trailingWord || hasTrailingWhitespace) {
+  if (
+    !lastWord ||
+    hasTrailingWhitespace ||
+    lastWord.range.end < document.text.length
+  ) {
     return {
-      contextTokens: extractWords(input, options),
+      contextTokens: wordTokens.map((token) => normalizePredictionToken(token.text, options)),
       prefix: "",
     };
   }
 
-  const withoutPrefix = input.slice(0, input.length - trailingWord.length);
-
   return {
-    contextTokens: extractWords(withoutPrefix, options),
-    prefix: normalizeWord(trailingWord, options),
+    contextTokens: wordTokens
+      .slice(0, -1)
+      .map((token) => normalizePredictionToken(token.text, options)),
+    prefix: normalizePredictionToken(lastWord.text, options),
   };
 }
 
@@ -277,7 +289,14 @@ function predictWords(
       }
 
       const score = (count / total) * contextWeight;
-      upsertCandidate(scores, candidate, score, count, size, resolveSurfaceForm(trainingData, candidate));
+      upsertCandidate(
+        scores,
+        candidate,
+        score,
+        count,
+        size,
+        resolveSurfaceForm(trainingData, candidate),
+      );
     }
   }
 
@@ -287,7 +306,8 @@ function predictWords(
     }
 
     const frequencyScore = (count / trainingData.tokenCount) * UNIGRAM_WEIGHT;
-    const recencyScore = ((trainingData.lastSeenAt.get(candidate) ?? 0) / trainingData.tokenCount) * RECENCY_WEIGHT;
+    const recencyScore =
+      ((trainingData.lastSeenAt.get(candidate) ?? 0) / trainingData.tokenCount) * RECENCY_WEIGHT;
 
     upsertCandidate(
       scores,
@@ -369,8 +389,15 @@ function buildContextKey(tokens: string[]): string {
   return tokens.join(CONTEXT_SEPARATOR);
 }
 
-function normalizeWord(word: string, options: ModelOptions): string {
-  return options.lowercase ? word.toLocaleLowerCase() : word;
+function normalizePredictionToken(word: string, options: ModelOptions): string {
+  return options.lowercase ? normalizeToken(word) : normalizeText(word);
+}
+
+function createPredictionDocument(text: string, options: ModelOptions) {
+  return createTextDocument({
+    text,
+    tokenNormalizer: (value) => normalizePredictionToken(value, options),
+  });
 }
 
 function rememberSurfaceForm(

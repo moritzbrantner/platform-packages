@@ -1,4 +1,11 @@
 export {
+  fromSpeechTranscriptionResult,
+  toTextDocument,
+  type FromSpeechTranscriptionResultOptions,
+  type SpeechTranscriptionResultLike,
+  type TimedTextToDocumentOptions,
+} from "./adapters";
+export {
   collectTimedTextText,
   fromTranscriptSegments,
   insertTimedTextCue,

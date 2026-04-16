@@ -26,6 +26,20 @@ function HomePage() {
           cta="Open flat-design demo"
         />
         <ExampleLinkCard
+          eyebrow="language stack"
+          title="Speech to study pipeline"
+          description="Inspect the combined `speech -> subtitles -> linguistics-core -> word-prediction` workflow, including timed text conversion and document-based prediction training."
+          href="/language-pipeline.html"
+          cta="Open language pipeline demo"
+        />
+        <ExampleLinkCard
+          eyebrow="language stack"
+          title="Parallel text and study demo"
+          description="Inspect the combined `linguistics-core -> parallel-text -> linguistics-learning` workflow with interlinear annotations and ranked study terms."
+          href="/language-study.html"
+          cta="Open language study demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/maps"
           title="Large-scale maps demo"
           description="Pan and zoom through 100,000 synthetic delivery points, watch client-side cluster totals update live, and inspect how single points reappear at close zoom."
@@ -83,9 +97,20 @@ function HomePage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
+              The two language-stack pages are the best place to inspect the new
+              shared text layer. One page follows timed transcript output into
+              subtitles, core documents, and word prediction. The other follows
+              core documents into parallel reading and study-term derivation.
+            </p>
+            <p>
               The card games page is the fast visual smoke test: hover tilt should
               feel stable, foil and glass variants should stay legible, and the fan
               and stack layouts should still read well on small screens.
+            </p>
+            <p>
+              The new `linguistics-core`, `linguistics-corpus`, `linguistics-learning`,
+              and `subtitles` packages are also aliased to local source, so the
+              combined pages update immediately while you iterate on the stack.
             </p>
             <p>
               The flat design page validates the new SVG scene package: palette
@@ -122,6 +147,12 @@ function HomePage() {
             <CardTitle>Quick links</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
+            <Button asChild variant="outline">
+              <a href="/language-pipeline.html">Open language pipeline demo</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/language-study.html">Open language study demo</a>
+            </Button>
             <Button asChild variant="outline">
               <a href="/card-games.html">Open card games package page</a>
             </Button>

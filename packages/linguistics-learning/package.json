@@ -20,7 +20,8 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/linguistics-core": "workspace:*"
+    "@moritzbrantner/linguistics-core": "workspace:*",
+    "@moritzbrantner/linguistics-corpus": "workspace:*"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

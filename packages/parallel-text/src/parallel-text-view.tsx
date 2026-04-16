@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, HTMLAttributes } from "react";
+import type { TextDocument } from "@moritzbrantner/linguistics-core";
 
 import type {
   ParallelTextAlignmentRow,
@@ -19,7 +20,8 @@ type ParallelTextSide = "original" | "translated";
 export interface ParallelTextTranslationOption {
   id: string;
   label: string;
-  translatedText: string;
+  translatedText?: string;
+  translatedDocument?: TextDocument;
   translatedLabel?: string;
   sentenceAlignments?: SentenceAlignmentInput[];
   tokenAlignments?: TokenAlignmentInput[];
@@ -27,8 +29,10 @@ export interface ParallelTextTranslationOption {
 
 export interface ParallelTextViewProps
   extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
-  originalText: string;
+  originalText?: string;
+  originalDocument?: TextDocument;
   translatedText?: string;
+  translatedDocument?: TextDocument;
   sentenceAlignments?: SentenceAlignmentInput[];
   tokenAlignments?: TokenAlignmentInput[];
   translations?: ParallelTextTranslationOption[];
@@ -56,7 +60,9 @@ interface HoverState {
 
 export function ParallelTextView({
   originalText,
+  originalDocument,
   translatedText,
+  translatedDocument,
   sentenceAlignments,
   tokenAlignments,
   translations,
@@ -71,12 +77,20 @@ export function ParallelTextView({
     () =>
       resolveTranslationOptions({
         translatedText,
+        translatedDocument,
         translatedLabel,
         sentenceAlignments,
         tokenAlignments,
         translations,
       }),
-    [translatedLabel, translatedText, sentenceAlignments, tokenAlignments, translations],
+    [
+      translatedDocument,
+      translatedLabel,
+      translatedText,
+      sentenceAlignments,
+      tokenAlignments,
+      translations,
+    ],
   );
   const [selectedTranslationId, setSelectedTranslationId] = useState<string | null>(() =>
     resolveTranslationId(translationOptions, defaultTranslationId),
@@ -107,11 +121,13 @@ export function ParallelTextView({
     () =>
       createParallelTextModel({
         originalText,
+        originalDocument,
         translatedText: selectedTranslation?.translatedText ?? "",
+        translatedDocument: selectedTranslation?.translatedDocument ?? translatedDocument,
         sentenceAlignments: selectedTranslation?.sentenceAlignments,
         tokenAlignments: selectedTranslation?.tokenAlignments,
       }),
-    [originalText, selectedTranslation],
+    [originalDocument, originalText, selectedTranslation, translatedDocument],
   );
   const modelIndex = useMemo(() => createModelIndex(model), [model]);
   const hoverState = useMemo(
@@ -292,12 +308,14 @@ function ColumnLabel({ children }: { children: string }) {
 
 function resolveTranslationOptions({
   translatedText,
+  translatedDocument,
   translatedLabel,
   sentenceAlignments,
   tokenAlignments,
   translations,
 }: {
   translatedText?: string;
+  translatedDocument?: TextDocument;
   translatedLabel: string;
   sentenceAlignments?: SentenceAlignmentInput[];
   tokenAlignments?: TokenAlignmentInput[];
@@ -307,12 +325,13 @@ function resolveTranslationOptions({
     return translations;
   }
 
-  if (typeof translatedText === "string") {
+  if (typeof translatedText === "string" || translatedDocument) {
     return [
       {
         id: "translation-0",
         label: translatedLabel,
         translatedText,
+        translatedDocument,
         translatedLabel,
         sentenceAlignments,
         tokenAlignments,

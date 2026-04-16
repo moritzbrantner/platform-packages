@@ -6,7 +6,9 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
-      "@moritzbrantner/subtitles": ["./src/index.ts"]
+      "@moritzbrantner/subtitles": ["./src/index.ts"],
+      "@moritzbrantner/linguistics-core": ["../linguistics-core/src/index.ts"],
+      "@moritzbrantner/linguistics-corpus": ["../linguistics-corpus/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"]

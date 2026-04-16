@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
+import { createTextDocument } from "@moritzbrantner/linguistics-core";
 import { ParallelTextView, createParallelTextModel } from "@moritzbrantner/parallel-text";
 
 describe("@moritzbrantner/parallel-text", () => {
@@ -120,5 +121,40 @@ describe("@moritzbrantner/parallel-text", () => {
     expect(frenchSentence.getAttribute("data-phrase-highlighted")).toBe("true");
     expect(frenchSentence.getAttribute("data-sentence-highlighted")).toBe("true");
     expect(bonjour.getAttribute("data-highlighted")).toBe("false");
+  });
+
+  test("accepts document inputs while preserving the existing alignment model", () => {
+    const model = createParallelTextModel({
+      originalDocument: createTextDocument({
+        id: "doc-original",
+        text: "Shared foundations help.",
+      }),
+      translatedDocument: createTextDocument({
+        id: "doc-translated",
+        text: "Gemeinsame Grundlagen helfen.",
+      }),
+    });
+
+    expect(model.rows).toHaveLength(1);
+    expect(model.rows[0]?.originalSentences[0]?.text).toBe("Shared foundations help.");
+    expect(model.rows[0]?.translatedSentences[0]?.text).toBe(
+      "Gemeinsame Grundlagen helfen.",
+    );
+
+    render(
+      <ParallelTextView
+        originalDocument={createTextDocument({
+          id: "render-original",
+          text: "Hello world.",
+        })}
+        translatedDocument={createTextDocument({
+          id: "render-translated",
+          text: "Hallo Welt.",
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Hello" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Hallo" })).toBeTruthy();
   });
 });
