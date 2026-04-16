@@ -106,6 +106,25 @@
       "name": "@moritzbrantner/keyboard",
       "version": "0.1.0",
     },
+    "packages/linguistics-core": {
+      "name": "@moritzbrantner/linguistics-core",
+      "version": "0.1.0",
+    },
+    "packages/linguistics-corpus": {
+      "name": "@moritzbrantner/linguistics-corpus",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/linguistics-learning": "workspace:*",
+      },
+    },
+    "packages/linguistics-learning": {
+      "name": "@moritzbrantner/linguistics-learning",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+      },
+    },
     "packages/maps": {
       "name": "@moritzbrantner/maps",
       "version": "0.1.0",
@@ -512,6 +531,12 @@
     "@moritzbrantner/flat-design": ["@moritzbrantner/flat-design@workspace:packages/flat-design"],
 
     "@moritzbrantner/keyboard": ["@moritzbrantner/keyboard@workspace:packages/keyboard"],
+
+    "@moritzbrantner/linguistics-core": ["@moritzbrantner/linguistics-core@workspace:packages/linguistics-core"],
+
+    "@moritzbrantner/linguistics-corpus": ["@moritzbrantner/linguistics-corpus@workspace:packages/linguistics-corpus"],
+
+    "@moritzbrantner/linguistics-learning": ["@moritzbrantner/linguistics-learning@workspace:packages/linguistics-learning"],
 
     "@moritzbrantner/maps": ["@moritzbrantner/maps@workspace:packages/maps"],
 
