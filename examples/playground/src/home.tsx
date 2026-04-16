@@ -19,6 +19,13 @@ function HomePage() {
           cta="Open maps demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/maps"
+          title="Temporal motion stress demo"
+          description="Render 10,000 dots on a separate page, keep 5,000 fixed in place, and drive 5,000 along seeded random routes with a time axis."
+          href="/maps-motion.html"
+          cta="Open motion demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/parallel-text"
           title="Parallel text comparison demo"
           description="Compare original and translated text side by side, hover tokens to inspect link mapping, and validate manual sentence alignment overrides."
@@ -86,6 +93,9 @@ function HomePage() {
           <CardContent className="flex flex-col gap-3">
             <Button asChild variant="outline">
               <a href="/maps.html">Open maps package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/maps-motion.html">Open maps motion page</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/parallel-text.html">Open parallel text package page</a>

@@ -22,3 +22,15 @@ export {
   type ClusteredMapProps,
   type MapViewState,
 } from "./clustered-map";
+export {
+  getTemporalMapPointsAtTime,
+  getTemporalMapTimeRange,
+  snapTemporalMapTime,
+  type TemporalMapKeyframe,
+  type TemporalMapTimeRange,
+  type TemporalMapTrack,
+} from "./temporal-points";
+export {
+  TemporalClusteredMap,
+  type TemporalClusteredMapProps,
+} from "./temporal-map";
