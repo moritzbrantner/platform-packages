@@ -25,14 +25,18 @@ export function CardStack({
   const half = Math.max(items.length - 1, 0) / 2;
 
   return (
-    <div {...divProps} className={cx("mb-card-stack", className)} style={style}>
+    <div
+      {...divProps}
+      className={cx("mb-card-stack grid w-fit pl-[0.4rem] pr-[1.6rem] pt-[0.4rem] pb-[2.1rem]", className)}
+      style={style}
+    >
       {items.map((child, index) => {
         const distanceFromCenter = index - half;
 
         return (
           <div
             key={index}
-            className="mb-card-stack__item"
+            className="mb-card-stack__item col-start-1 row-start-1 transition-transform duration-200 ease-out [transform:translate(var(--mb-stack-x,0px),var(--mb-stack-y,0px))_rotate(var(--mb-stack-rotate,0deg))] hover:[transform:translate(var(--mb-stack-x,0px),calc(var(--mb-stack-y,0px)-0.7rem))_rotate(var(--mb-stack-rotate,0deg))]"
             style={
               {
                 "--mb-stack-rotate": `${distanceFromCenter * rotateStep}deg`,

@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
@@ -16,10 +19,14 @@ describe("@moritzbrantner/card-games", () => {
       />,
     );
 
-    expect(screen.getByRole("img", { name: "A of hearts" })).toBeTruthy();
+    const card = screen.getByRole("img", { name: "A of hearts" });
+
+    expect(card).toBeTruthy();
     expect(screen.getByText("Fire mage")).toBeTruthy();
     expect(screen.getByText("Legendary hero")).toBeTruthy();
     expect(screen.getAllByText("♥").length).toBeGreaterThan(0);
+    expect(card.className).toContain("rounded-[1.65rem]");
+    expect(card.className).toContain("aspect-[5/7]");
   });
 
   test("renders layout helpers for hands, piles, and the table surface", () => {
@@ -48,5 +55,29 @@ describe("@moritzbrantner/card-games", () => {
     expect(container.querySelectorAll(".mb-card-fan__item")).toHaveLength(3);
     expect(container.querySelectorAll(".mb-card-stack__item")).toHaveLength(2);
     expect(screen.getAllByRole("img", { name: "Card back" })).toHaveLength(2);
+  });
+
+  test("uses the workspace bun lockfile and does not export a standalone stylesheet", () => {
+    const packageDir = path.resolve(process.cwd(), "packages/card-games");
+    const lockfilePath = path.resolve(process.cwd(), "bun.lock");
+    const packageJsonPath = path.resolve(packageDir, "package.json");
+    const packageStylePath = path.resolve(packageDir, "styles.css");
+    const lockfile = readFileSync(lockfilePath, "utf8");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
+      exports?: Record<string, { import: string; types: string }>;
+      files?: string[];
+    };
+
+    expect(existsSync(lockfilePath)).toBe(true);
+    expect(lockfile).toContain('"packages/card-games"');
+    expect(lockfile).toContain('"@moritzbrantner/card-games": "workspace:*"');
+    expect(packageJson.files).toEqual(["dist"]);
+    expect(packageJson.exports).toEqual({
+      ".": {
+        import: "./dist/index.js",
+        types: "./dist/index.d.ts",
+      },
+    });
+    expect(existsSync(packageStylePath)).toBe(false);
   });
 });

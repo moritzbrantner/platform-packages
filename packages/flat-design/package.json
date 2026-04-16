@@ -1,12 +1,12 @@
 {
-  "name": "@moritzbrantner/card-games",
+  "name": "@moritzbrantner/flat-design",
   "version": "0.1.0",
   "private": false,
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moritzbrantner/platform-packages.git",
-    "directory": "packages/card-games"
+    "directory": "packages/flat-design"
   },
   "files": [
     "dist"
@@ -38,6 +38,6 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/card-games/tests/card-games.test.tsx"
+    "test": "cd ../.. && vitest run packages/flat-design/tests/flat-design.test.tsx"
   }
 }
