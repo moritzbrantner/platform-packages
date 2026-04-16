@@ -174,6 +174,10 @@
         "three",
       ],
     },
+    "packages/subtitles": {
+      "name": "@moritzbrantner/subtitles",
+      "version": "0.1.0",
+    },
     "packages/ui": {
       "name": "@moritzbrantner/ui",
       "version": "0.3.0",
@@ -479,6 +483,8 @@
     "@moritzbrantner/speech": ["@moritzbrantner/speech@workspace:packages/speech"],
 
     "@moritzbrantner/storytelling": ["@moritzbrantner/storytelling@workspace:packages/storytelling"],
+
+    "@moritzbrantner/subtitles": ["@moritzbrantner/subtitles@workspace:packages/subtitles"],
 
     "@moritzbrantner/ui": ["@moritzbrantner/ui@workspace:packages/ui"],
 
