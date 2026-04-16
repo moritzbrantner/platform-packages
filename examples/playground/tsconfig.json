@@ -8,6 +8,7 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "paths": {
+      "@moritzbrantner/card-games": ["../../packages/card-games/src/index.ts"],
       "@moritzbrantner/maps": ["../../packages/maps/src/index.ts"],
       "@moritzbrantner/parallel-text": ["../../packages/parallel-text/src/index.ts"],
       "@moritzbrantner/speech": ["../../packages/speech/src/index.ts"],

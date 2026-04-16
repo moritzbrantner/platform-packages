@@ -13,6 +13,13 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^@moritzbrantner\/card-games$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/card-games/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/maps$/,
         replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
       },
@@ -56,6 +63,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: [
+      "@moritzbrantner/card-games",
       "@moritzbrantner/maps",
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/speech",
@@ -73,6 +81,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: path.resolve(rootDir, "index.html"),
+        cardGames: path.resolve(rootDir, "card-games.html"),
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
