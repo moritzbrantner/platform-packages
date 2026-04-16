@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, TextareaHTMLAttributes } from "react";
 
 import type {
+  SpeechStreamingTranscriber,
+  SpeechStreamingTranscriptionSession,
   SpeechTranscriber,
   SpeechTranscriptionRequest,
   SpeechTranscriptionResult,
   TranscriptSegment,
 } from "./transcript";
-import { mergeTranscriptTexts, normalizeTranscriptText } from "./transcript";
+import {
+  collectTranscriptText,
+  mergeTranscriptSegments,
+  mergeTranscriptTexts,
+  normalizeTranscriptText,
+} from "./transcript";
 
 export type SpeechCaptureStatus = "idle" | "requesting-permission" | "recording" | "stopping" | "error";
 
@@ -36,7 +43,8 @@ export interface MediaRecorderLike {
 }
 
 export interface UseSpeechTranscriberOptions {
-  transcriber: SpeechTranscriber;
+  transcriber?: SpeechTranscriber;
+  streamingTranscriber?: SpeechStreamingTranscriber;
   language?: string;
   prompt?: string;
   timesliceMs?: number;
@@ -100,6 +108,12 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
   const pendingRequestCountRef = useRef(0);
   const stopResolversRef = useRef<Array<() => void>>([]);
   const errorRef = useRef<Error | null>(null);
+  const streamingSessionRef = useRef<SpeechStreamingTranscriptionSession | null>(null);
+  const streamingSessionPromiseRef = useRef<Promise<SpeechStreamingTranscriptionSession> | null>(
+    null,
+  );
+  const closingStreamingSessionRef = useRef<Promise<void> | null>(null);
+  const resultSequenceRef = useRef(0);
 
   useEffect(() => {
     transcriptRef.current = transcript;
@@ -116,6 +130,7 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
   useEffect(() => {
     return () => {
       cleanupRecorder();
+      void closeStreamingSession();
     };
   }, []);
 
@@ -191,6 +206,30 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
     setPendingRequestCount(0);
   }
 
+  function createRequest(blob: Blob): SpeechTranscriptionRequest {
+    const chunkIndex = chunkIndexRef.current;
+    chunkIndexRef.current += 1;
+    const startedAt =
+      sessionStartRef.current === null || !options.timesliceMs
+        ? Date.now()
+        : sessionStartRef.current + chunkIndex * options.timesliceMs;
+    const endedAt =
+      options.timesliceMs && sessionStartRef.current !== null
+        ? startedAt + options.timesliceMs
+        : Date.now();
+
+    return {
+      audio: blob,
+      mimeType: blob.type || options.mimeType,
+      language: options.language,
+      prompt: options.prompt,
+      chunkIndex,
+      startedAt,
+      endedAt,
+      previousTranscript: transcriptRef.current,
+    };
+  }
+
   function resolveStopRequests(): void {
     const resolvers = stopResolversRef.current.splice(0, stopResolversRef.current.length);
 
@@ -240,6 +279,24 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
       return;
     }
 
+    if (
+      options.streamingTranscriber &&
+      (streamingSessionRef.current || streamingSessionPromiseRef.current || closingStreamingSessionRef.current)
+    ) {
+      if (!closingStreamingSessionRef.current) {
+        closingStreamingSessionRef.current = closeStreamingSession()
+          .catch((cause) => {
+            failWithError(cause);
+          })
+          .finally(() => {
+            closingStreamingSessionRef.current = null;
+            maybeFinalizeStop();
+          });
+      }
+
+      return;
+    }
+
     finalizeStop(errorRef.current ? "error" : "idle");
   }
 
@@ -250,42 +307,19 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
     options.onTranscriptionError?.(nextError);
   }
 
-  async function transcribeBlob(blob: Blob): Promise<void> {
-    if (!blob.size) {
-      return;
-    }
+  function applyTranscriptionResult(
+    result: SpeechTranscriptionResult,
+    request?: SpeechTranscriptionRequest,
+  ): void {
+    const normalizedSegments = normalizeResultSegments(result, request, resultSequenceRef.current);
+    resultSequenceRef.current += 1;
 
-    const chunkIndex = chunkIndexRef.current;
-    chunkIndexRef.current += 1;
-    const startedAt =
-      sessionStartRef.current === null || !options.timesliceMs
-        ? Date.now()
-        : sessionStartRef.current + chunkIndex * options.timesliceMs;
-    const endedAt =
-      options.timesliceMs && sessionStartRef.current !== null
-        ? startedAt + options.timesliceMs
-        : Date.now();
-    const request: SpeechTranscriptionRequest = {
-      audio: blob,
-      mimeType: blob.type || options.mimeType,
-      language: options.language,
-      prompt: options.prompt,
-      chunkIndex,
-      startedAt,
-      endedAt,
-      previousTranscript: transcriptRef.current,
-    };
-
-    pendingRequestCountRef.current += 1;
-    setPendingRequestCount(pendingRequestCountRef.current);
-
-    try {
-      const result = await options.transcriber.transcribe(request);
-      const nextTranscript = mergeTranscriptTexts(transcriptRef.current, result.text);
-      const nextSegments = [
-        ...segmentsRef.current,
-        ...normalizeResultSegments(result, request),
-      ];
+    if (normalizedSegments.length > 0) {
+      const nextSegments = mergeTranscriptSegments(segmentsRef.current, normalizedSegments);
+      const nextTranscript =
+        collectTranscriptText(nextSegments, {
+          includeInterim: true,
+        }) || mergeTranscriptTexts(transcriptRef.current, result.text);
 
       applySegments(nextSegments);
       applyTranscript(nextTranscript, {
@@ -294,6 +328,98 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
         lastResult: result,
       });
       setError(null);
+      return;
+    }
+
+    const nextTranscript = mergeTranscriptTexts(transcriptRef.current, result.text);
+
+    applyTranscript(nextTranscript, {
+      reason: "transcription",
+      segments: segmentsRef.current,
+      lastResult: result,
+    });
+    setError(null);
+  }
+
+  async function ensureStreamingSession(): Promise<SpeechStreamingTranscriptionSession | null> {
+    if (!options.streamingTranscriber) {
+      return null;
+    }
+
+    if (streamingSessionRef.current) {
+      return streamingSessionRef.current;
+    }
+
+    if (!streamingSessionPromiseRef.current) {
+      streamingSessionPromiseRef.current = Promise.resolve(
+        options.streamingTranscriber.openSession({
+          language: options.language,
+          prompt: options.prompt,
+          onResult: (result) => {
+            applyTranscriptionResult(result);
+          },
+          onError: (cause) => {
+            failWithError(cause);
+          },
+          onClose: () => {
+            streamingSessionRef.current = null;
+            maybeFinalizeStop();
+          },
+        }),
+      )
+        .then((session) => {
+          streamingSessionRef.current = session;
+          return session;
+        })
+        .finally(() => {
+          streamingSessionPromiseRef.current = null;
+        });
+    }
+
+    return streamingSessionPromiseRef.current;
+  }
+
+  async function closeStreamingSession(): Promise<void> {
+    const session =
+      streamingSessionRef.current ?? (await streamingSessionPromiseRef.current?.catch(() => null));
+
+    if (!session) {
+      streamingSessionRef.current = null;
+      return;
+    }
+
+    try {
+      await session.close();
+    } finally {
+      streamingSessionRef.current = null;
+    }
+  }
+
+  async function transcribeBlob(blob: Blob): Promise<void> {
+    if (!blob.size) {
+      return;
+    }
+
+    const request = createRequest(blob);
+
+    pendingRequestCountRef.current += 1;
+    setPendingRequestCount(pendingRequestCountRef.current);
+
+    try {
+      if (options.streamingTranscriber) {
+        const session = await ensureStreamingSession();
+
+        if (!session) {
+          throw new Error("No streaming transcriber is available.");
+        }
+
+        await session.sendAudioChunk(request);
+      } else if (options.transcriber) {
+        const result = await options.transcriber.transcribe(request);
+        applyTranscriptionResult(result, request);
+      } else {
+        throw new Error("No speech transcriber is configured.");
+      }
     } catch (cause) {
       failWithError(cause);
       return;
@@ -310,6 +436,10 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
     }
 
     try {
+      if (!options.transcriber && !options.streamingTranscriber) {
+        throw new Error("No speech transcriber is configured.");
+      }
+
       setError(null);
       setStatus("requesting-permission");
       const stream = await getMediaDevices().getUserMedia({
@@ -335,7 +465,12 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
       streamRef.current = stream;
       sessionStartRef.current = Date.now();
       chunkIndexRef.current = 0;
+      resultSequenceRef.current = 0;
       clearPendingRequests();
+
+      if (options.streamingTranscriber) {
+        await ensureStreamingSession();
+      }
 
       recorder.start(options.timesliceMs && options.timesliceMs > 0 ? options.timesliceMs : undefined);
       setIsRecording(true);
@@ -383,6 +518,7 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
 
 export function SpeechTranscriberPanel({
   transcriber,
+  streamingTranscriber,
   language,
   prompt,
   timesliceMs,
@@ -423,6 +559,7 @@ export function SpeechTranscriberPanel({
     stopRecording,
   } = useSpeechTranscriber({
     transcriber,
+    streamingTranscriber,
     language,
     prompt,
     timesliceMs,
@@ -520,18 +657,23 @@ export function isSpeechCaptureSupported(environment: {
 
 function normalizeResultSegments(
   result: SpeechTranscriptionResult,
-  request: SpeechTranscriptionRequest,
+  request: SpeechTranscriptionRequest | undefined,
+  resultSequence: number,
 ): TranscriptSegment[] {
   if (result.segments && result.segments.length > 0) {
     return result.segments.map((segment, index) => ({
-      id: segment.id || `chunk-${request.chunkIndex ?? 0}-segment-${index}`,
+      id:
+        segment.id ||
+        (request
+          ? `chunk-${request.chunkIndex ?? 0}-segment-${index}`
+          : `stream-result-${resultSequence}-segment-${index}`),
       text: normalizeTranscriptText(segment.text),
       final: segment.final ?? result.isFinal ?? true,
-      startTimeMs: segment.startTimeMs ?? request.startedAt ?? 0,
-      endTimeMs: segment.endTimeMs ?? request.endedAt ?? request.startedAt ?? 0,
+      startTimeMs: segment.startTimeMs ?? request?.startedAt ?? 0,
+      endTimeMs: segment.endTimeMs ?? request?.endedAt ?? request?.startedAt ?? segment.startTimeMs ?? 0,
       confidence: segment.confidence,
-      chunkIndex: segment.chunkIndex ?? request.chunkIndex,
-      source: segment.source ?? "live-chunk",
+      chunkIndex: segment.chunkIndex ?? request?.chunkIndex,
+      source: segment.source ?? (request ? "live-chunk" : "live-stream"),
     }));
   }
 
@@ -543,13 +685,13 @@ function normalizeResultSegments(
 
   return [
     {
-      id: `chunk-${request.chunkIndex ?? 0}`,
+      id: request ? `chunk-${request.chunkIndex ?? 0}` : `stream-result-${resultSequence}`,
       text,
       final: result.isFinal ?? true,
-      startTimeMs: request.startedAt ?? 0,
-      endTimeMs: request.endedAt ?? request.startedAt ?? 0,
-      chunkIndex: request.chunkIndex,
-      source: "live-chunk",
+      startTimeMs: request?.startedAt ?? 0,
+      endTimeMs: request?.endedAt ?? request?.startedAt ?? 0,
+      chunkIndex: request?.chunkIndex,
+      source: request ? "live-chunk" : "live-stream",
     },
   ];
 }

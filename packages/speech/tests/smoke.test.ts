@@ -3,9 +3,90 @@ import { describe, expect, test, vi } from "vitest";
 import {
   collectTranscriptText,
   createOpenAICompatibleTranscriber,
+  createWebSocketTranscriber,
   mergeTranscriptTexts,
   transcriptToPhrases,
 } from "@moritzbrantner/speech";
+
+class MockWebSocket {
+  readyState = 0;
+  binaryType: BinaryType = "blob";
+  sent: Array<string | Blob | ArrayBuffer | ArrayBufferView> = [];
+  private closeListeners = new Set<() => void>();
+  private errorListeners = new Set<() => void>();
+  private messageListeners = new Set<(event: { data: unknown }) => void>();
+  private openListeners = new Set<() => void>();
+
+  addEventListener(
+    type: "open" | "message" | "error" | "close",
+    listener: (() => void) | ((event: { data: unknown }) => void),
+  ) {
+    if (type === "open") {
+      this.openListeners.add(listener as () => void);
+      return;
+    }
+
+    if (type === "message") {
+      this.messageListeners.add(listener as (event: { data: unknown }) => void);
+      return;
+    }
+
+    if (type === "error") {
+      this.errorListeners.add(listener as () => void);
+      return;
+    }
+
+    this.closeListeners.add(listener as () => void);
+  }
+
+  removeEventListener(
+    type: "open" | "message" | "error" | "close",
+    listener: (() => void) | ((event: { data: unknown }) => void),
+  ) {
+    if (type === "open") {
+      this.openListeners.delete(listener as () => void);
+      return;
+    }
+
+    if (type === "message") {
+      this.messageListeners.delete(listener as (event: { data: unknown }) => void);
+      return;
+    }
+
+    if (type === "error") {
+      this.errorListeners.delete(listener as () => void);
+      return;
+    }
+
+    this.closeListeners.delete(listener as () => void);
+  }
+
+  send(data: string | Blob | ArrayBuffer | ArrayBufferView) {
+    this.sent.push(data);
+  }
+
+  close() {
+    this.readyState = 3;
+
+    for (const listener of this.closeListeners) {
+      listener();
+    }
+  }
+
+  emitOpen() {
+    this.readyState = 1;
+
+    for (const listener of this.openListeners) {
+      listener();
+    }
+  }
+
+  emitMessage(data: unknown) {
+    for (const listener of this.messageListeners) {
+      listener({ data });
+    }
+  }
+}
 
 describe("@moritzbrantner/speech utilities", () => {
   test("merges overlapping chunk transcripts without duplicating repeated words", () => {
@@ -100,5 +181,73 @@ describe("@moritzbrantner/speech utilities", () => {
         confidence: 0.91,
       }),
     ]);
+  });
+
+  test("opens a websocket session, sends chunk messages, and maps transcript events", async () => {
+    const socket = new MockWebSocket();
+    const results: Array<{ text: string; isFinal?: boolean }> = [];
+    const transcriber = createWebSocketTranscriber({
+      url: "wss://example.com/transcribe",
+      model: "whisper-live",
+      webSocketFactory: () => socket,
+    });
+    const sessionPromise = transcriber.openSession({
+      language: "en",
+      onResult: (result) => {
+        results.push(result);
+      },
+    });
+
+    socket.emitOpen();
+
+    const session = await sessionPromise;
+    expect(JSON.parse(socket.sent[0] as string)).toMatchObject({
+      type: "start",
+      model: "whisper-live",
+      language: "en",
+    });
+
+    await session.sendAudioChunk({
+      audio: new Blob(["hi"], { type: "audio/webm" }),
+      mimeType: "audio/webm",
+      chunkIndex: 1,
+      language: "en",
+    });
+
+    expect(JSON.parse(socket.sent[1] as string)).toMatchObject({
+      type: "audio_chunk",
+      model: "whisper-live",
+      chunkIndex: 1,
+      language: "en",
+      audio: "aGk=",
+    });
+
+    socket.emitMessage(
+      JSON.stringify({
+        text: "hello from websocket",
+        isFinal: false,
+        segments: [
+          {
+            id: "seg-live-1",
+            text: "hello from websocket",
+            start: 0,
+            end: 0.9,
+            final: false,
+          },
+        ],
+      }),
+    );
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        text: "hello from websocket",
+        isFinal: false,
+      }),
+    ]);
+
+    const closePromise = session.close();
+    expect(JSON.parse(socket.sent[2] as string)).toEqual({ type: "stop" });
+    socket.close();
+    await closePromise;
   });
 });

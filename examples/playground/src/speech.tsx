@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   SpeechTranscriberPanel,
   createOpenAICompatibleTranscriber,
+  createWebSocketTranscriber,
   transcriptToPhrases,
 } from "@moritzbrantner/speech";
 import {
@@ -79,14 +80,23 @@ function SpeechPage() {
   const [messages, setMessages] = useState<WordPredictionComposerMessage[]>(initialMessages);
   const [transcript, setTranscript] = useState("");
 
+  const usesWebSocket = /^wss?:\/\//iu.test(endpoint.trim());
   const transcriptPhrases = transcriptToPhrases(transcript);
-  const activeTranscriber = endpoint.trim()
+  const activeTranscriber = endpoint.trim() && !usesWebSocket
     ? createOpenAICompatibleTranscriber({
         endpoint: endpoint.trim(),
         model: modelName.trim() || "whisper-1",
         apiKey: apiKey.trim() || undefined,
       })
-    : createMockTranscriber();
+    : !endpoint.trim()
+      ? createMockTranscriber()
+      : undefined;
+  const activeStreamingTranscriber = usesWebSocket
+    ? createWebSocketTranscriber({
+        url: endpoint.trim(),
+        model: modelName.trim() || "whisper-live",
+      })
+    : undefined;
   const model = createWordPredictionModel({
     includeDefaultData,
     texts: [...splitCorpus(seedCorpus), ...transcriptPhrases, ...messages.map((message) => message.text)],
@@ -121,8 +131,8 @@ function SpeechPage() {
             <div className="space-y-2">
               <CardTitle>Configure the speech adapter</CardTitle>
               <CardDescription>
-                Leave the endpoint empty to use a mock transcriber. Add your own HTTP
-                endpoint to exercise a real Whisper or compatible speech-to-text model.
+                Leave the endpoint empty to use a mock transcriber. Add either an HTTP
+                endpoint or a `ws://` / `wss://` endpoint to exercise a real speech-to-text model.
               </CardDescription>
             </div>
           </CardHeader>
@@ -133,7 +143,7 @@ function SpeechPage() {
                 id="speech-endpoint"
                 value={endpoint}
                 onChange={(event) => setEndpoint(event.target.value)}
-                placeholder="https://api.example.com/audio/transcriptions"
+                placeholder="https://api.example.com/audio/transcriptions or wss://example.com/transcribe"
               />
             </div>
 
@@ -220,16 +230,23 @@ function SpeechPage() {
               <CardTitle>Record and transcribe</CardTitle>
               <CardDescription>
                 {endpoint.trim()
-                  ? "Audio chunks are posted to your endpoint as they are recorded."
+                  ? usesWebSocket
+                    ? "Audio chunks are pushed through a persistent websocket session while interim and final transcript events stream back."
+                    : "Audio chunks are posted to your endpoint as they are recorded."
                   : "Mock mode is active. The recorder still captures audio, but the transcriber returns scripted text so the pipeline can be exercised without a backend."}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <SpeechTranscriberPanel
                 transcriber={activeTranscriber}
+                streamingTranscriber={activeStreamingTranscriber}
                 language={language.trim() || undefined}
                 timesliceMs={timesliceMs}
-                helperText="Keep speaking while the component uploads rolling chunks. Edit the transcript if you need to correct model output before it is used elsewhere."
+                helperText={
+                  usesWebSocket
+                    ? "Keep speaking while the component pushes rolling chunks through the websocket session and applies interim transcript events as they arrive."
+                    : "Keep speaking while the component uploads rolling chunks. Edit the transcript if you need to correct model output before it is used elsewhere."
+                }
                 onTranscriptChange={(value: string) => setTranscript(value)}
                 textareaProps={{
                   placeholder: "Transcript will appear here.",
@@ -255,7 +272,9 @@ function SpeechPage() {
                   <p className="text-sm font-medium">Current mode</p>
                   <p className="text-sm text-muted-foreground">
                     {endpoint.trim()
-                      ? `HTTP mode using ${modelName.trim() || "whisper-1"}`
+                      ? usesWebSocket
+                        ? `WebSocket mode using ${modelName.trim() || "whisper-live"}`
+                        : `HTTP mode using ${modelName.trim() || "whisper-1"}`
                       : "Mock mode using scripted transcripts"}
                   </p>
                 </div>

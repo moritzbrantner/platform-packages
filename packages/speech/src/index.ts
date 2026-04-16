@@ -1,9 +1,13 @@
 export {
   collectTranscriptText,
+  mergeTranscriptSegments,
   mergeTranscriptTexts,
   normalizeTranscriptText,
   transcriptToPhrases,
   type CollectTranscriptTextOptions,
+  type SpeechStreamingSessionOptions,
+  type SpeechStreamingTranscriber,
+  type SpeechStreamingTranscriptionSession,
   type SpeechTranscriber,
   type SpeechTranscriptionRequest,
   type SpeechTranscriptionResult,
@@ -14,6 +18,12 @@ export {
   createOpenAICompatibleTranscriber,
   type OpenAICompatibleTranscriberOptions,
 } from "./transcriber";
+export {
+  createWebSocketTranscriber,
+  type WebSocketLike,
+  type WebSocketPayload,
+  type WebSocketTranscriberOptions,
+} from "./websocket-transcriber";
 export {
   isSpeechCaptureSupported,
   SpeechTranscriberPanel,

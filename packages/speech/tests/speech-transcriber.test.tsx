@@ -129,4 +129,80 @@ describe("@moritzbrantner/speech component", () => {
     expect(transcriber.transcribe).toHaveBeenCalledTimes(2);
     expect(mediaStream.track.stop).toHaveBeenCalledTimes(1);
   });
+
+  test("accepts incremental results from a streaming transcriber session", async () => {
+    const mediaStream = new MockMediaStream();
+    let recorder: MockMediaRecorder | undefined;
+    const streamingTranscriber = {
+      openSession: vi.fn(async ({ onResult }: { onResult: (result: { text: string; isFinal?: boolean; segments?: Array<Record<string, unknown>> }) => void }) => ({
+        async sendAudioChunk({ chunkIndex }: { chunkIndex?: number }) {
+          if (chunkIndex === 0) {
+            onResult({
+              text: "hello from",
+              isFinal: false,
+              segments: [
+                {
+                  id: "live-0",
+                  text: "hello from",
+                  startTimeMs: 0,
+                  endTimeMs: 700,
+                  final: false,
+                  source: "live-stream",
+                },
+              ],
+            });
+            return;
+          }
+
+          onResult({
+            text: "hello from websocket",
+            isFinal: true,
+            segments: [
+              {
+                id: "live-0",
+                text: "hello from websocket",
+                startTimeMs: 0,
+                endTimeMs: 1200,
+                final: true,
+                source: "live-stream",
+              },
+            ],
+          });
+        },
+        async close() {},
+      })),
+    };
+
+    render(
+      <SpeechTranscriberPanel
+        streamingTranscriber={streamingTranscriber}
+        timesliceMs={1000}
+        mediaDevices={{
+          getUserMedia: vi.fn(async () => mediaStream as unknown as MediaStream),
+        }}
+        mediaRecorderFactory={() => {
+          recorder = new MockMediaRecorder();
+          return recorder;
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Start recording" }));
+
+    await waitFor(() => {
+      expect(streamingTranscriber.openSession).toHaveBeenCalledTimes(1);
+    });
+
+    recorder?.requestData();
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("hello from")).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Stop recording" }));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("hello from websocket")).toBeTruthy();
+    });
+  });
 });
