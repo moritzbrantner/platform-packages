@@ -33,6 +33,7 @@ export default defineConfig({
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
       "@moritzbrantner/word-prediction": path.resolve(rootDir, "packages/word-prediction/src/index.ts"),
+      "@moritzbrantner/word-vectors": path.resolve(rootDir, "packages/word-vectors/src/index.ts"),
     },
   },
   test: {
