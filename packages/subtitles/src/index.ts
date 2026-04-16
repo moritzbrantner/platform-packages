@@ -1,5 +1,6 @@
 export {
   collectTimedTextText,
+  detectCueOverlaps,
   fromTranscriptSegments,
   insertTimedTextCue,
   mapTimedTextCues,
@@ -8,6 +9,7 @@ export {
   shiftTimedText,
   toTranscriptSegments,
   updateTimedTextCue,
+  validateTimedTextDocument,
 } from "./editing";
 export {
   detectTimedTextFormat,
@@ -28,5 +30,8 @@ export type {
   TimedTextCue,
   TimedTextDocument,
   TimedTextFormat,
+  TimedTextOverlap,
+  TimedTextValidationIssue,
+  TimedTextWord,
   TranscriptSegmentLike,
 } from "./model";

@@ -1,9 +1,14 @@
 import { describe, expect, test } from "vitest";
 
+import { createTextDocument } from "@moritzbrantner/linguistics-core";
 import {
+  createWordVectorBackoffSource,
   createWordVectorModel,
+  deserializeWordVectorModel,
+  serializeWordVectorModel,
   trainWordVectorModel,
 } from "@moritzbrantner/word-vectors";
+import { trainFromDocuments } from "../src/documents";
 
 describe("@moritzbrantner/word-vectors", () => {
   test("learns nearby meaning from repeated contexts", () => {
@@ -62,5 +67,72 @@ describe("@moritzbrantner/word-vectors", () => {
     expect(model.hasWord("apples")).toBe(true);
     expect(model.words()).toContain("apples");
     expect(model.findSimilarWords("apples").map((entry) => entry.word)).toContain("pears");
+  });
+
+  test("preserves deterministic similarity after serialization and exposes similar contexts", () => {
+    const model = createWordVectorModel({
+      texts: [
+        "Coffee beans smell rich.",
+        "Tea leaves smell fresh.",
+        "Coffee cups stay warm.",
+      ],
+      windowSize: 2,
+    });
+    const restored = deserializeWordVectorModel(serializeWordVectorModel(model));
+
+    expect(restored.similarity("coffee", "tea")).toBe(model.similarity("coffee", "tea"));
+    expect(restored.findSimilarContexts("coffee", { limit: 2 })[0]).toEqual(
+      expect.objectContaining({
+        word: expect.any(String),
+        weight: expect.any(Number),
+      }),
+    );
+  });
+
+  test("trains from text documents the same way as raw text", () => {
+    const documents = [
+      createTextDocument({
+        id: "doc-1",
+        text: "Harbor lights glow at night.",
+      }),
+      createTextDocument({
+        id: "doc-2",
+        text: "Harbor workers rest at dawn.",
+      }),
+    ];
+
+    const fromDocuments = trainFromDocuments(documents, {
+      windowSize: 2,
+    });
+    const fromRawText = createWordVectorModel({
+      texts: documents.map((document) => document.text),
+      windowSize: 2,
+    });
+
+    expect(fromDocuments.words()).toEqual(fromRawText.words());
+    expect(fromDocuments.similarity("harbor", "night")).toBe(
+      fromRawText.similarity("harbor", "night"),
+    );
+  });
+
+  test("creates optional semantic backoff suggestions for word prediction", () => {
+    const model = createWordVectorModel({
+      texts: [
+        "Coffee is strong.",
+        "Tea is calming.",
+        "Coffee tastes bold.",
+      ],
+    });
+
+    const suggestions = createWordVectorBackoffSource(model)(["coffee"]);
+
+    expect(Array.from(suggestions)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          word: expect.any(String),
+          score: expect.any(Number),
+        }),
+      ]),
+    );
   });
 });

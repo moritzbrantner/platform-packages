@@ -1,7 +1,87 @@
 import { describe, expect, test } from "vitest";
 
+import {
+  anchorSpan,
+  createTextDocument,
+  normalizeText,
+  reanchorSpan,
+  segmentTextDocument,
+} from "@moritzbrantner/linguistics-core";
+
 describe("@moritzbrantner/linguistics-core", () => {
-  test("package scaffold is present", () => {
-    expect(true).toBe(true);
+  test("segments mixed Latin, CJK, and Arabic text into word tokens", () => {
+    const document = segmentTextDocument(
+      createTextDocument({
+        id: "mixed",
+        language: "und",
+        text: "Hello 世界. مرحبا بالعالم.\n\nAnother line.",
+      }),
+      { granularity: "word", useIntlSegmenter: false },
+    );
+
+    expect(document.paragraphs).toHaveLength(2);
+    expect(document.sentences.map((sentence) => sentence.text)).toEqual([
+      "Hello 世界.",
+      "مرحبا بالعالم.",
+      "Another line.",
+    ]);
+    expect(
+      document.tokens.filter((token) => token.isWordLike).map((token) => token.text),
+    ).toEqual(["Hello", "世界", "مرحبا", "بالعالم", "Another", "line"]);
+  });
+
+  test("normalizes composed and decomposed Unicode consistently", () => {
+    const decomposed = "Cafe\u0301";
+    const composed = "Caf\u00E9";
+
+    expect(
+      normalizeText(decomposed, {
+        form: "NFC",
+      }),
+    ).toBe(composed);
+    expect(
+      normalizeText(decomposed, {
+        form: "NFKC",
+        lowercase: true,
+        stripDiacritics: true,
+      }),
+    ).toBe("cafe");
+  });
+
+  test("reanchors a span after text is edited earlier in the document", () => {
+    const original = createTextDocument({
+      id: "anchor",
+      text: "First line.\nThe harbor wakes before dawn.\nLast line.",
+    });
+    const start = original.text.indexOf("harbor");
+    const anchor = anchorSpan(original, {
+      start,
+      end: start + "harbor wakes".length,
+    });
+    const edited = createTextDocument({
+      id: "anchor-edited",
+      text: "New intro.\nFirst line.\nThe harbor wakes before dawn.\nLast line.",
+    });
+
+    expect(reanchorSpan(edited, anchor)).toEqual({
+      start: edited.text.indexOf("harbor"),
+      end: edited.text.indexOf("harbor") + "harbor wakes".length,
+      text: "harbor wakes",
+    });
+  });
+
+  test("uses the regex fallback when Intl.Segmenter is disabled", () => {
+    const document = segmentTextDocument(
+      createTextDocument({
+        id: "fallback",
+        text: "One sentence. Two more!",
+      }),
+      { granularity: "word", useIntlSegmenter: false },
+    );
+
+    expect(document.sentences).toHaveLength(2);
+    expect(document.tokens.filter((token) => token.isWordLike).map((token) => token.text)).toEqual(
+      ["One", "sentence", "Two", "more"],
+    );
   });
 });

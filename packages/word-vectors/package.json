@@ -17,14 +17,21 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./documents": {
+      "types": "./dist/documents.d.ts",
+      "import": "./dist/documents.js"
     }
+  },
+  "dependencies": {
+    "@moritzbrantner/linguistics-core": "workspace:*"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
+    "build": "tsup src/index.ts src/documents.ts --format esm --dts --clean --out-dir dist",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",

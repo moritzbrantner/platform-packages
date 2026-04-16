@@ -6,8 +6,12 @@ const TRAILING_WORD_PATTERN = /([\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*)$/u;
 const BOUNDARY_PATTERN = /^[.!?\n]+$/u;
 const CONTEXT_SEPARATOR = "\u0001";
 const DEFAULT_LIMIT = 5;
+const DEFAULT_COMPLETION_TOKENS = 3;
 const UNIGRAM_WEIGHT = 0.35;
 const RECENCY_WEIGHT = 0.05;
+const SEMANTIC_BACKOFF_WEIGHT = 0.15;
+
+const modelInternals = new WeakMap<WordPredictionModel, { options: ModelOptions; trainingData: TrainingData }>();
 
 export interface CreateWordPredictionModelOptions {
   texts?: Iterable<string> | string;
@@ -16,9 +20,24 @@ export interface CreateWordPredictionModelOptions {
   maxContextSize?: number;
 }
 
+export interface SemanticBackoffCandidate {
+  word: string;
+  score?: number;
+}
+
+export type SemanticBackoffSource = (
+  contextTokens: readonly string[],
+) => Iterable<string | SemanticBackoffCandidate>;
+
 export interface PredictWordOptions {
   limit?: number;
   minScore?: number;
+  fuzzyPrefixDistance?: 0 | 1;
+  semanticBackoff?: SemanticBackoffSource;
+}
+
+export interface PredictCompletionOptions extends PredictWordOptions {
+  maxTokens?: number;
 }
 
 export interface WordPrediction {
@@ -28,6 +47,23 @@ export interface WordPrediction {
   contextSize: number;
 }
 
+export interface WordCompletion {
+  completion: string;
+  words: string[];
+  score: number;
+}
+
+export interface SerializableWordPredictionModel {
+  lowercase: boolean;
+  maxContextSize: number;
+  tokenCount: number;
+  surfaceForms: Array<[string, Array<[string, number]>]>;
+  unigramCounts: Array<[string, number]>;
+  lastSeenAt: Array<[string, number]>;
+  nextWordCountsByContextSize: Array<[number, Array<[string, Array<[string, number]>]>]>;
+  totalByContextSize: Array<[number, Array<[string, number]>]>;
+}
+
 export interface WordPredictionModel {
   readonly vocabularySize: number;
   readonly maxContextSize: number;
@@ -35,6 +71,7 @@ export interface WordPredictionModel {
   train(texts: Iterable<string> | string): WordPredictionModel;
   predictForInput(input: string, options?: PredictWordOptions): WordPrediction[];
   predictNextWords(context: string, options?: PredictWordOptions): WordPrediction[];
+  predictCompletion(input: string, options?: PredictCompletionOptions): WordCompletion[];
 }
 
 interface ModelOptions {
@@ -87,14 +124,25 @@ export function createWordPredictionModel(
     },
     predictForInput(input, predictOptions) {
       const { contextTokens, prefix } = parseInput(input, modelOptions);
-      return predictWords(trainingData, contextTokens, prefix, predictOptions);
+      return predictWords(trainingData, modelOptions, contextTokens, prefix, predictOptions);
     },
     predictNextWords(context, predictOptions) {
       const contextTokens = extractWords(context, modelOptions);
-      return predictWords(trainingData, contextTokens, "", predictOptions);
+      return predictWords(trainingData, modelOptions, contextTokens, "", predictOptions);
+    },
+    predictCompletion(input, predictOptions) {
+      const { contextTokens, prefix } = parseInput(input, modelOptions);
+      return predictCompletion(
+        trainingData,
+        modelOptions,
+        contextTokens,
+        prefix,
+        predictOptions,
+      );
     },
   };
 
+  modelInternals.set(model, { options: modelOptions, trainingData });
   return model;
 }
 
@@ -112,6 +160,121 @@ export function createDefaultWordPredictionModel(
     ...options,
     includeDefaultData: true,
   });
+}
+
+export function serializeWordPredictionModel(model: WordPredictionModel): string {
+  const snapshot = getModelSnapshot(model);
+
+  return `${JSON.stringify(snapshot, null, 2)}\n`;
+}
+
+export function deserializeWordPredictionModel(
+  value: string | SerializableWordPredictionModel,
+): WordPredictionModel {
+  const snapshot =
+    typeof value === "string"
+      ? (JSON.parse(value) as SerializableWordPredictionModel)
+      : value;
+  const modelOptions: ModelOptions = {
+    lowercase: snapshot.lowercase,
+    maxContextSize: clampContextSize(snapshot.maxContextSize),
+  };
+  const trainingData: TrainingData = {
+    surfaceForms: new Map(
+      snapshot.surfaceForms.map(([word, forms]) => [word, new Map(forms)]),
+    ),
+    unigramCounts: new Map(snapshot.unigramCounts),
+    lastSeenAt: new Map(snapshot.lastSeenAt),
+    nextWordCountsByContextSize: new Map(
+      snapshot.nextWordCountsByContextSize.map(([size, contexts]) => [
+        size,
+        new Map(contexts.map(([context, candidates]) => [context, new Map(candidates)])),
+      ]),
+    ),
+    totalByContextSize: new Map(
+      snapshot.totalByContextSize.map(([size, contexts]) => [size, new Map(contexts)]),
+    ),
+    maxContextSize: snapshot.maxContextSize,
+    tokenCount: snapshot.tokenCount,
+  };
+
+  return createModelFromTrainingData(trainingData, modelOptions);
+}
+
+function createModelFromTrainingData(
+  trainingData: TrainingData,
+  modelOptions: ModelOptions,
+): WordPredictionModel {
+  const model: WordPredictionModel = {
+    get vocabularySize() {
+      return trainingData.unigramCounts.size;
+    },
+    get maxContextSize() {
+      return modelOptions.maxContextSize;
+    },
+    get tokenCount() {
+      return trainingData.tokenCount;
+    },
+    train(texts) {
+      trainTexts(trainingData, texts, modelOptions);
+      return model;
+    },
+    predictForInput(input, predictOptions) {
+      const { contextTokens, prefix } = parseInput(input, modelOptions);
+      return predictWords(trainingData, modelOptions, contextTokens, prefix, predictOptions);
+    },
+    predictNextWords(context, predictOptions) {
+      const contextTokens = extractWords(context, modelOptions);
+      return predictWords(trainingData, modelOptions, contextTokens, "", predictOptions);
+    },
+    predictCompletion(input, predictOptions) {
+      const { contextTokens, prefix } = parseInput(input, modelOptions);
+      return predictCompletion(
+        trainingData,
+        modelOptions,
+        contextTokens,
+        prefix,
+        predictOptions,
+      );
+    },
+  };
+
+  modelInternals.set(model, { options: modelOptions, trainingData });
+  return model;
+}
+
+function getModelSnapshot(model: WordPredictionModel): SerializableWordPredictionModel {
+  const internal = modelInternals.get(model);
+
+  if (!internal) {
+    throw new Error("Unsupported word prediction model instance.");
+  }
+
+  return {
+    lowercase: internal.options.lowercase,
+    maxContextSize: internal.options.maxContextSize,
+    tokenCount: internal.trainingData.tokenCount,
+    surfaceForms: Array.from(internal.trainingData.surfaceForms.entries(), ([word, forms]) => [
+      word,
+      Array.from(forms.entries()),
+    ]),
+    unigramCounts: Array.from(internal.trainingData.unigramCounts.entries()),
+    lastSeenAt: Array.from(internal.trainingData.lastSeenAt.entries()),
+    nextWordCountsByContextSize: Array.from(
+      internal.trainingData.nextWordCountsByContextSize.entries(),
+      ([size, contexts]) => [
+        size,
+        Array.from(contexts.entries(), ([context, candidates]) => [
+          context,
+          Array.from(candidates.entries()),
+        ]),
+      ],
+    ),
+    totalByContextSize: Array.from(
+      internal.trainingData.totalByContextSize.entries(),
+      ([size, contexts]) => [size, Array.from(contexts.entries())],
+    ),
+  };
 }
 
 function normalizeModelOptions(options: CreateWordPredictionModelOptions): ModelOptions {
@@ -247,6 +410,7 @@ function parseInput(
 
 function predictWords(
   trainingData: TrainingData,
+  modelOptions: ModelOptions,
   contextTokens: string[],
   prefix: string,
   options: PredictWordOptions = {},
@@ -272,7 +436,7 @@ function predictWords(
     const contextWeight = (size + 1) * (size + 1);
 
     for (const [candidate, count] of candidates) {
-      if (prefix && !candidate.startsWith(prefix)) {
+      if (!matchesPrefix(candidate, prefix, options.fuzzyPrefixDistance ?? 0)) {
         continue;
       }
 
@@ -282,12 +446,13 @@ function predictWords(
   }
 
   for (const [candidate, count] of trainingData.unigramCounts) {
-    if (prefix && !candidate.startsWith(prefix)) {
+    if (!matchesPrefix(candidate, prefix, options.fuzzyPrefixDistance ?? 0)) {
       continue;
     }
 
     const frequencyScore = (count / trainingData.tokenCount) * UNIGRAM_WEIGHT;
-    const recencyScore = ((trainingData.lastSeenAt.get(candidate) ?? 0) / trainingData.tokenCount) * RECENCY_WEIGHT;
+    const recencyScore =
+      ((trainingData.lastSeenAt.get(candidate) ?? 0) / trainingData.tokenCount) * RECENCY_WEIGHT;
 
     upsertCandidate(
       scores,
@@ -297,6 +462,22 @@ function predictWords(
       0,
       resolveSurfaceForm(trainingData, candidate),
     );
+  }
+
+  if (options.semanticBackoff) {
+    for (const suggestion of options.semanticBackoff(normalizedContext)) {
+      const candidateWord = typeof suggestion === "string" ? suggestion : suggestion.word;
+      const normalizedCandidate = normalizeWord(candidateWord, modelOptions);
+
+      upsertCandidate(
+        scores,
+        normalizedCandidate,
+        (typeof suggestion === "string" ? 1 : suggestion.score ?? 1) * SEMANTIC_BACKOFF_WEIGHT,
+        0,
+        0,
+        candidateWord,
+      );
+    }
   }
 
   return Array.from(scores.values())
@@ -323,6 +504,121 @@ function predictWords(
       matches: candidate.matches,
       contextSize: candidate.contextSize,
     }));
+}
+
+function predictCompletion(
+  trainingData: TrainingData,
+  modelOptions: ModelOptions,
+  contextTokens: string[],
+  prefix: string,
+  options: PredictCompletionOptions = {},
+): WordCompletion[] {
+  const starters = predictWords(trainingData, modelOptions, contextTokens, prefix, options);
+  const maxTokens = Math.max(1, Math.floor(options.maxTokens ?? DEFAULT_COMPLETION_TOKENS));
+
+  return starters.map((starter) => {
+    const words = [starter.word];
+    let score = starter.score;
+    let currentContext = [...contextTokens, normalizeWord(starter.word, modelOptions)];
+
+    for (let index = 1; index < maxTokens; index += 1) {
+      if (bestObservedContextSize(trainingData, currentContext) === 0) {
+        break;
+      }
+
+      const next = predictWords(trainingData, modelOptions, currentContext, "", {
+        ...options,
+        limit: 1,
+        minScore: 0,
+      })[0];
+
+      if (!next || next.contextSize === 0) {
+        break;
+      }
+
+      words.push(next.word);
+      score *= next.score;
+      currentContext = [...currentContext, normalizeWord(next.word, modelOptions)];
+    }
+
+    return {
+      completion: words.join(" "),
+      words,
+      score: Number(score.toFixed(6)),
+    };
+  });
+}
+
+function bestObservedContextSize(trainingData: TrainingData, contextTokens: string[]): number {
+  const normalizedContext = contextTokens.slice(-trainingData.maxContextSize);
+
+  for (let size = normalizedContext.length; size >= 1; size -= 1) {
+    const contextKey = buildContextKey(normalizedContext.slice(-size));
+
+    if (trainingData.nextWordCountsByContextSize.get(size)?.has(contextKey)) {
+      return size;
+    }
+  }
+
+  return 0;
+}
+
+function matchesPrefix(candidate: string, prefix: string, distance: 0 | 1): boolean {
+  if (!prefix) {
+    return true;
+  }
+
+  if (candidate.startsWith(prefix)) {
+    return true;
+  }
+
+  if (distance === 0) {
+    return false;
+  }
+
+  const slice = candidate.slice(0, prefix.length + 1);
+  return editDistanceAtMostOne(slice, prefix);
+}
+
+function editDistanceAtMostOne(left: string, right: string): boolean {
+  const lengthDelta = Math.abs(left.length - right.length);
+
+  if (lengthDelta > 1) {
+    return false;
+  }
+
+  let indexLeft = 0;
+  let indexRight = 0;
+  let edits = 0;
+
+  while (indexLeft < left.length && indexRight < right.length) {
+    if (left[indexLeft] === right[indexRight]) {
+      indexLeft += 1;
+      indexRight += 1;
+      continue;
+    }
+
+    edits += 1;
+
+    if (edits > 1) {
+      return false;
+    }
+
+    if (left.length > right.length) {
+      indexLeft += 1;
+    } else if (left.length < right.length) {
+      indexRight += 1;
+    } else {
+      indexLeft += 1;
+      indexRight += 1;
+    }
+  }
+
+  if (indexLeft < left.length || indexRight < right.length) {
+    edits += 1;
+  }
+
+  return edits <= 1;
 }
 
 function upsertCandidate(

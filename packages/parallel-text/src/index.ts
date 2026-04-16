@@ -1,6 +1,10 @@
 export {
+  createAlignmentModel,
   createParallelTextModel,
+  parseAlignment,
   segmentText,
+  serializeAlignment,
+  type CreateAlignmentModelOptions,
   type CreateParallelTextModelOptions,
   type ParallelTextAlignmentRow,
   type ParallelTextModel,
@@ -8,6 +12,7 @@ export {
   type ParallelTextSentence,
   type ParallelTextToken,
   type ParallelTextTokenLink,
+  type SerializedAlignment,
   type SentenceAlignmentInput,
   type TokenAlignmentInput,
 } from "./model";

@@ -7,13 +7,18 @@ Shared runtime packages for the Next.js application stack.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
+- `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
+- `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, and multilingual term frequencies.
+- `@moritzbrantner/linguistics-learning`: interlinear annotation, study-term extraction, flashcard derivation, and SM-2 style recall grading on top of linguistics core.
 - `@moritzbrantner/maps`: browser map component plus standalone point aggregation utilities for large clustered datasets.
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
 - `@moritzbrantner/speech`: microphone capture, chunked speech-to-text orchestration, and Whisper-compatible HTTP transcription adapters for live or batch transcription flows.
   Includes local Python and Bun websocket server examples for the default streaming protocol.
+- `@moritzbrantner/subtitles`: SRT/VTT/transcript timed-text parsing, editing, validation, overlap detection, and word-level timing preservation.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
 - `@moritzbrantner/storytelling`: branching and scroll-driven storytelling primitives with interactive choices, motion.dev transitions, and optional Remotion/Three.js adapters.
 - `@moritzbrantner/word-prediction`: dependency-free next-word suggestion engine for chat-style and keyboard-style text prediction.
+- `@moritzbrantner/word-vectors`: dependency-light distributional word vectors with similarity lookup, context inspection, persistence, and document adapters.
 
 ## Repository scope
 - Runtime packages only.

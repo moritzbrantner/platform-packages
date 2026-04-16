@@ -1,4 +1,10 @@
-import type { SpeechTranscriptionRequest, SpeechTranscriptionResult, TranscriptSegment, TranscriptSegmentSource } from "./transcript";
+import type {
+  SpeechTranscriptionRequest,
+  SpeechTranscriptionResult,
+  TranscriptSegment,
+  TranscriptSegmentSource,
+  TranscriptWord,
+} from "./transcript";
 import { normalizeTranscriptText } from "./transcript";
 
 export function normalizeProviderResponse(
@@ -15,11 +21,13 @@ export function normalizeProviderResponse(
     ) ?? "",
   );
   const segments = normalizeSegments(payloadRecord, request, source);
+  const words = normalizeWords(payloadRecord?.words, request.startedAt ?? 0, request.endedAt);
   const derivedText = text || segments.map((segment) => segment.text).join(" ").trim();
 
   return {
     text: derivedText,
     segments,
+    words: words.length > 0 ? words : segments.flatMap((segment) => segment.words ?? []),
     isFinal:
       firstBoolean(payloadRecord?.isFinal, payloadRecord?.is_final, payloadRecord?.final) ?? true,
     language: firstString(payloadRecord?.language, payloadRecord?.detected_language),
@@ -177,7 +185,45 @@ function normalizeSegments(
         confidence: firstNumber(record?.confidence),
         chunkIndex: request.chunkIndex,
         source,
+        words: normalizeWords(record?.words, startTimeMs, endTimeMs),
       } satisfies TranscriptSegment,
+    ];
+  });
+}
+
+function normalizeWords(
+  rawWords: unknown,
+  fallbackStartTimeMs: number,
+  fallbackEndTimeMs?: number,
+): TranscriptWord[] {
+  if (!Array.isArray(rawWords)) {
+    return [];
+  }
+
+  return rawWords.flatMap((word) => {
+    const record = asRecord(word);
+    const text = firstString(record?.text, record?.word);
+
+    if (!text) {
+      return [];
+    }
+
+    const startTimeMs = coerceTimestamp(
+      firstNumber(record?.start_ms, record?.start, record?.offset_ms),
+      fallbackStartTimeMs,
+    );
+    const endTimeMs = coerceTimestamp(
+      firstNumber(record?.end_ms, record?.end, record?.duration_ms),
+      fallbackEndTimeMs ?? startTimeMs,
+    );
+
+    return [
+      {
+        text,
+        startTimeMs,
+        endTimeMs,
+        confidence: firstNumber(record?.confidence),
+      } satisfies TranscriptWord,
     ];
   });
 }

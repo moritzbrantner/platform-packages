@@ -3,6 +3,8 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, HTMLAttributes } from "react";
 
+import { createTextDocument, segmentTextDocument } from "@moritzbrantner/linguistics-core";
+
 import type {
   ParallelTextAlignmentRow,
   ParallelTextModel,
@@ -12,7 +14,7 @@ import type {
   SentenceAlignmentInput,
   TokenAlignmentInput,
 } from "./model";
-import { createParallelTextModel, relativeIndex } from "./model";
+import { createAlignmentModel, relativeIndex } from "./model";
 
 type ParallelTextSide = "original" | "translated";
 
@@ -103,15 +105,32 @@ export function ParallelTextView({
     translationOptions.find((translation) => translation.id === selectedTranslationId) ??
     translationOptions[0] ??
     null;
+  const originalDocument = useMemo(
+    () =>
+      segmentTextDocument(
+        createTextDocument({
+          id: "original",
+          text: originalText,
+        }),
+        { granularity: "word" },
+      ),
+    [originalText],
+  );
   const model = useMemo<ParallelTextModel>(
     () =>
-      createParallelTextModel({
-        originalText,
-        translatedText: selectedTranslation?.translatedText ?? "",
+      createAlignmentModel({
+        original: originalDocument,
+        translated: segmentTextDocument(
+          createTextDocument({
+            id: "translated",
+            text: selectedTranslation?.translatedText ?? "",
+          }),
+          { granularity: "word" },
+        ),
         sentenceAlignments: selectedTranslation?.sentenceAlignments,
         tokenAlignments: selectedTranslation?.tokenAlignments,
       }),
-    [originalText, selectedTranslation],
+    [originalDocument, selectedTranslation],
   );
   const modelIndex = useMemo(() => createModelIndex(model), [model]);
   const hoverState = useMemo(

@@ -31,6 +31,27 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
       },
       {
+        find: /^@moritzbrantner\/linguistics-core$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/linguistics-core/src/index.ts",
+        ),
+      },
+      {
+        find: /^@moritzbrantner\/linguistics-corpus$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/linguistics-corpus/src/index.ts",
+        ),
+      },
+      {
+        find: /^@moritzbrantner\/linguistics-learning$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/linguistics-learning/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/parallel-text$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -40,6 +61,10 @@ export default defineConfig({
       {
         find: /^@moritzbrantner\/speech$/,
         replacement: path.resolve(workspaceRoot, "packages/speech/src/index.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/subtitles$/,
+        replacement: path.resolve(workspaceRoot, "packages/subtitles/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/ui$/,
@@ -66,18 +91,34 @@ export default defineConfig({
           "packages/word-prediction/src/index.ts",
         ),
       },
+      {
+        find: /^@moritzbrantner\/word-vectors$/,
+        replacement: path.resolve(workspaceRoot, "packages/word-vectors/src/index.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/word-vectors\/documents$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/word-vectors/src/documents.ts",
+        ),
+      },
     ],
   },
   optimizeDeps: {
     exclude: [
       "@moritzbrantner/card-games",
       "@moritzbrantner/flat-design",
+      "@moritzbrantner/linguistics-core",
+      "@moritzbrantner/linguistics-corpus",
+      "@moritzbrantner/linguistics-learning",
       "@moritzbrantner/maps",
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/speech",
+      "@moritzbrantner/subtitles",
       "@moritzbrantner/ui",
       "@moritzbrantner/storytelling",
       "@moritzbrantner/word-prediction",
+      "@moritzbrantner/word-vectors",
     ],
   },
   server: {
@@ -91,13 +132,18 @@ export default defineConfig({
         home: path.resolve(rootDir, "index.html"),
         cardGames: path.resolve(rootDir, "card-games.html"),
         flatDesign: path.resolve(rootDir, "flat-design.html"),
+        linguisticsCore: path.resolve(rootDir, "linguistics-core.html"),
+        linguisticsCorpus: path.resolve(rootDir, "linguistics-corpus.html"),
+        linguisticsLearning: path.resolve(rootDir, "linguistics-learning.html"),
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         speech: path.resolve(rootDir, "speech.html"),
+        subtitles: path.resolve(rootDir, "subtitles.html"),
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),
         wordPrediction: path.resolve(rootDir, "word-prediction.html"),
+        wordVectors: path.resolve(rootDir, "word-vectors.html"),
       },
       output: {
         manualChunks(id) {

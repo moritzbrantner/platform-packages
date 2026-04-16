@@ -1,3 +1,9 @@
+import {
+  createTextDocument,
+  segmentTextDocument,
+  type TextDocument,
+} from "@moritzbrantner/linguistics-core";
+
 export interface ParallelTextToken {
   id: string;
   sentenceId: string;
@@ -74,6 +80,19 @@ export interface CreateParallelTextModelOptions {
   tokenAlignments?: TokenAlignmentInput[];
 }
 
+export interface CreateAlignmentModelOptions {
+  original: string | TextDocument;
+  translated: string | TextDocument;
+  sentenceAlignments?: SentenceAlignmentInput[];
+  tokenAlignments?: TokenAlignmentInput[];
+}
+
+export interface SerializedAlignment {
+  version: 1;
+  sentenceAlignments: SentenceAlignmentInput[];
+  tokenAlignments: TokenAlignmentInput[];
+}
+
 interface AlignmentRowSeed {
   originalSentenceIndices: number[];
   translatedSentenceIndices: number[];
@@ -86,17 +105,23 @@ interface SegmentedDocument {
   sentences: ParallelTextSentence[];
 }
 
-const sentencePattern = /[^.!?…。！？\n]+[.!?…。！？]*|[^\n]+/gu;
-const tokenPattern = /\p{L}[\p{L}\p{M}\p{N}'’-]*|\p{N}+|[^\s]/gu;
+export function createParallelTextModel(options: CreateParallelTextModelOptions): ParallelTextModel {
+  return createAlignmentModel({
+    original: options.originalText,
+    translated: options.translatedText,
+    sentenceAlignments: options.sentenceAlignments,
+    tokenAlignments: options.tokenAlignments,
+  });
+}
 
-export function createParallelTextModel({
-  originalText,
-  translatedText,
+export function createAlignmentModel({
+  original,
+  translated,
   sentenceAlignments,
   tokenAlignments,
-}: CreateParallelTextModelOptions): ParallelTextModel {
-  const originalDocument = segmentDocument(originalText, "original");
-  const translatedDocument = segmentDocument(translatedText, "translated");
+}: CreateAlignmentModelOptions): ParallelTextModel {
+  const originalDocument = segmentDocument(original, "original");
+  const translatedDocument = segmentDocument(translated, "translated");
   const rowSeeds = sentenceAlignments?.length
     ? createManualRows(
         sentenceAlignments,
@@ -141,6 +166,77 @@ export function createParallelTextModel({
   };
 }
 
+export function serializeAlignment(
+  value:
+    | ParallelTextModel
+    | {
+        sentenceAlignments?: SentenceAlignmentInput[];
+        tokenAlignments?: TokenAlignmentInput[];
+      },
+): string {
+  const payload: SerializedAlignment = "rows" in value
+    ? {
+        version: 1,
+        sentenceAlignments: value.rows
+          .filter((row) => row.source === "manual")
+          .map((row) => ({
+            original: row.originalSentenceIndices,
+            translated: row.translatedSentenceIndices,
+            confidence: row.confidence,
+          })),
+        tokenAlignments: value.rows.flatMap((row) => {
+          const alignments: TokenAlignmentInput[] = [];
+
+          for (const link of row.tokenLinks.filter((candidate) => candidate.source === "manual")) {
+            const originalToken = row.originalSentences
+              .flatMap((sentence) => sentence.tokens)
+              .find((token) => token.id === link.originalTokenId);
+            const translatedToken = row.translatedSentences
+              .flatMap((sentence) => sentence.tokens)
+              .find((token) => token.id === link.translatedTokenId);
+
+            if (
+              originalToken?.wordIndex === null ||
+              translatedToken?.wordIndex === null ||
+              originalToken === undefined ||
+              translatedToken === undefined
+            ) {
+              continue;
+            }
+
+            alignments.push({
+              originalSentence: originalToken.sentenceIndex,
+              translatedSentence: translatedToken.sentenceIndex,
+              originalToken: originalToken.wordIndex,
+              translatedToken: translatedToken.wordIndex,
+              confidence: link.confidence,
+            });
+          }
+
+          return alignments;
+        }),
+      }
+    : {
+        version: 1,
+        sentenceAlignments: value.sentenceAlignments?.map((alignment) => ({ ...alignment })) ?? [],
+        tokenAlignments: value.tokenAlignments?.map((alignment) => ({ ...alignment })) ?? [],
+      };
+
+  return `${JSON.stringify(payload, null, 2)}\n`;
+}
+
+export function parseAlignment(input: string): SerializedAlignment {
+  const parsed = JSON.parse(input) as Partial<SerializedAlignment>;
+
+  return {
+    version: 1,
+    sentenceAlignments: Array.isArray(parsed.sentenceAlignments)
+      ? parsed.sentenceAlignments
+      : [],
+    tokenAlignments: Array.isArray(parsed.tokenAlignments) ? parsed.tokenAlignments : [],
+  };
+}
+
 export function segmentText(
   text: string,
   side: "original" | "translated",
@@ -149,105 +245,78 @@ export function segmentText(
 }
 
 function segmentDocument(
-  text: string,
+  value: string | TextDocument,
   side: "original" | "translated",
 ): SegmentedDocument {
-  const trimmed = text.trim();
-
-  if (!trimmed) {
-    return {
-      paragraphs: [],
-      sentences: [],
-    };
-  }
-
-  const sentences: ParallelTextSentence[] = [];
-  const paragraphs = trimmed
-    .split(/\n\s*\n+/)
-    .map((paragraph) => paragraph.replace(/\s*\n+\s*/g, " ").trim())
-    .filter(Boolean)
-    .map((paragraphText, paragraphIndex) => {
-      const paragraphId = `${side}-paragraph-${paragraphIndex}`;
-      const sentenceTexts = Array.from(
-        paragraphText.matchAll(sentencePattern),
-        (match) => match[0].trim(),
-      ).filter(Boolean);
-      const paragraphSentences =
-        sentenceTexts.length > 0 ? sentenceTexts : [paragraphText];
-
-      const nextSentences = paragraphSentences.map((sentenceText) => {
-        const sentence = createSentence(
-          sentenceText,
-          side,
-          sentences.length,
-          paragraphId,
-          paragraphIndex,
-        );
-        sentences.push(sentence);
-        return sentence;
-      });
-
-      return {
-        id: paragraphId,
-        index: paragraphIndex,
-        text: paragraphText,
-        sentences: nextSentences,
-      } satisfies ParallelTextParagraph;
-    });
+  const segmented = ensureSegmentedDocument(value, side);
 
   return {
-    paragraphs,
-    sentences,
+    paragraphs: segmented.paragraphs.map((paragraph) => ({
+      id: paragraph.id,
+      index: paragraph.index,
+      text: paragraph.text,
+      sentences: paragraph.sentences.map((sentence) => ({
+        id: sentence.id,
+        index: sentence.index,
+        paragraphId: sentence.paragraphId,
+        paragraphIndex: sentence.paragraphIndex,
+        text: sentence.text,
+        tokens: sentence.tokens.map((token) => ({
+          id: token.id,
+          sentenceId: token.sentenceId,
+          sentenceIndex: token.sentenceIndex,
+          wordIndex: token.wordIndex,
+          text: token.text,
+          normalized: token.normalized,
+          leadingText: token.leadingText,
+          isWord: token.isWordLike,
+        })),
+        trailingText: sentence.trailingText,
+      })),
+    })),
+    sentences: segmented.sentences.map((sentence) => ({
+      id: sentence.id,
+      index: sentence.index,
+      paragraphId: sentence.paragraphId,
+      paragraphIndex: sentence.paragraphIndex,
+      text: sentence.text,
+      tokens: sentence.tokens.map((token) => ({
+        id: token.id,
+        sentenceId: token.sentenceId,
+        sentenceIndex: token.sentenceIndex,
+        wordIndex: token.wordIndex,
+        text: token.text,
+        normalized: token.normalized,
+        leadingText: token.leadingText,
+        isWord: token.isWordLike,
+      })),
+      trailingText: sentence.trailingText,
+    })),
   };
 }
 
-function createSentence(
-  text: string,
+function ensureSegmentedDocument(
+  value: string | TextDocument,
   side: "original" | "translated",
-  sentenceIndex: number,
-  paragraphId: string,
-  paragraphIndex: number,
-): ParallelTextSentence {
-  const sentenceId = `${side}-sentence-${sentenceIndex}`;
-  const tokens: ParallelTextToken[] = [];
-  let lastEnd = 0;
-  let wordIndex = 0;
+): TextDocument {
+  const baseDocument =
+    typeof value === "string"
+      ? createTextDocument({
+          id: side,
+          text: value,
+        })
+      : value.id === side
+        ? value
+        : {
+            ...value,
+            id: side,
+          };
 
-  for (const match of text.matchAll(tokenPattern)) {
-    const tokenText = match[0];
-    const matchIndex = match.index ?? 0;
-    const isWord = /[\p{L}\p{N}]/u.test(tokenText);
-
-    tokens.push({
-      id: `${sentenceId}-token-${tokens.length}`,
-      sentenceId,
-      sentenceIndex,
-      wordIndex: isWord ? wordIndex++ : null,
-      text: tokenText,
-      normalized: normalizeToken(tokenText),
-      leadingText: text.slice(lastEnd, matchIndex),
-      isWord,
-    });
-
-    lastEnd = matchIndex + tokenText.length;
-  }
-
-  return {
-    id: sentenceId,
-    index: sentenceIndex,
-    paragraphId,
-    paragraphIndex,
-    text,
-    tokens,
-    trailingText: text.slice(lastEnd),
-  };
-}
-
-function normalizeToken(value: string) {
-  return value
-    .toLocaleLowerCase()
-    .normalize("NFKD")
-    .replace(/\p{M}/gu, "");
+  return baseDocument.tokens.length > 0
+    ? baseDocument
+    : segmentTextDocument(baseDocument, {
+        granularity: "word",
+      });
 }
 
 function createManualRows(
