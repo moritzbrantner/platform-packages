@@ -67,7 +67,50 @@ describe("@moritzbrantner/storytelling", () => {
 
     expect(screen.getByRole("region", { name: "History" })).toBeTruthy();
     expect(screen.getByText("First scene")).toBeTruthy();
+    expect(screen.getByRole("navigation", { name: "Story minimap" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Reset" })).toBeTruthy();
+  });
+
+  test("navigates story scenes through the minimap", () => {
+    const originalScrollTo = HTMLElement.prototype.scrollTo;
+    const scrollToMock = vi.fn();
+
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      value: scrollToMock,
+    });
+
+    try {
+      render(
+        <StoryContainer title="History" subtitle="Timeline">
+          <StorySeries ariaLabel="Story">
+            <StoryScene id="one" title="One">
+              First scene
+            </StoryScene>
+            <StoryScene id="two" title="Two">
+              Second scene
+            </StoryScene>
+            <StoryScene id="three" title="Three">
+              Third scene
+            </StoryScene>
+          </StorySeries>
+        </StoryContainer>,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Go to scene 2: Two" }));
+
+      expect(scrollToMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          behavior: "smooth",
+          top: 0,
+        }),
+      );
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+        configurable: true,
+        value: originalScrollTo,
+      });
+    }
   });
 
   test("renders a branching story and advances when a choice is selected", async () => {
