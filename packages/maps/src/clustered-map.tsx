@@ -28,9 +28,7 @@ import {
   type VisibleAggregationSummary,
 } from "./aggregation";
 import {
-  createClusterAreaRing,
-  createClusterVoronoiBoundarySegments,
-  createClusterVoronoiCells,
+  createProjectedClusterVoronoiGeometry,
 } from "./cluster-area";
 
 const SOURCE_ID = "moritzbrantner-maps-source";
@@ -134,7 +132,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
     };
     const aggregation = index.getViewportAggregation(query);
 
-    source.setData(toFeatureCollection(aggregation.features, index, query.bounds));
+    source.setData(toFeatureCollection(aggregation.features, index, map));
     const nextSummaryKey = serializeVisibleAggregationSummary(aggregation.summary);
 
     if (lastViewportSummaryKeyRef.current === nextSummaryKey) {
@@ -192,7 +190,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
 
         localMap.addSource(SOURCE_ID, {
           type: "geojson",
-          data: toFeatureCollection([], undefined, [-180, -85, 180, 85]),
+          data: toFeatureCollection([]),
         });
         localMap.addLayer({
           id: CLUSTER_AREA_FILL_LAYER_ID,
@@ -413,13 +411,13 @@ function joinClassNames(...values: Array<string | undefined>) {
 function toFeatureCollection<TProperties>(
   features: readonly AggregatedMapFeature<TProperties>[],
   index?: ReturnType<typeof createPointAggregationIndex<TProperties>>,
-  bounds: [number, number, number, number] = [-180, -85, 180, 85],
+  map?: MaplibreMap,
 ) {
   const clusterFeatures = features.filter(
     (feature): feature is AggregatedMapCluster => feature.kind === "cluster",
   );
-  const areaFeatures = index
-    ? createClusterAreaFeatures(clusterFeatures, index, bounds)
+  const areaFeatures = index && map
+    ? createClusterAreaFeatures(clusterFeatures, index, map)
     : [];
 
   return {
@@ -455,66 +453,78 @@ function toFeatureCollection<TProperties>(
 function createClusterAreaFeatures<TProperties>(
   clusterFeatures: readonly AggregatedMapCluster[],
   index: ReturnType<typeof createPointAggregationIndex<TProperties>>,
-  bounds: [number, number, number, number],
+  map: MaplibreMap,
 ) {
-  const drafts = clusterFeatures
-    .map((feature) => createClusterAreaDraft(feature, index))
-    .filter(isDefined);
+  const viewportWidth = map.getContainer().clientWidth;
+  const viewportHeight = map.getContainer().clientHeight;
 
-  const boundaryInputs = drafts.map((draft) => ({
-    boundary: draft.baseRing,
-    clusterId: draft.feature.clusterId,
-    coordinates: draft.feature.coordinates,
-  }));
-  const clusterCells = createClusterVoronoiCells(boundaryInputs, bounds);
-  const boundarySegments = createClusterVoronoiBoundarySegments(boundaryInputs, bounds);
-  const draftByClusterId = new globalThis.Map<number | string, (typeof drafts)[number]>(
-    drafts.map((draft) => [draft.feature.clusterId, draft] as const),
+  if (viewportWidth <= 0 || viewportHeight <= 0) {
+    return [];
+  }
+
+  const clusterById = new globalThis.Map<number | string, AggregatedMapCluster>(
+    clusterFeatures.map((feature) => [feature.clusterId, feature] as const),
   );
-  const areaFeatures = [...clusterCells.entries()]
-    .map(([clusterId, ring]) => {
-      const draft = draftByClusterId.get(clusterId);
+  const projectedInputs = clusterFeatures.flatMap((feature) =>
+    getClusterAreaSample(index, feature).map((coordinates) => ({
+      clusterId: feature.clusterId,
+      coordinates,
+    })),
+  );
+  const geometry = createProjectedClusterVoronoiGeometry(projectedInputs, {
+    includeOuterEdges: false,
+    project(coordinate) {
+      const point = map.project(coordinate);
+      return [point.x, point.y];
+    },
+    unproject(coordinate) {
+      const point = map.unproject(coordinate);
+      return [point.lng, point.lat];
+    },
+    viewportBounds: [-24, -24, viewportWidth + 24, viewportHeight + 24],
+  });
+  const areaFeatures = geometry.regions
+    .map((region) => {
+      const feature = clusterById.get(region.clusterId);
 
-      if (!draft || ring.length < 4) {
+      if (!feature || region.polygons.length === 0) {
         return null;
       }
 
-      return createClusterAreaFeature(draft.feature, ring);
+      return createClusterAreaFeature(feature, region.polygons);
     })
     .filter(isDefined);
-  const boundaryFeatures = boundarySegments.map((segment) =>
+  const boundaryFeatures = geometry.boundarySegments.map((segment) =>
     createClusterAreaBoundaryFeature(
       segment.coordinates,
-      segment.clusterIndexes
-        .filter((clusterIndex): clusterIndex is number => clusterIndex !== null)
-        .map((clusterIndex) => drafts[clusterIndex]!.feature.pointCount),
+      segment.clusterIds
+        .filter((clusterId): clusterId is number | string => clusterId !== null)
+        .map((clusterId) => clusterById.get(clusterId)?.pointCount ?? 0),
     ),
   );
 
   return [...areaFeatures, ...boundaryFeatures];
 }
 
-function createClusterAreaDraft<TProperties>(
-  feature: AggregatedMapCluster,
-  index: ReturnType<typeof createPointAggregationIndex<TProperties>>,
-) {
-  const samplePoints = getClusterAreaSample(index, feature);
-  const baseRing = createClusterAreaRing(samplePoints, feature.coordinates);
-
-  if (!baseRing || baseRing.length < 4) {
-    return null;
-  }
-
-  return {
-    baseRing,
-    feature,
-  };
-}
-
 function createClusterAreaFeature(
   feature: AggregatedMapCluster,
-  ring: Array<[number, number]>,
+  polygons: Array<Array<Array<[number, number]>>>,
 ) {
+  if (polygons.length > 1) {
+    return {
+      type: "Feature" as const,
+      properties: {
+        kind: "cluster-area",
+        clusterId: feature.clusterId,
+        pointCount: feature.pointCount,
+      },
+      geometry: {
+        type: "MultiPolygon" as const,
+        coordinates: polygons,
+      },
+    };
+  }
+
   return {
     type: "Feature" as const,
     properties: {
@@ -524,7 +534,7 @@ function createClusterAreaFeature(
     },
     geometry: {
       type: "Polygon" as const,
-      coordinates: [ring],
+      coordinates: polygons[0]!,
     },
   };
 }

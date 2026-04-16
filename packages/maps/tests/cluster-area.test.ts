@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   clipRingToPolygon,
   createClusterAreaRing,
+  createProjectedClusterVoronoiGeometry,
   createClusterVoronoiBoundarySegments,
   createClusterVoronoiCells,
 } from "../src/cluster-area";
@@ -61,54 +62,42 @@ describe("@moritzbrantner/maps cluster area", () => {
     expect(clipped![0]).toEqual(clipped!.at(-1));
   });
 
-  test("clips neighboring cluster areas at the midpoint between cluster boundaries", () => {
-    const cells = createClusterVoronoiCells(
+  test("dissolves same-cluster cells into one merged region", () => {
+    const geometry = createProjectedClusterVoronoiGeometry(
       [
-        {
-          clusterId: 1,
-          coordinates: [-3, 0],
-          boundary: [
-            [-5, -1],
-            [-1, -1],
-            [-1, 1],
-            [-5, 1],
-            [-5, -1],
-          ],
-        },
-        {
-          clusterId: 2,
-          coordinates: [6, 0],
-          boundary: [
-            [2, -1],
-            [5, -1],
-            [5, 1],
-            [2, 1],
-            [2, -1],
-          ],
-        },
+        { clusterId: 1, coordinates: [-2, 0] },
+        { clusterId: 1, coordinates: [0, 0] },
+        { clusterId: 2, coordinates: [2, 0] },
       ],
-      [-10, -4, 10, 4],
-    );
-    const leftCell = cells.get(1);
-    const clipped = clipRingToPolygon(
-      [
-        [-6, -2],
-        [1.5, -2],
-        [1.5, 2],
-        [-6, 2],
-        [-6, -2],
-      ],
-      leftCell!,
+      {
+        includeOuterEdges: false,
+        project(coordinate) {
+          return [coordinate[0], -coordinate[1]];
+        },
+        unproject(coordinate) {
+          return [coordinate[0], -coordinate[1]];
+        },
+        viewportBounds: [-4, -4, 4, 4],
+      },
     );
 
-    expect(leftCell).toBeTruthy();
-    expect(clipped).toBeTruthy();
-    expect(Math.max(...clipped!.map((point) => point[0]))).toBeLessThanOrEqual(0.501);
-    expect(Math.max(...clipped!.map((point) => point[0]))).toBeGreaterThanOrEqual(0.499);
-    expect(clipped![0]).toEqual(clipped!.at(-1));
+    const leftRegion = geometry.regions.find((region) => region.clusterId === 1);
+
+    expect(geometry.regions).toHaveLength(2);
+    expect(leftRegion).toBeTruthy();
+
+    if (!leftRegion) {
+      throw new Error("Expected a dissolved region for cluster 1");
+    }
+
+    expect(leftRegion.polygons).toHaveLength(1);
+    expect(Math.max(...leftRegion.polygons[0]![0]!.map((point) => point[0]))).toBeLessThanOrEqual(
+      1.001,
+    );
+    expect(leftRegion.polygons[0]![0]![0]).toEqual(leftRegion.polygons[0]![0]!.at(-1));
   });
 
-  test("renders only boundaries between different cluster ids", () => {
+  test("renders only dissolved boundaries between different cluster ids", () => {
     const segments = createClusterVoronoiBoundarySegments(
       [
         { clusterId: 1, coordinates: [-2, 0] },
@@ -121,12 +110,47 @@ describe("@moritzbrantner/maps cluster area", () => {
 
     expect(segments).toHaveLength(1);
     expect(segments[0]!.clusterIds).toEqual([1, 2]);
-    expect(segments[0]!.clusterIndexes).toEqual([1, 2]);
-    expect(segments[0]!.coordinates[0]![0]).toBeCloseTo(1, 6);
-    expect(segments[0]!.coordinates[1]![0]).toBeCloseTo(1, 6);
+    expect(segments[0]!.coordinates.every((point) => Math.abs(point[0] - 1) <= 1e-6)).toBe(true);
   });
 
-  test("deduplicates shared Voronoi edges", () => {
+  test("does not leak same-cluster shared edges into rendered boundaries", () => {
+    const geometry = createProjectedClusterVoronoiGeometry(
+      [
+        { clusterId: 1, coordinates: [-2, 0] },
+        { clusterId: 1, coordinates: [0, 0] },
+        { clusterId: 2, coordinates: [2, 0] },
+      ],
+      {
+        includeOuterEdges: true,
+        project(coordinate) {
+          return [coordinate[0], -coordinate[1]];
+        },
+        unproject(coordinate) {
+          return [coordinate[0], -coordinate[1]];
+        },
+        viewportBounds: [-4, -4, 4, 4],
+      },
+    );
+
+    expect(
+      geometry.boundarySegments.some(
+        (segment) =>
+          segment.clusterIds[0] === 1 &&
+          segment.clusterIds[1] === null &&
+          segment.coordinates.every((point) => Math.abs(point[0] + 1) <= 1e-6),
+      ),
+    ).toBe(false);
+    expect(
+      geometry.boundarySegments.some(
+        (segment) =>
+          segment.clusterIds[0] === 1 &&
+          segment.clusterIds[1] === 2 &&
+          segment.coordinates.every((point) => Math.abs(point[0] - 1) <= 1e-6),
+      ),
+    ).toBe(true);
+  });
+
+  test("deduplicates and stitches shared Voronoi edges", () => {
     const segments = createClusterVoronoiBoundarySegments(
       [
         { clusterId: "left", coordinates: [-1, 0] },
@@ -138,7 +162,7 @@ describe("@moritzbrantner/maps cluster area", () => {
 
     expect(segments).toHaveLength(1);
     expect(segments[0]!.clusterIds).toEqual(["left", "right"]);
-    expect(segments[0]!.coordinates[0]![0]).toBeCloseTo(0, 6);
-    expect(segments[0]!.coordinates[1]![0]).toBeCloseTo(0, 6);
+    expect(segments[0]!.coordinates.every((point) => Math.abs(point[0]) <= 1e-6)).toBe(true);
+    expect(segments[0]!.coordinates[0]).not.toEqual(segments[0]!.coordinates.at(-1));
   });
 });

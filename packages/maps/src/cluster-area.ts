@@ -23,9 +23,31 @@ export type ClusterVoronoiInput = {
 
 export type ClusterVoronoiBoundarySegment = {
   clusterIds: [number | string, number | string | null];
-  clusterIndexes: [number, number | null];
-  coordinates: [Coordinate, Coordinate];
+  coordinates: Coordinate[];
 };
+
+export type ClusterVoronoiRegion = {
+  clusterId: number | string;
+  polygons: Coordinate[][][];
+};
+
+type ProjectedSegment = {
+  coordinates: [Coordinate, Coordinate];
+  endKey: string;
+  id: string;
+  startKey: string;
+};
+
+type ProjectedUndirectedSegment = {
+  coordinates: [Coordinate, Coordinate];
+  endKey: string;
+  id: string;
+  startKey: string;
+};
+
+const DEFAULT_VORONOI_VIEWPORT_PADDING = 24;
+const SEGMENT_EPSILON = 1e-4;
+const DUPLICATE_POINT_OFFSET = 1e-3;
 
 export function createClusterAreaRing(
   points: readonly Coordinate[],
@@ -69,22 +91,22 @@ export function createClusterVoronoiCells(
   clusters: readonly ClusterVoronoiInput[],
   bounds: Bounds,
 ) {
-  if (clusters.length === 0) {
-    return new Map<ClusterVoronoiInput["clusterId"], Coordinate[]>();
-  }
-
-  const context = createProjectedClusterContext(clusters, bounds);
+  const projection = createScreenProjectionFromBounds(bounds);
   const cells = new Map<ClusterVoronoiInput["clusterId"], Coordinate[]>();
+  const geometry = createProjectedClusterVoronoiGeometry(clusters, {
+    project: projection.project,
+    unproject: projection.unproject,
+    viewportBounds: projectBoundsToViewport(bounds, projection),
+  });
 
-  for (const cell of createProjectedClusterCells(context)) {
-    if (!cell) {
+  for (const region of geometry.regions) {
+    const polygon = selectLargestPolygon(region.polygons);
+
+    if (!polygon) {
       continue;
     }
 
-    cells.set(
-      context.projectedClusters[cell.clusterIndex]!.clusterId,
-      cell.ring.map((point) => context.projection.unproject(point)),
-    );
+    cells.set(region.clusterId, polygon[0]!);
   }
 
   return cells;
@@ -97,214 +119,79 @@ export function createClusterVoronoiBoundarySegments(
     includeOuterEdges?: boolean;
   } = {},
 ) {
+  const projection = createScreenProjectionFromBounds(bounds);
+
+  return createProjectedClusterVoronoiGeometry(clusters, {
+    includeOuterEdges: options.includeOuterEdges,
+    project: projection.project,
+    unproject: projection.unproject,
+    viewportBounds: projectBoundsToViewport(bounds, projection),
+  }).boundarySegments;
+}
+
+export function createProjectedClusterVoronoiGeometry(
+  clusters: readonly ClusterVoronoiInput[],
+  options: {
+    includeOuterEdges?: boolean;
+    project(coordinate: Coordinate): Coordinate;
+    unproject(coordinate: Coordinate): Coordinate;
+    viewportBounds: [minX: number, minY: number, maxX: number, maxY: number];
+  },
+) {
   if (clusters.length === 0) {
-    return [] as ClusterVoronoiBoundarySegment[];
+    return {
+      boundarySegments: [] as ClusterVoronoiBoundarySegment[],
+      regions: [] as ClusterVoronoiRegion[],
+    };
   }
 
-  const { includeOuterEdges = true } = options;
-  const context = createProjectedClusterContext(clusters, bounds);
-  const edgeMap = new Map<
-    string,
-    {
-      coordinates: [Coordinate, Coordinate];
-      owners: Array<{
-        clusterId: ClusterVoronoiInput["clusterId"];
-        clusterIndex: number;
-      }>;
-    }
-  >();
+  const context = createProjectedVoronoiContext(clusters, options);
+  const cells = createProjectedVoronoiCells(context);
 
-  for (const cell of createProjectedClusterCells(context)) {
-    if (!cell) {
-      continue;
-    }
-
-    const ring = removeClosingPoint(cell.ring);
-
-    for (let pointIndex = 0; pointIndex < ring.length; pointIndex += 1) {
-      const start = ring[pointIndex]!;
-      const end = ring[(pointIndex + 1) % ring.length]!;
-
-      if (samePointWithTolerance(start, end)) {
-        continue;
-      }
-
-      const normalizedEdge = normalizeEdge(start, end);
-      const existingEdge = edgeMap.get(normalizedEdge.key);
-
-      if (existingEdge) {
-        if (
-          !existingEdge.owners.some((owner) => owner.clusterIndex === cell.clusterIndex)
-        ) {
-          existingEdge.owners.push({
-            clusterId: context.projectedClusters[cell.clusterIndex]!.clusterId,
-            clusterIndex: cell.clusterIndex,
-          });
-        }
-
-        continue;
-      }
-
-      edgeMap.set(normalizedEdge.key, {
-        coordinates: normalizedEdge.coordinates,
-        owners: [
-          {
-            clusterId: context.projectedClusters[cell.clusterIndex]!.clusterId,
-            clusterIndex: cell.clusterIndex,
-          },
-        ],
-      });
-    }
-  }
-
-  return [...edgeMap.values()]
-    .flatMap((edge) => {
-      const sortedOwners = [...edge.owners].sort(
-        (left, right) => left.clusterIndex - right.clusterIndex,
-      );
-
-      if (sortedOwners.length === 1) {
-        if (!includeOuterEdges) {
-          return [];
-        }
-
-        return [
-          {
-            clusterIds: [sortedOwners[0]!.clusterId, null],
-            clusterIndexes: [sortedOwners[0]!.clusterIndex, null],
-            coordinates: edge.coordinates.map((coordinate) =>
-              context.projection.unproject(coordinate),
-            ) as [Coordinate, Coordinate],
-          },
-        ];
-      }
-
-      const distinctClusterIds = new Set(
-        sortedOwners.map((owner) => serializeClusterId(owner.clusterId)),
-      );
-
-      if (distinctClusterIds.size <= 1) {
-        return [];
-      }
-
-      return [
-        {
-          clusterIds: [sortedOwners[0]!.clusterId, sortedOwners[1]!.clusterId],
-          clusterIndexes: [sortedOwners[0]!.clusterIndex, sortedOwners[1]!.clusterIndex],
-          coordinates: edge.coordinates.map((coordinate) =>
-            context.projection.unproject(coordinate),
-          ) as [Coordinate, Coordinate],
-        },
-      ];
-    })
-    .filter((segment) => segment.coordinates.length === 2);
+  return dissolveProjectedClusterCells(context, cells, {
+    includeOuterEdges: options.includeOuterEdges ?? true,
+  });
 }
 
-export function createClusterBoundaryMidpoints(
+function createProjectedVoronoiContext(
   clusters: readonly ClusterVoronoiInput[],
-  bounds: Bounds,
+  options: {
+    project(coordinate: Coordinate): Coordinate;
+    unproject(coordinate: Coordinate): Coordinate;
+    viewportBounds: [minX: number, minY: number, maxX: number, maxY: number];
+  },
 ) {
-  if (clusters.length < 2) {
-    return new Map<ClusterVoronoiInput["clusterId"], Coordinate[]>();
-  }
-
-  const context = createProjectedClusterContext(clusters, bounds);
-
-  if (!hasProjectedBoundaries(context.projectedClusters)) {
-    return new Map<ClusterVoronoiInput["clusterId"], Coordinate[]>();
-  }
-
-  const midpoints = new Map<ClusterVoronoiInput["clusterId"], Coordinate[]>();
-
-  for (let clusterIndex = 0; clusterIndex < context.projectedClusters.length; clusterIndex += 1) {
-    for (const neighborIndex of getComparableClusterIndexes(
-      clusterIndex,
-      context.neighborIndexes,
-      context.projectedClusters.length,
-    )) {
-      if (neighborIndex <= clusterIndex) {
-        continue;
-      }
-
-      const guide = getBoundaryGuide(
-        context.projectedClusters[clusterIndex]!,
-        context.projectedClusters[neighborIndex]!,
-      );
-
-      if (!guide) {
-        continue;
-      }
-
-      const midpoint = context.projection.unproject(guide.midpoint);
-      pushCoordinate(midpoints, context.projectedClusters[clusterIndex]!.clusterId, midpoint);
-      pushCoordinate(midpoints, context.projectedClusters[neighborIndex]!.clusterId, midpoint);
-    }
-  }
-
-  return midpoints;
-}
-
-function createProjectedClusterContext(
-  clusters: readonly ClusterVoronoiInput[],
-  bounds: Bounds,
-) {
-  const projection = createProjectionFromBounds(bounds);
-  const projectedClusters = clusters.map((cluster) => ({
-    clusterId: cluster.clusterId,
-    center: projection.project(cluster.coordinates),
-    boundary:
-      cluster.boundary && cluster.boundary.length >= 3
-        ? removeClosingPoint(cluster.boundary).map((point) => projection.project(point))
-        : null,
-  }));
-  const projectedBoundsRing: Coordinate[] = [
-    projection.project([bounds[0], bounds[1]]),
-    projection.project([bounds[2], bounds[1]]),
-    projection.project([bounds[2], bounds[3]]),
-    projection.project([bounds[0], bounds[3]]),
-  ];
-  const projectedBounds: [number, number, number, number] = [
-    projectedBoundsRing[0]![0],
-    projectedBoundsRing[0]![1],
-    projectedBoundsRing[2]![0],
-    projectedBoundsRing[2]![1],
-  ];
+  const projectedClusters = stabilizeProjectedClusters(
+    [...clusters]
+      .map((cluster, sourceIndex) => ({
+        clusterId: cluster.clusterId,
+        coordinates: cluster.coordinates,
+        projected: options.project(cluster.coordinates),
+        sourceIndex,
+      }))
+      .sort(compareProjectedClusters),
+  );
   const delaunay = Delaunay.from(
     projectedClusters,
-    (cluster) => cluster.center[0],
-    (cluster) => cluster.center[1],
+    (cluster) => cluster.projected[0],
+    (cluster) => cluster.projected[1],
   );
-  const neighborIndexes = new Map<number, number[]>();
-
-  for (let clusterIndex = 0; clusterIndex < projectedClusters.length; clusterIndex += 1) {
-    neighborIndexes.set(clusterIndex, [...delaunay.neighbors(clusterIndex)]);
-  }
 
   return {
     delaunay,
-    neighborIndexes,
-    projectedBounds,
-    projectedBoundsRing,
     projectedClusters,
-    projection,
+    unproject: options.unproject,
+    viewportBounds: options.viewportBounds,
   };
 }
 
-function createProjectedClusterCells(
-  context: ReturnType<typeof createProjectedClusterContext>,
+function createProjectedVoronoiCells(
+  context: ReturnType<typeof createProjectedVoronoiContext>,
 ) {
-  return hasProjectedBoundaries(context.projectedClusters)
-    ? createBoundaryGuidedProjectedClusterCells(context)
-    : createCenterProjectedClusterCells(context);
-}
-
-function createCenterProjectedClusterCells(
-  context: ReturnType<typeof createProjectedClusterContext>,
-) {
-  const voronoi = context.delaunay.voronoi(context.projectedBounds);
+  const voronoi = context.delaunay.voronoi(context.viewportBounds);
   const cells: Array<
     | {
-        clusterIndex: number;
+        clusterId: ClusterVoronoiInput["clusterId"];
         ring: Coordinate[];
       }
     | null
@@ -318,293 +205,683 @@ function createCenterProjectedClusterCells(
       continue;
     }
 
-    const ring = closeRing(polygon.slice(0, -1).map(([x, y]) => [x, y] as Coordinate));
+    const ring = orientRingForScreenInterior(
+      closeRing(
+        compactRing(
+          polygon
+            .slice(0, -1)
+            .map(([x, y]) => snapCoordinate([x, y] as Coordinate)),
+        ),
+      ),
+    );
 
-    if (ring.length >= 4) {
-      cells.push({ clusterIndex, ring });
+    cells.push(
+      ring.length >= 4
+        ? { clusterId: context.projectedClusters[clusterIndex]!.clusterId, ring }
+        : null,
+    );
+  }
+
+  return cells;
+}
+
+function dissolveProjectedClusterCells(
+  context: ReturnType<typeof createProjectedVoronoiContext>,
+  cells: ReturnType<typeof createProjectedVoronoiCells>,
+  options: {
+    includeOuterEdges: boolean;
+  },
+) {
+  const regionSegments = new Map<ClusterVoronoiInput["clusterId"], ProjectedSegment[]>();
+  const boundarySegmentsByPair = new Map<
+    string,
+    {
+      clusterIds: [number | string, number | string | null];
+      segments: ProjectedUndirectedSegment[];
+    }
+  >();
+  const edgeMap = new Map<
+    string,
+    {
+      coordinates: [Coordinate, Coordinate];
+      owners: Array<{
+        clusterId: ClusterVoronoiInput["clusterId"];
+        coordinates: [Coordinate, Coordinate];
+      }>;
+    }
+  >();
+
+  for (const cell of cells) {
+    if (!cell) {
       continue;
     }
 
-    cells.push(null);
-  }
+    const ring = removeClosingPoint(cell.ring);
 
-  return cells;
-}
+    for (let pointIndex = 0; pointIndex < ring.length; pointIndex += 1) {
+      const start = snapCoordinate(ring[pointIndex]!);
+      const end = snapCoordinate(ring[(pointIndex + 1) % ring.length]!);
 
-function createBoundaryGuidedProjectedClusterCells(
-  context: ReturnType<typeof createProjectedClusterContext>,
-) {
-  const cells: Array<
-    | {
-        clusterIndex: number;
-        ring: Coordinate[];
-      }
-    | null
-  > = [];
-
-  for (let clusterIndex = 0; clusterIndex < context.projectedClusters.length; clusterIndex += 1) {
-    const projectedCluster = context.projectedClusters[clusterIndex]!;
-    let cell = closeRing(context.projectedBoundsRing);
-
-    for (const neighborIndex of getComparableClusterIndexes(
-      clusterIndex,
-      context.neighborIndexes,
-      context.projectedClusters.length,
-    )) {
-      const guide = getBoundaryGuide(
-        projectedCluster,
-        context.projectedClusters[neighborIndex]!,
-      );
-
-      if (!guide) {
+      if (samePointWithTolerance(start, end)) {
         continue;
       }
 
-      const clippedCell = clipRingToHalfPlane(
-        cell,
-        guide.currentPoint,
-        guide.otherPoint,
-      );
+      const normalized = normalizeEdge(start, end);
+      const edge = edgeMap.get(normalized.key);
 
-      if (!clippedCell) {
-        cell = [];
-        break;
+      if (edge) {
+        edge.owners.push({
+          clusterId: cell.clusterId,
+          coordinates: [start, end],
+        });
+        continue;
       }
 
-      cell = clippedCell;
-    }
-
-    cells.push(cell.length >= 4 ? { clusterIndex, ring: cell } : null);
-  }
-
-  return cells;
-}
-
-function hasProjectedBoundaries(
-  clusters: ReadonlyArray<{ boundary: readonly Coordinate[] | null }>,
-) {
-  return clusters.every((cluster) => (cluster.boundary?.length ?? 0) >= 3);
-}
-
-function getComparableClusterIndexes(
-  clusterIndex: number,
-  neighborIndexes: ReadonlyMap<number, readonly number[]>,
-  clusterCount: number,
-) {
-  const neighbors = neighborIndexes.get(clusterIndex) ?? [];
-
-  if (neighbors.length > 0) {
-    return neighbors;
-  }
-
-  const allOthers: number[] = [];
-
-  for (let index = 0; index < clusterCount; index += 1) {
-    if (index !== clusterIndex) {
-      allOthers.push(index);
+      edgeMap.set(normalized.key, {
+        coordinates: normalized.coordinates,
+        owners: [
+          {
+            clusterId: cell.clusterId,
+            coordinates: [start, end],
+          },
+        ],
+      });
     }
   }
 
-  return allOthers;
-}
+  for (const edge of edgeMap.values()) {
+    const rawDistinctClusterIds = new Map(
+      edge.owners.map((owner) => [serializeClusterId(owner.clusterId), owner.clusterId] as const),
+    );
 
-function getBoundaryGuide(
-  current: {
-    center: Coordinate;
-    boundary: readonly Coordinate[] | null;
-  },
-  other: {
-    center: Coordinate;
-    boundary: readonly Coordinate[] | null;
-  },
-) {
-  const boundaryPair =
-    current.boundary && other.boundary
-      ? findClosestBoundaryPair(current.boundary, other.boundary)
-      : null;
+    if (rawDistinctClusterIds.size === 1 && edge.owners.length > 1) {
+      continue;
+    }
 
-  if (
-    boundaryPair &&
-    getCoordinateDistanceSquared(boundaryPair.currentPoint, boundaryPair.otherPoint) > 1e-12
-  ) {
-    return {
-      ...boundaryPair,
-      midpoint: getMidpoint(boundaryPair.currentPoint, boundaryPair.otherPoint),
-    };
+    const owners = dedupeEdgeOwners(edge.owners);
+    const distinctClusterIds = new Map(
+      owners.map((owner) => [serializeClusterId(owner.clusterId), owner.clusterId] as const),
+    );
+
+    for (const owner of owners) {
+      pushSegment(regionSegments, owner.clusterId, createDirectedSegment(owner.coordinates));
+    }
+
+    const sortedClusterIds = [...distinctClusterIds.values()].sort(compareClusterIds);
+
+    if (sortedClusterIds.length === 1) {
+      if (!options.includeOuterEdges) {
+        continue;
+      }
+
+      pushBoundaryPairSegment(
+        boundarySegmentsByPair,
+        [sortedClusterIds[0]!, null],
+        edge.coordinates,
+      );
+      continue;
+    }
+
+    pushBoundaryPairSegment(
+      boundarySegmentsByPair,
+      [sortedClusterIds[0]!, sortedClusterIds[1]!],
+      edge.coordinates,
+    );
   }
 
-  if (getCoordinateDistanceSquared(current.center, other.center) <= 1e-12) {
-    return null;
-  }
+  const regions = [...regionSegments.entries()]
+    .map(([clusterId, segments]) => {
+      const loops = stitchDirectedSegmentsToLoops(segments);
+
+      if (loops.length === 0) {
+        return null;
+      }
+
+      return {
+        clusterId,
+        polygons: buildDissolvedPolygons(loops).map((polygon) =>
+          polygon.map((ring) => ring.map((point) => context.unproject(point))),
+        ),
+      } satisfies ClusterVoronoiRegion;
+    })
+    .filter(isDefined)
+    .sort((left, right) => compareClusterIds(left.clusterId, right.clusterId));
+
+  const boundarySegments = [...boundarySegmentsByPair.values()]
+    .flatMap((boundary) =>
+      stitchUndirectedSegments(boundary.segments).map((coordinates) => ({
+        clusterIds: boundary.clusterIds,
+        coordinates: coordinates.map((point) => context.unproject(point)),
+      })),
+    )
+    .filter((segment) => segment.coordinates.length >= 2);
 
   return {
-    currentPoint: current.center,
-    otherPoint: other.center,
-    midpoint: getMidpoint(current.center, other.center),
+    boundarySegments,
+    regions,
   };
 }
 
-function findClosestBoundaryPair(
-  currentBoundary: readonly Coordinate[],
-  otherBoundary: readonly Coordinate[],
-) {
-  let bestPair:
-    | {
-        currentPoint: Coordinate;
-        otherPoint: Coordinate;
+function buildDissolvedPolygons(loops: readonly Coordinate[][]) {
+  const nodes = [...loops]
+    .map((loop) => ({
+      area: Math.abs(getSignedArea(removeClosingPoint(loop))),
+      loop,
+      parentIndex: -1,
+    }))
+    .sort((left, right) => {
+      if (left.area !== right.area) {
+        return right.area - left.area;
       }
-    | null = null;
-  let minimumDistance = Number.POSITIVE_INFINITY;
 
-  for (const currentPoint of currentBoundary) {
-    for (let index = 0; index < otherBoundary.length; index += 1) {
-      const segmentStart = otherBoundary[index]!;
-      const segmentEnd = otherBoundary[(index + 1) % otherBoundary.length]!;
-      const otherPoint = getClosestPointOnSegment(currentPoint, segmentStart, segmentEnd);
-      const distance = getCoordinateDistanceSquared(currentPoint, otherPoint);
+      return compareCoordinates(removeClosingPoint(left.loop)[0]!, removeClosingPoint(right.loop)[0]!);
+    });
+  const polygonIndexes = new Array<number>(nodes.length).fill(-1);
+  const polygons: Coordinate[][][] = [];
+  const depths = new Array<number>(nodes.length).fill(0);
 
-      if (distance < minimumDistance) {
-        minimumDistance = distance;
-        bestPair = { currentPoint, otherPoint };
+  for (let nodeIndex = 0; nodeIndex < nodes.length; nodeIndex += 1) {
+    const representative = removeClosingPoint(nodes[nodeIndex]!.loop)[0]!;
+
+    for (let candidateIndex = nodeIndex - 1; candidateIndex >= 0; candidateIndex -= 1) {
+      if (pointInPolygon(representative, removeClosingPoint(nodes[candidateIndex]!.loop))) {
+        nodes[nodeIndex]!.parentIndex = candidateIndex;
+        depths[nodeIndex] = depths[candidateIndex]! + 1;
+        break;
       }
+    }
+
+    if (depths[nodeIndex]! % 2 === 0) {
+      polygonIndexes[nodeIndex] = polygons.length;
+      polygons.push([nodes[nodeIndex]!.loop]);
+      continue;
+    }
+
+    let parentIndex = nodes[nodeIndex]!.parentIndex;
+
+    while (parentIndex >= 0 && depths[parentIndex]! % 2 === 1) {
+      parentIndex = nodes[parentIndex]!.parentIndex;
+    }
+
+    if (parentIndex >= 0) {
+      polygons[polygonIndexes[parentIndex]!]!.push(nodes[nodeIndex]!.loop);
     }
   }
 
-  for (const otherPoint of otherBoundary) {
-    for (let index = 0; index < currentBoundary.length; index += 1) {
-      const segmentStart = currentBoundary[index]!;
-      const segmentEnd = currentBoundary[(index + 1) % currentBoundary.length]!;
-      const currentPoint = getClosestPointOnSegment(otherPoint, segmentStart, segmentEnd);
-      const distance = getCoordinateDistanceSquared(currentPoint, otherPoint);
-
-      if (distance < minimumDistance) {
-        minimumDistance = distance;
-        bestPair = { currentPoint, otherPoint };
-      }
-    }
-  }
-
-  return bestPair;
+  return polygons;
 }
 
-function getClosestPointOnSegment(
-  point: Coordinate,
-  segmentStart: Coordinate,
-  segmentEnd: Coordinate,
-): Coordinate {
-  const segment: Coordinate = [
-    segmentEnd[0] - segmentStart[0],
-    segmentEnd[1] - segmentStart[1],
-  ];
-  const segmentLengthSquared = getCoordinateDistanceSquared(segmentStart, segmentEnd);
+function stitchDirectedSegmentsToLoops(segments: readonly ProjectedSegment[]) {
+  const outgoingSegments = new Map<string, ProjectedSegment[]>();
+  const visited = new Set<string>();
+  const loops: Coordinate[][] = [];
 
-  if (segmentLengthSquared <= 1e-12) {
-    return [...segmentStart] as Coordinate;
+  for (const segment of segments) {
+    const existingSegments = outgoingSegments.get(segment.startKey);
+
+    if (existingSegments) {
+      existingSegments.push(segment);
+      continue;
+    }
+
+    outgoingSegments.set(segment.startKey, [segment]);
   }
 
-  const t = Math.max(
-    0,
-    Math.min(
-      1,
-      ((point[0] - segmentStart[0]) * segment[0] +
-        (point[1] - segmentStart[1]) * segment[1]) /
-        segmentLengthSquared,
-    ),
+  const orderedSegments = [...segments].sort((left, right) =>
+    left.id.localeCompare(right.id),
   );
 
-  return [segmentStart[0] + segment[0] * t, segmentStart[1] + segment[1] * t];
+  for (const segment of orderedSegments) {
+    if (visited.has(segment.id)) {
+      continue;
+    }
+
+    const loop = traceDirectedLoop(segment, outgoingSegments, visited);
+
+    if (loop) {
+      loops.push(loop);
+    }
+  }
+
+  return loops;
 }
 
-function clipRingToHalfPlane(
-  subjectRing: readonly Coordinate[],
-  currentPoint: Coordinate,
-  otherPoint: Coordinate,
+function traceDirectedLoop(
+  startSegment: ProjectedSegment,
+  outgoingSegments: ReadonlyMap<string, readonly ProjectedSegment[]>,
+  visited: Set<string>,
 ) {
-  const subject = removeClosingPoint(subjectRing);
+  const coordinates: Coordinate[] = [startSegment.coordinates[0]];
+  let currentSegment = startSegment;
+  let guard = 0;
 
-  if (subject.length < 3) {
-    return null;
+  while (guard < outgoingSegments.size * 8 + 8) {
+    guard += 1;
+    visited.add(currentSegment.id);
+    coordinates.push(currentSegment.coordinates[1]);
+
+    if (currentSegment.endKey === startSegment.startKey) {
+      const compacted = closeRing(compactRing(coordinates));
+      return compacted.length >= 4 ? compacted : null;
+    }
+
+    const nextSegment = chooseNextDirectedSegment(
+      currentSegment,
+      outgoingSegments.get(currentSegment.endKey) ?? [],
+      visited,
+    );
+
+    if (!nextSegment) {
+      return null;
+    }
+
+    currentSegment = nextSegment;
   }
 
-  const midpoint = getMidpoint(currentPoint, otherPoint);
-  const normal: Coordinate = [
-    otherPoint[0] - currentPoint[0],
-    otherPoint[1] - currentPoint[1],
-  ];
+  return null;
+}
 
-  if (getCoordinateDistanceSquared(currentPoint, otherPoint) <= 1e-12) {
-    return closeRing(subject);
+function chooseNextDirectedSegment(
+  currentSegment: ProjectedSegment,
+  candidateSegments: readonly ProjectedSegment[],
+  visited: ReadonlySet<string>,
+) {
+  const currentStart = currentSegment.coordinates[0];
+  const currentEnd = currentSegment.coordinates[1];
+  const incomingAngle = getScreenAngle(currentStart, currentEnd);
+  let bestSegment: ProjectedSegment | null = null;
+  let bestTurn = Number.POSITIVE_INFINITY;
+
+  for (const candidate of candidateSegments) {
+    if (visited.has(candidate.id)) {
+      continue;
+    }
+
+    const turn = normalizeAngle(
+      getScreenAngle(candidate.coordinates[0], candidate.coordinates[1]) - incomingAngle,
+    );
+
+    if (turn < bestTurn || (turn === bestTurn && candidate.id < (bestSegment?.id ?? ""))) {
+      bestTurn = turn;
+      bestSegment = candidate;
+    }
   }
 
-  const output: Coordinate[] = [];
-  let previousPoint = subject.at(-1)!;
-  let previousInside = isInsideHalfPlane(previousPoint, midpoint, normal);
+  return bestSegment;
+}
 
-  for (const current of subject) {
-    const currentInside = isInsideHalfPlane(current, midpoint, normal);
+function stitchUndirectedSegments(segments: readonly ProjectedUndirectedSegment[]) {
+  const segmentsByVertex = new Map<string, ProjectedUndirectedSegment[]>();
+  const visited = new Set<string>();
+  const polylines: Coordinate[][] = [];
 
-    if (currentInside !== previousInside) {
-      const intersection = getHalfPlaneIntersection(
-        previousPoint,
-        current,
-        midpoint,
-        normal,
-      );
+  for (const segment of segments) {
+    pushUndirectedSegment(segmentsByVertex, segment.startKey, segment);
+    pushUndirectedSegment(segmentsByVertex, segment.endKey, segment);
+  }
 
-      if (intersection) {
-        output.push(intersection);
+  const orderedVertices = [...segmentsByVertex.keys()].sort();
+
+  for (const vertexKey of orderedVertices) {
+    const degree = segmentsByVertex.get(vertexKey)?.length ?? 0;
+
+    if (degree === 2) {
+      continue;
+    }
+
+    for (const segment of segmentsByVertex.get(vertexKey) ?? []) {
+      if (visited.has(segment.id)) {
+        continue;
+      }
+
+      const path = traceUndirectedPath(vertexKey, segment, segmentsByVertex, visited);
+
+      if (path.length >= 2) {
+        polylines.push(path);
       }
     }
+  }
 
-    if (currentInside) {
-      output.push(current);
+  for (const segment of [...segments].sort((left, right) => left.id.localeCompare(right.id))) {
+    if (visited.has(segment.id)) {
+      continue;
     }
 
-    previousPoint = current;
-    previousInside = currentInside;
+    const path = traceUndirectedPath(segment.startKey, segment, segmentsByVertex, visited);
+
+    if (path.length >= 2) {
+      polylines.push(path);
+    }
   }
 
-  const compacted = compactRing(output);
-
-  if (compacted.length < 3) {
-    return null;
-  }
-
-  return closeRing(compacted);
+  return polylines;
 }
 
-function isInsideHalfPlane(
-  point: Coordinate,
-  midpoint: Coordinate,
-  normal: Coordinate,
+function traceUndirectedPath(
+  startKey: string,
+  startSegment: ProjectedUndirectedSegment,
+  segmentsByVertex: ReadonlyMap<string, readonly ProjectedUndirectedSegment[]>,
+  visited: Set<string>,
 ) {
-  return (
-    (point[0] - midpoint[0]) * normal[0] + (point[1] - midpoint[1]) * normal[1] <= 1e-9
+  const path: Coordinate[] = [coordinateFromKey(startKey)];
+  let currentKey = startKey;
+  let previousKey: string | null = null;
+  let currentSegment: ProjectedUndirectedSegment | null = startSegment;
+  let guard = 0;
+
+  while (currentSegment && guard < segmentsByVertex.size * 8 + 8) {
+    guard += 1;
+    visited.add(currentSegment.id);
+    const nextKey =
+      currentSegment.startKey === currentKey ? currentSegment.endKey : currentSegment.startKey;
+    path.push(coordinateFromKey(nextKey));
+
+    const nextSegment = chooseNextUndirectedSegment(
+      currentKey,
+      nextKey,
+      previousKey,
+      segmentsByVertex.get(nextKey) ?? [],
+      visited,
+    );
+
+    previousKey = currentKey;
+    currentKey = nextKey;
+    currentSegment = nextSegment;
+
+    if (currentKey === startKey && currentSegment) {
+      continue;
+    }
+  }
+
+  return compactRing(path);
+}
+
+function chooseNextUndirectedSegment(
+  currentKey: string,
+  nextKey: string,
+  previousKey: string | null,
+  candidateSegments: readonly ProjectedUndirectedSegment[],
+  visited: ReadonlySet<string>,
+) {
+  const currentPoint = coordinateFromKey(currentKey);
+  const nextPoint = coordinateFromKey(nextKey);
+  const incomingAngle = getScreenAngle(currentPoint, nextPoint);
+  let bestSegment: ProjectedUndirectedSegment | null = null;
+  let bestTurn = Number.POSITIVE_INFINITY;
+
+  for (const candidate of candidateSegments) {
+    if (visited.has(candidate.id)) {
+      continue;
+    }
+
+    const candidateKey =
+      candidate.startKey === nextKey ? candidate.endKey : candidate.startKey;
+
+    if (previousKey && candidateKey === previousKey && candidateSegments.length > 1) {
+      continue;
+    }
+
+    const turn = normalizeAngle(
+      getScreenAngle(nextPoint, coordinateFromKey(candidateKey)) - incomingAngle,
+    );
+
+    if (turn < bestTurn || (turn === bestTurn && candidate.id < (bestSegment?.id ?? ""))) {
+      bestTurn = turn;
+      bestSegment = candidate;
+    }
+  }
+
+  return bestSegment;
+}
+
+function selectLargestPolygon(polygons: readonly Coordinate[][][]) {
+  let largestPolygon: Coordinate[][] | null = null;
+  let largestArea = Number.NEGATIVE_INFINITY;
+
+  for (const polygon of polygons) {
+    const area = Math.abs(getSignedArea(removeClosingPoint(polygon[0]!)));
+
+    if (area > largestArea) {
+      largestArea = area;
+      largestPolygon = polygon;
+    }
+  }
+
+  return largestPolygon;
+}
+
+function orientRingForScreenInterior(ring: readonly Coordinate[]) {
+  const openRing = removeClosingPoint(ring);
+
+  if (openRing.length < 3) {
+    return closeRing(openRing);
+  }
+
+  return getSignedArea(openRing) <= 0
+    ? closeRing(openRing)
+    : closeRing([...openRing].reverse());
+}
+
+function createDirectedSegment(coordinates: [Coordinate, Coordinate]): ProjectedSegment {
+  const start = snapCoordinate(coordinates[0]);
+  const end = snapCoordinate(coordinates[1]);
+
+  return {
+    coordinates: [start, end],
+    endKey: formatCoordinateKey(end),
+    id: `${formatCoordinateKey(start)}->${formatCoordinateKey(end)}`,
+    startKey: formatCoordinateKey(start),
+  };
+}
+
+function createUndirectedSegment(coordinates: [Coordinate, Coordinate]): ProjectedUndirectedSegment {
+  const normalized = normalizeEdge(coordinates[0], coordinates[1]);
+
+  return {
+    coordinates: normalized.coordinates,
+    endKey: formatCoordinateKey(normalized.coordinates[1]),
+    id: normalized.key,
+    startKey: formatCoordinateKey(normalized.coordinates[0]),
+  };
+}
+
+function dedupeEdgeOwners(
+  owners: ReadonlyArray<{
+    clusterId: ClusterVoronoiInput["clusterId"];
+    coordinates: [Coordinate, Coordinate];
+  }>,
+) {
+  const ownerMap = new Map<
+    string,
+    {
+      clusterId: ClusterVoronoiInput["clusterId"];
+      coordinates: [Coordinate, Coordinate];
+    }
+  >();
+
+  for (const owner of owners) {
+    const serializedClusterId = serializeClusterId(owner.clusterId);
+
+    if (!ownerMap.has(serializedClusterId)) {
+      ownerMap.set(serializedClusterId, owner);
+    }
+  }
+
+  return [...ownerMap.values()].sort((left, right) =>
+    compareClusterIds(left.clusterId, right.clusterId),
   );
 }
 
-function getHalfPlaneIntersection(
-  segmentStart: Coordinate,
-  segmentEnd: Coordinate,
-  midpoint: Coordinate,
-  normal: Coordinate,
-): Coordinate | null {
-  const direction: Coordinate = [
-    segmentEnd[0] - segmentStart[0],
-    segmentEnd[1] - segmentStart[1],
-  ];
-  const denominator = direction[0] * normal[0] + direction[1] * normal[1];
+function pushSegment(
+  segmentMap: Map<ClusterVoronoiInput["clusterId"], ProjectedSegment[]>,
+  clusterId: ClusterVoronoiInput["clusterId"],
+  segment: ProjectedSegment,
+) {
+  const segments = segmentMap.get(clusterId);
 
-  if (Math.abs(denominator) <= 1e-12) {
-    return null;
+  if (segments) {
+    segments.push(segment);
+    return;
   }
 
-  const t =
-    ((midpoint[0] - segmentStart[0]) * normal[0] +
-      (midpoint[1] - segmentStart[1]) * normal[1]) /
-    denominator;
+  segmentMap.set(clusterId, [segment]);
+}
 
-  return [segmentStart[0] + direction[0] * t, segmentStart[1] + direction[1] * t];
+function pushBoundaryPairSegment(
+  boundarySegmentsByPair: Map<
+    string,
+    {
+      clusterIds: [number | string, number | string | null];
+      segments: ProjectedUndirectedSegment[];
+    }
+  >,
+  clusterIds: [number | string, number | string | null],
+  coordinates: [Coordinate, Coordinate],
+) {
+  const pairKey = `${serializeClusterId(clusterIds[0])}|${
+    clusterIds[1] === null ? "null" : serializeClusterId(clusterIds[1])
+  }`;
+  const boundary = boundarySegmentsByPair.get(pairKey);
+  const segment = createUndirectedSegment(coordinates);
+
+  if (boundary) {
+    boundary.segments.push(segment);
+    return;
+  }
+
+  boundarySegmentsByPair.set(pairKey, {
+    clusterIds,
+    segments: [segment],
+  });
+}
+
+function pushUndirectedSegment(
+  segmentMap: Map<string, ProjectedUndirectedSegment[]>,
+  vertexKey: string,
+  segment: ProjectedUndirectedSegment,
+) {
+  const segments = segmentMap.get(vertexKey);
+
+  if (segments) {
+    segments.push(segment);
+    return;
+  }
+
+  segmentMap.set(vertexKey, [segment]);
+}
+
+function compareProjectedClusters(
+  left: {
+    clusterId: ClusterVoronoiInput["clusterId"];
+    coordinates: Coordinate;
+    sourceIndex: number;
+  },
+  right: {
+    clusterId: ClusterVoronoiInput["clusterId"];
+    coordinates: Coordinate;
+    sourceIndex: number;
+  },
+) {
+  const clusterIdOrder = compareClusterIds(left.clusterId, right.clusterId);
+
+  if (clusterIdOrder !== 0) {
+    return clusterIdOrder;
+  }
+
+  const coordinateOrder = compareCoordinates(left.coordinates, right.coordinates);
+
+  if (coordinateOrder !== 0) {
+    return coordinateOrder;
+  }
+
+  return left.sourceIndex - right.sourceIndex;
+}
+
+function compareClusterIds(
+  left: ClusterVoronoiInput["clusterId"],
+  right: ClusterVoronoiInput["clusterId"],
+) {
+  return serializeClusterId(left).localeCompare(serializeClusterId(right));
+}
+
+function stabilizeProjectedClusters<
+  TCluster extends {
+    projected: Coordinate;
+  },
+>(clusters: readonly TCluster[]) {
+  const collisionCounts = new Map<string, number>();
+
+  return clusters.map((cluster) => {
+    const pointKey = formatCoordinateKey(cluster.projected);
+    const collisionCount = collisionCounts.get(pointKey) ?? 0;
+
+    collisionCounts.set(pointKey, collisionCount + 1);
+
+    if (collisionCount === 0) {
+      return cluster;
+    }
+
+    const angle = collisionCount * ((Math.PI * 2) / DEFAULT_SEGMENTS);
+    const radius = DUPLICATE_POINT_OFFSET * (1 + Math.floor(collisionCount / DEFAULT_SEGMENTS));
+
+    return {
+      ...cluster,
+      projected: [
+        cluster.projected[0] + Math.cos(angle) * radius,
+        cluster.projected[1] + Math.sin(angle) * radius,
+      ] as Coordinate,
+    };
+  });
+}
+
+function createScreenProjectionFromBounds(bounds: Bounds) {
+  const projection = createProjectionFromBounds(bounds);
+
+  return {
+    project(coordinate: Coordinate) {
+      const [x, y] = projection.project(coordinate);
+      return [x, -y] as Coordinate;
+    },
+    unproject(coordinate: Coordinate) {
+      return projection.unproject([coordinate[0], -coordinate[1]]);
+    },
+  };
+}
+
+function projectBoundsToViewport(
+  bounds: Bounds,
+  projection: ReturnType<typeof createScreenProjectionFromBounds>,
+  padding = DEFAULT_VORONOI_VIEWPORT_PADDING,
+): [number, number, number, number] {
+  const topLeft = projection.project([bounds[0], bounds[3]]);
+  const bottomRight = projection.project([bounds[2], bounds[1]]);
+
+  return [
+    topLeft[0] - padding,
+    topLeft[1] - padding,
+    bottomRight[0] + padding,
+    bottomRight[1] + padding,
+  ];
+}
+
+function snapCoordinate(point: Coordinate): Coordinate {
+  return [
+    Math.round(point[0] / SEGMENT_EPSILON) * SEGMENT_EPSILON,
+    Math.round(point[1] / SEGMENT_EPSILON) * SEGMENT_EPSILON,
+  ];
+}
+
+function coordinateFromKey(key: string): Coordinate {
+  const [x, y] = key.split(":");
+  return [Number(x), Number(y)];
+}
+
+function getScreenAngle(start: Coordinate, end: Coordinate) {
+  return Math.atan2(-(end[1] - start[1]), end[0] - start[0]);
+}
+
+function isDefined<T>(value: T | null): value is T {
+  return value !== null;
 }
 
 function compactRing(points: readonly Coordinate[]) {
@@ -628,40 +905,19 @@ function samePointWithTolerance(left: Coordinate | undefined, right: Coordinate 
     return false;
   }
 
-  return Math.abs(left[0] - right[0]) <= 1e-9 && Math.abs(left[1] - right[1]) <= 1e-9;
-}
-
-function getCoordinateDistanceSquared(first: Coordinate, second: Coordinate) {
-  const deltaX = first[0] - second[0];
-  const deltaY = first[1] - second[1];
-
-  return deltaX * deltaX + deltaY * deltaY;
-}
-
-function getMidpoint(first: Coordinate, second: Coordinate): Coordinate {
-  return [(first[0] + second[0]) / 2, (first[1] + second[1]) / 2];
-}
-
-function pushCoordinate(
-  coordinateMap: Map<ClusterVoronoiInput["clusterId"], Coordinate[]>,
-  clusterId: ClusterVoronoiInput["clusterId"],
-  coordinate: Coordinate,
-) {
-  const coordinates = coordinateMap.get(clusterId);
-
-  if (coordinates) {
-    coordinates.push(coordinate);
-    return;
-  }
-
-  coordinateMap.set(clusterId, [coordinate]);
+  return (
+    Math.abs(left[0] - right[0]) <= SEGMENT_EPSILON &&
+    Math.abs(left[1] - right[1]) <= SEGMENT_EPSILON
+  );
 }
 
 function normalizeEdge(start: Coordinate, end: Coordinate) {
+  const snappedStart = snapCoordinate(start);
+  const snappedEnd = snapCoordinate(end);
   const coordinates =
-    compareCoordinates(start, end) <= 0
-      ? ([start, end] as [Coordinate, Coordinate])
-      : ([end, start] as [Coordinate, Coordinate]);
+    compareCoordinates(snappedStart, snappedEnd) <= 0
+      ? ([snappedStart, snappedEnd] as [Coordinate, Coordinate])
+      : ([snappedEnd, snappedStart] as [Coordinate, Coordinate]);
 
   return {
     coordinates,
@@ -678,7 +934,8 @@ function compareCoordinates(left: Coordinate, right: Coordinate) {
 }
 
 function formatCoordinateKey(point: Coordinate) {
-  return `${point[0].toFixed(9)}:${point[1].toFixed(9)}`;
+  const snappedPoint = snapCoordinate(point);
+  return `${snappedPoint[0].toFixed(4)}:${snappedPoint[1].toFixed(4)}`;
 }
 
 function serializeClusterId(clusterId: ClusterVoronoiInput["clusterId"]) {
