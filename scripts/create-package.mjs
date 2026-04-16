@@ -19,7 +19,7 @@ const dryRun = args.includes("--dry-run");
 const positionalArgs = args.filter((arg) => arg !== "--dry-run");
 
 if (positionalArgs.length !== 1) {
-  console.error("Usage: pnpm create:package <package-name> [--dry-run]");
+  console.error("Usage: bun run create:package <package-name> [--dry-run]");
   process.exit(1);
 }
 
@@ -62,16 +62,6 @@ for (const file of getTemplateFiles(path.join(rootDir, "templates/package"))) {
   writeOperations.push({ type: "write", file: targetFile, contents });
 }
 
-const nextWorkspace = updateWorkspaceFile(
-  readFileSync(path.join(rootDir, "pnpm-workspace.yaml"), "utf8"),
-  packageDirectory,
-);
-writeOperations.push({
-  type: "write",
-  file: path.join(rootDir, "pnpm-workspace.yaml"),
-  contents: nextWorkspace,
-});
-
 const nextVitestConfig = updateVitestAliases(
   readFileSync(path.join(rootDir, "vitest.config.ts"), "utf8"),
   packageId,
@@ -85,6 +75,7 @@ writeOperations.push({
 
 const nextRootPackageJson = updateRootPackageJson(
   JSON.parse(readFileSync(path.join(rootDir, "package.json"), "utf8")),
+  packageDirectory,
 );
 writeOperations.push({
   type: "write",
@@ -108,8 +99,8 @@ for (const operation of writeOperations) {
 }
 
 console.log(`Created ${packageDirectory}`);
-console.log(`Registered ${packageId} in pnpm-workspace.yaml and vitest.config.ts`);
-console.log("Next step: run pnpm changeset when you are ready to release it.");
+console.log(`Registered ${packageId} in package.json workspaces and vitest.config.ts`);
+console.log("Next step: run bun run changeset when you are ready to release it.");
 
 function getRepositoryMetadata() {
   let remoteUrl = "";
@@ -205,22 +196,6 @@ function applyReplacements(contents, replacements) {
   return nextContents;
 }
 
-function updateWorkspaceFile(contents, nextPackageDirectory) {
-  const entries = contents
-    .split(/\r?\n/)
-    .map((line) => line.match(/^\s*-\s+(.+?)\s*$/)?.[1])
-    .filter(Boolean);
-
-  if (entries.includes(nextPackageDirectory)) {
-    return contents;
-  }
-
-  entries.push(nextPackageDirectory);
-  entries.sort((left, right) => left.localeCompare(right));
-
-  return `packages:\n${entries.map((entry) => `  - ${entry}`).join("\n")}\n`;
-}
-
 function updateVitestAliases(contents, packageId, relativeEntryFile) {
   const aliasBlockPattern = /(alias:\s*\{\n)([\s\S]*?)(\s*\},)/m;
   const match = contents.match(aliasBlockPattern);
@@ -262,7 +237,16 @@ function updateVitestAliases(contents, packageId, relativeEntryFile) {
   return contents.replace(aliasBlockPattern, nextAliasBlock);
 }
 
-function updateRootPackageJson(packageJson) {
+function updateRootPackageJson(packageJson, nextPackageDirectory) {
+  const workspaces = Array.isArray(packageJson.workspaces)
+    ? [...packageJson.workspaces]
+    : [];
+
+  if (!workspaces.includes(nextPackageDirectory)) {
+    workspaces.push(nextPackageDirectory);
+    workspaces.sort((left, right) => left.localeCompare(right));
+  }
+
   const nextScripts = {
     ...packageJson.scripts,
     "create:package": "node scripts/create-package.mjs",
@@ -270,6 +254,7 @@ function updateRootPackageJson(packageJson) {
 
   return {
     ...packageJson,
+    workspaces,
     scripts: nextScripts,
   };
 }

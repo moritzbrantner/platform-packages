@@ -67,7 +67,7 @@ function HomePage() {
               behavior inside a real browser map.
             </p>
             <p>
-              Run <code>pnpm dev:playground</code> from the workspace root. Vite
+              Run <code>bun run dev:playground</code> from the workspace root. Vite
               aliases the packages to local source files, so edits in
               <code>packages/maps</code>, <code>packages/ui</code>, and
               <code>packages/storytelling</code> show up

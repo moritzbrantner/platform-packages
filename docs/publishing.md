@@ -11,7 +11,7 @@ If a package version has not been published before, the workflow's `changeset pu
 
 ## Later releases
 1. Make your package changes.
-2. Run `pnpm changeset`.
+2. Run `bun run changeset`.
 3. Select the packages that changed and choose the appropriate version bump.
 4. Commit the generated changeset file with your code changes.
 5. Merge to `main`.

@@ -79,8 +79,7 @@ export default defineConfig({
         manualChunks(id) {
           if (
             id.includes("@react-three/fiber") ||
-            id.includes("/node_modules/three/") ||
-            id.includes("/node_modules/.pnpm/three@")
+            id.includes("/node_modules/three/")
           ) {
             return "three-stage-vendor";
           }

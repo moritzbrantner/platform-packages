@@ -1,8 +1,0 @@
-packages:
-  - examples/*
-  - packages/keyboard
-  - packages/maps
-  - packages/parallel-text
-  - packages/storytelling
-  - packages/ui
-  - packages/word-prediction
