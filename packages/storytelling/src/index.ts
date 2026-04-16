@@ -17,6 +17,19 @@ export {
   type StoryContainerProps,
 } from "./story-container";
 export { StoryDefaultStage } from "./story-default-stage";
+export {
+  StoryAudioFile,
+  StorySubtitleFile,
+  StoryVideoFile,
+  createAudioStoryScene,
+  createSubtitleStoryScene,
+  createVideoStoryScene,
+  type StoryAudioFileProps,
+  type StoryMediaTextTrack,
+  type StorySubtitleCue,
+  type StorySubtitleFileProps,
+  type StoryVideoFileProps,
+} from "./story-media";
 export { StoryScene } from "./story-scene";
 export { StorySeries, type StorySeriesProps } from "./story-series";
 export type {
