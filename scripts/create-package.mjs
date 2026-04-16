@@ -206,21 +206,18 @@ function updateVitestAliases(contents, packageId, relativeEntryFile) {
   }
 
   const aliases = new Map();
-  const aliasLines = match[2]
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const aliasEntries = Array.from(
+    match[2].matchAll(
+      /"([^"]+)":\s*path\.resolve\(\s*rootDir,\s*"([^"]+)"\s*\),/gm,
+    ),
+  );
 
-  for (const line of aliasLines) {
-    const aliasMatch = line.match(
-      /^"([^"]+)":\s*path\.resolve\(rootDir,\s*"([^"]+)"\),?$/,
-    );
+  if (aliasEntries.length === 0) {
+    console.error("Could not parse any vitest aliases from vitest.config.ts.");
+    process.exit(1);
+  }
 
-    if (!aliasMatch) {
-      console.error(`Could not parse vitest alias line: ${line}`);
-      process.exit(1);
-    }
-
+  for (const aliasMatch of aliasEntries) {
     aliases.set(aliasMatch[1], aliasMatch[2]);
   }
 
