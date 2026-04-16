@@ -7,6 +7,7 @@ const rootDir = fileURLToPath(new URL("./", import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
       "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
       "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),

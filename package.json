@@ -4,6 +4,7 @@
   "packageManager": "bun@1.3.12",
   "workspaces": [
     "examples/*",
+    "packages/card-games",
     "packages/keyboard",
     "packages/maps",
     "packages/parallel-text",
