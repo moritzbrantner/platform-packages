@@ -9,6 +9,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@moritzbrantner/maps": "workspace:*",
     "@moritzbrantner/parallel-text": "workspace:*",
     "@moritzbrantner/storytelling": "workspace:*",
     "@moritzbrantner/ui": "workspace:*",

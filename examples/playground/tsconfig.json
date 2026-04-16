@@ -8,6 +8,7 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "paths": {
+      "@moritzbrantner/maps": ["../../packages/maps/src/index.ts"],
       "@moritzbrantner/parallel-text": ["../../packages/parallel-text/src/index.ts"],
       "@moritzbrantner/storytelling": ["../../packages/storytelling/src/index.ts"],
       "@moritzbrantner/ui": ["../../packages/ui/src/index.ts"],

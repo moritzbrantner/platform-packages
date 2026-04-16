@@ -10,10 +10,12 @@
     "lint": "turbo run lint",
     "preview:playground": "pnpm --filter @moritzbrantner/playground preview",
     "build:playground": "pnpm --filter @moritzbrantner/playground build",
+    "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.29.7",
     "@testing-library/react": "^16.3.0",

@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
+      "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
