@@ -30,5 +30,5 @@ Consumers need an `.npmrc` entry for the package scope you publish under and a t
 
 ```ini
 @moritzbrantner:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GH_PACKAGES_TOKEN}
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
 ```
