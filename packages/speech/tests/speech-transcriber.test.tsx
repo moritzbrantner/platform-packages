@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
+import type { SpeechStreamingTranscriber } from "@moritzbrantner/speech";
 import { SpeechTranscriberPanel } from "@moritzbrantner/speech";
 
 class MockTrack {
@@ -134,7 +135,7 @@ describe("@moritzbrantner/speech component", () => {
     const mediaStream = new MockMediaStream();
     let recorder: MockMediaRecorder | undefined;
     const streamingTranscriber = {
-      openSession: vi.fn(async ({ onResult }: { onResult: (result: { text: string; isFinal?: boolean; segments?: Array<Record<string, unknown>> }) => void }) => ({
+      openSession: vi.fn(async ({ onResult }) => ({
         async sendAudioChunk({ chunkIndex }: { chunkIndex?: number }) {
           if (chunkIndex === 0) {
             onResult({
@@ -171,7 +172,7 @@ describe("@moritzbrantner/speech component", () => {
         },
         async close() {},
       })),
-    };
+    } satisfies SpeechStreamingTranscriber;
 
     render(
       <SpeechTranscriberPanel

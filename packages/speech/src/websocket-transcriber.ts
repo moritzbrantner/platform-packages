@@ -292,19 +292,13 @@ function looksLikeTranscriptPayload(payload: unknown): boolean {
 }
 
 async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer();
+  const buffer =
+    typeof blob.arrayBuffer === "function"
+      ? await blob.arrayBuffer()
+      : await new Response(blob).arrayBuffer();
   const bytes = new Uint8Array(buffer);
-  let binary = "";
 
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-
-  if (typeof globalThis.btoa === "function") {
-    return globalThis.btoa(binary);
-  }
-
-  return Buffer.from(bytes).toString("base64");
+  return encodeBase64(bytes);
 }
 
 function tryParseJson(value: string): unknown {
@@ -317,4 +311,23 @@ function tryParseJson(value: string): unknown {
 
 function toError(value: unknown): Error {
   return value instanceof Error ? value : new Error(String(value));
+}
+
+function encodeBase64(bytes: Uint8Array): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let encoded = "";
+
+  for (let index = 0; index < bytes.length; index += 3) {
+    const first = bytes[index] ?? 0;
+    const second = bytes[index + 1] ?? 0;
+    const third = bytes[index + 2] ?? 0;
+    const combined = (first << 16) | (second << 8) | third;
+
+    encoded += alphabet[(combined >> 18) & 63];
+    encoded += alphabet[(combined >> 12) & 63];
+    encoded += index + 1 < bytes.length ? alphabet[(combined >> 6) & 63] : "=";
+    encoded += index + 2 < bytes.length ? alphabet[combined & 63] : "=";
+  }
+
+  return encoded;
 }
