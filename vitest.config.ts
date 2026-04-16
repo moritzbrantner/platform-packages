@@ -14,6 +14,18 @@ export default defineConfig({
       "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
       "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
+      "@moritzbrantner/linguistics-core": path.resolve(
+        rootDir,
+        "packages/linguistics-core/src/index.ts",
+      ),
+      "@moritzbrantner/linguistics-learning": path.resolve(
+        rootDir,
+        "packages/linguistics-learning/src/index.ts",
+      ),
+      "@moritzbrantner/linguistics-corpus": path.resolve(
+        rootDir,
+        "packages/linguistics-corpus/src/index.ts",
+      ),
       "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
       "@moritzbrantner/speech": path.resolve(rootDir, "packages/speech/src/index.ts"),
