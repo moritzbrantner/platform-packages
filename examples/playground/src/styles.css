@@ -1,6 +1,8 @@
 @import "@moritzbrantner/ui/styles.css";
+@import "@moritzbrantner/maps/styles.css";
 
 @source "./**/*.{ts,tsx}";
+@source "../../../packages/maps/src/**/*.{ts,tsx}";
 @source "../../../packages/storytelling/src/**/*.{ts,tsx}";
 
 :root {

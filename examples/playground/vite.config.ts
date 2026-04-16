@@ -13,6 +13,10 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^@moritzbrantner\/maps$/,
+        replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
+      },
+      {
         find: /^@moritzbrantner\/parallel-text$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -41,6 +45,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: [
+      "@moritzbrantner/maps",
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/ui",
       "@moritzbrantner/storytelling",
@@ -56,6 +61,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: path.resolve(rootDir, "index.html"),
+        maps: path.resolve(rootDir, "maps.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),

@@ -12,6 +12,13 @@ function HomePage() {
     >
       <section className="grid gap-4 md:grid-cols-2">
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/maps"
+          title="Large-scale maps demo"
+          description="Pan and zoom through 100,000 synthetic delivery points, watch client-side cluster totals update live, and inspect how single points reappear at close zoom."
+          href="/maps.html"
+          cta="Open maps demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/parallel-text"
           title="Parallel text comparison demo"
           description="Compare original and translated text side by side, hover tokens to inspect link mapping, and validate manual sentence alignment overrides."
@@ -48,9 +55,15 @@ function HomePage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
+              The maps page is the heavy-data manual smoke test: it exercises a
+              six-figure dataset, zoom-aware aggregation, and click-to-expand cluster
+              behavior inside a real browser map.
+            </p>
+            <p>
               Run <code>pnpm dev:playground</code> from the workspace root. Vite
               aliases the packages to local source files, so edits in
-              <code>packages/ui</code> and <code>packages/storytelling</code> show up
+              <code>packages/maps</code>, <code>packages/ui</code>, and
+              <code>packages/storytelling</code> show up
               immediately.
             </p>
             <p>
@@ -71,6 +84,9 @@ function HomePage() {
             <CardTitle>Quick links</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
+            <Button asChild variant="outline">
+              <a href="/maps.html">Open maps package page</a>
+            </Button>
             <Button asChild variant="outline">
               <a href="/parallel-text.html">Open parallel text package page</a>
             </Button>
