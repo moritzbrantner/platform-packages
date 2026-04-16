@@ -7,6 +7,7 @@ import {
   useEffectEvent,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import type {
   GeoJSONSource,
@@ -41,10 +42,12 @@ export type ClusteredMapProps<TProperties = Record<string, unknown>> = {
   fitBoundsPadding?: number;
   fitToData?: boolean;
   initialViewState?: MapViewState;
+  mapLabel?: string;
   mapStyle?: string | StyleSpecification;
   maxZoom?: PointAggregationIndexOptions["maxZoom"];
   minZoom?: PointAggregationIndexOptions["minZoom"];
   onFeatureSelect?: (feature: AggregatedMapFeature<TProperties> | null) => void;
+  onMapReady?: (map: Map) => void;
   onViewportAggregationChange?: (summary: VisibleAggregationSummary) => void;
   points: readonly MapPoint<TProperties>[];
   showAttributionControl?: boolean;
@@ -76,10 +79,12 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
   fitBoundsPadding = 56,
   fitToData = true,
   initialViewState,
+  mapLabel = "Interactive map",
   mapStyle = defaultRasterMapStyle,
   maxZoom,
   minZoom,
   onFeatureSelect,
+  onMapReady,
   onViewportAggregationChange,
   points,
   showAttributionControl = true,
@@ -87,6 +92,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
 }: ClusteredMapProps<TProperties>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const deferredPoints = useDeferredValue(points);
   const index = useMemo(
     () =>
@@ -127,6 +133,13 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
   const handleClick = useEffectEvent((feature: AggregatedMapFeature<TProperties> | null) => {
     startTransition(() => {
       onFeatureSelect?.(feature);
+    });
+  });
+
+  const handleMapReady = useEffectEvent((map: Map) => {
+    setIsReady(true);
+    startTransition(() => {
+      onMapReady?.(map);
     });
   });
 
@@ -226,6 +239,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
         });
 
         syncSource();
+        handleMapReady(localMap);
       });
 
       localMap.on("moveend", syncSource);
@@ -279,6 +293,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
 
     return () => {
       isCancelled = true;
+      setIsReady(false);
 
       if (localMap) {
         localMap.remove();
@@ -286,7 +301,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
 
       mapRef.current = null;
     };
-  }, [initialViewState, mapStyle, showAttributionControl]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -313,10 +328,12 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
     }
 
     syncSource();
-  }, [deferredPoints, fitBoundsPadding, fitToData, initialViewState, index, syncSource]);
+  }, [deferredPoints, fitBoundsPadding, fitToData, index, syncSource]);
 
   return (
     <div
+      aria-label={mapLabel}
+      data-map-ready={isReady ? "true" : "false"}
       className={joinClassNames("mb-maps", className)}
       style={{
         minHeight: 480,

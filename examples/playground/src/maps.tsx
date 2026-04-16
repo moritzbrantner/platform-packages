@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import {
   ClusteredMap,
   type AggregatedMapFeature,
+  type ClusteredMapProps,
   type MapPoint,
   type VisibleAggregationSummary,
 } from "@moritzbrantner/maps";
@@ -26,13 +27,43 @@ type DeliveryPoint = MapPoint<{
 }>;
 
 const DATASET_SIZE = 100_000;
+type PlaygroundMapInstance = Parameters<
+  NonNullable<ClusteredMapProps["onMapReady"]>
+>[0];
+type PlaygroundMapStyle = Exclude<ClusteredMapProps["mapStyle"], string | undefined>;
+const E2E_MAP_STYLE: PlaygroundMapStyle = {
+  version: 8,
+  sources: {},
+  layers: [
+    {
+      id: "background",
+      type: "background",
+      paint: {
+        "background-color": "#f4f4f5",
+      },
+    },
+  ],
+};
 
 function MapsPage() {
+  const e2eMode = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("e2e") === "1",
+    [],
+  );
   const points = useMemo(() => createDeliveryPoints(DATASET_SIZE), []);
   const [selection, setSelection] = useState<AggregatedMapFeature<DeliveryPoint["properties"]> | null>(
     null,
   );
   const [summary, setSummary] = useState<VisibleAggregationSummary | null>(null);
+  const initialViewState = useMemo(
+    () => ({
+      center: [-98.5795, 39.8283] as [number, number],
+      zoom: 3.2,
+    }),
+    [],
+  );
 
   return (
     <PlaygroundPage
@@ -63,13 +94,13 @@ function MapsPage() {
           </CardHeader>
           <CardContent className="p-0">
             <ClusteredMap
+              mapLabel="Clustered delivery demand map"
               points={points}
-              initialViewState={{
-                center: [-98.5795, 39.8283],
-                zoom: 3.2,
-              }}
+              initialViewState={initialViewState}
+              mapStyle={e2eMode ? E2E_MAP_STYLE : undefined}
               style={{ minHeight: 640 }}
               onFeatureSelect={setSelection}
+              onMapReady={e2eMode ? exposeE2EMapHandle : undefined}
               onViewportAggregationChange={setSummary}
             />
           </CardContent>
@@ -86,21 +117,25 @@ function MapsPage() {
             <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <MetricCard
                 label="Visible points"
+                testId="metric-visible-points"
                 value={summary ? formatInteger(summary.visiblePointCount) : "\u2014"}
                 hint="Underlying data points represented by points plus clusters."
               />
               <MetricCard
                 label="Visible clusters"
+                testId="metric-visible-clusters"
                 value={summary ? formatInteger(summary.visibleClusterCount) : "\u2014"}
                 hint="Aggregated bubbles currently standing in for dense regions."
               />
               <MetricCard
                 label="Open orders"
+                testId="metric-open-orders"
                 value={summary ? formatInteger(summary.metrics.orders ?? 0) : "\u2014"}
                 hint="Sum of the synthetic `orders` metric in the viewport."
               />
               <MetricCard
                 label="Revenue"
+                testId="metric-revenue"
                 value={summary ? formatCurrency(summary.metrics.revenue ?? 0) : "\u2014"}
                 hint="Aggregated `revenue` across everything on screen."
               />
@@ -150,19 +185,37 @@ function MapsPage() {
   );
 }
 
+function exposeE2EMapHandle(map: PlaygroundMapInstance) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.__MB_MAPS_E2E__ = {
+    map,
+    readyCount: (window.__MB_MAPS_E2E__?.readyCount ?? 0) + 1,
+  };
+}
+
 function MetricCard({
   hint,
   label,
+  testId,
   value,
 }: {
   hint: string;
   label: string;
+  testId: string;
   value: string;
 }) {
   return (
     <div className="rounded-[1.25rem] border border-border/60 bg-card/70 p-4">
       <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+      <p
+        data-testid={testId}
+        className="mt-2 text-3xl font-semibold tracking-tight text-foreground"
+      >
+        {value}
+      </p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{hint}</p>
     </div>
   );
@@ -269,3 +322,12 @@ function formatCurrency(value: number) {
 }
 
 mountPage(<MapsPage />);
+
+declare global {
+  interface Window {
+    __MB_MAPS_E2E__?: {
+      map: PlaygroundMapInstance;
+      readyCount: number;
+    };
+  }
+}
