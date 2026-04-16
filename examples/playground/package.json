@@ -12,6 +12,7 @@
     "@react-three/fiber": "^9.4.0",
     "@moritzbrantner/maps": "workspace:*",
     "@moritzbrantner/parallel-text": "workspace:*",
+    "@moritzbrantner/speech": "workspace:*",
     "@moritzbrantner/storytelling": "workspace:*",
     "@moritzbrantner/ui": "workspace:*",
     "@moritzbrantner/word-prediction": "workspace:*",

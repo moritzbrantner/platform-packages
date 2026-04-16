@@ -24,6 +24,10 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/speech$/,
+        replacement: path.resolve(workspaceRoot, "packages/speech/src/index.ts"),
+      },
+      {
         find: /^@moritzbrantner\/ui$/,
         replacement: path.resolve(workspaceRoot, "packages/ui/src/index.ts"),
       },
@@ -54,6 +58,7 @@ export default defineConfig({
     exclude: [
       "@moritzbrantner/maps",
       "@moritzbrantner/parallel-text",
+      "@moritzbrantner/speech",
       "@moritzbrantner/ui",
       "@moritzbrantner/storytelling",
       "@moritzbrantner/word-prediction",
@@ -71,6 +76,7 @@ export default defineConfig({
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
+        speech: path.resolve(rootDir, "speech.html"),
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),
         wordPrediction: path.resolve(rootDir, "word-prediction.html"),
