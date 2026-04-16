@@ -21,9 +21,9 @@ import {
   createPointAggregationIndex,
   getBoundsFromPoints,
   type AggregatedMapFeature,
-  type AggregatedMapCluster,
   type MapPointFilter,
   type MapPoint,
+  type PointAggregationIndex,
   type PointAggregationIndexOptions,
   type ViewportAggregationQuery,
   type VisibleAggregationSummary,
@@ -31,6 +31,12 @@ import {
 import {
   createProjectedClusterVoronoiGeometry,
 } from "./cluster-area";
+import {
+  assignClusterAreaColors,
+  createBoundaryLineColor,
+  createClusterAreaSubjects,
+  getClusterAreaId,
+} from "./cluster-area-visuals";
 
 const SOURCE_ID = "moritzbrantner-maps-source";
 const CLUSTER_AREA_FILL_LAYER_ID = "moritzbrantner-maps-cluster-area-fill";
@@ -203,17 +209,11 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
           filter: ["==", ["get", "kind"], "cluster-area"],
           paint: {
             "fill-color": [
-              "step",
-              ["get", "pointCount"],
-              "#0f766e",
-              25,
-              "#0284c7",
-              250,
-              "#7c3aed",
-              2_500,
-              "#ea580c",
+              "coalesce",
+              ["get", "clusterColor"],
+              "#2563eb",
             ],
-            "fill-opacity": 0.1,
+            "fill-opacity": 0.56,
           },
         });
         localMap.addLayer({
@@ -223,19 +223,12 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
           filter: ["==", ["get", "kind"], "cluster-area-boundary"],
           paint: {
             "line-color": [
-              "step",
-              ["get", "pointCount"],
-              "#115e59",
-              25,
-              "#0369a1",
-              250,
-              "#6d28d9",
-              2_500,
-              "#c2410c",
+              "coalesce",
+              ["get", "lineColor"],
+              "#0f172a",
             ],
-            "line-opacity": 0.45,
+            "line-opacity": 0.9,
             "line-width": 2,
-            "line-dasharray": [2, 1.5],
           },
         });
         localMap.addLayer({
@@ -245,15 +238,19 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
           filter: ["==", ["get", "kind"], "cluster"],
           paint: {
             "circle-color": [
-              "step",
-              ["get", "pointCount"],
-              "#0f766e",
-              25,
-              "#0284c7",
-              250,
-              "#7c3aed",
-              2_500,
-              "#ea580c",
+              "coalesce",
+              ["get", "clusterColor"],
+              [
+                "step",
+                ["get", "pointCount"],
+                "#0f766e",
+                25,
+                "#0284c7",
+                250,
+                "#7c3aed",
+                2_500,
+                "#ea580c",
+              ],
             ],
             "circle-opacity": 0.9,
             "circle-radius": [
@@ -291,11 +288,15 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
           source: SOURCE_ID,
           filter: ["==", ["get", "kind"], "point"],
           paint: {
-            "circle-color": "#0f172a",
-            "circle-opacity": 0.75,
-            "circle-radius": 5,
+            "circle-color": [
+              "coalesce",
+              ["get", "clusterColor"],
+              "#0f172a",
+            ],
+            "circle-opacity": 0.92,
+            "circle-radius": 6,
             "circle-stroke-color": "#ffffff",
-            "circle-stroke-width": 1.5,
+            "circle-stroke-width": 2,
           },
         });
 
@@ -414,20 +415,17 @@ function joinClassNames(...values: Array<string | undefined>) {
 
 function toFeatureCollection<TProperties>(
   features: readonly AggregatedMapFeature<TProperties>[],
-  index?: ReturnType<typeof createPointAggregationIndex<TProperties>>,
+  index?: PointAggregationIndex<TProperties>,
   map?: MaplibreMap,
 ) {
-  const clusterFeatures = features.filter(
-    (feature): feature is AggregatedMapCluster => feature.kind === "cluster",
-  );
   const areaFeatures = index && map
-    ? createClusterAreaFeatures(clusterFeatures, index, map)
-    : [];
+    ? createClusterAreaFeatures(features, index, map)
+    : { areaFeatures: [], colorsByAreaId: new Map<string, string>() };
 
   return {
     type: "FeatureCollection" as const,
     features: [
-      ...areaFeatures,
+      ...areaFeatures.areaFeatures,
       ...features.map((feature) => ({
         type: "Feature" as const,
         properties:
@@ -435,12 +433,16 @@ function toFeatureCollection<TProperties>(
             ? {
                 kind: "cluster",
                 clusterId: feature.clusterId,
+                clusterColor:
+                  areaFeatures.colorsByAreaId.get(getClusterAreaId(feature)) ?? null,
                 pointCount: feature.pointCount,
                 pointCountAbbreviated: feature.pointCountAbbreviated,
                 ...feature.metrics,
               }
             : {
                 kind: "point",
+                clusterColor:
+                  areaFeatures.colorsByAreaId.get(getClusterAreaId(feature)) ?? null,
                 pointId: feature.point.id,
                 label: feature.point.label,
                 ...feature.metrics,
@@ -455,23 +457,29 @@ function toFeatureCollection<TProperties>(
 }
 
 function createClusterAreaFeatures<TProperties>(
-  clusterFeatures: readonly AggregatedMapCluster[],
-  index: ReturnType<typeof createPointAggregationIndex<TProperties>>,
+  features: readonly AggregatedMapFeature<TProperties>[],
+  index: PointAggregationIndex<TProperties>,
   map: MaplibreMap,
 ) {
   const viewportWidth = map.getContainer().clientWidth;
   const viewportHeight = map.getContainer().clientHeight;
 
   if (viewportWidth <= 0 || viewportHeight <= 0) {
-    return [];
+    return { areaFeatures: [], colorsByAreaId: new Map<string, string>() };
   }
 
-  const clusterById = new globalThis.Map<number | string, AggregatedMapCluster>(
-    clusterFeatures.map((feature) => [feature.clusterId, feature] as const),
+  const subjects = createClusterAreaSubjects(features, index);
+
+  if (subjects.length === 0) {
+    return { areaFeatures: [], colorsByAreaId: new Map<string, string>() };
+  }
+
+  const subjectByAreaId = new globalThis.Map(
+    subjects.map((subject) => [subject.areaId, subject] as const),
   );
-  const projectedInputs = clusterFeatures.flatMap((feature) =>
-    getClusterAreaSample(index, feature).map((coordinates) => ({
-      clusterId: feature.clusterId,
+  const projectedInputs = subjects.flatMap((subject) =>
+    subject.sampleCoordinates.map((coordinates) => ({
+      clusterId: subject.areaId,
       coordinates,
     })),
   );
@@ -487,39 +495,56 @@ function createClusterAreaFeatures<TProperties>(
     },
     viewportBounds: [-24, -24, viewportWidth + 24, viewportHeight + 24],
   });
+  const colorsByAreaId = assignClusterAreaColors(
+    subjects.map((subject) => subject.areaId),
+    geometry.boundarySegments,
+  );
   const areaFeatures = geometry.regions
     .map((region) => {
-      const feature = clusterById.get(region.clusterId);
+      const subject = subjectByAreaId.get(String(region.clusterId));
 
-      if (!feature || region.polygons.length === 0) {
+      if (!subject || region.polygons.length === 0) {
         return null;
       }
 
-      return createClusterAreaFeature(feature, region.polygons);
+      return createClusterAreaFeature(
+        subject,
+        region.polygons,
+        colorsByAreaId.get(subject.areaId) ?? "#2563eb",
+      );
     })
     .filter(isDefined);
   const boundaryFeatures = geometry.boundarySegments.map((segment) =>
     createClusterAreaBoundaryFeature(
       segment.coordinates,
       segment.clusterIds
-        .filter((clusterId): clusterId is number | string => clusterId !== null)
-        .map((clusterId) => clusterById.get(clusterId)?.pointCount ?? 0),
+        .filter((clusterId): clusterId is string => typeof clusterId === "string")
+        .map((clusterId) => subjectByAreaId.get(clusterId)?.pointCount ?? 0),
+      createBoundaryLineColor(segment.clusterIds, colorsByAreaId),
     ),
   );
 
-  return [...areaFeatures, ...boundaryFeatures];
+  return {
+    areaFeatures: [...areaFeatures, ...boundaryFeatures],
+    colorsByAreaId,
+  };
 }
 
 function createClusterAreaFeature(
-  feature: AggregatedMapCluster,
+  feature: {
+    areaId: string;
+    pointCount: number;
+  },
   polygons: Array<Array<Array<[number, number]>>>,
+  clusterColor: string,
 ) {
   if (polygons.length > 1) {
     return {
       type: "Feature" as const,
       properties: {
         kind: "cluster-area",
-        clusterId: feature.clusterId,
+        clusterColor,
+        clusterId: feature.areaId,
         pointCount: feature.pointCount,
       },
       geometry: {
@@ -533,7 +558,8 @@ function createClusterAreaFeature(
     type: "Feature" as const,
     properties: {
       kind: "cluster-area",
-      clusterId: feature.clusterId,
+      clusterColor,
+      clusterId: feature.areaId,
       pointCount: feature.pointCount,
     },
     geometry: {
@@ -546,11 +572,13 @@ function createClusterAreaFeature(
 function createClusterAreaBoundaryFeature(
   coordinates: Array<[number, number]>,
   pointCounts: readonly number[],
+  lineColor: string,
 ) {
   return {
     type: "Feature" as const,
     properties: {
       kind: "cluster-area-boundary",
+      lineColor,
       pointCount: Math.max(...pointCounts, 0),
     },
     geometry: {
@@ -558,37 +586,6 @@ function createClusterAreaBoundaryFeature(
       coordinates,
     },
   };
-}
-
-function getClusterAreaSample<TProperties>(
-  index: ReturnType<typeof createPointAggregationIndex<TProperties>>,
-  feature: AggregatedMapCluster,
-) {
-  const maxSamples = Math.min(feature.pointCount, 96);
-  const batchSize = Math.min(maxSamples, 24);
-
-  if (batchSize <= 0) {
-    return [feature.coordinates];
-  }
-
-  const sample: Array<[number, number]> = [];
-  const stride = Math.max(Math.floor(feature.pointCount / maxSamples), 1);
-
-  for (let offset = 0; offset < feature.pointCount && sample.length < maxSamples; offset += stride * batchSize) {
-    const leaves = index.getClusterLeaves(feature.clusterId, batchSize, offset);
-
-    for (const leaf of leaves) {
-      sample.push([leaf.longitude, leaf.latitude]);
-
-      if (sample.length >= maxSamples) {
-        break;
-      }
-    }
-  }
-
-  sample.push(feature.coordinates);
-
-  return sample;
 }
 
 function isDefined<T>(value: T | null): value is T {
