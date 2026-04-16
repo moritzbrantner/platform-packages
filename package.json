@@ -7,6 +7,7 @@
     "packages/collaboration",
     "packages/card-games",
     "packages/flat-design",
+    "packages/hexagon-grids",
     "packages/keyboard",
     "packages/maps",
     "packages/parallel-text",
