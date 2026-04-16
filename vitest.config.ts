@@ -28,12 +28,30 @@ export default defineConfig({
       ),
       "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
+      "@moritzbrantner/parallel-text/model": path.resolve(
+        rootDir,
+        "packages/parallel-text/src/model.ts",
+      ),
       "@moritzbrantner/speech": path.resolve(rootDir, "packages/speech/src/index.ts"),
+      "@moritzbrantner/speech/core": path.resolve(rootDir, "packages/speech/src/core.ts"),
+      "@moritzbrantner/speech/react": path.resolve(rootDir, "packages/speech/src/react.ts"),
       "@moritzbrantner/subtitles": path.resolve(rootDir, "packages/subtitles/src/index.ts"),
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
       "@moritzbrantner/word-prediction": path.resolve(rootDir, "packages/word-prediction/src/index.ts"),
+      "@moritzbrantner/word-prediction/core": path.resolve(
+        rootDir,
+        "packages/word-prediction/src/core.ts",
+      ),
+      "@moritzbrantner/word-prediction/react": path.resolve(
+        rootDir,
+        "packages/word-prediction/src/react.ts",
+      ),
       "@moritzbrantner/word-vectors": path.resolve(rootDir, "packages/word-vectors/src/index.ts"),
+      "@moritzbrantner/word-vectors/documents": path.resolve(
+        rootDir,
+        "packages/word-vectors/src/documents.ts",
+      ),
     },
   },
   test: {

@@ -1,7 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
-import { ParallelTextView, createParallelTextModel } from "@moritzbrantner/parallel-text";
+import { createTextDocument, segmentTextDocument } from "@moritzbrantner/linguistics-core";
+import {
+  ParallelTextView,
+  createAlignmentModel,
+  createParallelTextModel,
+  parseAlignment,
+  serializeAlignment,
+} from "@moritzbrantner/parallel-text";
 
 describe("@moritzbrantner/parallel-text", () => {
   test("creates paragraph-aware automatic rows and token links", () => {
@@ -120,5 +127,68 @@ describe("@moritzbrantner/parallel-text", () => {
     expect(frenchSentence.getAttribute("data-phrase-highlighted")).toBe("true");
     expect(frenchSentence.getAttribute("data-sentence-highlighted")).toBe("true");
     expect(bonjour.getAttribute("data-highlighted")).toBe("false");
+  });
+
+  test("reuses the same source segmentation across alignment models", () => {
+    const original = segmentTextDocument(
+      createTextDocument({
+        id: "original",
+        text: "One sentence. Another sentence.",
+      }),
+      { granularity: "word", useIntlSegmenter: false },
+    );
+
+    const german = createAlignmentModel({
+      original,
+      translated: "Ein Satz. Noch ein Satz.",
+    });
+    const french = createAlignmentModel({
+      original,
+      translated: "Une phrase. Encore une phrase.",
+    });
+
+    expect(german.originalSentences.map((sentence) => sentence.id)).toEqual(
+      french.originalSentences.map((sentence) => sentence.id),
+    );
+    expect(german.originalSentences[0]?.tokens[0]?.text).toBe("One");
+  });
+
+  test("serializes and parses manual alignments without losing sentence mappings", () => {
+    const model = createParallelTextModel({
+      originalText: "I fold the letter carefully. Then I place it under the blue cup.",
+      translatedText: "Dann lege ich ihn unter die blaue Tasse. Ich falte den Brief sorgfaeltig.",
+      sentenceAlignments: [
+        { original: 1, translated: 0, confidence: 0.9 },
+        { original: 0, translated: 1, confidence: 1 },
+      ],
+      tokenAlignments: [
+        {
+          originalSentence: 0,
+          translatedSentence: 1,
+          originalToken: 2,
+          translatedToken: 2,
+          confidence: 1,
+        },
+      ],
+    });
+
+    const parsed = parseAlignment(serializeAlignment(model));
+
+    expect(parsed).toEqual({
+      version: 1,
+      sentenceAlignments: [
+        { original: [1], translated: [0], confidence: 0.9 },
+        { original: [0], translated: [1], confidence: 1 },
+      ],
+      tokenAlignments: [
+        {
+          originalSentence: 0,
+          translatedSentence: 1,
+          originalToken: 2,
+          translatedToken: 2,
+          confidence: 1,
+        },
+      ],
+    });
   });
 });

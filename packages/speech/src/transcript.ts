@@ -1,5 +1,12 @@
 export type TranscriptSegmentSource = "upload" | "live-chunk" | "live-stream" | "manual";
 
+export interface TranscriptWord {
+  text: string;
+  startTimeMs: number;
+  endTimeMs: number;
+  confidence?: number;
+}
+
 export interface TranscriptSegment {
   id: string;
   text: string;
@@ -9,6 +16,7 @@ export interface TranscriptSegment {
   confidence?: number;
   chunkIndex?: number;
   source?: TranscriptSegmentSource;
+  words?: TranscriptWord[];
 }
 
 export interface SpeechTranscriptionRequest {
@@ -27,6 +35,7 @@ export interface SpeechTranscriptionRequest {
 export interface SpeechTranscriptionResult {
   text: string;
   segments?: TranscriptSegment[];
+  words?: TranscriptWord[];
   isFinal?: boolean;
   language?: string;
   durationMs?: number;

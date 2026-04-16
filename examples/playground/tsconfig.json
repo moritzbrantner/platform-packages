@@ -10,13 +10,19 @@
     "paths": {
       "@moritzbrantner/card-games": ["../../packages/card-games/src/index.ts"],
       "@moritzbrantner/flat-design": ["../../packages/flat-design/src/index.ts"],
+      "@moritzbrantner/linguistics-core": ["../../packages/linguistics-core/src/index.ts"],
+      "@moritzbrantner/linguistics-corpus": ["../../packages/linguistics-corpus/src/index.ts"],
+      "@moritzbrantner/linguistics-learning": ["../../packages/linguistics-learning/src/index.ts"],
       "@moritzbrantner/maps": ["../../packages/maps/src/index.ts"],
       "@moritzbrantner/parallel-text": ["../../packages/parallel-text/src/index.ts"],
       "@moritzbrantner/speech": ["../../packages/speech/src/index.ts"],
       "@moritzbrantner/storytelling": ["../../packages/storytelling/src/index.ts"],
       "@moritzbrantner/storytelling/three": ["../../packages/storytelling/src/three.tsx"],
+      "@moritzbrantner/subtitles": ["../../packages/subtitles/src/index.ts"],
       "@moritzbrantner/ui": ["../../packages/ui/src/index.ts"],
-      "@moritzbrantner/word-prediction": ["../../packages/word-prediction/src/index.ts"]
+      "@moritzbrantner/word-prediction": ["../../packages/word-prediction/src/index.ts"],
+      "@moritzbrantner/word-vectors": ["../../packages/word-vectors/src/index.ts"],
+      "@moritzbrantner/word-vectors/documents": ["../../packages/word-vectors/src/documents.ts"]
     },
     "types": ["vite/client"]
   },

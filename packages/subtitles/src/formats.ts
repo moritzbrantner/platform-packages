@@ -4,6 +4,7 @@ import type {
   TimedTextCue,
   TimedTextDocument,
   TimedTextFormat,
+  TimedTextWord,
 } from "./model";
 import { collectTimedTextText, normalizeTimedTextDocument } from "./editing";
 
@@ -24,6 +25,8 @@ interface TranscriptJsonValue {
   final?: unknown;
   language?: unknown;
   metadata?: unknown;
+  settings?: unknown;
+  words?: unknown;
 }
 
 interface TranscriptJsonDocument {
@@ -171,7 +174,7 @@ export function serializeVtt(document: TimedTextDocument): string {
       }
 
       lines.push(
-        `${formatVttTimestamp(cue.startTimeMs)} --> ${formatVttTimestamp(cue.endTimeMs)}`,
+        `${formatVttTimestamp(cue.startTimeMs)} --> ${formatVttTimestamp(cue.endTimeMs)}${formatVttSettings(cue.settings)}`,
       );
       lines.push(cue.text.trim());
       return lines.join("\n");
@@ -242,6 +245,8 @@ export function serializeTranscriptJson(document: TimedTextDocument): string {
       final: cue.final,
       language: cue.language,
       metadata: cue.metadata,
+      settings: cue.settings,
+      words: cue.words,
     })),
   };
 
@@ -297,6 +302,7 @@ function parseVttCueBlock(block: string, index: number): TimedTextCue {
     startTimeMs: parseTimestamp(match.groups.start),
     endTimeMs: parseTimestamp(match.groups.end),
     text: lines.slice(timingLineIndex + 1).join("\n").trim(),
+    settings: parseVttSettings(timingLine),
   };
 }
 
@@ -319,6 +325,8 @@ function parseTranscriptJsonCue(value: unknown, index: number): TimedTextCue {
     final: typeof cue.final === "boolean" ? cue.final : undefined,
     language: typeof cue.language === "string" ? cue.language : undefined,
     metadata: isRecord(cue.metadata) ? cue.metadata : undefined,
+    settings: parseSettings(cue.settings),
+    words: parseWords(cue.words, index),
   };
 }
 
@@ -426,4 +434,71 @@ function isGeneratedCueId(value: string, index: number): boolean {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseVttSettings(line: string): Record<string, string> | undefined {
+  const rawSettings = line.split("-->", 2)[1]?.trim().split(/\s+/u).slice(1) ?? [];
+  const settingsEntries = rawSettings
+    .map((entry) => entry.split(":", 2))
+    .filter((entry) => entry.length === 2 && entry[0] && entry[1]);
+
+  return settingsEntries.length > 0 ? Object.fromEntries(settingsEntries) : undefined;
+}
+
+function formatVttSettings(settings: Record<string, string> | undefined): string {
+  if (!settings) {
+    return "";
+  }
+
+  const entries = Object.entries(settings).filter(([, value]) => value.trim());
+  return entries.length > 0 ? ` ${entries.map(([key, value]) => `${key}:${value}`).join(" ")}` : "";
+}
+
+function parseSettings(value: unknown): Record<string, string> | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const entries = Object.entries(value)
+    .filter(([, entry]) => typeof entry === "string")
+    .map(([key, entry]) => [key, entry as string] as const);
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
+function parseWords(value: unknown, index: number): TimedTextWord[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value.flatMap((word, wordIndex) => {
+    if (!word || typeof word !== "object") {
+      throw new Error(`Invalid word timing at transcript segment ${index}, word ${wordIndex}.`);
+    }
+
+    const record = word as Record<string, unknown>;
+    const text = typeof record.text === "string" ? record.text : "";
+
+    if (!text) {
+      return [];
+    }
+
+    return [
+      {
+        text,
+        startTimeMs: parseTranscriptJsonTimestamp(
+          record.startTimeMs,
+          record.start,
+          "start",
+          index,
+        ),
+        endTimeMs: parseTranscriptJsonTimestamp(
+          record.endTimeMs,
+          record.end,
+          "end",
+          index,
+        ),
+        confidence: typeof record.confidence === "number" ? record.confidence : undefined,
+      } satisfies TimedTextWord,
+    ];
+  });
 }

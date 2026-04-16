@@ -18,13 +18,18 @@ type PageKey =
   | "home"
   | "card-games"
   | "flat-design"
+  | "linguistics-core"
+  | "linguistics-corpus"
+  | "linguistics-learning"
   | "maps"
   | "maps-motion"
   | "parallel-text"
   | "speech"
+  | "subtitles"
   | "ui"
   | "storytelling"
-  | "word-prediction";
+  | "word-prediction"
+  | "word-vectors";
 
 type AppShellProps = {
   activePage: PageKey;
@@ -37,13 +42,22 @@ const navigation = [
   { key: "home", href: "/index.html", label: "Overview" },
   { key: "card-games", href: "/card-games.html", label: "Card games package" },
   { key: "flat-design", href: "/flat-design.html", label: "Flat design package" },
+  { key: "linguistics-core", href: "/linguistics-core.html", label: "Linguistics core" },
+  { key: "linguistics-corpus", href: "/linguistics-corpus.html", label: "Linguistics corpus" },
+  {
+    key: "linguistics-learning",
+    href: "/linguistics-learning.html",
+    label: "Linguistics learning",
+  },
   { key: "maps", href: "/maps.html", label: "Maps package" },
   { key: "maps-motion", href: "/maps-motion.html", label: "Maps motion demo" },
   { key: "parallel-text", href: "/parallel-text.html", label: "Parallel text package" },
   { key: "speech", href: "/speech.html", label: "Speech package" },
+  { key: "subtitles", href: "/subtitles.html", label: "Subtitles package" },
   { key: "ui", href: "/ui.html", label: "UI package" },
   { key: "storytelling", href: "/storytelling.html", label: "Storytelling package" },
   { key: "word-prediction", href: "/word-prediction.html", label: "Word prediction package" },
+  { key: "word-vectors", href: "/word-vectors.html", label: "Word vectors package" },
 ] as const satisfies ReadonlyArray<{
   key: PageKey;
   href: string;

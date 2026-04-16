@@ -1,5 +1,26 @@
 # @moritzbrantner/word-vectors
 
-Distributional word-meaning vectors built from local text with a small, dependency-free TypeScript API.
+Dependency-light word vectors with similarity search, context inspection, serialization, and document adapters.
 
-The package trains sparse word vectors from co-occurrence windows, scores dimensions with positive PMI, and exposes cosine-similarity search for nearby words.
+## Main APIs
+
+- `createWordVectorModel({ texts?, windowSize?, minWordCount?, maxVocabularySize? })`
+- `serializeWordVectorModel(model)` / `deserializeWordVectorModel(json)`
+- `findSimilarWords(word)` / `findSimilarContexts(word)`
+- `trainFromDocuments(documents)` from `@moritzbrantner/word-vectors/documents`
+
+## Example
+
+```ts
+import { createWordVectorModel } from "@moritzbrantner/word-vectors";
+import { trainFromDocuments } from "@moritzbrantner/word-vectors/documents";
+
+const model = createWordVectorModel({
+  texts: ["Coffee beans smell rich.", "Tea leaves smell fresh."],
+});
+
+model.findSimilarWords("coffee");
+model.findSimilarContexts("coffee");
+
+trainFromDocuments([]);
+```

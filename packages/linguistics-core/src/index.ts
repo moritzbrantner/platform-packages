@@ -1,1 +1,574 @@
-export {};
+export type LanguageTag = string;
+
+export interface TextSpan {
+  start: number;
+  end: number;
+  text: string;
+}
+
+export interface TextAnchor {
+  start: number;
+  end: number;
+  text: string;
+  normalizedText: string;
+  prefix: string;
+  suffix: string;
+}
+
+export interface TextToken {
+  id: string;
+  index: number;
+  wordIndex: number | null;
+  paragraphId: string;
+  paragraphIndex: number;
+  sentenceId: string;
+  sentenceIndex: number;
+  span: TextSpan;
+  text: string;
+  normalized: string;
+  leadingText: string;
+  isWordLike: boolean;
+}
+
+export interface TextSentence {
+  id: string;
+  index: number;
+  paragraphId: string;
+  paragraphIndex: number;
+  span: TextSpan;
+  text: string;
+  tokens: TextToken[];
+  trailingText: string;
+}
+
+export interface TextParagraph {
+  id: string;
+  index: number;
+  span: TextSpan;
+  text: string;
+  sentences: TextSentence[];
+}
+
+export interface TextDocument<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+> {
+  id: string;
+  text: string;
+  language?: LanguageTag;
+  metadata?: Metadata;
+  paragraphs: TextParagraph[];
+  sentences: TextSentence[];
+  tokens: TextToken[];
+}
+
+export interface CreateTextDocumentOptions<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+> {
+  id?: string;
+  text: string;
+  language?: LanguageTag;
+  metadata?: Metadata;
+}
+
+export interface SegmentTextDocumentOptions {
+  granularity: "paragraph" | "sentence" | "word";
+  useIntlSegmenter?: boolean;
+}
+
+export interface NormalizeTextOptions {
+  form: "NFC" | "NFKC";
+  lowercase?: boolean;
+  stripDiacritics?: boolean;
+}
+
+export interface Analyzer {
+  id: string;
+  tokenize?(
+    document: TextDocument,
+    options?: SegmentTextDocumentOptions,
+  ): TextDocument | Promise<TextDocument>;
+  tag?(document: TextDocument): unknown | Promise<unknown>;
+  align?(
+    source: TextDocument,
+    target: TextDocument,
+  ): unknown | Promise<unknown>;
+}
+
+interface SegmentSlice {
+  index: number;
+  segment: string;
+  isWordLike?: boolean;
+}
+
+const DEFAULT_DOCUMENT_ID = "document";
+const DEFAULT_CONTEXT_WINDOW = 24;
+const FALLBACK_SENTENCE_PATTERN = /[^.!?…。！？؟\n]+[.!?…。！？؟]*|[^\n]+/gu;
+const FALLBACK_TOKEN_PATTERN =
+  /\p{L}[\p{L}\p{M}\p{N}'’-]*|\p{N}+|[^\s]/gu;
+
+export function createTextDocument<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+>({
+  id,
+  text,
+  language,
+  metadata,
+}: CreateTextDocumentOptions<Metadata>): TextDocument<Metadata> {
+  return {
+    id: id?.trim() || DEFAULT_DOCUMENT_ID,
+    text,
+    language,
+    metadata: metadata ? { ...metadata } : undefined,
+    paragraphs: segmentParagraphs(text, id?.trim() || DEFAULT_DOCUMENT_ID),
+    sentences: [],
+    tokens: [],
+  };
+}
+
+export function segmentTextDocument<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+>(
+  document: TextDocument<Metadata>,
+  options: SegmentTextDocumentOptions,
+): TextDocument<Metadata> {
+  const paragraphs =
+    document.paragraphs.length > 0
+      ? cloneParagraphs(document.paragraphs)
+      : segmentParagraphs(document.text, document.id);
+
+  if (options.granularity === "paragraph") {
+    return {
+      ...document,
+      paragraphs,
+      sentences: [],
+      tokens: [],
+    };
+  }
+
+  const sentences: TextSentence[] = [];
+  const tokens: TextToken[] = [];
+  const paragraphSentences = paragraphs.map((paragraph, paragraphIndex) => {
+    const segments = segmentSentences(
+      paragraph.text,
+      document.language,
+      options.useIntlSegmenter !== false,
+    );
+
+    const nextSentences = (segments.length > 0 ? segments : [{ index: 0, segment: paragraph.text }]).map(
+      (slice) => {
+        const span = createSpan(
+          document.text,
+          paragraph.span.start + slice.index,
+          paragraph.span.start + slice.index + slice.segment.length,
+        );
+        const sentenceId = `${document.id}-sentence-${sentences.length}`;
+        const nextTokens =
+          options.granularity === "word"
+            ? createSentenceTokens(
+                document,
+                paragraph,
+                paragraphIndex,
+                sentenceId,
+                sentences.length,
+                span,
+                slice.segment,
+                options.useIntlSegmenter !== false,
+              )
+            : [];
+
+        const sentence: TextSentence = {
+          id: sentenceId,
+          index: sentences.length,
+          paragraphId: paragraph.id,
+          paragraphIndex,
+          span,
+          text: slice.segment,
+          tokens: nextTokens,
+          trailingText:
+            nextTokens.length > 0
+              ? slice.segment.slice(
+                  (nextTokens.at(-1)?.span.end ?? span.start) - span.start,
+                )
+              : "",
+        };
+
+        sentences.push(sentence);
+        tokens.push(...nextTokens);
+        return sentence;
+      },
+    );
+
+    return {
+      ...paragraph,
+      sentences: nextSentences,
+    };
+  });
+
+  return {
+    ...document,
+    paragraphs: paragraphSentences,
+    sentences,
+    tokens,
+  };
+}
+
+export function normalizeText(text: string, options: NormalizeTextOptions): string {
+  let normalized = text.normalize(options.form);
+
+  if (options.lowercase) {
+    normalized = normalized.toLocaleLowerCase();
+  }
+
+  if (options.stripDiacritics) {
+    normalized = normalized
+      .normalize("NFKD")
+      .replace(/\p{M}/gu, "")
+      .normalize(options.form);
+  }
+
+  return normalized;
+}
+
+export function anchorSpan(document: TextDocument, span: Pick<TextSpan, "end" | "start">): TextAnchor {
+  const resolved = createSpan(document.text, span.start, span.end);
+
+  return {
+    start: resolved.start,
+    end: resolved.end,
+    text: resolved.text,
+    normalizedText: normalizeText(resolved.text, {
+      form: "NFKC",
+      lowercase: true,
+      stripDiacritics: true,
+    }),
+    prefix: document.text.slice(
+      Math.max(0, resolved.start - DEFAULT_CONTEXT_WINDOW),
+      resolved.start,
+    ),
+    suffix: document.text.slice(
+      resolved.end,
+      Math.min(document.text.length, resolved.end + DEFAULT_CONTEXT_WINDOW),
+    ),
+  };
+}
+
+export function reanchorSpan(document: TextDocument, anchor: TextAnchor): TextSpan | null {
+  if (
+    anchor.start >= 0 &&
+    anchor.end <= document.text.length &&
+    document.text.slice(anchor.start, anchor.end) === anchor.text
+  ) {
+    return createSpan(document.text, anchor.start, anchor.end);
+  }
+
+  const exactMatches = findSubstringMatches(document.text, anchor.text);
+
+  if (exactMatches.length > 0) {
+    return scoreAnchorMatches(document.text, anchor, exactMatches);
+  }
+
+  if (!anchor.normalizedText) {
+    return null;
+  }
+
+  const normalizedMatches = findNormalizedMatches(document.text, anchor.normalizedText);
+  return normalizedMatches.length > 0
+    ? scoreAnchorMatches(document.text, anchor, normalizedMatches)
+    : null;
+}
+
+function segmentParagraphs(text: string, documentId: string): TextParagraph[] {
+  const paragraphs: TextParagraph[] = [];
+
+  for (const match of text.matchAll(/\S[\s\S]*?(?=(?:\n\s*\n)+|$)/gu)) {
+    const value = match[0];
+    const blockStart = match.index ?? 0;
+    const leadingTrim = value.match(/^\s*/u)?.[0].length ?? 0;
+    const trailingTrim = value.match(/\s*$/u)?.[0].length ?? 0;
+    const start = blockStart + leadingTrim;
+    const end = blockStart + value.length - trailingTrim;
+
+    if (end <= start) {
+      continue;
+    }
+
+    paragraphs.push({
+      id: `${documentId}-paragraph-${paragraphs.length}`,
+      index: paragraphs.length,
+      span: createSpan(text, start, end),
+      text: text.slice(start, end),
+      sentences: [],
+    });
+  }
+
+  if (paragraphs.length === 0 && text.trim()) {
+    paragraphs.push({
+      id: `${documentId}-paragraph-0`,
+      index: 0,
+      span: createSpan(text, 0, text.length),
+      text,
+      sentences: [],
+    });
+  }
+
+  return paragraphs;
+}
+
+function cloneParagraphs(paragraphs: readonly TextParagraph[]): TextParagraph[] {
+  return paragraphs.map((paragraph) => ({
+    ...paragraph,
+    span: { ...paragraph.span },
+    sentences: paragraph.sentences.map((sentence) => ({
+      ...sentence,
+      span: { ...sentence.span },
+      tokens: sentence.tokens.map((token) => ({
+        ...token,
+        span: { ...token.span },
+      })),
+    })),
+  }));
+}
+
+function createSentenceTokens(
+  document: TextDocument,
+  paragraph: TextParagraph,
+  paragraphIndex: number,
+  sentenceId: string,
+  sentenceIndex: number,
+  sentenceSpan: TextSpan,
+  sentenceText: string,
+  useIntlSegmenter: boolean,
+): TextToken[] {
+  const segments = segmentWords(sentenceText, document.language, useIntlSegmenter);
+  const matches = segments.length > 0 ? segments : fallbackTokens(sentenceText);
+  const tokens: TextToken[] = [];
+  let wordIndex = 0;
+  let lastBoundary = 0;
+
+  for (const match of matches) {
+    if (!match.segment || !match.segment.trim()) {
+      continue;
+    }
+
+    const tokenStart = sentenceSpan.start + match.index;
+    const tokenEnd = tokenStart + match.segment.length;
+    const tokenText = sentenceText.slice(match.index, match.index + match.segment.length);
+    const isWordLike = match.isWordLike ?? /[\p{L}\p{N}]/u.test(tokenText);
+
+    tokens.push({
+      id: `${sentenceId}-token-${tokens.length}`,
+      index: tokens.length,
+      wordIndex: isWordLike ? wordIndex++ : null,
+      paragraphId: paragraph.id,
+      paragraphIndex,
+      sentenceId,
+      sentenceIndex,
+      span: createSpan(document.text, tokenStart, tokenEnd),
+      text: tokenText,
+      normalized: normalizeText(tokenText, {
+        form: "NFKC",
+        lowercase: true,
+        stripDiacritics: true,
+      }),
+      leadingText: sentenceText.slice(lastBoundary, match.index),
+      isWordLike,
+    });
+    lastBoundary = match.index + match.segment.length;
+  }
+
+  return tokens;
+}
+
+function segmentSentences(
+  text: string,
+  language: LanguageTag | undefined,
+  useIntlSegmenter: boolean,
+): SegmentSlice[] {
+  const segments =
+    useIntlSegmenter && typeof Intl?.Segmenter === "function"
+      ? Array.from(
+          new Intl.Segmenter(language, { granularity: "sentence" }).segment(text),
+          (entry) => ({ index: entry.index, segment: entry.segment }),
+        )
+      : [];
+
+  const filtered = trimSegmentSlices(segments);
+  return filtered.length > 0 ? filtered : trimSegmentSlices(fallbackSentences(text));
+}
+
+function segmentWords(
+  text: string,
+  language: LanguageTag | undefined,
+  useIntlSegmenter: boolean,
+): SegmentSlice[] {
+  if (useIntlSegmenter && typeof Intl?.Segmenter === "function") {
+    return Array.from(
+      new Intl.Segmenter(language, { granularity: "word" }).segment(text),
+      (entry) => ({
+        index: entry.index,
+        segment: entry.segment,
+        isWordLike: entry.isWordLike,
+      }),
+    );
+  }
+
+  return [];
+}
+
+function fallbackSentences(text: string): SegmentSlice[] {
+  return Array.from(text.matchAll(FALLBACK_SENTENCE_PATTERN), (match) => ({
+    index: match.index ?? 0,
+    segment: match[0],
+  })).filter((entry) => entry.segment.trim());
+}
+
+function trimSegmentSlices(segments: SegmentSlice[]): SegmentSlice[] {
+  return segments
+    .map((segment) => {
+      const leadingWhitespace = segment.segment.match(/^\s*/u)?.[0].length ?? 0;
+      const trailingWhitespace = segment.segment.match(/\s*$/u)?.[0].length ?? 0;
+
+      return {
+        ...segment,
+        index: segment.index + leadingWhitespace,
+        segment: segment.segment.slice(
+          leadingWhitespace,
+          Math.max(leadingWhitespace, segment.segment.length - trailingWhitespace),
+        ),
+      };
+    })
+    .filter((segment) => segment.segment.length > 0);
+}
+
+function fallbackTokens(text: string): SegmentSlice[] {
+  return Array.from(text.matchAll(FALLBACK_TOKEN_PATTERN), (match) => ({
+    index: match.index ?? 0,
+    segment: match[0],
+    isWordLike: /[\p{L}\p{N}]/u.test(match[0]),
+  }));
+}
+
+function createSpan(text: string, start: number, end: number): TextSpan {
+  const safeStart = Math.max(0, Math.min(start, text.length));
+  const safeEnd = Math.max(safeStart, Math.min(end, text.length));
+
+  return {
+    start: safeStart,
+    end: safeEnd,
+    text: text.slice(safeStart, safeEnd),
+  };
+}
+
+function findSubstringMatches(text: string, search: string): Array<{ start: number; end: number }> {
+  if (!search) {
+    return [];
+  }
+
+  const matches: Array<{ start: number; end: number }> = [];
+  let index = text.indexOf(search);
+
+  while (index !== -1) {
+    matches.push({
+      start: index,
+      end: index + search.length,
+    });
+    index = text.indexOf(search, index + 1);
+  }
+
+  return matches;
+}
+
+function findNormalizedMatches(
+  text: string,
+  normalizedSearch: string,
+): Array<{ start: number; end: number }> {
+  const graphemes = Array.from(text);
+  const normalizedUnits = graphemes.map((character) =>
+    normalizeText(character, {
+      form: "NFKC",
+      lowercase: true,
+      stripDiacritics: true,
+    }),
+  );
+
+  const offsets = graphemes.reduce<number[]>((positions, character) => {
+    positions.push((positions.at(-1) ?? 0) + character.length);
+    return positions;
+  }, []);
+  const normalized = normalizedUnits.join("");
+  const matches: Array<{ start: number; end: number }> = [];
+  let searchIndex = normalized.indexOf(normalizedSearch);
+
+  while (searchIndex !== -1) {
+    let accumulated = 0;
+    let startIndex = 0;
+    let endIndex = graphemes.length;
+
+    for (let index = 0; index < normalizedUnits.length; index += 1) {
+      const nextAccumulated = accumulated + normalizedUnits[index].length;
+
+      if (accumulated <= searchIndex && searchIndex < nextAccumulated) {
+        startIndex = index;
+      }
+
+      if (
+        accumulated < searchIndex + normalizedSearch.length &&
+        searchIndex + normalizedSearch.length <= nextAccumulated
+      ) {
+        endIndex = index + 1;
+        break;
+      }
+
+      accumulated = nextAccumulated;
+    }
+
+    matches.push({
+      start: startIndex === 0 ? 0 : offsets[startIndex - 1] ?? 0,
+      end: offsets[endIndex - 1] ?? text.length,
+    });
+
+    searchIndex = normalized.indexOf(normalizedSearch, searchIndex + 1);
+  }
+
+  return matches;
+}
+
+function scoreAnchorMatches(
+  text: string,
+  anchor: TextAnchor,
+  candidates: Array<{ start: number; end: number }>,
+): TextSpan | null {
+  const best = candidates
+    .map((candidate) => ({
+      ...candidate,
+      score:
+        overlapScore(anchor.prefix, text.slice(Math.max(0, candidate.start - anchor.prefix.length), candidate.start)) +
+        overlapScore(anchor.suffix, text.slice(candidate.end, candidate.end + anchor.suffix.length)) -
+        Math.abs(anchor.start - candidate.start) / 1000,
+    }))
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        Math.abs(anchor.start - left.start) - Math.abs(anchor.start - right.start) ||
+        left.start - right.start,
+    )[0];
+
+  return best ? createSpan(text, best.start, best.end) : null;
+}
+
+function overlapScore(expected: string, actual: string): number {
+  const maxLength = Math.min(expected.length, actual.length);
+  let best = 0;
+
+  for (let length = maxLength; length >= 1; length -= 1) {
+    if (
+      expected.slice(expected.length - length) === actual.slice(actual.length - length) ||
+      expected.slice(0, length) === actual.slice(0, length)
+    ) {
+      best = length;
+      break;
+    }
+  }
+
+  return best;
+}

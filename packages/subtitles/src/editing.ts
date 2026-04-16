@@ -3,6 +3,8 @@ import type {
   ShiftTimedTextOptions,
   TimedTextCue,
   TimedTextDocument,
+  TimedTextOverlap,
+  TimedTextValidationIssue,
   TranscriptSegmentLike,
 } from "./model";
 
@@ -181,6 +183,63 @@ export function toTranscriptSegments(document: TimedTextDocument): TranscriptSeg
   return document.cues.map((cue) => copyCue(cue));
 }
 
+export function detectCueOverlaps(document: TimedTextDocument): TimedTextOverlap[] {
+  const cues = normalizeTimedTextDocument(document).cues;
+  const overlaps: TimedTextOverlap[] = [];
+
+  for (let index = 1; index < cues.length; index += 1) {
+    const previous = cues[index - 1];
+    const current = cues[index];
+
+    if (previous.endTimeMs <= current.startTimeMs) {
+      continue;
+    }
+
+    overlaps.push({
+      firstCueId: previous.id,
+      secondCueId: current.id,
+      overlapMs: previous.endTimeMs - current.startTimeMs,
+    });
+  }
+
+  return overlaps;
+}
+
+export function validateTimedTextDocument(document: TimedTextDocument): TimedTextValidationIssue[] {
+  const issues: TimedTextValidationIssue[] = [];
+
+  for (const cue of document.cues) {
+    if (cue.endTimeMs < cue.startTimeMs) {
+      issues.push({
+        code: "invalid-cue-range",
+        cueId: cue.id,
+        message: `Cue ${cue.id} ends before it starts.`,
+      });
+    }
+
+    for (const word of cue.words ?? []) {
+      if (word.startTimeMs < cue.startTimeMs || word.endTimeMs > cue.endTimeMs) {
+        issues.push({
+          code: "word-outside-cue",
+          cueId: cue.id,
+          message: `Word timing for cue ${cue.id} falls outside the cue range.`,
+        });
+      }
+    }
+  }
+
+  for (const overlap of detectCueOverlaps(document)) {
+    issues.push({
+      code: "cue-overlap",
+      cueId: overlap.firstCueId,
+      relatedCueId: overlap.secondCueId,
+      message: `Cue ${overlap.firstCueId} overlaps cue ${overlap.secondCueId} by ${overlap.overlapMs}ms.`,
+    });
+  }
+
+  return issues;
+}
+
 function normalizeCue(
   cue: Partial<TimedTextCue> & Pick<TimedTextCue, "endTimeMs" | "startTimeMs" | "text">,
   index: number,
@@ -201,6 +260,15 @@ function normalizeCue(
     final: cue.final,
     language: cue.language,
     metadata: cue.metadata ? { ...cue.metadata } : undefined,
+    settings: cue.settings ? { ...cue.settings } : undefined,
+    words: cue.words
+      ? cue.words.map((word) => ({
+          text: word.text,
+          startTimeMs: Math.round(word.startTimeMs),
+          endTimeMs: Math.max(Math.round(word.startTimeMs), Math.round(word.endTimeMs)),
+          confidence: word.confidence,
+        }))
+      : undefined,
   };
 }
 
@@ -214,6 +282,8 @@ function copyCue(cue: TimedTextCue): TimedTextCue {
   return {
     ...cue,
     metadata: cue.metadata ? { ...cue.metadata } : undefined,
+    settings: cue.settings ? { ...cue.settings } : undefined,
+    words: cue.words?.map((word) => ({ ...word })),
   };
 }
 

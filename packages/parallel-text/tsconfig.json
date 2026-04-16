@@ -8,7 +8,9 @@
     "moduleResolution": "Bundler",
     "types": ["node"],
     "paths": {
-      "@moritzbrantner/parallel-text": ["./src/index.ts"]
+      "@moritzbrantner/linguistics-core": ["../linguistics-core/src/index.ts"],
+      "@moritzbrantner/parallel-text": ["./src/index.ts"],
+      "@moritzbrantner/parallel-text/model": ["./src/model.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]

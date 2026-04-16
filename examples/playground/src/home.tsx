@@ -26,6 +26,27 @@ function HomePage() {
           cta="Open flat-design demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/linguistics-core"
+          title="Linguistics core demo"
+          description="Inspect Unicode normalization, multilingual segmentation, and span re-anchoring with the shared text-document model."
+          href="/linguistics-core.html"
+          cta="Open linguistics core demo"
+        />
+        <ExampleLinkCard
+          eyebrow="@moritzbrantner/linguistics-corpus"
+          title="Corpus indexing demo"
+          description="Run metadata-aware search, inspect concordance windows, and compare multilingual frequency tables over in-memory documents."
+          href="/linguistics-corpus.html"
+          cta="Open corpus demo"
+        />
+        <ExampleLinkCard
+          eyebrow="@moritzbrantner/linguistics-learning"
+          title="Learning helpers demo"
+          description="Derive study terms, generate flashcards, and inspect the spaced-repetition grading state produced from live text."
+          href="/linguistics-learning.html"
+          cta="Open learning demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/maps"
           title="Large-scale maps demo"
           description="Pan and zoom through 100,000 synthetic delivery points, watch client-side cluster totals update live, and inspect how single points reappear at close zoom."
@@ -54,6 +75,13 @@ function HomePage() {
           cta="Open speech demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/subtitles"
+          title="Timed-text demo"
+          description="Roundtrip VTT settings, inspect cue-level validation, and verify that overlap detection and word timings survive edits."
+          href="/subtitles.html"
+          cta="Open subtitles demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/ui"
           title="Interactive UI gallery"
           description="Buttons, form controls, overlays, data display, theme switching, and notification flows built directly from the shared UI package."
@@ -73,6 +101,13 @@ function HomePage() {
           description="Train a next-word model on chat-like examples, then inspect live next-word suggestions and partial-word completions as you type."
           href="/word-prediction.html"
           cta="Open word prediction demo"
+        />
+        <ExampleLinkCard
+          eyebrow="@moritzbrantner/word-vectors"
+          title="Word vectors demo"
+          description="Inspect distributional similarity, sparse context weights, and the document adapter that feeds semantic backoff for prediction."
+          href="/word-vectors.html"
+          cta="Open word vectors demo"
         />
       </section>
 
@@ -129,6 +164,15 @@ function HomePage() {
               <a href="/flat-design.html">Open flat design package page</a>
             </Button>
             <Button asChild variant="outline">
+              <a href="/linguistics-core.html">Open linguistics core package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/linguistics-corpus.html">Open linguistics corpus package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/linguistics-learning.html">Open linguistics learning package page</a>
+            </Button>
+            <Button asChild variant="outline">
               <a href="/maps.html">Open maps package page</a>
             </Button>
             <Button asChild variant="outline">
@@ -141,6 +185,9 @@ function HomePage() {
               <a href="/speech.html">Open speech package page</a>
             </Button>
             <Button asChild variant="outline">
+              <a href="/subtitles.html">Open subtitles package page</a>
+            </Button>
+            <Button asChild variant="outline">
               <a href="/ui.html">Open UI package page</a>
             </Button>
             <Button asChild variant="outline">
@@ -148,6 +195,9 @@ function HomePage() {
             </Button>
             <Button asChild variant="outline">
               <a href="/word-prediction.html">Open word prediction page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/word-vectors.html">Open word vectors page</a>
             </Button>
           </CardContent>
         </Card>

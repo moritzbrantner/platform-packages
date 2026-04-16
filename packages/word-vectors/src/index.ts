@@ -4,6 +4,8 @@ const DEFAULT_LIMIT = 5;
 const DEFAULT_MIN_WORD_COUNT = 1;
 const DEFAULT_MAX_VOCABULARY_SIZE = Number.POSITIVE_INFINITY;
 
+const modelInternals = new WeakMap<WordVectorModel, { options: ModelOptions; trainingData: TrainingData }>();
+
 export interface CreateWordVectorModelOptions {
   texts?: Iterable<string> | string;
   lowercase?: boolean;
@@ -42,6 +44,18 @@ export interface WordSimilarity {
   sharedContexts: number;
 }
 
+export interface SerializableWordVectorModel {
+  lowercase: boolean;
+  maxVocabularySize: number;
+  minWordCount: number;
+  windowSize: number;
+  tokenCount: number;
+  totalCooccurrenceWeight: number;
+  unigramCounts: Array<[string, number]>;
+  cooccurrenceTotals: Array<[string, number]>;
+  cooccurrenceCounts: Array<[string, Array<[string, number]>]>;
+}
+
 export interface WordVectorModel {
   readonly vocabularySize: number;
   readonly tokenCount: number;
@@ -52,6 +66,7 @@ export interface WordVectorModel {
   getVector(word: string, options?: GetWordVectorOptions): WordMeaningVector | undefined;
   similarity(leftWord: string, rightWord: string): number;
   findSimilarWords(word: string, options?: FindSimilarWordsOptions): WordSimilarity[];
+  findSimilarContexts(word: string, options?: GetWordVectorOptions): WordVectorEntry[];
 }
 
 interface ModelOptions {
@@ -87,7 +102,70 @@ export function createWordVectorModel(
   const vectorCache = new Map<string, WeightedVector>();
 
   trainTexts(trainingData, vectorCache, options.texts, modelOptions);
+  return createModel(trainingData, vectorCache, modelOptions);
+}
 
+export function trainWordVectorModel(
+  texts: Iterable<string> | string,
+  options: Omit<CreateWordVectorModelOptions, "texts"> = {},
+): WordVectorModel {
+  return createWordVectorModel({ ...options, texts });
+}
+
+export function serializeWordVectorModel(model: WordVectorModel): string {
+  const snapshot = getModelSnapshot(model);
+  return `${JSON.stringify(snapshot, null, 2)}\n`;
+}
+
+export function deserializeWordVectorModel(
+  value: string | SerializableWordVectorModel,
+): WordVectorModel {
+  const snapshot =
+    typeof value === "string" ? (JSON.parse(value) as SerializableWordVectorModel) : value;
+  const modelOptions = normalizeOptions(snapshot);
+  const trainingData: TrainingData = {
+    cooccurrenceCounts: new Map(
+      snapshot.cooccurrenceCounts.map(([word, entries]) => [word, new Map(entries)]),
+    ),
+    cooccurrenceTotals: new Map(snapshot.cooccurrenceTotals),
+    tokenCount: snapshot.tokenCount,
+    totalCooccurrenceWeight: snapshot.totalCooccurrenceWeight,
+    unigramCounts: new Map(snapshot.unigramCounts),
+  };
+  const vectorCache = new Map<string, WeightedVector>();
+
+  return createModel(trainingData, vectorCache, modelOptions);
+}
+
+export function createWordVectorBackoffSource(model: WordVectorModel) {
+  return (contextTokens: readonly string[]) => {
+    const head = contextTokens.at(-1);
+
+    if (!head) {
+      return [];
+    }
+
+    const similarWords = model.findSimilarWords(head, {
+      limit: DEFAULT_LIMIT,
+      minScore: 0.05,
+    });
+    const similarContexts = model.findSimilarContexts(head, {
+      limit: DEFAULT_LIMIT,
+      minWeight: 0,
+    });
+
+    return [
+      ...similarWords.map((entry) => ({ word: entry.word, score: entry.score })),
+      ...similarContexts.map((entry) => ({ word: entry.word, score: entry.weight })),
+    ];
+  };
+}
+
+function createModel(
+  trainingData: TrainingData,
+  vectorCache: Map<string, WeightedVector>,
+  modelOptions: ModelOptions,
+): WordVectorModel {
   const model: WordVectorModel = {
     get vocabularySize() {
       return getVocabulary(trainingData, modelOptions).length;
@@ -192,16 +270,36 @@ export function createWordVectorModel(
       matches.sort(compareSimilarWords);
       return matches.slice(0, limit);
     },
+    findSimilarContexts(word, vectorOptions = {}) {
+      return model.getVector(word, vectorOptions)?.entries ?? [];
+    },
   };
 
+  modelInternals.set(model, { options: modelOptions, trainingData });
   return model;
 }
 
-export function trainWordVectorModel(
-  texts: Iterable<string> | string,
-  options: Omit<CreateWordVectorModelOptions, "texts"> = {},
-): WordVectorModel {
-  return createWordVectorModel({ ...options, texts });
+function getModelSnapshot(model: WordVectorModel): SerializableWordVectorModel {
+  const internal = modelInternals.get(model);
+
+  if (!internal) {
+    throw new Error("Unsupported word vector model instance.");
+  }
+
+  return {
+    lowercase: internal.options.lowercase,
+    maxVocabularySize: internal.options.maxVocabularySize,
+    minWordCount: internal.options.minWordCount,
+    windowSize: internal.options.windowSize,
+    tokenCount: internal.trainingData.tokenCount,
+    totalCooccurrenceWeight: internal.trainingData.totalCooccurrenceWeight,
+    unigramCounts: Array.from(internal.trainingData.unigramCounts.entries()),
+    cooccurrenceTotals: Array.from(internal.trainingData.cooccurrenceTotals.entries()),
+    cooccurrenceCounts: Array.from(
+      internal.trainingData.cooccurrenceCounts.entries(),
+      ([word, entries]) => [word, Array.from(entries.entries())],
+    ),
+  };
 }
 
 function normalizeOptions(options: CreateWordVectorModelOptions): ModelOptions {
@@ -521,16 +619,12 @@ function compareVectorEntries(left: WordVectorEntry, right: WordVectorEntry): nu
 }
 
 function compareSimilarWords(left: WordSimilarity, right: WordSimilarity): number {
-  const scoreDelta = right.score - left.score;
-
-  if (scoreDelta !== 0) {
-    return scoreDelta;
+  if (right.score !== left.score) {
+    return right.score - left.score;
   }
 
-  const sharedContextDelta = right.sharedContexts - left.sharedContexts;
-
-  if (sharedContextDelta !== 0) {
-    return sharedContextDelta;
+  if (right.sharedContexts !== left.sharedContexts) {
+    return right.sharedContexts - left.sharedContexts;
   }
 
   return left.word.localeCompare(right.word);

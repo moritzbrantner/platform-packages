@@ -1,5 +1,12 @@
 export type TimedTextFormat = "srt" | "transcript-json" | "vtt";
 
+export interface TimedTextWord {
+  text: string;
+  startTimeMs: number;
+  endTimeMs: number;
+  confidence?: number;
+}
+
 export interface TimedTextCue {
   id: string;
   startTimeMs: number;
@@ -10,6 +17,8 @@ export interface TimedTextCue {
   final?: boolean;
   language?: string;
   metadata?: Record<string, unknown>;
+  settings?: Record<string, string>;
+  words?: TimedTextWord[];
 }
 
 export interface TimedTextDocument {
@@ -30,6 +39,8 @@ export interface TranscriptSegmentLike {
   final?: boolean;
   language?: string;
   metadata?: Record<string, unknown>;
+  settings?: Record<string, string>;
+  words?: TimedTextWord[];
 }
 
 export interface NormalizeTimedTextDocumentOptions {
@@ -49,4 +60,17 @@ export interface ParseTimedTextOptions {
 
 export interface SerializeTimedTextOptions {
   format?: TimedTextFormat;
+}
+
+export interface TimedTextOverlap {
+  firstCueId: string;
+  secondCueId: string;
+  overlapMs: number;
+}
+
+export interface TimedTextValidationIssue {
+  code: "cue-overlap" | "invalid-cue-range" | "word-outside-cue";
+  cueId: string;
+  message: string;
+  relatedCueId?: string;
 }

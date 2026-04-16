@@ -2,8 +2,10 @@ import { describe, expect, test, vi } from "vitest";
 
 import {
   collectTranscriptText,
+  createBufferedStreamingSession,
   createOpenAICompatibleTranscriber,
   createWebSocketTranscriber,
+  mergeTranscriptSegments,
   mergeTranscriptTexts,
   transcriptToPhrases,
 } from "@moritzbrantner/speech";
@@ -137,15 +139,29 @@ describe("@moritzbrantner/speech utilities", () => {
           text: "Hello world from whisper",
           language: "en",
           segments: [
-            {
-              id: "seg-1",
-              text: "Hello world from whisper",
-              start: 0,
-              end: 1.4,
-              confidence: 0.91,
-            },
-          ],
-        }),
+          {
+            id: "seg-1",
+            text: "Hello world from whisper",
+            start: 0,
+            end: 1.4,
+            confidence: 0.91,
+            words: [
+              {
+                text: "Hello",
+                start: 0,
+                end: 0.6,
+                confidence: 0.95,
+              },
+              {
+                text: "world",
+                start: 0.7,
+                end: 1.4,
+                confidence: 0.94,
+              },
+            ],
+          },
+        ],
+      }),
         {
           status: 200,
           headers: {
@@ -179,7 +195,35 @@ describe("@moritzbrantner/speech utilities", () => {
         startTimeMs: 0,
         endTimeMs: 1400,
         confidence: 0.91,
+        words: [
+          {
+            text: "Hello",
+            startTimeMs: 0,
+            endTimeMs: 600,
+            confidence: 0.95,
+          },
+          {
+            text: "world",
+            startTimeMs: 700,
+            endTimeMs: 1400,
+            confidence: 0.94,
+          },
+        ],
       }),
+    ]);
+    expect(result.words).toEqual([
+      {
+        text: "Hello",
+        startTimeMs: 0,
+        endTimeMs: 600,
+        confidence: 0.95,
+      },
+      {
+        text: "world",
+        startTimeMs: 700,
+        endTimeMs: 1400,
+        confidence: 0.94,
+      },
     ]);
   });
 
@@ -233,6 +277,13 @@ describe("@moritzbrantner/speech utilities", () => {
             start: 0,
             end: 0.9,
             final: false,
+            words: [
+              {
+                text: "hello",
+                start: 0,
+                end: 0.3,
+              },
+            ],
           },
         ],
       }),
@@ -243,6 +294,13 @@ describe("@moritzbrantner/speech utilities", () => {
         expect.objectContaining({
           text: "hello from websocket",
           isFinal: false,
+          words: [
+            {
+              text: "hello",
+              startTimeMs: 0,
+              endTimeMs: 300,
+            },
+          ],
         }),
       ]);
     });
@@ -252,5 +310,130 @@ describe("@moritzbrantner/speech utilities", () => {
     expect(JSON.parse(socket.sent.at(-1) as string)).toEqual({ type: "stop" });
     socket.close();
     await closePromise;
+  });
+
+  test("buffers chunks, reconnects, and merges interim segment revisions by id", async () => {
+    const sentChunks: number[] = [];
+    const emittedResults: Array<{ text: string; segmentCount: number }> = [];
+    const openCallbacks: Array<() => void> = [];
+    let openCount = 0;
+
+    const transcriber = {
+      async openSession(options: {
+        onClose?: () => void;
+        onResult: (result: {
+          text: string;
+          isFinal?: boolean;
+          segments?: Array<{
+            id: string;
+            text: string;
+            final: boolean;
+            startTimeMs: number;
+            endTimeMs: number;
+          }>;
+        }) => void;
+      }) {
+        openCount += 1;
+
+        return {
+          async sendAudioChunk(request: { chunkIndex?: number }) {
+            sentChunks.push(request.chunkIndex ?? -1);
+
+            if (request.chunkIndex === 1) {
+              options.onResult({
+                text: "hello",
+                isFinal: false,
+                segments: [
+                  {
+                    id: "seg-live-1",
+                    text: "hello",
+                    final: false,
+                    startTimeMs: 0,
+                    endTimeMs: 500,
+                  },
+                ],
+              });
+              options.onResult({
+                text: "hello world",
+                isFinal: true,
+                segments: [
+                  {
+                    id: "seg-live-1",
+                    text: "hello world",
+                    final: true,
+                    startTimeMs: 0,
+                    endTimeMs: 900,
+                  },
+                ],
+              });
+              openCallbacks.push(() => options.onClose?.());
+            }
+          },
+          async close() {},
+        };
+      },
+    };
+
+    const session = await createBufferedStreamingSession({
+      transcriber,
+      reconnect: { attempts: 1, delayMs: 0 },
+      maxPendingChunks: 2,
+      onResult(result) {
+        emittedResults.push({
+          text: result.text,
+          segmentCount: result.segments?.length ?? 0,
+        });
+      },
+    });
+
+    await session.sendAudioChunk({
+      audio: new Blob(["a"]),
+      chunkIndex: 1,
+    });
+    openCallbacks[0]?.();
+    await Promise.resolve();
+    await session.sendAudioChunk({
+      audio: new Blob(["b"]),
+      chunkIndex: 2,
+    });
+
+    expect(openCount).toBe(2);
+    expect(sentChunks).toEqual([1, 2]);
+    expect(emittedResults.at(-1)).toEqual({
+      text: "hello world",
+      segmentCount: 1,
+    });
+    expect(
+      mergeTranscriptSegments(
+        [
+          {
+            id: "seg-live-1",
+            text: "hello",
+            final: false,
+            startTimeMs: 0,
+            endTimeMs: 500,
+          },
+        ],
+        [
+          {
+            id: "seg-live-1",
+            text: "hello world",
+            final: true,
+            startTimeMs: 0,
+            endTimeMs: 900,
+          },
+        ],
+      ),
+    ).toEqual([
+      {
+        id: "seg-live-1",
+        text: "hello world",
+        final: true,
+        startTimeMs: 0,
+        endTimeMs: 900,
+      },
+    ]);
+
+    await session.close();
   });
 });

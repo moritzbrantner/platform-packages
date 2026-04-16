@@ -4,6 +4,8 @@ import {
   DEFAULT_WORD_PREDICTION_TEXTS,
   createDefaultWordPredictionModel,
   createWordPredictionModel,
+  deserializeWordPredictionModel,
+  serializeWordPredictionModel,
   trainWordPredictionModel,
 } from "@moritzbrantner/word-prediction";
 
@@ -184,5 +186,54 @@ describe("@moritzbrantner/word-prediction", () => {
       word: "beta",
       contextSize: 1,
     });
+  });
+
+  test("serializes and deserializes the model without changing predictions", () => {
+    const model = createWordPredictionModel({
+      texts: ["See you soon.", "See you tomorrow.", "See you tonight."],
+    });
+    const restored = deserializeWordPredictionModel(serializeWordPredictionModel(model));
+
+    expect(restored.predictNextWords("See you")).toEqual(model.predictNextWords("See you"));
+    expect(restored.tokenCount).toBe(model.tokenCount);
+    expect(restored.vocabularySize).toBe(model.vocabularySize);
+  });
+
+  test("supports typo-tolerant prefix matching only when enabled", () => {
+    const model = createWordPredictionModel({
+      texts: ["Hello there.", "Helper text.", "Held position."],
+      lowercase: false,
+    });
+
+    expect(model.predictForInput("Helo")).toEqual([]);
+    expect(
+      model.predictForInput("Helo", { fuzzyPrefixDistance: 1 }).map((prediction) => prediction.word),
+    ).toContain("Hello");
+  });
+
+  test("predicts multi-token completions and stops at sentence boundaries", () => {
+    const model = createWordPredictionModel({
+      texts: ["See you soon.", "See you soon.", "See you tomorrow.", "Call me later."],
+    });
+
+    expect(model.predictCompletion("See ", { limit: 2, maxTokens: 3 })[0]).toEqual({
+      completion: "you soon",
+      words: ["you", "soon"],
+      score: expect.any(Number),
+    });
+  });
+
+  test("accepts optional semantic backoff suggestions", () => {
+    const model = createWordPredictionModel({
+      texts: ["hello world"],
+    });
+
+    expect(
+      model
+        .predictNextWords("unseen context", {
+          semanticBackoff: () => [{ word: "semantic", score: 2 }],
+        })
+        .map((prediction) => prediction.word),
+    ).toContain("semantic");
   });
 });
