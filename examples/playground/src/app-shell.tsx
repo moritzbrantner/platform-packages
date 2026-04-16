@@ -17,6 +17,7 @@ import {
 type PageKey =
   | "home"
   | "maps"
+  | "maps-motion"
   | "parallel-text"
   | "ui"
   | "storytelling"
@@ -32,6 +33,7 @@ type AppShellProps = {
 const navigation = [
   { key: "home", href: "/index.html", label: "Overview" },
   { key: "maps", href: "/maps.html", label: "Maps package" },
+  { key: "maps-motion", href: "/maps-motion.html", label: "Maps motion demo" },
   { key: "parallel-text", href: "/parallel-text.html", label: "Parallel text package" },
   { key: "ui", href: "/ui.html", label: "UI package" },
   { key: "storytelling", href: "/storytelling.html", label: "Storytelling package" },

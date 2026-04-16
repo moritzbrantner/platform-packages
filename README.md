@@ -17,11 +17,11 @@ Shared runtime packages for the Next.js application stack.
 - Includes a local playground app for manually testing package behavior.
 
 ## Local development
-1. Install dependencies with `pnpm install`.
-2. Scaffold a new package with `pnpm create:package <name>`.
-3. Start the example pages with `pnpm dev:playground`.
-4. Build packages and the playground with `pnpm build`.
-5. Run checks with `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
+1. Install dependencies with `bun install`.
+2. Scaffold a new package with `bun run create:package <name>`.
+3. Start the example pages with `bun run dev:playground`.
+4. Build packages and the playground with `bun run build`.
+5. Run checks with `bun run lint`, `bun run typecheck`, and `bun run test`.
 
 ## Publishing
 - The package names use the neutral `@moritzbrantner/*` scope in source.

@@ -26,7 +26,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
-    "prepack": "pnpm build",
+    "prepack": "bun run build",
     "check-types": "tsc --noEmit",
     "test": "cd ../.. && vitest run packages/keyboard/tests/smoke.test.ts"
   }

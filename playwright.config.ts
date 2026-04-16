@@ -9,7 +9,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      "pnpm --filter @moritzbrantner/playground build && pnpm --filter @moritzbrantner/playground preview --host 127.0.0.1 --port 4173",
+      "bun run --filter @moritzbrantner/playground build && bun run --filter @moritzbrantner/playground preview -- --host 127.0.0.1 --port 4173",
     port: 4173,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

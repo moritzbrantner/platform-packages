@@ -69,6 +69,7 @@ export default defineConfig({
       input: {
         home: path.resolve(rootDir, "index.html"),
         maps: path.resolve(rootDir, "maps.html"),
+        mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),
@@ -78,8 +79,7 @@ export default defineConfig({
         manualChunks(id) {
           if (
             id.includes("@react-three/fiber") ||
-            id.includes("/node_modules/three/") ||
-            id.includes("/node_modules/.pnpm/three@")
+            id.includes("/node_modules/three/")
           ) {
             return "three-stage-vendor";
           }
