@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@moritzbrantner/extraction-schema": ["./src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
