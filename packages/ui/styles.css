@@ -61,6 +61,17 @@
   --radius: 0.25rem;
   --glass-blur: 20px;
   --glass-shadow: 0 24px 60px oklch(0.145 0 0 / 0.12);
+  --glass-interactive-shadow: 0 18px 38px oklch(0.145 0 0 / 0.12);
+  --glass-raised-shadow:
+    0 18px 32px oklch(0.145 0 0 / 0.16), 0 4px 10px oklch(0.145 0 0 / 0.08);
+  --glass-inset-shadow:
+    inset 0 2px 6px oklch(0.145 0 0 / 0.1), inset 0 1px 0 oklch(1 0 0 / 0.42),
+    0 1px 0 oklch(1 0 0 / 0.14);
+  --glass-inset-highlight: oklch(1 0 0 / 0.55);
+  --glass-surface-tint: oklch(1 0 0 / 0.12);
+  --glass-inset-surface: oklch(0.93 0.01 248 / 0.38);
+  --glass-cursor-glow: oklch(1 0 0 / 0.72);
+  --glass-cursor-glow-accent: oklch(0.82 0.05 235 / 0.38);
   --background: oklch(0.985 0.006 250);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0 / 0.48);
@@ -96,6 +107,17 @@
 
 .dark {
   --glass-shadow: 0 24px 70px oklch(0 0 0 / 0.35);
+  --glass-interactive-shadow: 0 18px 40px oklch(0 0 0 / 0.3);
+  --glass-raised-shadow:
+    0 18px 34px oklch(0 0 0 / 0.34), 0 4px 12px oklch(0 0 0 / 0.2);
+  --glass-inset-shadow:
+    inset 0 2px 8px oklch(0 0 0 / 0.34), inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 1px 0 oklch(1 0 0 / 0.04);
+  --glass-inset-highlight: oklch(1 0 0 / 0.12);
+  --glass-surface-tint: oklch(1 0 0 / 0.035);
+  --glass-inset-surface: oklch(0.16 0.008 255 / 0.52);
+  --glass-cursor-glow: oklch(1 0 0 / 0.2);
+  --glass-cursor-glow-accent: oklch(0.82 0.05 235 / 0.16);
   --background: oklch(0.17 0.01 255);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.23 0.012 255 / 0.56);
@@ -176,10 +198,145 @@
     [data-slot="command"],
     [data-slot="toast"]
   ) {
+    position: relative;
+    isolation: isolate;
     border-radius: 0 !important;
+    border-color: color-mix(in oklch, var(--border) 92%, white 8%);
     box-shadow: var(--glass-shadow);
+    background-image:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--glass-surface-tint) 100%, transparent) 0%,
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at top left,
+        color-mix(in oklch, var(--glass-inset-highlight) 52%, transparent) 0%,
+        transparent 48%
+      );
     backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  }
+
+  :where(
+    [data-slot="button"],
+    [data-slot="badge"],
+    [data-slot="tabs-list"],
+    [data-slot="tabs-trigger"],
+    [data-slot="toggle"],
+    [data-slot="toggle-group"],
+    [data-slot="toggle-group-item"],
+    [data-slot="accordion-trigger"],
+    [data-slot="checkbox"],
+    [data-slot="radio-group-item"],
+    [data-slot="switch"],
+    [data-slot="progress"],
+    [data-slot="slider-track"],
+    [data-slot="slider-thumb"],
+    [data-slot="table-container"],
+    [data-slot="table-row"],
+    [data-slot="table-head"],
+    [data-slot="table-cell"],
+    [data-slot="item"],
+    [data-slot="separator"],
+    [data-slot="empty"],
+    [data-slot="skeleton"]
+  ) {
+    position: relative;
+    isolation: isolate;
+    border-radius: 0 !important;
+    border-color: color-mix(in oklch, var(--border) 90%, white 10%);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-inset-highlight),
+      var(--glass-raised-shadow);
+    backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(150%);
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(150%);
+  }
+
+  :where(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="input-group"],
+    [data-slot="select-trigger"],
+    [data-slot="native-select"]
+  ) {
+    position: relative;
+    isolation: isolate;
+    border-radius: 0 !important;
+    border-color: color-mix(in oklch, var(--border) 94%, black 6%);
+    box-shadow: var(--glass-inset-shadow);
+    background-color: var(--glass-inset-surface);
+    backdrop-filter: blur(calc(var(--glass-blur) * 0.55)) saturate(125%);
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.55)) saturate(125%);
+  }
+
+  :where(
+    [data-slot="dialog-overlay"],
+    [data-slot="alert-dialog-overlay"],
+    [data-slot="sheet-overlay"],
+    [data-slot="drawer-overlay"]
+  ) {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  :where(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="input-group"],
+    [data-slot="select-trigger"],
+    [data-slot="native-select"],
+    [data-slot="tabs-list"],
+    [data-slot="tabs-trigger"],
+    [data-slot="toggle"],
+    [data-slot="toggle-group"],
+    [data-slot="toggle-group-item"],
+    [data-slot="accordion-trigger"],
+    [data-slot="checkbox"],
+    [data-slot="radio-group-item"],
+    [data-slot="switch"],
+    [data-slot="progress"],
+    [data-slot="slider-track"],
+    [data-slot="slider-thumb"],
+    [data-slot="table-container"],
+    [data-slot="table-row"],
+    [data-slot="table-head"],
+    [data-slot="table-cell"],
+    [data-slot="item"],
+    [data-slot="empty"],
+    [data-slot="skeleton"]
+  ) {
+    background-image:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--glass-surface-tint) 72%, transparent) 0%,
+        transparent 42%
+      ),
+      radial-gradient(
+        circle at top left,
+        color-mix(in oklch, var(--glass-inset-highlight) 38%, transparent) 0%,
+        transparent 52%
+      );
+  }
+
+  :where(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="input-group"],
+    [data-slot="select-trigger"],
+    [data-slot="native-select"]
+  ) {
+    background-image:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, black 4%, transparent) 0%,
+        transparent 24%
+      ),
+      radial-gradient(
+        circle at 50% 0%,
+        color-mix(in oklch, white 16%, transparent) 0%,
+        transparent 46%
+      );
   }
 
   :where(
@@ -196,20 +353,182 @@
     [data-slot="toggle-group"],
     [data-slot="toggle-group-item"],
     [data-slot="accordion-trigger"],
-    [data-slot="empty"],
-    [data-slot="skeleton"]
-  ) {
-    border-radius: 0 !important;
+    [data-slot="item"],
+    [data-slot="empty"]
+  )::after,
+  :where(
+    [data-slot="card"],
+    [data-slot="alert"],
+    [data-slot="dialog-content"],
+    [data-slot="alert-dialog-content"],
+    [data-slot="sheet-content"],
+    [data-slot="drawer-content"],
+    [data-slot="popover-content"],
+    [data-slot="hover-card-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="dropdown-menu-sub-content"],
+    [data-slot="context-menu-content"],
+    [data-slot="context-menu-sub-content"],
+    [data-slot="menubar-content"],
+    [data-slot="menubar-sub-content"],
+    [data-slot="navigation-menu-content"],
+    [data-slot="navigation-menu-viewport"],
+    [data-slot="select-content"],
+    [data-slot="combobox-content"],
+    [data-slot="command"],
+    [data-slot="toast"]
+  )::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--glass-inset-highlight) 58%, transparent) 0%,
+        transparent 24%
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in oklch, white 10%, transparent) 0%,
+        transparent 22%,
+        transparent 78%,
+        color-mix(in oklch, white 8%, transparent) 100%
+      );
+    opacity: 0.9;
+    z-index: 0;
   }
 
   :where(
-    [data-slot="dialog-overlay"],
-    [data-slot="alert-dialog-overlay"],
-    [data-slot="sheet-overlay"],
-    [data-slot="drawer-overlay"]
+    [data-slot="button"],
+    [data-slot="button"]::before,
+    [data-slot="button"]::after
   ) {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  :where([data-slot="button"]) {
+    overflow: hidden;
+  }
+
+  :where([data-slot="button"])::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle 58px at var(--glass-cursor-x, 50%) var(--glass-cursor-y, 50%),
+      var(--glass-cursor-glow) 0%,
+      color-mix(in oklch, var(--glass-cursor-glow-accent) 82%, transparent) 22%,
+      transparent 54%
+    );
+    opacity: 0;
+    z-index: 0;
+  }
+
+  :where(
+    [data-slot="button"]:hover,
+    [data-slot="button"]:focus-visible
+  )::before {
+    opacity: 1;
+  }
+
+  :where([data-slot="button"] > *) {
+    position: relative;
+    z-index: 1;
+  }
+
+  :where([data-slot="button"]) {
+    background-position: center;
+    transform: translateY(-1px);
+  }
+
+  :where([data-slot="button"]:active) {
+    transform: translateY(1px);
+    box-shadow:
+      inset 0 1px 0 0
+        color-mix(in oklch, var(--glass-inset-highlight) 65%, transparent),
+      var(--glass-interactive-shadow);
+  }
+
+  :where(
+    [data-slot="card"] > *,
+    [data-slot="alert"] > *,
+    [data-slot="dialog-content"] > *,
+    [data-slot="alert-dialog-content"] > *,
+    [data-slot="sheet-content"] > *,
+    [data-slot="drawer-content"] > *,
+    [data-slot="popover-content"] > *,
+    [data-slot="hover-card-content"] > *,
+    [data-slot="dropdown-menu-content"] > *,
+    [data-slot="dropdown-menu-sub-content"] > *,
+    [data-slot="context-menu-content"] > *,
+    [data-slot="context-menu-sub-content"] > *,
+    [data-slot="menubar-content"] > *,
+    [data-slot="menubar-sub-content"] > *,
+    [data-slot="navigation-menu-content"] > *,
+    [data-slot="navigation-menu-viewport"] > *,
+    [data-slot="select-content"] > *,
+    [data-slot="combobox-content"] > *,
+    [data-slot="command"] > *,
+    [data-slot="toast"] > *,
+    [data-slot="badge"] > *,
+    [data-slot="tabs-list"] > *,
+    [data-slot="tabs-trigger"] > *,
+    [data-slot="toggle"] > *,
+    [data-slot="toggle-group"] > *,
+    [data-slot="toggle-group-item"] > *,
+    [data-slot="accordion-trigger"] > *,
+    [data-slot="item"] > *,
+    [data-slot="empty"] > *
+  ) {
+    position: relative;
+    z-index: 1;
+  }
+
+  :where([data-slot="table-container"]) {
+    overflow: hidden;
+    background-color: color-mix(in oklch, var(--card) 88%, transparent);
+  }
+
+  :where([data-slot="table"]) {
+    border-collapse: collapse;
+  }
+
+  :where([data-slot="table-head"]) {
+    background-color: color-mix(in oklch, var(--muted) 72%, transparent);
+  }
+
+  :where([data-slot="table-row"]) {
+    background-color: color-mix(in oklch, var(--background) 58%, transparent);
+  }
+
+  :where([data-slot="table-row"]:hover) {
+    background-color: color-mix(in oklch, var(--accent) 62%, transparent);
+  }
+
+  :where(
+    [data-slot="checkbox"],
+    [data-slot="radio-group-item"],
+    [data-slot="switch"]
+  ) {
+    background-color: color-mix(in oklch, var(--background) 52%, transparent);
+  }
+
+  :where([data-slot="progress"], [data-slot="slider-track"]) {
+    background-color: color-mix(in oklch, var(--muted) 72%, transparent);
+  }
+
+  :where([data-slot="separator"]) {
+    background-color: color-mix(in oklch, var(--border) 88%, transparent);
+    box-shadow: none;
+  }
+
+  :where([data-slot="skeleton"]) {
+    background-color: color-mix(in oklch, var(--muted) 74%, transparent);
   }
 }
 
