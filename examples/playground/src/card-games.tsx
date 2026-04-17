@@ -9,7 +9,7 @@ import {
   type PlayingCardEffect,
   type PlayingCardTone,
 } from "@moritzbrantner/card-games";
-import { Badge } from "@moritzbrantner/ui";
+import { Badge, Button } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
 import { mountPage } from "./mount";
@@ -83,10 +83,11 @@ function CardGamesPage() {
         >
           <CardFan aria-label="Opening hand" className="justify-start overflow-x-auto">
             {openingHand.map((card, index) => (
-              <button
+              <Button
                 key={`${card.rank}-${card.suit}`}
                 type="button"
                 aria-label={`Select ${card.headline}`}
+                variant="ghost"
                 className="rounded-[1.8rem] bg-transparent p-0 text-left"
                 onClick={() => setSelectedCard(index)}
               >
@@ -102,7 +103,7 @@ function CardGamesPage() {
                   badge={card.badge}
                   selected={selectedCard === index}
                 />
-              </button>
+              </Button>
             ))}
           </CardFan>
         </CardTable>

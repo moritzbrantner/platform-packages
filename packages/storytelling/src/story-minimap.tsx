@@ -2,7 +2,7 @@
 
 import { motion, useTransform } from "motion/react";
 
-import { cn } from "@moritzbrantner/ui";
+import { Button, cn } from "@moritzbrantner/ui";
 
 import { useStoryContext } from "./story-context";
 
@@ -69,8 +69,9 @@ function StoryMinimapComponent({
 
             return (
               <li key={scene.id} className="shrink-0 md:shrink">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   className={cn(
                     "flex min-w-[10rem] items-start gap-3 rounded-xl border px-3 py-3 text-left transition-colors md:min-w-0 md:w-full md:items-center",
                     isActive
@@ -108,7 +109,7 @@ function StoryMinimapComponent({
                       {scene.title}
                     </span>
                   </span>
-                </button>
+                </Button>
               </li>
             );
           })}

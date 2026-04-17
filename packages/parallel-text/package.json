@@ -24,7 +24,8 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/linguistics-core": "workspace:*"
+    "@moritzbrantner/linguistics-core": "workspace:*",
+    "@moritzbrantner/ui": "workspace:^"
   },
   "peerDependencies": {
     "react": "^19.0.0",

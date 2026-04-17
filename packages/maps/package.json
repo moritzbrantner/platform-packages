@@ -29,6 +29,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@moritzbrantner/ui": "workspace:^",
     "d3-delaunay": "^6.0.4",
     "maplibre-gl": "^5.10.0",
     "supercluster": "^8.0.1",

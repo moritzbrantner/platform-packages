@@ -3,6 +3,8 @@
 import { useId, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, TextareaHTMLAttributes } from "react";
 
+import { Button } from "@moritzbrantner/ui";
+
 import type { PredictWordOptions, WordPrediction, WordPredictionModel } from "./model";
 
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
@@ -172,7 +174,7 @@ export function WordPredictionComposer({
             <p style={styles.shortcutHint}>Use Ctrl+1-9. Cmd+1-9 also works on macOS.</p>
           </div>
           <div style={styles.toggleRow}>
-            <button
+            <Button
               type="button"
               aria-pressed={showScore}
               onClick={() => setShowScore((current) => !current)}
@@ -182,8 +184,8 @@ export function WordPredictionComposer({
               }}
             >
               Show score
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               aria-pressed={showContext}
               onClick={() => setShowContext((current) => !current)}
@@ -193,7 +195,7 @@ export function WordPredictionComposer({
               }}
             >
               Show context
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -233,9 +235,9 @@ export function WordPredictionComposer({
             }}
           />
           {onSubmit ? (
-            <button type="button" onClick={submitDraft} style={styles.submitButton}>
+            <Button type="button" onClick={submitDraft} style={styles.submitButton}>
               {submitLabel}
-            </button>
+            </Button>
           ) : null}
         </div>
       </section>
@@ -262,7 +264,7 @@ function SuggestionButton({
   const contextLabel = describePredictionContext(input, prediction.contextSize);
 
   return (
-    <button
+    <Button
       type="button"
       data-word-prediction-suggestion="true"
       onClick={() => onSelect(prediction.word)}
@@ -278,7 +280,7 @@ function SuggestionButton({
           {showContext ? <span>{`Context ${contextLabel}`}</span> : null}
         </div>
       ) : null}
-    </button>
+    </Button>
   );
 }
 

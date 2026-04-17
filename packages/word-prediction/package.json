@@ -31,6 +31,7 @@
     "react": "^19.0.0"
   },
   "dependencies": {
+    "@moritzbrantner/ui": "workspace:^",
     "@moritzbrantner/word-vectors": "workspace:*"
   },
   "devDependencies": {
