@@ -46,6 +46,10 @@ export default defineConfig({
         rootDir,
         "packages/sentiment-analysis/src/index.ts",
       ),
+      "@moritzbrantner/source-ingestion": path.resolve(
+        rootDir,
+        "packages/source-ingestion/src/index.ts",
+      ),
       "@moritzbrantner/speed-reading": path.resolve(
         rootDir,
         "packages/speed-reading/src/index.ts",
