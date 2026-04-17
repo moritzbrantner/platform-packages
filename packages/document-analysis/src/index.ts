@@ -9,6 +9,11 @@ import type {
   SentimentAnalysisPipeline,
   SentimentAnalysisResult,
 } from "@moritzbrantner/sentiment-analysis";
+import type {
+  SyntaxAnalysisResult,
+  SyntaxDocumentSummary,
+  SyntaxPipeline,
+} from "@moritzbrantner/syntax-analysis";
 import type { TextAnalysisPipeline, TextAnalysisResult } from "@moritzbrantner/text-analysis";
 import type {
   TextSummarizationPipeline,
@@ -27,6 +32,8 @@ export interface DocumentAnalysisReport<
   summary?: TextSummaryResult;
   sentiment?: SentimentAnalysisResult;
   analysis?: TextAnalysisResult<Metadata>;
+  syntax?: SyntaxAnalysisResult<Metadata>;
+  syntaxSummary?: SyntaxDocumentSummary;
   answers: Array<{ question: string; answer: QuestionAnswer | null }>;
 }
 
@@ -35,6 +42,7 @@ export interface CreateDocumentAnalysisPipelineOptions<
 > {
   questionAnswering?: QuestionAnsweringPipeline<Metadata>;
   textAnalysis?: TextAnalysisPipeline<Metadata>;
+  syntaxAnalysis?: SyntaxPipeline<Metadata>;
   sentimentAnalysis?: SentimentAnalysisPipeline<Metadata>;
   summarization?: TextSummarizationPipeline<Metadata>;
   defaultQuestions?: string[];
@@ -45,6 +53,7 @@ export interface AnalyzeDocumentOptions {
   includeSummary?: boolean;
   includeSentiment?: boolean;
   includeTextAnalysis?: boolean;
+  includeSyntax?: boolean;
 }
 
 export interface DocumentAnalysisPipeline<
@@ -66,7 +75,7 @@ export function createDocumentAnalysisPipeline<
       const normalized = normalizeDocumentInput(input);
       const questions = analysisOptions.questions ?? options.defaultQuestions ?? [];
 
-      const [summary, sentiment, analysis, answers] = await Promise.all([
+      const [summary, sentiment, analysis, syntax, answers] = await Promise.all([
         analysisOptions.includeSummary !== false && options.summarization
           ? options.summarization.summarize(normalized.document)
           : Promise.resolve(undefined),
@@ -75,6 +84,9 @@ export function createDocumentAnalysisPipeline<
           : Promise.resolve(undefined),
         analysisOptions.includeTextAnalysis !== false && options.textAnalysis
           ? options.textAnalysis.analyze(normalized.document)
+          : Promise.resolve(undefined),
+        analysisOptions.includeSyntax !== false && options.syntaxAnalysis
+          ? options.syntaxAnalysis.analyzeSyntax(normalized.document)
           : Promise.resolve(undefined),
         options.questionAnswering
           ? Promise.all(
@@ -92,6 +104,8 @@ export function createDocumentAnalysisPipeline<
         summary,
         sentiment,
         analysis,
+        syntax,
+        syntaxSummary: syntax?.summary,
         answers,
       };
     },

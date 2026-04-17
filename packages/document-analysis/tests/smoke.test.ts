@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { createDocumentAnalysisPipeline } from "@moritzbrantner/document-analysis";
 
 describe("@moritzbrantner/document-analysis", () => {
-  test("orchestrates summary, sentiment, text analysis, and QA", async () => {
+  test("orchestrates summary, sentiment, text analysis, syntax analysis, and QA", async () => {
     const pipeline = createDocumentAnalysisPipeline({
       defaultQuestions: ["Where?"],
       summarization: {
@@ -36,6 +36,44 @@ describe("@moritzbrantner/document-analysis", () => {
           chunks: [],
         }),
       },
+      syntaxAnalysis: {
+        analyzeSyntax: async (input) => ({
+          document: typeof input === "string" ? (null as never) : input,
+          tokens: [
+            {
+              tokenId: "token-0",
+              tokenIndex: 0,
+              sentenceId: "sentence-0",
+              sentenceIndex: 0,
+              text: "Clara",
+              normalized: "clara",
+              lemma: "clara",
+              posTag: "NOUN",
+              score: 0.9,
+            },
+          ],
+          lemmas: ["clara"],
+          posTags: ["NOUN"],
+          dependencyArcs: [],
+          sentences: [],
+          summary: {
+            sentenceCount: 1,
+            tokenCount: 1,
+            posTagHistogram: [{ tag: "NOUN", count: 1 }],
+            relationHistogram: [],
+            topLemmas: [{ lemma: "clara", count: 1 }],
+          },
+        }),
+        analyzeSentenceSyntax: async () => ({
+          sentenceId: "sentence-0",
+          sentenceIndex: 0,
+          text: "Clara runs support from Berlin.",
+          tokens: [],
+          lemmas: [],
+          posTags: [],
+          dependencyArcs: [],
+        }),
+      },
       questionAnswering: {
         answer: async () => [],
         answerMany: async () => ({}),
@@ -56,6 +94,7 @@ describe("@moritzbrantner/document-analysis", () => {
     expect(report.summary?.summary).toBe("Clara runs support from Berlin.");
     expect(report.sentiment?.sentiment).toBe("positive");
     expect(report.analysis?.entities[0]?.text).toBe("Berlin");
+    expect(report.syntaxSummary?.topLemmas[0]?.lemma).toBe("clara");
     expect(report.answers[0]?.answer?.answer).toBe("Berlin");
   });
 });
