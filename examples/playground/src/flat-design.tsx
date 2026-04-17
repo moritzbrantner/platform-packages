@@ -2,10 +2,12 @@ import { useMemo, useState } from "react";
 
 import {
   FlatScene,
-  createBobbingAnimation,
+  createFlatBadgeFigure,
+  createFlatCardFigure,
+  createFlatCloudFigure,
   createFlatShowcaseScene,
-  createOpacityPulseAnimation,
-  createPulseAnimation,
+  createFlatSparkleFigure,
+  createFlatSunFigure,
   renderFlatSceneToSvg,
   type FlatColorPalette,
   type FlatDesignScene,
@@ -58,81 +60,89 @@ const palettePresets: ReadonlyArray<{
 
 function createBadgeScene(accent: string, animate: boolean): FlatDesignScene {
   return {
-    width: 260,
+    width: 320,
     height: 220,
-    title: "Custom badge",
+    title: "Figure helpers",
     background: "#F6F9FF",
     layers: [
       {
         shapes: [
-          {
-            kind: "group",
-            transform: "translate(130 110)",
-            animations: animate
-              ? [
-                  createPulseAnimation({ from: 1, to: 1.08, dur: "5.4s" }),
-                  createOpacityPulseAnimation({
+          createFlatSunFigure({
+            x: 58,
+            y: 52,
+            scale: 0.72,
+            color: "#FFC95C",
+            haloColor: "#FFC95C",
+            motion: animate
+              ? {
+                  preset: "pulse",
+                  options: {
+                    from: 1,
+                    to: 1.08,
                     minOpacity: 0.82,
                     maxOpacity: 1,
                     dur: "5.4s",
-                  }),
-                ]
-              : undefined,
-            children: [
-              {
-                kind: "circle",
-                cx: 0,
-                cy: 0,
-                r: 72,
-                fill: accent,
-                opacity: 0.18,
-              },
-              {
-                kind: "rect",
-                x: -62,
-                y: -50,
-                width: 124,
-                height: 100,
-                rx: 28,
-                fill: accent,
-              },
-              {
-                kind: "rect",
-                x: -38,
-                y: -18,
-                width: 76,
-                height: 16,
-                rx: 8,
-                fill: "#FFFFFF",
-                opacity: 0.95,
-              },
-              {
-                kind: "rect",
-                x: -24,
-                y: 14,
-                width: 48,
-                height: 12,
-                rx: 6,
-                fill: "#FFFFFF",
-                opacity: 0.8,
-              },
-            ],
-          },
-          {
-            kind: "group",
-            transform: "translate(204 58)",
-            animations: animate
-              ? [createBobbingAnimation({ distance: 10, dur: "4.1s" })]
-              : undefined,
-            children: [
-              { kind: "circle", cx: 0, cy: 0, r: 24, fill: "#111827" },
-              {
-                kind: "path",
-                d: "M-7 -1l5 5L9 -9l4 4L-2 12-11 3z",
-                fill: "#FFFFFF",
-              },
-            ],
-          },
+                  },
+                }
+              : false,
+          }),
+          createFlatCloudFigure({
+            x: 108,
+            y: 64,
+            scale: 0.88,
+            motion: animate
+              ? { preset: "drift", options: { distance: 14, dur: "8.6s" } }
+              : false,
+          }),
+          createFlatCardFigure({
+            x: 128,
+            y: 122,
+            width: 132,
+            height: 86,
+            surface: accent,
+            detail: "#FFFFFF",
+            accent: "#FFFFFF",
+            motion: animate
+              ? {
+                  preset: "pulse",
+                  options: {
+                    from: 1,
+                    to: 1.06,
+                    minOpacity: 0.86,
+                    maxOpacity: 1,
+                    dur: "5.4s",
+                  },
+                }
+              : false,
+          }),
+          createFlatBadgeFigure({
+            x: 252,
+            y: 72,
+            scale: 0.44,
+            color: "#111827",
+            highlight: "#FFFFFF",
+            checkColor: "#111827",
+            motion: animate
+              ? { preset: "bobbing", options: { distance: 10, dur: "4.1s" } }
+              : false,
+          }),
+          createFlatSparkleFigure({
+            x: 268,
+            y: 152,
+            color: accent,
+            motion: animate
+              ? {
+                  preset: "pulse",
+                  options: {
+                    from: 0.9,
+                    to: 1.15,
+                    minOpacity: 0.45,
+                    maxOpacity: 1,
+                    dur: "4.8s",
+                  },
+                }
+              : false,
+          }),
         ],
       },
     ],
@@ -232,8 +242,8 @@ function FlatDesignPage() {
             <div className="space-y-2">
               <CardTitle className="text-2xl">Composable primitives</CardTitle>
               <CardDescription className="text-sm leading-6">
-                Build a smaller badge-style illustration with the same shape schema and
-                motion helpers.
+                Compose scenes from the packaged figure helpers and swap between
+                bobbing, drift, and pulse motion presets.
               </CardDescription>
             </div>
           </CardHeader>

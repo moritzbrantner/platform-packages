@@ -4,8 +4,14 @@ import { describe, expect, test } from "vitest";
 import {
   FlatScene,
   createBobbingAnimation,
+  createFlatBadgeFigure,
+  createFlatCardFigure,
+  createFlatCloudFigure,
   createFlatDesignPalette,
+  createFlatFigureAnimations,
+  createFlatSparkleFigure,
   createFlatShowcaseScene,
+  createFlatSunFigure,
   renderFlatSceneToSvg,
   type FlatDesignScene,
 } from "@moritzbrantner/flat-design";
@@ -66,6 +72,65 @@ describe("@moritzbrantner/flat-design", () => {
     expect(svg).toContain("url(#flat-panel-gradient)");
   });
 
+  test("builds reusable figures with all three motion presets", () => {
+    const motions = ["bobbing", "drift", "pulse"] as const;
+
+    for (const motion of motions) {
+      const figures = [
+        createFlatCloudFigure({ motion }),
+        createFlatSparkleFigure({ motion }),
+        createFlatBadgeFigure({ motion }),
+        createFlatCardFigure({ motion }),
+        createFlatSunFigure({ motion }),
+      ];
+
+      for (const figure of figures) {
+        expect(figure.kind).toBe("group");
+        expect(figure.children.length).toBeGreaterThan(0);
+        expect(figure.animations?.length).toBe(motion === "pulse" ? 2 : 1);
+      }
+    }
+  });
+
+  test("serializes figure helper animations into svg markup", () => {
+    const scene: FlatDesignScene = {
+      width: 320,
+      height: 220,
+      title: "Figure helpers",
+      layers: [
+        {
+          shapes: [
+            createFlatCloudFigure({
+              x: 72,
+              y: 64,
+              motion: { preset: "drift", options: { distance: 10, dur: "8s" } },
+            }),
+            createFlatBadgeFigure({
+              x: 158,
+              y: 124,
+              motion: { preset: "bobbing", options: { distance: 8, dur: "4s" } },
+            }),
+            createFlatSparkleFigure({
+              x: 252,
+              y: 58,
+              motion: {
+                preset: "pulse",
+                options: { from: 0.9, to: 1.12, minOpacity: 0.5, dur: "5s" },
+              },
+            }),
+          ],
+        },
+      ],
+    };
+
+    const svg = renderFlatSceneToSvg(scene);
+
+    expect(svg).toContain('translate(72 64)');
+    expect(svg).toContain('translate(158 124)');
+    expect(svg.match(/animateTransform/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+    expect(svg).toContain('attributeName="opacity"');
+  });
+
   test("merges palette overrides without dropping defaults", () => {
     const palette = createFlatDesignPalette({
       accent: "#111111",
@@ -76,5 +141,12 @@ describe("@moritzbrantner/flat-design", () => {
     expect(palette.accentAlt).toBe("#222222");
     expect(palette.background).toBeTruthy();
     expect(palette.highlight).toBeTruthy();
+  });
+
+  test("maps motion presets to svg animation arrays", () => {
+    expect(createFlatFigureAnimations("bobbing")?.length).toBe(1);
+    expect(createFlatFigureAnimations("drift")?.length).toBe(1);
+    expect(createFlatFigureAnimations("pulse")?.length).toBe(2);
+    expect(createFlatFigureAnimations(false)).toBeUndefined();
   });
 });
