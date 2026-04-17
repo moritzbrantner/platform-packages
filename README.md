@@ -9,14 +9,20 @@ Shared runtime packages for the Next.js application stack.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
 - `@moritzbrantner/hexagon-grids`: globe-aware H3 hex indexing, polygon coverage, neighborhood/path helpers, and point aggregation into hex cells.
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
+- `@moritzbrantner/document-analysis`: orchestration layer that combines OCR/text normalization with summarization, sentiment, text analysis, and question answering into one document report.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
 - `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, and multilingual term frequencies.
 - `@moritzbrantner/linguistics-learning`: interlinear annotation, corpus-derived study-term extraction, flashcard derivation, and SM-2 style recall grading on top of the corpus layer.
 - `@moritzbrantner/maps`: browser map component plus standalone point aggregation utilities for large clustered datasets.
+- `@moritzbrantner/question-answering`: chunk-aware extractive question answering pipeline with ranked answers across long contexts.
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
+- `@moritzbrantner/sentiment-analysis`: label-normalized sentiment scoring on top of text-classification models, with chunk aggregation for longer texts.
 - `@moritzbrantner/speech`: microphone capture, chunked speech-to-text orchestration, and Whisper-compatible HTTP transcription adapters for live or batch transcription flows.
   Includes local Python and Bun websocket server examples for the default streaming protocol.
 - `@moritzbrantner/subtitles`: SRT/VTT/transcript timed-text parsing, editing, validation, overlap detection, and word-level timing preservation.
+- `@moritzbrantner/text-analysis`: composable labels, entities, embeddings, and keyword extraction pipeline over raw text or `TextDocument`s.
+- `@moritzbrantner/text-inference`: shared chunking, task contracts, and Hugging Face HTTP wrappers used by the text-focused AI packages.
+- `@moritzbrantner/text-summarization`: chunked summarization pipeline with optional multi-pass reduction for longer documents.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
 - `@moritzbrantner/storytelling`: branching and scroll-driven storytelling primitives with interactive choices, motion.dev transitions, and optional Remotion/Three.js adapters.
 - `@moritzbrantner/word-prediction`: next-word suggestion engine for chat-style and keyboard-style text prediction, with optional semantic backoff from word vectors.
@@ -26,6 +32,9 @@ Shared runtime packages for the Next.js application stack.
 
 - `@moritzbrantner/linguistics-core` is the base document and segmentation layer.
 - `@moritzbrantner/linguistics-corpus` builds on core and owns corpus indexing, concordance, and term frequency logic.
+- `@moritzbrantner/text-inference` adds provider contracts, Hugging Face routing, and shared chunking on top of core documents.
+- `@moritzbrantner/question-answering`, `@moritzbrantner/text-analysis`, `@moritzbrantner/sentiment-analysis`, and `@moritzbrantner/text-summarization` all build on that shared text-inference layer so task packages stay consistent while providers remain swappable.
+- `@moritzbrantner/document-analysis` sits above OCR plus the text task packages to produce a single document report from raw text or scanned input.
 - `@moritzbrantner/word-vectors` builds on corpus-backed documents so similarity models are trained from an explicit corpus layer.
 - `@moritzbrantner/linguistics-learning` sits above corpus so study-term extraction can aggregate across documents instead of only per-document text.
 - `@moritzbrantner/word-prediction` sits above word vectors and can use them for semantic backoff when exact n-gram context is sparse.

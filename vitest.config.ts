@@ -12,6 +12,10 @@ export default defineConfig({
         "packages/collaboration/src/index.ts",
       ),
       "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
+      "@moritzbrantner/document-analysis": path.resolve(
+        rootDir,
+        "packages/document-analysis/src/index.ts",
+      ),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
       "@moritzbrantner/hexagon-grids": path.resolve(
         rootDir,
@@ -37,6 +41,11 @@ export default defineConfig({
         rootDir,
         "packages/parallel-text/src/model.ts",
       ),
+      "@moritzbrantner/question-answering": path.resolve(rootDir, "packages/question-answering/src/index.ts"),
+      "@moritzbrantner/sentiment-analysis": path.resolve(
+        rootDir,
+        "packages/sentiment-analysis/src/index.ts",
+      ),
       "@moritzbrantner/speed-reading": path.resolve(
         rootDir,
         "packages/speed-reading/src/index.ts",
@@ -48,8 +57,14 @@ export default defineConfig({
       "@moritzbrantner/speech": path.resolve(rootDir, "packages/speech/src/index.ts"),
       "@moritzbrantner/speech/core": path.resolve(rootDir, "packages/speech/src/core.ts"),
       "@moritzbrantner/speech/react": path.resolve(rootDir, "packages/speech/src/react.ts"),
-      "@moritzbrantner/subtitles": path.resolve(rootDir, "packages/subtitles/src/index.ts"),
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
+      "@moritzbrantner/subtitles": path.resolve(rootDir, "packages/subtitles/src/index.ts"),
+      "@moritzbrantner/text-analysis": path.resolve(rootDir, "packages/text-analysis/src/index.ts"),
+      "@moritzbrantner/text-inference": path.resolve(
+        rootDir,
+        "packages/text-inference/src/index.ts",
+      ),
+      "@moritzbrantner/text-summarization": path.resolve(rootDir, "packages/text-summarization/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
       "@moritzbrantner/word-prediction": path.resolve(rootDir, "packages/word-prediction/src/index.ts"),
       "@moritzbrantner/word-prediction/core": path.resolve(
