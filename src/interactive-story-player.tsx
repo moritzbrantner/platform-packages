@@ -206,7 +206,7 @@ export function InteractiveStoryPlayer<
                 <div className="mt-4 space-y-3">
                   {choices.length > 0 ? (
                     choices.map((choice) => (
-                      <button
+                      <Button
                         key={choice.id}
                         type="button"
                         onClick={() => choose(choice.id)}
@@ -225,7 +225,7 @@ export function InteractiveStoryPlayer<
                             {choice.description}
                           </span>
                         ) : null}
-                      </button>
+                      </Button>
                     ))
                   ) : (
                     <p className="text-sm text-muted-foreground">
