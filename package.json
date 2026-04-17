@@ -14,6 +14,11 @@
     "lint": "turbo run lint && node scripts/verify-package-styles.mjs && node scripts/verify-ui-components.mjs",
     "preview:playground": "bun run --filter @moritzbrantner/playground preview",
     "build:playground": "bun run --filter @moritzbrantner/playground build",
+    "release:build": "bun run --filter @moritzbrantner/ui build && bun run --filter @moritzbrantner/storytelling build && bun run --filter @moritzbrantner/maps build",
+    "release:lint": "bun run --filter @moritzbrantner/ui lint && bun run --filter @moritzbrantner/storytelling lint && bun run --filter @moritzbrantner/maps lint && node scripts/verify-package-styles.mjs && node scripts/verify-ui-components.mjs",
+    "release:publish": "node scripts/publish-scaffold-packages.mjs",
+    "release:test": "bun test ./tests/scaffold-contract.test.ts && bun run --filter @moritzbrantner/ui test && bun run --filter @moritzbrantner/storytelling test && bun run --filter @moritzbrantner/maps test",
+    "release:typecheck": "bun run --filter @moritzbrantner/ui check-types && bun run --filter @moritzbrantner/storytelling check-types && bun run --filter @moritzbrantner/maps check-types",
     "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
     "test": "bun test ./tests/scaffold-contract.test.ts && turbo run test"

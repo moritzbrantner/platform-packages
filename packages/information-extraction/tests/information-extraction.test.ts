@@ -4,7 +4,7 @@ import {
   createInformationExtractionPipeline,
   toGraphJson,
   type RelationExtractionProvider,
-} from "@moritzbrantner/information-extraction";
+} from "../src/index";
 import type { TokenClassificationProvider } from "@moritzbrantner/text-inference";
 import type { TextAnalysisResult } from "@moritzbrantner/text-analysis";
 

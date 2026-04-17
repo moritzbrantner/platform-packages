@@ -20,7 +20,7 @@ export interface SourceReference {
   title?: string;
 }
 
-export interface IngestionMetadata {
+export interface IngestionMetadata extends Record<string, unknown> {
   source: SourceReference;
   cleaning: {
     boilerplateRemoved: boolean;
@@ -137,55 +137,55 @@ export function ingestPlainText(input: IngestPlainTextInput): IngestedTextDocume
 export function ingestJsonFeed(input: IngestJsonFeedInput): IngestedTextDocument[] {
   const parsed = parseJsonFeed(input.feed);
 
-  return parsed
-    .map((item, index) => {
-      const text = resolveFeedItemText(item);
+  return parsed.flatMap<IngestedTextDocument>((item, index) => {
+    const text = resolveFeedItemText(item);
 
-      if (!text) {
-        return null;
-      }
+    if (!text) {
+      return [];
+    }
 
-      const source = {
-        ...input.source,
-        connector: "json-feed" as const,
-        url: item.url ?? input.source.url,
-        sourceId: item.id ?? input.source.sourceId,
-        title: item.title ?? input.source.title,
-        publishedAt: item.publishedAt ?? input.source.publishedAt,
-      };
+    const source: SourceReference = {
+      ...input.source,
+      connector: "json-feed",
+      url: item.url ?? input.source.url,
+      sourceId: item.id ?? input.source.sourceId,
+      title: item.title ?? input.source.title,
+      publishedAt: item.publishedAt ?? input.source.publishedAt,
+    };
 
-      const id = item.id ?? item.url ?? `${input.source.sourceId ?? "feed-item"}-${index}`;
+    const id = item.id ?? item.url ?? `${input.source.sourceId ?? "feed-item"}-${index}`;
 
-      const normalized = looksLikeHtml(text)
-        ? ingestHtml({
-            html: text,
-            source,
-            id,
-            language: item.language ?? input.defaultLanguage,
-          })
-        : ingestPlainText({
-            text,
-            source,
-            id,
-            language: item.language ?? input.defaultLanguage,
-          });
-
-      return {
-        ...normalized,
-        metadata: {
-          ...normalized.metadata,
+    const normalized = looksLikeHtml(text)
+      ? ingestHtml({
+          html: text,
           source,
-        },
-        document: {
-          ...normalized.document,
-          metadata: {
-            ...normalized.document.metadata,
-            source,
-          },
-        },
-      } satisfies IngestedTextDocument;
-    })
-    .filter((item): item is IngestedTextDocument => item !== null);
+          id,
+          language: item.language ?? input.defaultLanguage,
+        })
+      : ingestPlainText({
+          text,
+          source,
+          id,
+          language: item.language ?? input.defaultLanguage,
+        });
+
+    const metadata: IngestionMetadata = {
+      ...normalized.metadata,
+      source,
+    };
+    const document: TextDocument<IngestionMetadata> = {
+      ...normalized.document,
+      metadata,
+    };
+
+    return [
+      {
+        ...normalized,
+        metadata,
+        document,
+      },
+    ];
+  });
 }
 
 export function ingestFileDrop(input: IngestFileDropInput): IngestedTextDocument[] {
@@ -235,9 +235,9 @@ export function chunkIngestedDocumentForInference(
   options: ChunkIngestedDocumentOptions = {},
 ): IngestionChunk[] {
   const chunking = resolveChunkingPreset(options.preset ?? "balanced");
-  const chunks = chunkTextForInference(ingested.document, chunking);
+  const chunks = chunkTextForInference<IngestionMetadata>(ingested.document, chunking);
 
-  return chunks.map((chunk) => ({
+  return chunks.map((chunk: TextChunk<IngestionMetadata>) => ({
     ...chunk,
     sourceStart: resolveSourceStart(ingested.sourceOffsets, chunk.start),
     sourceEnd: resolveSourceEnd(ingested.sourceOffsets, chunk.end),

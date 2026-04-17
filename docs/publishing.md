@@ -5,10 +5,18 @@
 2. Confirm your package scope matches the GitHub Packages owner. GitHub Packages only accepts npm scopes owned by the publishing user or organization.
 3. If you are not publishing from a `platform` GitHub owner, rename `@moritzbrantner/*` packages to your real GitHub scope before the first release.
 4. Prepare or publish `@moritzbrantner/ui`, `@moritzbrantner/storytelling`, `@moritzbrantner/eslint-config`, and `@moritzbrantner/typescript-config` first because they are the scaffold-critical package set.
-5. Open a pull request and merge it into `main`.
-6. Wait for the `Release Packages` workflow to finish on `main`.
+5. For the first standalone install wave, also publish `@moritzbrantner/maps` because `electron-template` currently consumes it from the shared package repository.
+6. Open a pull request and merge it into `main`.
+7. Wait for the `Publish Private Packages` workflow to finish on `main`.
 
-If a package version has not been published before, the workflow's `changeset publish` step will publish that version directly to GitHub Packages.
+The current workflow validates and publishes only the first scaffold release set:
+- `@moritzbrantner/ui`
+- `@moritzbrantner/storytelling`
+- `@moritzbrantner/eslint-config`
+- `@moritzbrantner/typescript-config`
+- `@moritzbrantner/maps`
+
+It skips unrelated packages until the rest of the repository is release-ready.
 
 ## Later releases
 1. Make your package changes.
@@ -16,7 +24,7 @@ If a package version has not been published before, the workflow's `changeset pu
 3. Select the packages that changed and choose the appropriate version bump.
 4. Commit the generated changeset file with your code changes.
 5. Merge to `main`.
-6. When the release pull request is created by Changesets, merge that pull request to publish.
+6. Expand the publish workflow from the scaffold release set to the broader package graph before relying on Changesets-driven automation for the whole repository.
 
 The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`.
 

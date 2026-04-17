@@ -8,7 +8,8 @@
     "moduleResolution": "Bundler",
     "types": ["node"],
     "paths": {
-      "@moritzbrantner/maps": ["./src/index.ts"]
+      "@moritzbrantner/maps": ["./src/index.ts"],
+      "@moritzbrantner/ui": ["../ui/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]

@@ -325,8 +325,6 @@ export function createInformationExtractionPipeline<
           documentId: document.id,
           relations: mergedRelations,
           events: mergedEvents,
-          chunks: chunkResults,
-          analysis: extractionOptions.analysis,
         }) : undefined,
       };
     },
