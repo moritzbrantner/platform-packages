@@ -27,6 +27,7 @@ export default defineConfig({
         "packages/linguistics-corpus/src/index.ts",
       ),
       "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
+      "@moritzbrantner/ocr": path.resolve(rootDir, "packages/ocr/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
       "@moritzbrantner/parallel-text/model": path.resolve(
         rootDir,
