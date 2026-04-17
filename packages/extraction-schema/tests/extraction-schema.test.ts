@@ -11,7 +11,7 @@ import {
   validateExtractionOutput,
   validateExtractionSchema,
   type ExtractionSchema,
-} from "@moritzbrantner/extraction-schema";
+} from "../src/index";
 
 const schema: ExtractionSchema = {
   entities: [

@@ -334,7 +334,7 @@ function buildDependencyArcs(
 function parseDependencyLabel(
   label: string,
   score: number,
-  tokens: readonly TextSentence["tokens"],
+  tokens: TextSentence["tokens"],
 ): SyntaxDependencyArc | null {
   const match = label.match(/^(\d+|root)\s*[-:>\s]\s*(\d+)\s*(?:\|\s*|\s+)([A-Za-z0-9_.:-]+)$/u);
 

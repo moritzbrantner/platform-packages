@@ -337,9 +337,11 @@ export function normalizeDate(value: string | Date, options: CanonicalizationOpt
     return null;
   }
 
-  const direct = new Date(text);
-  if (!Number.isNaN(direct.getTime())) {
-    return direct.toISOString().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}(?:[T\s].*)?$/u.test(text)) {
+    const direct = new Date(text);
+    if (!Number.isNaN(direct.getTime())) {
+      return direct.toISOString().slice(0, 10);
+    }
   }
 
   const normalized = text.replace(/[.\-]/gu, "/");
@@ -414,10 +416,14 @@ export function normalizeLocalizedValue(value: string, locale = "en-US"): string
   const thousandSeparator = decimalSeparator === "." ? "," : ".";
 
   return trimmed
-    .replace(new RegExp(`\\${thousandSeparator}`, "gu"), "")
+    .replace(new RegExp(escapeForRegExp(thousandSeparator), "gu"), "")
     .replace(decimalSeparator === "," ? /,/gu : /\u00A0/gu, decimalSeparator === "," ? "." : "")
     .replace(/\s+/gu, " ")
     .trim();
+}
+
+function escapeForRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 export function createConfidenceThresholdPolicy(

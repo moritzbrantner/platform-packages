@@ -8,7 +8,14 @@ const forbiddenElementPattern = /<button[\s>]/;
 
 function shouldSkipDir(dirPath) {
   const normalized = dirPath.split(path.sep).join("/");
-  return normalized.includes("packages/ui/src");
+  return (
+    normalized.includes("packages/ui/src") ||
+    normalized.includes("/node_modules") ||
+    normalized.includes("/dist") ||
+    normalized.includes("/.turbo") ||
+    normalized.includes("/playwright-report") ||
+    normalized.includes("/test-results")
+  );
 }
 
 function visit(targetPath) {

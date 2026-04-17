@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { createSyntaxPipeline } from "@moritzbrantner/syntax-analysis";
+import { createSyntaxPipeline } from "../src/index";
 
 describe("@moritzbrantner/syntax-analysis", () => {
   test("builds sentence and document syntax analyses", async () => {
