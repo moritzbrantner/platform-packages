@@ -16,7 +16,7 @@
     "build:playground": "bun run --filter @moritzbrantner/playground build",
     "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
-    "test": "turbo run test"
+    "test": "bun test ./tests/scaffold-contract.test.ts && turbo run test"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",

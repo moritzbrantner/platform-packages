@@ -1,6 +1,19 @@
 # platform-packages
 
-Shared runtime packages for the Next.js application stack.
+Shared packages for the maintained scaffold family. This repo stays broad on purpose, but only part of it is scaffold-critical for cross-repo alignment.
+
+## Scaffold-critical package set
+
+The maintained template family should converge on these packages first:
+
+- `@moritzbrantner/ui`
+- `@moritzbrantner/storytelling`
+- `@moritzbrantner/eslint-config`
+- `@moritzbrantner/typescript-config`
+
+These four packages are the current scaffold-facing contract for `monorepo`, `next-template`, `expo-template`, and `electron-template`.
+
+Everything else in this repository remains valid, but is not required for `scaffold-v2` alignment.
 
 ## Packages
 
@@ -42,8 +55,9 @@ Shared runtime packages for the Next.js application stack.
 
 ## Repository scope
 
-- Runtime packages only.
-- No shared eslint or TypeScript config packages in this first extraction wave.
+- The repository remains broad and can host shared runtime, tooling, and domain packages.
+- The scaffold-critical set is limited to `ui`, `storytelling`, `eslint-config`, and `typescript-config`.
+- Unrelated packages stay in place and are not blocked on the template-family release cadence.
 - GitHub Packages publishing is configured through Changesets.
 - Includes a local playground app for manually testing package behavior.
 
@@ -66,4 +80,6 @@ Shared runtime packages for the Next.js application stack.
 
 - The package names use the neutral `@moritzbrantner/*` scope in source.
 - Before first GitHub Packages publish, either publish from a matching GitHub org/user scope or rename the packages to your actual GitHub Packages scope.
+- Publish or prepare releasable versions of the scaffold-critical package set before widening the release scope to the rest of the repository.
+- Do not move `@repo/auth-contract` or `@repo/upload-playbook` into this repository until real multi-repo reuse exists.
 - See [`docs/publishing.md`](./docs/publishing.md) for the release workflow and scope caveat.
