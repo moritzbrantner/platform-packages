@@ -6,6 +6,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
+      "@moritzbrantner/linguistics-core": ["../linguistics-core/src/index.ts"],
       "@moritzbrantner/ocr": ["./src/index.ts"]
     }
   },
