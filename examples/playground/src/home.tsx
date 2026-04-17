@@ -68,6 +68,13 @@ function HomePage() {
           cta="Open parallel text demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/speed-reading"
+          title="Speed reading OCR demo"
+          description="Paste any passage or upload a PDF, run cleanup on headers and page numbers, and drive an RSVP-style reader with live WPM controls."
+          href="/speed-reading.html"
+          cta="Open speed reading demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/speech"
           title="Speech transcription demo"
           description="Record from the microphone, upload chunks to a Whisper-style backend, and watch the returned transcript feed the predictive text model."
@@ -180,6 +187,9 @@ function HomePage() {
             </Button>
             <Button asChild variant="outline">
               <a href="/parallel-text.html">Open parallel text package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/speed-reading.html">Open speed reading package page</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/speech.html">Open speech package page</a>

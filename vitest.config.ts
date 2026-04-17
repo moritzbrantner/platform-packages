@@ -33,6 +33,14 @@ export default defineConfig({
         rootDir,
         "packages/parallel-text/src/model.ts",
       ),
+      "@moritzbrantner/speed-reading": path.resolve(
+        rootDir,
+        "packages/speed-reading/src/index.ts",
+      ),
+      "@moritzbrantner/speed-reading/core": path.resolve(
+        rootDir,
+        "packages/speed-reading/src/core.ts",
+      ),
       "@moritzbrantner/speech": path.resolve(rootDir, "packages/speech/src/index.ts"),
       "@moritzbrantner/speech/core": path.resolve(rootDir, "packages/speech/src/core.ts"),
       "@moritzbrantner/speech/react": path.resolve(rootDir, "packages/speech/src/react.ts"),
