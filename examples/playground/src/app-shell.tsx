@@ -98,6 +98,19 @@ const navigation = [
   label: string;
 }>;
 
+const playgroundFrameClassName = cn(
+  "relative min-h-screen overflow-hidden px-4 py-8 md:px-8",
+  "[background-image:radial-gradient(circle_at_15%_18%,color-mix(in_oklch,var(--primary)_18%,white)_0%,transparent_30%),radial-gradient(circle_at_85%_10%,color-mix(in_oklch,var(--chart-2)_16%,white)_0%,transparent_26%),linear-gradient(180deg,color-mix(in_oklch,var(--muted)_38%,white)_0%,var(--background)_42%)]",
+  "dark:[background-image:radial-gradient(circle_at_15%_18%,color-mix(in_oklch,var(--primary)_24%,black)_0%,transparent_28%),radial-gradient(circle_at_82%_12%,color-mix(in_oklch,var(--chart-2)_18%,black)_0%,transparent_24%),linear-gradient(180deg,color-mix(in_oklch,var(--card)_72%,black)_0%,var(--background)_44%)]",
+);
+
+const playgroundGridClassName = cn(
+  "pointer-events-none fixed inset-0 opacity-35",
+  "[background-image:linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)]",
+  "[background-size:72px_72px]",
+  "[mask-image:linear-gradient(180deg,rgba(0,0,0,0.25),transparent_82%)]",
+);
+
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
@@ -122,7 +135,8 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
   );
 
   return (
-    <div className="min-h-screen px-4 py-8 md:px-8">
+    <div className={playgroundFrameClassName}>
+      <div aria-hidden="true" className={playgroundGridClassName} />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <header className="rounded-none border border-border/60 bg-background/55 p-5 shadow-2xl shadow-black/10 supports-backdrop-filter:backdrop-blur-xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

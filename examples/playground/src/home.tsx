@@ -112,7 +112,7 @@ function HomePage() {
         <ExampleLinkCard
           eyebrow="@moritzbrantner/word-vectors"
           title="Word vectors demo"
-          description="Inspect distributional similarity, sparse context weights, and the document adapter that feeds semantic backoff for prediction."
+          description="Inspect distributional similarity, sparse context weights, and the corpus adapter that feeds semantic backoff for prediction."
           href="/word-vectors.html"
           cta="Open word vectors demo"
         />

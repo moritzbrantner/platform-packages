@@ -1,11 +1,12 @@
 import { createTextDocument } from "@moritzbrantner/linguistics-core";
+import { createCorpusIndex } from "@moritzbrantner/linguistics-corpus";
 import {
   createWordVectorBackoffSource,
   createWordVectorModel,
   deserializeWordVectorModel,
   serializeWordVectorModel,
+  trainFromCorpus,
 } from "@moritzbrantner/word-vectors";
-import { trainFromDocuments } from "@moritzbrantner/word-vectors/documents";
 import {
   Badge,
   Card,
@@ -30,23 +31,25 @@ const model = createWordVectorModel({
 const restored = deserializeWordVectorModel(serializeWordVectorModel(model));
 const similarWords = restored.findSimilarWords("coffee", { limit: 4 });
 const similarContexts = restored.findSimilarContexts("coffee", { limit: 4 });
-const fromDocuments = trainFromDocuments(
+const corpus = createCorpusIndex(
   texts.map((text, index) =>
     createTextDocument({
       id: `doc-${index}`,
       text,
     }),
   ),
-  { windowSize: 2 },
 );
-const semanticBackoff = createWordVectorBackoffSource(restored)(["coffee"]);
+const fromCorpus = trainFromCorpus(corpus, {
+  windowSize: 2,
+});
+const semanticBackoff = createWordVectorBackoffSource(fromCorpus)(["coffee"]);
 
 function WordVectorsPage() {
   return (
     <PlaygroundPage
       activePage="word-vectors"
       title="Word vectors package examples"
-      description="Inspect distributional similarity, sparse context weights, JSON persistence, and the document adapter that feeds optional semantic backoff into prediction."
+      description="Inspect distributional similarity, sparse context weights, JSON persistence, and the corpus adapter that feeds optional semantic backoff into prediction."
     >
       <section className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
         <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
@@ -62,7 +65,7 @@ function WordVectorsPage() {
           <CardContent className="space-y-3 text-sm">
             <p><strong>Similarity:</strong> {restored.similarity("coffee", "tea").toFixed(3)}</p>
             <p><strong>Vocabulary:</strong> {restored.words().join(", ")}</p>
-            <p><strong>Document adapter similarity:</strong> {fromDocuments.similarity("coffee", "tea").toFixed(3)}</p>
+            <p><strong>Corpus adapter similarity:</strong> {fromCorpus.similarity("coffee", "tea").toFixed(3)}</p>
           </CardContent>
         </Card>
 

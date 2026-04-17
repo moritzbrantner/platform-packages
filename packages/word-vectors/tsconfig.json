@@ -7,6 +7,7 @@
     "moduleResolution": "Bundler",
     "paths": {
       "@moritzbrantner/linguistics-core": ["../linguistics-core/src/index.ts"],
+      "@moritzbrantner/linguistics-corpus": ["../linguistics-corpus/src/index.ts"],
       "@moritzbrantner/word-vectors": ["./src/index.ts"],
       "@moritzbrantner/word-vectors/documents": ["./src/documents.ts"]
     }

@@ -340,7 +340,6 @@
   }
 
   :where(
-    [data-slot="button"],
     [data-slot="badge"],
     [data-slot="input"],
     [data-slot="textarea"],
@@ -397,61 +396,6 @@
       );
     opacity: 0.9;
     z-index: 0;
-  }
-
-  :where(
-    [data-slot="button"],
-    [data-slot="button"]::before,
-    [data-slot="button"]::after
-  ) {
-    transition:
-      opacity 180ms ease,
-      transform 180ms ease,
-      box-shadow 180ms ease;
-  }
-
-  :where([data-slot="button"]) {
-    overflow: hidden;
-  }
-
-  :where([data-slot="button"])::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(
-      circle 58px at var(--glass-cursor-x, 50%) var(--glass-cursor-y, 50%),
-      var(--glass-cursor-glow) 0%,
-      color-mix(in oklch, var(--glass-cursor-glow-accent) 82%, transparent) 22%,
-      transparent 54%
-    );
-    opacity: 0;
-    z-index: 0;
-  }
-
-  :where(
-    [data-slot="button"]:hover,
-    [data-slot="button"]:focus-visible
-  )::before {
-    opacity: 1;
-  }
-
-  :where([data-slot="button"] > *) {
-    position: relative;
-    z-index: 1;
-  }
-
-  :where([data-slot="button"]) {
-    background-position: center;
-    transform: translateY(-1px);
-  }
-
-  :where([data-slot="button"]:active) {
-    transform: translateY(1px);
-    box-shadow:
-      inset 0 1px 0 0
-        color-mix(in oklch, var(--glass-inset-highlight) 65%, transparent),
-      var(--glass-interactive-shadow);
   }
 
   :where(

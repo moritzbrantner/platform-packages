@@ -1,11 +1,13 @@
 import { describe, expect, test } from "vitest";
 
 import { createTextDocument } from "@moritzbrantner/linguistics-core";
+import { createCorpusIndex } from "@moritzbrantner/linguistics-corpus";
 import {
   createWordVectorBackoffSource,
   createWordVectorModel,
   deserializeWordVectorModel,
   serializeWordVectorModel,
+  trainFromCorpus,
   trainWordVectorModel,
 } from "@moritzbrantner/word-vectors";
 import { trainFromDocuments } from "../src/documents";
@@ -112,6 +114,31 @@ describe("@moritzbrantner/word-vectors", () => {
     expect(fromDocuments.words()).toEqual(fromRawText.words());
     expect(fromDocuments.similarity("harbor", "night")).toBe(
       fromRawText.similarity("harbor", "night"),
+    );
+  });
+
+  test("trains from a corpus index without manual document extraction", () => {
+    const corpus = createCorpusIndex([
+      createTextDocument({
+        id: "doc-1",
+        text: "Coffee beans smell rich.",
+      }),
+      createTextDocument({
+        id: "doc-2",
+        text: "Tea leaves smell fresh.",
+      }),
+    ]);
+
+    const fromCorpus = trainFromCorpus(corpus, {
+      windowSize: 2,
+    });
+    const fromDocuments = trainFromDocuments(corpus.documents, {
+      windowSize: 2,
+    });
+
+    expect(fromCorpus.words()).toEqual(fromDocuments.words());
+    expect(fromCorpus.similarity("coffee", "tea")).toBe(
+      fromDocuments.similarity("coffee", "tea"),
     );
   });
 

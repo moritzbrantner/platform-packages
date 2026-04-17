@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, TextareaHTMLAttributes } from "react";
 
-import type { WordPrediction, WordPredictionModel } from "./model";
+import type { PredictWordOptions, WordPrediction, WordPredictionModel } from "./model";
 
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
 const TRAILING_WORD_PATTERN = /([\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*)$/u;
@@ -25,6 +25,7 @@ export interface WordPredictionComposerProps
   onSubmit?: (value: string) => void;
   messages?: WordPredictionComposerMessage[];
   limit?: number;
+  predictionOptions?: Omit<PredictWordOptions, "limit">;
   placeholder?: string;
   composeLabel?: string;
   suggestionsLabel?: string;
@@ -43,6 +44,7 @@ export function WordPredictionComposer({
   onSubmit,
   messages = [],
   limit = DEFAULT_LIMIT,
+  predictionOptions,
   placeholder = "Type your message",
   composeLabel = "Compose message",
   suggestionsLabel = "Suggestions",
@@ -61,7 +63,10 @@ export function WordPredictionComposer({
   const [showScore, setShowScore] = useState(initialShowScore);
   const [showContext, setShowContext] = useState(initialShowContext);
   const currentValue = isControlled ? value : uncontrolledValue;
-  const suggestions = model.predictForInput(currentValue, { limit });
+  const suggestions = model.predictForInput(currentValue, {
+    ...predictionOptions,
+    limit,
+  });
 
   function updateValue(nextValue: string) {
     if (!isControlled) {

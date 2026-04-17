@@ -8,6 +8,7 @@ import {
 } from "@moritzbrantner/speech";
 import {
   WordPredictionComposer,
+  createSemanticBackoffFromTexts,
   createWordPredictionModel,
   type WordPredictionComposerMessage,
 } from "@moritzbrantner/word-prediction";
@@ -102,6 +103,10 @@ function SpeechPage() {
     texts: [...splitCorpus(seedCorpus), ...transcriptPhrases, ...messages.map((message) => message.text)],
     maxContextSize: 3,
   });
+  const semanticBackoff = createSemanticBackoffFromTexts(
+    [...splitCorpus(seedCorpus), ...transcriptPhrases, ...messages.map((message) => message.text)],
+    { windowSize: 2 },
+  );
 
   function submitDraft(value: string) {
     setMessages((current) => [
@@ -313,6 +318,7 @@ function SpeechPage() {
                   onValueChange={setDraft}
                   onSubmit={submitDraft}
                   messages={messages}
+                  predictionOptions={{ semanticBackoff }}
                   placeholder="Start typing after recording a phrase"
                 />
               </CardContent>
