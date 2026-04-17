@@ -1,3 +1,6 @@
+import type { TextDocument } from "@moritzbrantner/linguistics-core";
+import type { CorpusIndex } from "@moritzbrantner/linguistics-corpus";
+
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
 const DEFAULT_WINDOW_SIZE = 2;
 const DEFAULT_LIMIT = 5;
@@ -68,6 +71,8 @@ export interface WordVectorModel {
   findSimilarWords(word: string, options?: FindSimilarWordsOptions): WordSimilarity[];
   findSimilarContexts(word: string, options?: GetWordVectorOptions): WordVectorEntry[];
 }
+
+export type TrainFromCorpusSource = CorpusIndex | Pick<CorpusIndex, "documents">;
 
 interface ModelOptions {
   lowercase: boolean;
@@ -159,6 +164,23 @@ export function createWordVectorBackoffSource(model: WordVectorModel) {
       ...similarContexts.map((entry) => ({ word: entry.word, score: entry.weight })),
     ];
   };
+}
+
+export function trainFromDocuments(
+  documents: readonly TextDocument[],
+  options: Omit<CreateWordVectorModelOptions, "texts"> = {},
+): WordVectorModel {
+  return createWordVectorModel({
+    ...options,
+    texts: documents.map((document) => document.text),
+  });
+}
+
+export function trainFromCorpus(
+  corpus: TrainFromCorpusSource,
+  options: Omit<CreateWordVectorModelOptions, "texts"> = {},
+): WordVectorModel {
+  return trainFromDocuments(corpus.documents, options);
 }
 
 function createModel(

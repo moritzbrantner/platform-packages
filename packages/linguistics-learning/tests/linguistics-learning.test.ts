@@ -1,9 +1,11 @@
 import { describe, expect, test } from "vitest";
 
 import { createTextDocument } from "@moritzbrantner/linguistics-core";
+import { createCorpusIndex } from "@moritzbrantner/linguistics-corpus";
 import {
   createFlashcardSet,
   createInterlinearBlock,
+  deriveCorpusStudyTerms,
   deriveStudyTerms,
   gradeRecall,
 } from "@moritzbrantner/linguistics-learning";
@@ -85,6 +87,48 @@ describe("@moritzbrantner/linguistics-learning", () => {
           termId: "word:harbor",
         },
       ],
+    });
+  });
+
+  test("aggregates study terms across a corpus", () => {
+    const corpus = createCorpusIndex([
+      createTextDocument({
+        id: "lesson-1",
+        language: "en",
+        text: "Harbor lights glow. Harbor workers rest.",
+      }),
+      createTextDocument({
+        id: "lesson-2",
+        language: "en",
+        text: "Harbor stories travel. Harbor bells ring.",
+      }),
+    ]);
+
+    const terms = deriveCorpusStudyTerms(corpus, {
+      minFrequency: 2,
+      includeNamedEntities: true,
+    });
+
+    expect(terms).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          lemma: "harbor",
+          count: 4,
+          documentCount: 2,
+          documentIds: ["lesson-1", "lesson-2"],
+        }),
+      ]),
+    );
+    expect(
+      createFlashcardSet(terms, {
+        sourceLanguage: "en",
+        targetLanguage: "de",
+      }).cards[0],
+    ).toEqual({
+      id: "card-en:word:harbor",
+      front: "Harbor",
+      back: "harbor",
+      termId: "en:word:harbor",
     });
   });
 

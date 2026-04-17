@@ -6,6 +6,7 @@ import {
   type TextSpan,
   type TextToken,
 } from "@moritzbrantner/linguistics-core";
+import type { CorpusIndex } from "@moritzbrantner/linguistics-corpus";
 
 export interface InterlinearAlignmentInput {
   sourceTokenIndex: number;
@@ -47,6 +48,30 @@ export interface StudyTerm {
   count: number;
   kind: "multiword" | "word";
   spans: TextSpan[];
+  gloss?: string;
+}
+
+export interface CorpusStudyTermsOptions extends DeriveStudyTermsOptions {
+  documentIds?: ReadonlyArray<string>;
+  languages?: ReadonlyArray<LanguageTag>;
+}
+
+export interface CorpusStudyTerm {
+  id: string;
+  language?: LanguageTag;
+  surfaces: string[];
+  lemma: string;
+  count: number;
+  kind: "multiword" | "word";
+  documentCount: number;
+  documentIds: string[];
+  gloss?: string;
+}
+
+export interface FlashcardSourceTerm {
+  id: string;
+  surfaces: string[];
+  lemma: string;
   gloss?: string;
 }
 
@@ -211,8 +236,78 @@ export function deriveStudyTerms(
     );
 }
 
+export function deriveCorpusStudyTerms(
+  corpus: CorpusIndex,
+  options: CorpusStudyTermsOptions = {},
+): CorpusStudyTerm[] {
+  const allowedDocumentIds = options.documentIds ? new Set(options.documentIds) : undefined;
+  const allowedLanguages = options.languages ? new Set(options.languages) : undefined;
+  const terms = new Map<
+    string,
+    CorpusStudyTerm & {
+      documentIdSet: Set<string>;
+    }
+  >();
+
+  for (const document of corpus.documents) {
+    if (allowedDocumentIds && !allowedDocumentIds.has(document.id)) {
+      continue;
+    }
+
+    if (
+      allowedLanguages &&
+      (!document.language || !allowedLanguages.has(document.language))
+    ) {
+      continue;
+    }
+
+    for (const term of deriveStudyTerms(document, options)) {
+      const key = `${term.language ?? "und"}:${term.kind}:${term.lemma}`;
+      const existing = terms.get(key);
+
+      if (existing) {
+        existing.count += term.count;
+        existing.documentIdSet.add(document.id);
+
+        for (const surface of term.surfaces) {
+          addSurface(existing.surfaces, surface);
+        }
+
+        continue;
+      }
+
+      terms.set(key, {
+        id: key,
+        language: term.language,
+        surfaces: [...term.surfaces].sort(),
+        lemma: term.lemma,
+        count: term.count,
+        kind: term.kind,
+        documentCount: 1,
+        documentIds: [document.id],
+        gloss: term.gloss,
+        documentIdSet: new Set([document.id]),
+      });
+    }
+  }
+
+  return Array.from(terms.values())
+    .map(({ documentIdSet, ...term }) => ({
+      ...term,
+      documentCount: documentIdSet.size,
+      documentIds: Array.from(documentIdSet).sort(),
+    }))
+    .sort(
+      (left, right) =>
+        right.count - left.count ||
+        right.documentCount - left.documentCount ||
+        left.kind.localeCompare(right.kind) ||
+        left.lemma.localeCompare(right.lemma),
+    );
+}
+
 export function createFlashcardSet(
-  terms: ReadonlyArray<StudyTerm>,
+  terms: ReadonlyArray<FlashcardSourceTerm>,
   options: CreateFlashcardSetOptions,
 ): FlashcardSet {
   return {

@@ -1,8 +1,10 @@
 import { describe, expect, test } from "vitest";
 
+import { createWordVectorModel } from "@moritzbrantner/word-vectors";
 import {
   DEFAULT_WORD_PREDICTION_TEXTS,
   createDefaultWordPredictionModel,
+  createSemanticBackoffFromWordVectors,
   createWordPredictionModel,
   deserializeWordPredictionModel,
   serializeWordPredictionModel,
@@ -235,5 +237,25 @@ describe("@moritzbrantner/word-prediction", () => {
         })
         .map((prediction) => prediction.word),
     ).toContain("semantic");
+  });
+
+  test("creates semantic backoff suggestions from word vectors", () => {
+    const model = createWordPredictionModel({
+      texts: ["quiet harbor"],
+    });
+    const vectorModel = createWordVectorModel({
+      texts: [
+        "Harbor lights glow softly.",
+        "Harbor workers gather early.",
+      ],
+    });
+
+    expect(
+      model
+        .predictNextWords("unseen harbor", {
+          semanticBackoff: createSemanticBackoffFromWordVectors(vectorModel),
+        })
+        .map((prediction) => prediction.word),
+    ).toContain("workers");
   });
 });

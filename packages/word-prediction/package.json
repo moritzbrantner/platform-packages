@@ -30,6 +30,9 @@
   "peerDependencies": {
     "react": "^19.0.0"
   },
+  "dependencies": {
+    "@moritzbrantner/word-vectors": "workspace:*"
+  },
   "devDependencies": {
     "@types/react": "^19.2.2",
     "react": "^19.2.0"

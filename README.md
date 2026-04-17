@@ -11,7 +11,7 @@ Shared runtime packages for the Next.js application stack.
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
 - `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, and multilingual term frequencies.
-- `@moritzbrantner/linguistics-learning`: interlinear annotation, study-term extraction, flashcard derivation, and SM-2 style recall grading on top of linguistics core.
+- `@moritzbrantner/linguistics-learning`: interlinear annotation, corpus-derived study-term extraction, flashcard derivation, and SM-2 style recall grading on top of the corpus layer.
 - `@moritzbrantner/maps`: browser map component plus standalone point aggregation utilities for large clustered datasets.
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
 - `@moritzbrantner/speech`: microphone capture, chunked speech-to-text orchestration, and Whisper-compatible HTTP transcription adapters for live or batch transcription flows.
@@ -19,8 +19,17 @@ Shared runtime packages for the Next.js application stack.
 - `@moritzbrantner/subtitles`: SRT/VTT/transcript timed-text parsing, editing, validation, overlap detection, and word-level timing preservation.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
 - `@moritzbrantner/storytelling`: branching and scroll-driven storytelling primitives with interactive choices, motion.dev transitions, and optional Remotion/Three.js adapters.
-- `@moritzbrantner/word-prediction`: dependency-free next-word suggestion engine for chat-style and keyboard-style text prediction.
-- `@moritzbrantner/word-vectors`: dependency-light distributional word vectors with similarity lookup, context inspection, persistence, and document adapters.
+- `@moritzbrantner/word-prediction`: next-word suggestion engine for chat-style and keyboard-style text prediction, with optional semantic backoff from word vectors.
+- `@moritzbrantner/word-vectors`: distributional word vectors with similarity lookup, context inspection, persistence, and corpus-aware training adapters.
+
+## Dependency design
+
+- `@moritzbrantner/linguistics-core` is the base document and segmentation layer.
+- `@moritzbrantner/linguistics-corpus` builds on core and owns corpus indexing, concordance, and term frequency logic.
+- `@moritzbrantner/word-vectors` builds on corpus-backed documents so similarity models are trained from an explicit corpus layer.
+- `@moritzbrantner/linguistics-learning` sits above corpus so study-term extraction can aggregate across documents instead of only per-document text.
+- `@moritzbrantner/word-prediction` sits above word vectors and can use them for semantic backoff when exact n-gram context is sparse.
+- The playground is intended to validate those layers in order: core and corpus pages establish the text model, vectors and learning consume corpus data, and speech exercises prediction with vector-backed backoff.
 
 ## Repository scope
 
@@ -32,6 +41,7 @@ Shared runtime packages for the Next.js application stack.
 ## Styling rule
 
 - Package-authored styling must use Tailwind CSS.
+- Prefer inline Tailwind utility classes in components over page-specific custom CSS selectors.
 - If a package ships CSS, it must expose a root `styles.css` file, import `tailwindcss`, declare package-local `@source` paths, and export `./styles.css` from `package.json`.
 - The repository lint step verifies that contract for every package that publishes styles.
 

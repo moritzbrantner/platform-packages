@@ -1,8 +1,9 @@
 import { createTextDocument } from "@moritzbrantner/linguistics-core";
+import { createCorpusIndex } from "@moritzbrantner/linguistics-corpus";
 import {
   createFlashcardSet,
   createInterlinearBlock,
-  deriveStudyTerms,
+  deriveCorpusStudyTerms,
   gradeRecall,
 } from "@moritzbrantner/linguistics-learning";
 import {
@@ -17,11 +18,18 @@ import {
 import { PlaygroundPage } from "./app-shell";
 import { mountPage } from "./mount";
 
-const document = createTextDocument({
-  id: "learning-demo",
-  language: "en",
-  text: "Students study nightly. A student studied last night while studying grammar.",
-});
+const learningCorpus = createCorpusIndex([
+  createTextDocument({
+    id: "learning-demo-1",
+    language: "en",
+    text: "Students study nightly. A student studied last night while studying grammar.",
+  }),
+  createTextDocument({
+    id: "learning-demo-2",
+    language: "en",
+    text: "Grammar students study together. Studying vocabulary helps every student.",
+  }),
+]);
 const interlinear = createInterlinearBlock(
   createTextDocument({
     id: "interlinear-demo",
@@ -34,13 +42,13 @@ const interlinear = createInterlinearBlock(
     { sourceTokenIndex: 2, gloss: "friend" },
   ],
 );
-const terms = deriveStudyTerms(document, {
+const terms = deriveCorpusStudyTerms(learningCorpus, {
   minFrequency: 1,
   includeNamedEntities: true,
   includeMultiwordTerms: true,
 });
 const flashcards = createFlashcardSet(
-  terms.filter((term) => term.count >= 2),
+  terms.filter((term) => term.count >= 3),
   { sourceLanguage: "en", targetLanguage: "de" },
 );
 const review = gradeRecall({ quality: 4, reviewedAt: "2026-04-16T00:00:00.000Z" }, []);
@@ -50,7 +58,7 @@ function LinguisticsLearningPage() {
     <PlaygroundPage
       activePage="linguistics-learning"
       title="Linguistics learning package examples"
-      description="Inspect interlinear token alignment, derived study terms, flashcard generation, and the SM-2 style grading state used for follow-up reviews."
+      description="Inspect interlinear token alignment, corpus-derived study terms, flashcard generation, and the SM-2 style grading state used for follow-up reviews."
     >
       <section className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
@@ -78,14 +86,16 @@ function LinguisticsLearningPage() {
             <CardHeader>
               <CardTitle>Derived study terms</CardTitle>
               <CardDescription>
-                Inflection-heavy forms collapse into a shared lemma before flashcards are generated.
+                Inflection-heavy forms collapse into a shared lemma and stay aggregated across the corpus before flashcards are generated.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
               {terms.slice(0, 8).map((term) => (
                 <div key={term.id} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
                   <p className="font-medium">{term.lemma}</p>
-                  <p className="text-muted-foreground">{term.kind} • {term.count}</p>
+                  <p className="text-muted-foreground">
+                    {term.kind} • {term.count} hits • {term.documentCount} docs
+                  </p>
                   <p>{term.surfaces.join(", ")}</p>
                 </div>
               ))}
