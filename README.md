@@ -6,6 +6,7 @@ Shared runtime packages for the Next.js application stack.
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
+- `@moritzbrantner/hexagon-grids`: globe-aware H3 hex indexing, polygon coverage, neighborhood/path helpers, and point aggregation into hex cells.
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
 - `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, and multilingual term frequencies.
