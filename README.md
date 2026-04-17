@@ -83,3 +83,4 @@ Everything else in this repository remains valid, but is not required for `scaff
 - Publish or prepare releasable versions of the scaffold-critical package set before widening the release scope to the rest of the repository.
 - Do not move `@repo/auth-contract` or `@repo/upload-playbook` into this repository until real multi-repo reuse exists.
 - See [`docs/publishing.md`](./docs/publishing.md) for the release workflow and scope caveat.
+- See [SCAFFOLD_ALIGNMENT.md](./SCAFFOLD_ALIGNMENT.md) for the scaffold-family alignment contract for this repository.
