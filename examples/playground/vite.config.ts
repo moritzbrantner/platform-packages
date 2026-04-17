@@ -59,6 +59,24 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/ocr$/,
+        replacement: path.resolve(workspaceRoot, "packages/ocr/src/index.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/speed-reading$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/speed-reading/src/index.ts",
+        ),
+      },
+      {
+        find: /^@moritzbrantner\/speed-reading\/core$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/speed-reading/src/core.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/speech$/,
         replacement: path.resolve(workspaceRoot, "packages/speech/src/index.ts"),
       },
@@ -112,7 +130,9 @@ export default defineConfig({
       "@moritzbrantner/linguistics-corpus",
       "@moritzbrantner/linguistics-learning",
       "@moritzbrantner/maps",
+      "@moritzbrantner/ocr",
       "@moritzbrantner/parallel-text",
+      "@moritzbrantner/speed-reading",
       "@moritzbrantner/speech",
       "@moritzbrantner/subtitles",
       "@moritzbrantner/ui",
@@ -138,6 +158,7 @@ export default defineConfig({
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
+        speedReading: path.resolve(rootDir, "speed-reading.html"),
         speech: path.resolve(rootDir, "speech.html"),
         subtitles: path.resolve(rootDir, "subtitles.html"),
         ui: path.resolve(rootDir, "ui.html"),
