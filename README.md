@@ -3,6 +3,7 @@
 Shared runtime packages for the Next.js application stack.
 
 ## Packages
+
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
@@ -22,12 +23,20 @@ Shared runtime packages for the Next.js application stack.
 - `@moritzbrantner/word-vectors`: dependency-light distributional word vectors with similarity lookup, context inspection, persistence, and document adapters.
 
 ## Repository scope
+
 - Runtime packages only.
 - No shared eslint or TypeScript config packages in this first extraction wave.
 - GitHub Packages publishing is configured through Changesets.
 - Includes a local playground app for manually testing package behavior.
 
+## Styling rule
+
+- Package-authored styling must use Tailwind CSS.
+- If a package ships CSS, it must expose a root `styles.css` file, import `tailwindcss`, declare package-local `@source` paths, and export `./styles.css` from `package.json`.
+- The repository lint step verifies that contract for every package that publishes styles.
+
 ## Local development
+
 1. Install dependencies with `bun install`.
 2. Scaffold a new package with `bun run create:package <name>`.
 3. Start the example pages with `bun run dev:playground`.
@@ -35,6 +44,7 @@ Shared runtime packages for the Next.js application stack.
 5. Run checks with `bun run lint`, `bun run typecheck`, and `bun run test`.
 
 ## Publishing
+
 - The package names use the neutral `@moritzbrantner/*` scope in source.
 - Before first GitHub Packages publish, either publish from a matching GitHub org/user scope or rename the packages to your actual GitHub Packages scope.
 - See [`docs/publishing.md`](./docs/publishing.md) for the release workflow and scope caveat.

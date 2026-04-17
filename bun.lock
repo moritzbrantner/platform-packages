@@ -147,6 +147,7 @@
         "d3-delaunay": "^6.0.4",
         "maplibre-gl": "^5.10.0",
         "supercluster": "^8.0.1",
+        "tailwindcss": "^4.1.14",
       },
       "devDependencies": {
         "@types/d3-delaunay": "^6.0.4",

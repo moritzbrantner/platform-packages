@@ -42,9 +42,21 @@ type AppShellProps = {
 const navigation = [
   { key: "home", href: "/index.html", label: "Overview" },
   { key: "card-games", href: "/card-games.html", label: "Card games package" },
-  { key: "flat-design", href: "/flat-design.html", label: "Flat design package" },
-  { key: "linguistics-core", href: "/linguistics-core.html", label: "Linguistics core" },
-  { key: "linguistics-corpus", href: "/linguistics-corpus.html", label: "Linguistics corpus" },
+  {
+    key: "flat-design",
+    href: "/flat-design.html",
+    label: "Flat design package",
+  },
+  {
+    key: "linguistics-core",
+    href: "/linguistics-core.html",
+    label: "Linguistics core",
+  },
+  {
+    key: "linguistics-corpus",
+    href: "/linguistics-corpus.html",
+    label: "Linguistics corpus",
+  },
   {
     key: "linguistics-learning",
     href: "/linguistics-learning.html",
@@ -52,14 +64,34 @@ const navigation = [
   },
   { key: "maps", href: "/maps.html", label: "Maps package" },
   { key: "maps-motion", href: "/maps-motion.html", label: "Maps motion demo" },
-  { key: "parallel-text", href: "/parallel-text.html", label: "Parallel text package" },
-  { key: "speed-reading", href: "/speed-reading.html", label: "Speed reading package" },
+  {
+    key: "parallel-text",
+    href: "/parallel-text.html",
+    label: "Parallel text package",
+  },
+  {
+    key: "speed-reading",
+    href: "/speed-reading.html",
+    label: "Speed reading package",
+  },
   { key: "speech", href: "/speech.html", label: "Speech package" },
   { key: "subtitles", href: "/subtitles.html", label: "Subtitles package" },
   { key: "ui", href: "/ui.html", label: "UI package" },
-  { key: "storytelling", href: "/storytelling.html", label: "Storytelling package" },
-  { key: "word-prediction", href: "/word-prediction.html", label: "Word prediction package" },
-  { key: "word-vectors", href: "/word-vectors.html", label: "Word vectors package" },
+  {
+    key: "storytelling",
+    href: "/storytelling.html",
+    label: "Storytelling package",
+  },
+  {
+    key: "word-prediction",
+    href: "/word-prediction.html",
+    label: "Word prediction package",
+  },
+  {
+    key: "word-vectors",
+    href: "/word-vectors.html",
+    label: "Word vectors package",
+  },
 ] as const satisfies ReadonlyArray<{
   key: PageKey;
   href: string;
@@ -84,17 +116,18 @@ function ThemeToggle() {
 
 function AppFrame({ activePage, title, description, children }: AppShellProps) {
   const activeLabel = useMemo(
-    () => navigation.find((item) => item.key === activePage)?.label ?? "Playground",
+    () =>
+      navigation.find((item) => item.key === activePage)?.label ?? "Playground",
     [activePage],
   );
 
   return (
     <div className="min-h-screen px-4 py-8 md:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <header className="rounded-[2rem] border border-border/60 bg-background/85 p-5 shadow-xl shadow-black/5 supports-backdrop-filter:backdrop-blur">
+        <header className="rounded-none border border-border/60 bg-background/55 p-5 shadow-2xl shadow-black/10 supports-backdrop-filter:backdrop-blur-xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-3">
-              <Badge variant="outline" className="rounded-full px-3 py-1">
+              <Badge variant="outline" className="px-3 py-1">
                 Platform packages playground
               </Badge>
               <div className="space-y-2">
@@ -108,7 +141,10 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
             </div>
 
             <div className="flex flex-col gap-3 md:items-end">
-              <nav className="flex flex-wrap gap-2" aria-label="Playground navigation">
+              <nav
+                className="flex flex-wrap gap-2"
+                aria-label="Playground navigation"
+              >
                 {navigation.map((item) => (
                   <Button
                     key={item.key}
@@ -118,7 +154,9 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
                   >
                     <a
                       href={item.href}
-                      aria-current={item.key === activePage ? "page" : undefined}
+                      aria-current={
+                        item.key === activePage ? "page" : undefined
+                      }
                     >
                       {item.label}
                     </a>
@@ -143,7 +181,12 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
 
 export function PlaygroundPage(props: AppShellProps) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       <AppFrame {...props} />
     </ThemeProvider>
   );
@@ -163,9 +206,9 @@ export function ExampleLinkCard({
   cta: string;
 }) {
   return (
-    <Card className="h-full rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
+    <Card className="h-full rounded-none border-border/60 bg-background/55 shadow-2xl shadow-black/10">
       <CardHeader className="space-y-3">
-        <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
+        <Badge variant="secondary" className="w-fit px-3 py-1">
           {eyebrow}
         </Badge>
         <div className="space-y-2">
@@ -176,7 +219,7 @@ export function ExampleLinkCard({
         </div>
       </CardHeader>
       <CardContent className="flex h-full items-end">
-        <Button asChild className={cn("rounded-full px-5")}>
+        <Button asChild className={cn("px-5")}>
           <a href={href}>{cta}</a>
         </Button>
       </CardContent>
