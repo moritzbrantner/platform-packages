@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "platform-packages",
@@ -90,12 +89,29 @@
         "react-dom": "^19.0.0",
       },
     },
+    "packages/document-analysis": {
+      "name": "@moritzbrantner/document-analysis",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/ocr": "workspace:*",
+        "@moritzbrantner/question-answering": "workspace:*",
+        "@moritzbrantner/sentiment-analysis": "workspace:*",
+        "@moritzbrantner/syntax-analysis": "workspace:*",
+        "@moritzbrantner/text-analysis": "workspace:*",
+        "@moritzbrantner/text-summarization": "workspace:*",
+      },
+    },
     "packages/eslint-config": {
       "name": "@moritzbrantner/eslint-config",
       "version": "0.1.0",
       "peerDependencies": {
         "eslint": "^9.0.0",
       },
+    },
+    "packages/extraction-schema": {
+      "name": "@moritzbrantner/extraction-schema",
+      "version": "0.1.0",
     },
     "packages/flat-design": {
       "name": "@moritzbrantner/flat-design",
@@ -118,6 +134,14 @@
         "h3-js": "^4.4.0",
       },
     },
+    "packages/information-extraction": {
+      "name": "@moritzbrantner/information-extraction",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/text-analysis": "workspace:*",
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
     "packages/keyboard": {
       "name": "@moritzbrantner/keyboard",
       "version": "0.1.0",
@@ -138,12 +162,14 @@
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/linguistics-corpus": "workspace:*",
       },
     },
     "packages/maps": {
       "name": "@moritzbrantner/maps",
       "version": "0.1.0",
       "dependencies": {
+        "@moritzbrantner/ui": "workspace:^",
         "d3-delaunay": "^6.0.4",
         "maplibre-gl": "^5.10.0",
         "supercluster": "^8.0.1",
@@ -174,6 +200,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/ui": "workspace:^",
       },
       "devDependencies": {
         "@types/react": "^19.2.2",
@@ -186,9 +213,35 @@
         "react-dom": "^19.0.0",
       },
     },
+    "packages/question-answering": {
+      "name": "@moritzbrantner/question-answering",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/sentiment-analysis": {
+      "name": "@moritzbrantner/sentiment-analysis",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/source-ingestion": {
+      "name": "@moritzbrantner/source-ingestion",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
     "packages/speech": {
       "name": "@moritzbrantner/speech",
       "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/ui": "workspace:^",
+      },
       "devDependencies": {
         "@types/react": "^19.2.2",
         "react": "^19.2.0",
@@ -241,6 +294,36 @@
       "name": "@moritzbrantner/subtitles",
       "version": "0.1.0",
     },
+    "packages/syntax-analysis": {
+      "name": "@moritzbrantner/syntax-analysis",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/text-analysis": {
+      "name": "@moritzbrantner/text-analysis",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/text-inference": {
+      "name": "@moritzbrantner/text-inference",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+      },
+    },
+    "packages/text-summarization": {
+      "name": "@moritzbrantner/text-summarization",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
     "packages/typescript-config": {
       "name": "@moritzbrantner/typescript-config",
       "version": "0.1.0",
@@ -285,6 +368,10 @@
     "packages/word-prediction": {
       "name": "@moritzbrantner/word-prediction",
       "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/ui": "workspace:^",
+        "@moritzbrantner/word-vectors": "workspace:*",
+      },
       "devDependencies": {
         "@types/react": "^19.2.2",
         "react": "^19.2.0",
@@ -298,6 +385,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/linguistics-corpus": "workspace:*",
       },
     },
   },
@@ -570,11 +658,17 @@
 
     "@moritzbrantner/collaboration": ["@moritzbrantner/collaboration@workspace:packages/collaboration"],
 
+    "@moritzbrantner/document-analysis": ["@moritzbrantner/document-analysis@workspace:packages/document-analysis"],
+
     "@moritzbrantner/eslint-config": ["@moritzbrantner/eslint-config@workspace:packages/eslint-config"],
+
+    "@moritzbrantner/extraction-schema": ["@moritzbrantner/extraction-schema@workspace:packages/extraction-schema"],
 
     "@moritzbrantner/flat-design": ["@moritzbrantner/flat-design@workspace:packages/flat-design"],
 
     "@moritzbrantner/hexagon-grids": ["@moritzbrantner/hexagon-grids@workspace:packages/hexagon-grids"],
+
+    "@moritzbrantner/information-extraction": ["@moritzbrantner/information-extraction@workspace:packages/information-extraction"],
 
     "@moritzbrantner/keyboard": ["@moritzbrantner/keyboard@workspace:packages/keyboard"],
 
@@ -592,6 +686,12 @@
 
     "@moritzbrantner/playground": ["@moritzbrantner/playground@workspace:examples/playground"],
 
+    "@moritzbrantner/question-answering": ["@moritzbrantner/question-answering@workspace:packages/question-answering"],
+
+    "@moritzbrantner/sentiment-analysis": ["@moritzbrantner/sentiment-analysis@workspace:packages/sentiment-analysis"],
+
+    "@moritzbrantner/source-ingestion": ["@moritzbrantner/source-ingestion@workspace:packages/source-ingestion"],
+
     "@moritzbrantner/speech": ["@moritzbrantner/speech@workspace:packages/speech"],
 
     "@moritzbrantner/speed-reading": ["@moritzbrantner/speed-reading@workspace:packages/speed-reading"],
@@ -599,6 +699,14 @@
     "@moritzbrantner/storytelling": ["@moritzbrantner/storytelling@workspace:packages/storytelling"],
 
     "@moritzbrantner/subtitles": ["@moritzbrantner/subtitles@workspace:packages/subtitles"],
+
+    "@moritzbrantner/syntax-analysis": ["@moritzbrantner/syntax-analysis@workspace:packages/syntax-analysis"],
+
+    "@moritzbrantner/text-analysis": ["@moritzbrantner/text-analysis@workspace:packages/text-analysis"],
+
+    "@moritzbrantner/text-inference": ["@moritzbrantner/text-inference@workspace:packages/text-inference"],
+
+    "@moritzbrantner/text-summarization": ["@moritzbrantner/text-summarization@workspace:packages/text-summarization"],
 
     "@moritzbrantner/typescript-config": ["@moritzbrantner/typescript-config@workspace:packages/typescript-config"],
 

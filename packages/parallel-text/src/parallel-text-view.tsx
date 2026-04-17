@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, HTMLAttributes } from "react";
 
 import { createTextDocument, segmentTextDocument } from "@moritzbrantner/linguistics-core";
+import { Button } from "@moritzbrantner/ui";
 
 import type {
   ParallelTextAlignmentRow,
@@ -160,7 +161,7 @@ export function ParallelTextView({
                 const isSelected = translation.id === selectedTranslation?.id;
 
                 return (
-                  <button
+                  <Button
                     key={translation.id}
                     type="button"
                     role="tab"
@@ -172,7 +173,7 @@ export function ParallelTextView({
                     }}
                   >
                     {translation.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -273,7 +274,7 @@ function SentenceInline({
           <Fragment key={token.id}>
             {token.leadingText}
             {token.isWord ? (
-              <button
+              <Button
                 type="button"
                 data-token-id={token.id}
                 data-highlighted={isActive || isLinked ? "true" : "false"}
@@ -293,7 +294,7 @@ function SentenceInline({
                 }}
               >
                 {token.text}
-              </button>
+              </Button>
             ) : (
               <span style={styles.punctuation}>{token.text}</span>
             )}

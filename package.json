@@ -11,7 +11,7 @@
     "changeset": "changeset",
     "create:package": "node scripts/create-package.mjs",
     "dev:playground": "bun run --filter @moritzbrantner/playground dev",
-    "lint": "turbo run lint && node scripts/verify-package-styles.mjs",
+    "lint": "turbo run lint && node scripts/verify-package-styles.mjs && node scripts/verify-ui-components.mjs",
     "preview:playground": "bun run --filter @moritzbrantner/playground preview",
     "build:playground": "bun run --filter @moritzbrantner/playground build",
     "test:e2e": "playwright test",

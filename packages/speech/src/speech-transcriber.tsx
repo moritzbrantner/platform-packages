@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, TextareaHTMLAttributes } from "react";
 
+import { Button } from "@moritzbrantner/ui";
+
 import type {
   SpeechStreamingTranscriber,
   SpeechStreamingTranscriptionSession,
@@ -597,20 +599,20 @@ export function SpeechTranscriberPanel({
       </div>
 
       <div style={styles.actions}>
-        <button type="button" onClick={() => void startRecording()} disabled={isStartDisabled} style={buttonStyle(isStartDisabled)}>
+        <Button type="button" onClick={() => void startRecording()} disabled={isStartDisabled} style={buttonStyle(isStartDisabled)}>
           {startLabel}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => void stopRecording()}
           disabled={isStopDisabled}
           style={buttonStyle(isStopDisabled, true)}
         >
           {stopLabel}
-        </button>
-        <button type="button" onClick={resetTranscript} style={styles.secondaryButton}>
+        </Button>
+        <Button type="button" onClick={resetTranscript} style={styles.secondaryButton}>
           {resetLabel}
-        </button>
+        </Button>
       </div>
 
       <label style={styles.label}>

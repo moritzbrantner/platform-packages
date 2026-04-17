@@ -10,6 +10,8 @@ import {
   type ChangeEvent,
 } from "react";
 
+import { Button } from "@moritzbrantner/ui";
+
 import { ClusteredMap, type ClusteredMapProps } from "./clustered-map";
 import {
   getTemporalMapPointsAtTime,
@@ -201,7 +203,7 @@ export function TemporalClusteredMap<TProperties = Record<string, unknown>>({
       />
       {showPlaybackControls ? (
         <div className="mb-temporal-map__timeline" aria-label={timelineLabel}>
-          <button
+          <Button
             type="button"
             className="mb-temporal-map__playback-toggle"
             disabled={!hasPlayableRange}
@@ -210,7 +212,7 @@ export function TemporalClusteredMap<TProperties = Record<string, unknown>>({
             }}
           >
             {isPlaying ? "Pause" : "Play"}
-          </button>
+          </Button>
           <div className="mb-temporal-map__axis">
             <span className="mb-temporal-map__axis-boundary">
               {timeRange ? formatTimeLabel(timeRange.start) : "\u2014"}
