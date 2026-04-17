@@ -20,13 +20,13 @@
     }
   },
   "dependencies": {
+    "@moritzbrantner/document-structure-extraction": "workspace:*",
     "@moritzbrantner/linguistics-core": "workspace:*",
     "@moritzbrantner/ocr": "workspace:*",
     "@moritzbrantner/question-answering": "workspace:*",
     "@moritzbrantner/sentiment-analysis": "workspace:*",
     "@moritzbrantner/text-analysis": "workspace:*",
-    "@moritzbrantner/text-summarization": "workspace:*",
-    "@moritzbrantner/document-structure-extraction": "workspace:*"
+    "@moritzbrantner/text-summarization": "workspace:*"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

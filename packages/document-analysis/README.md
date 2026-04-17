@@ -4,9 +4,9 @@ Higher-level orchestration for document summarization, sentiment, text analysis,
 
 ## Main APIs
 
-- `createDocumentAnalysisPipeline({ summarization?, sentimentAnalysis?, textAnalysis?, questionAnswering?, structureHooks?, defaultQuestions? })`
+- `createDocumentAnalysisPipeline({ summarization?, sentimentAnalysis?, textAnalysis?, questionAnswering?, defaultQuestions?, structureHooks? })`
 - `pipeline.analyze(input, { questions?, includeSummary?, includeSentiment?, includeTextAnalysis?, includeStructure? })`
 
-Inputs can be raw text, `TextDocument`s, or `OcrDocument`s.
+Inputs can be raw text, `TextDocument`s, or `OcrDocument`s. OCR inputs are converted into linguistics-aware text documents before analysis.
 
-When OCR input is used, the pipeline can optionally include structure-aware extraction through `@moritzbrantner/document-structure-extraction` and run `structureHooks` to return structured findings and metadata.
+When `includeStructure` is enabled for OCR inputs, the pipeline also returns structure-aware findings via `@moritzbrantner/document-structure-extraction`.
