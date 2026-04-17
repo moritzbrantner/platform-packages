@@ -13,6 +13,10 @@ export default defineConfig({
       ),
       "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
+      "@moritzbrantner/hexagon-grids": path.resolve(
+        rootDir,
+        "packages/hexagon-grids/src/index.ts",
+      ),
       "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
       "@moritzbrantner/linguistics-core": path.resolve(
         rootDir,

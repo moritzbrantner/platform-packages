@@ -7,6 +7,22 @@ export {
 } from "./animation-presets";
 export { FlatScene, type FlatSceneProps } from "./flat-scene";
 export {
+  createFlatBadgeFigure,
+  createFlatCardFigure,
+  createFlatCloudFigure,
+  createFlatFigureAnimations,
+  createFlatSparkleFigure,
+  createFlatSunFigure,
+  type FlatBadgeFigureOptions,
+  type FlatCardFigureOptions,
+  type FlatCloudFigureOptions,
+  type FlatFigureAnimationOptions,
+  type FlatFigureAnimationPreset,
+  type FlatFigureMotion,
+  type FlatSparkleFigureOptions,
+  type FlatSunFigureOptions,
+} from "./figures";
+export {
   createFlatDesignPalette,
   defaultFlatDesignPalette,
 } from "./palette";

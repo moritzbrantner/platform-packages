@@ -1,17 +1,12 @@
 import {
-  createBobbingAnimation,
-  createDriftAnimation,
-  createOpacityPulseAnimation,
-  createPulseAnimation,
-  createSpinAnimation,
-} from "./animation-presets";
+  createFlatBadgeFigure,
+  createFlatCardFigure,
+  createFlatCloudFigure,
+  createFlatSparkleFigure,
+  createFlatSunFigure,
+} from "./figures";
 import { createFlatDesignPalette } from "./palette";
-import type {
-  FlatColorPalette,
-  FlatDesignScene,
-  FlatGroup,
-  FlatShape,
-} from "./scene-types";
+import type { FlatColorPalette, FlatDesignScene, FlatShape } from "./scene-types";
 
 export type FlatShowcaseSceneOptions = {
   width?: number;
@@ -21,81 +16,6 @@ export type FlatShowcaseSceneOptions = {
   description?: string;
   palette?: Partial<FlatColorPalette>;
 };
-
-function createCloud(
-  x: number,
-  y: number,
-  scale: number,
-  animate: boolean,
-): FlatGroup {
-  return {
-    kind: "group",
-    opacity: 0.92,
-    transform: `translate(${x} ${y}) scale(${scale})`,
-    animations: animate ? [createDriftAnimation({ distance: 20, dur: "11s" })] : undefined,
-    children: [
-      { kind: "ellipse", cx: -26, cy: 3, rx: 28, ry: 18, fill: "#FFFFFF" },
-      { kind: "ellipse", cx: 2, cy: -8, rx: 34, ry: 24, fill: "#FFFFFF" },
-      { kind: "ellipse", cx: 34, cy: 5, rx: 24, ry: 16, fill: "#FFFFFF" },
-      { kind: "rect", x: -40, y: 0, width: 88, height: 24, rx: 12, fill: "#FFFFFF" },
-    ],
-  };
-}
-
-function createSparkle(x: number, y: number, color: string, animate: boolean): FlatGroup {
-  return {
-    kind: "group",
-    transform: `translate(${x} ${y})`,
-    animations: animate
-      ? [
-          createPulseAnimation({ from: 0.92, to: 1.12, dur: "5s" }),
-          createOpacityPulseAnimation({ minOpacity: 0.45, maxOpacity: 1, dur: "5s" }),
-        ]
-      : undefined,
-    children: [
-      {
-        kind: "line",
-        x1: 0,
-        y1: -12,
-        x2: 0,
-        y2: 12,
-        stroke: color,
-        strokeWidth: 4,
-        strokeLinecap: "round",
-      },
-      {
-        kind: "line",
-        x1: -12,
-        y1: 0,
-        x2: 12,
-        y2: 0,
-        stroke: color,
-        strokeWidth: 4,
-        strokeLinecap: "round",
-      },
-    ],
-  };
-}
-
-function createBadge(color: string, highlight: string, animate: boolean): FlatGroup {
-  return {
-    kind: "group",
-    transform: "translate(620 186)",
-    animations: animate ? [createBobbingAnimation({ distance: 14, dur: "4.2s" })] : undefined,
-    children: [
-      { kind: "circle", cx: 0, cy: 0, r: 52, fill: color },
-      { kind: "circle", cx: 0, cy: 0, r: 26, fill: highlight, opacity: 0.92 },
-      {
-        kind: "path",
-        fill: color,
-        d: "M-9 -1l8 8L16 -12l7 7L-1 20-16 5z",
-        transform: "scale(0.8)",
-      },
-      createSparkle(-48, -40, highlight, animate),
-      createSparkle(46, 36, highlight, animate),
-    ],
-  };
-}
 
 export function createFlatShowcaseScene(
   options: FlatShowcaseSceneOptions = {},
@@ -258,75 +178,42 @@ export function createFlatShowcaseScene(
             height,
             fill: "url(#flat-sky-gradient)",
           },
-          {
-            kind: "group",
-            transform: "translate(644 116)",
-            animations: animate
-              ? [
-                  createPulseAnimation({ from: 1, to: 1.06, dur: "7s" }),
-                  createSpinAnimation({ angle: 360, dur: "26s" }),
-                ]
-              : undefined,
-            children: [
-              {
-                kind: "circle",
-                cx: 0,
-                cy: 0,
-                r: 62,
-                fill: palette.accent,
-                opacity: 0.18,
-              },
-              {
-                kind: "circle",
-                cx: 0,
-                cy: 0,
-                r: 42,
-                fill: palette.accent,
-              },
-              {
-                kind: "polygon",
-                points: [
-                  { x: 0, y: -78 },
-                  { x: 8, y: -56 },
-                  { x: -8, y: -56 },
-                ],
-                fill: palette.accent,
-                opacity: 0.8,
-              },
-              {
-                kind: "polygon",
-                points: [
-                  { x: 78, y: 0 },
-                  { x: 56, y: 8 },
-                  { x: 56, y: -8 },
-                ],
-                fill: palette.accent,
-                opacity: 0.8,
-              },
-              {
-                kind: "polygon",
-                points: [
-                  { x: 0, y: 78 },
-                  { x: 8, y: 56 },
-                  { x: -8, y: 56 },
-                ],
-                fill: palette.accent,
-                opacity: 0.8,
-              },
-              {
-                kind: "polygon",
-                points: [
-                  { x: -78, y: 0 },
-                  { x: -56, y: 8 },
-                  { x: -56, y: -8 },
-                ],
-                fill: palette.accent,
-                opacity: 0.8,
-              },
-            ],
-          },
-          createCloud(180, 98, 1, animate),
-          createCloud(500, 76, 0.82, animate),
+          createFlatSunFigure({
+            x: 644,
+            y: 116,
+            color: palette.accent,
+            haloColor: palette.accent,
+            motion: animate
+              ? {
+                  preset: "pulse",
+                  options: {
+                    from: 1,
+                    to: 1.06,
+                    minOpacity: 0.78,
+                    maxOpacity: 1,
+                    dur: "7s",
+                  },
+                }
+              : false,
+          }),
+          createFlatCloudFigure({
+            x: 180,
+            y: 98,
+            scale: 1,
+            opacity: 0.92,
+            motion: animate
+              ? { preset: "drift", options: { distance: 20, dur: "11s" } }
+              : false,
+          }),
+          createFlatCloudFigure({
+            x: 500,
+            y: 76,
+            scale: 0.82,
+            opacity: 0.92,
+            motion: animate
+              ? { preset: "drift", options: { distance: 20, dur: "11s" } }
+              : false,
+          }),
         ],
       },
       {
@@ -376,51 +263,65 @@ export function createFlatShowcaseScene(
         id: "panel",
         shapes: [
           ...panelShapes,
-          createBadge(palette.accentAlt, palette.highlight, animate),
-          {
-            kind: "group",
-            transform: "translate(132 154)",
-            animations: animate
-              ? [createBobbingAnimation({ distance: 10, dur: "4.8s" })]
-              : undefined,
-            children: [
-              {
-                kind: "rect",
-                x: 0,
-                y: 0,
-                width: 118,
-                height: 74,
-                rx: 24,
-                fill: palette.highlight,
-                opacity: 0.96,
-              },
-              {
-                kind: "rect",
-                x: 18,
-                y: 18,
-                width: 82,
-                height: 12,
-                rx: 6,
-                fill: palette.surfaceAlt,
-              },
-              {
-                kind: "rect",
-                x: 18,
-                y: 40,
-                width: 52,
-                height: 16,
-                rx: 8,
-                fill: palette.accent,
-              },
-            ],
-          },
+          createFlatBadgeFigure({
+            x: 620,
+            y: 186,
+            color: palette.accentAlt,
+            highlight: palette.highlight,
+            checkColor: palette.accentAlt,
+            motion: animate
+              ? { preset: "bobbing", options: { distance: 14, dur: "4.2s" } }
+              : false,
+          }),
+          createFlatCardFigure({
+            x: 191,
+            y: 191,
+            surface: palette.highlight,
+            detail: palette.surfaceAlt,
+            accent: palette.accent,
+            motion: animate
+              ? { preset: "bobbing", options: { distance: 10, dur: "4.8s" } }
+              : false,
+          }),
         ],
       },
       {
         id: "sparkles",
         shapes: [
-          createSparkle(138, 126, palette.accentAlt, animate),
-          createSparkle(722, 202, palette.highlight, animate),
+          createFlatSparkleFigure({
+            x: 138,
+            y: 126,
+            color: palette.accentAlt,
+            motion: animate
+              ? {
+                  preset: "pulse",
+                  options: {
+                    from: 0.92,
+                    to: 1.12,
+                    minOpacity: 0.45,
+                    maxOpacity: 1,
+                    dur: "5s",
+                  },
+                }
+              : false,
+          }),
+          createFlatSparkleFigure({
+            x: 722,
+            y: 202,
+            color: palette.highlight,
+            motion: animate
+              ? {
+                  preset: "pulse",
+                  options: {
+                    from: 0.92,
+                    to: 1.12,
+                    minOpacity: 0.45,
+                    maxOpacity: 1,
+                    dur: "5s",
+                  },
+                }
+              : false,
+          }),
         ],
       },
     ],
