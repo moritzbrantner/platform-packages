@@ -1,108 +1,78 @@
+@import "tailwindcss";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
-.mb-maps {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at top, rgba(14, 116, 144, 0.18), transparent 42%),
-    linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.12));
-}
+@source "./dist/**/*.{js,mjs}";
+@source "./src/**/*.{ts,tsx}";
 
-.mb-maps__canvas,
-.mb-maps .maplibregl-canvas-container,
-.mb-maps .maplibregl-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
+@layer components {
+  .mb-maps {
+    @apply relative overflow-hidden;
+    background:
+      radial-gradient(circle at top, rgb(14 116 144 / 0.18), transparent 42%),
+      linear-gradient(180deg, rgb(15 23 42 / 0.02), rgb(15 23 42 / 0.12));
+  }
 
-.mb-maps .maplibregl-ctrl-top-right {
-  top: 1rem;
-  right: 1rem;
-}
+  .mb-maps__canvas,
+  .mb-maps .maplibregl-canvas-container,
+  .mb-maps .maplibregl-canvas {
+    @apply absolute inset-0 size-full;
+  }
 
-.mb-maps .maplibregl-ctrl-group {
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 999px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-}
+  .mb-maps .maplibregl-ctrl-top-right {
+    @apply right-4 top-4;
+  }
 
-.mb-maps .maplibregl-ctrl button {
-  width: 34px;
-  height: 34px;
-}
+  .mb-maps .maplibregl-ctrl-group {
+    @apply overflow-hidden rounded-full border border-slate-900/10 shadow-[0_10px_30px_rgb(15_23_42_/_0.18)];
+  }
 
-.mb-temporal-map {
-  display: grid;
-  gap: 1rem;
-}
+  .mb-maps .maplibregl-ctrl button {
+    @apply size-[34px];
+  }
 
-.mb-temporal-map__timeline {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem 1.125rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(16px);
-}
+  .mb-temporal-map {
+    @apply grid gap-4;
+  }
 
-.mb-temporal-map__playback-toggle {
-  appearance: none;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #0f766e, #0f172a);
-  color: #ffffff;
-  font: inherit;
-  font-weight: 600;
-  padding: 0.7rem 1.1rem;
-  cursor: pointer;
-}
+  .mb-temporal-map__timeline {
+    @apply grid items-center gap-4 rounded-[1.25rem] border border-slate-900/8 bg-white/88 px-[1.125rem] py-4 shadow-[0_16px_40px_rgb(15_23_42_/_0.08)] backdrop-blur-[16px];
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
 
-.mb-temporal-map__playback-toggle:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+  .mb-temporal-map__playback-toggle {
+    @apply cursor-pointer rounded-full border-0 px-[1.1rem] py-[0.7rem] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45;
+    appearance: none;
+    background: linear-gradient(135deg, #0f766e, #0f172a);
+    font: inherit;
+  }
 
-.mb-temporal-map__axis {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0.85rem;
-  align-items: center;
-}
+  .mb-temporal-map__axis {
+    @apply grid items-center gap-[0.85rem];
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
 
-.mb-temporal-map__axis-boundary,
-.mb-temporal-map__current-time {
-  color: rgba(15, 23, 42, 0.78);
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-}
+  .mb-temporal-map__axis-boundary,
+  .mb-temporal-map__current-time {
+    @apply text-[0.9rem] text-slate-900/78;
+    font-variant-numeric: tabular-nums;
+  }
 
-.mb-temporal-map__current-time {
-  justify-self: end;
-  font-weight: 600;
-}
+  .mb-temporal-map__current-time {
+    @apply justify-self-end font-semibold;
+  }
 
-.mb-temporal-map__slider {
-  width: 100%;
-  accent-color: #0f766e;
+  .mb-temporal-map__slider {
+    @apply w-full accent-[#0f766e];
+  }
 }
 
 @media (max-width: 720px) {
-  .mb-temporal-map__timeline {
-    grid-template-columns: 1fr;
-  }
-
+  .mb-temporal-map__timeline,
   .mb-temporal-map__axis {
     grid-template-columns: 1fr;
   }
 
   .mb-temporal-map__current-time {
-    justify-self: start;
+    @apply justify-self-start;
   }
 }
