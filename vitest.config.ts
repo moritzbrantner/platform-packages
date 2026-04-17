@@ -21,6 +21,10 @@ export default defineConfig({
         rootDir,
         "packages/hexagon-grids/src/index.ts",
       ),
+      "@moritzbrantner/information-extraction": path.resolve(
+        rootDir,
+        "packages/information-extraction/src/index.ts",
+      ),
       "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
       "@moritzbrantner/linguistics-core": path.resolve(
         rootDir,
