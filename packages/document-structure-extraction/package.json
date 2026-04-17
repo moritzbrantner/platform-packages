@@ -1,12 +1,12 @@
 {
-  "name": "@moritzbrantner/document-analysis",
+  "name": "@moritzbrantner/document-structure-extraction",
   "version": "0.1.0",
   "private": false,
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moritzbrantner/platform-packages.git",
-    "directory": "packages/document-analysis"
+    "directory": "packages/document-structure-extraction"
   },
   "files": [
     "dist"
@@ -21,12 +21,7 @@
   },
   "dependencies": {
     "@moritzbrantner/linguistics-core": "workspace:*",
-    "@moritzbrantner/ocr": "workspace:*",
-    "@moritzbrantner/question-answering": "workspace:*",
-    "@moritzbrantner/sentiment-analysis": "workspace:*",
-    "@moritzbrantner/text-analysis": "workspace:*",
-    "@moritzbrantner/text-summarization": "workspace:*",
-    "@moritzbrantner/document-structure-extraction": "workspace:*"
+    "@moritzbrantner/ocr": "workspace:*"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
@@ -37,6 +32,6 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/document-analysis/tests"
+    "test": "cd ../.. && vitest run packages/document-structure-extraction/tests"
   }
 }

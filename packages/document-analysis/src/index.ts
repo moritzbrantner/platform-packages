@@ -3,6 +3,12 @@ import {
   segmentTextDocument,
   type TextDocument,
 } from "@moritzbrantner/linguistics-core";
+import {
+  extractDocumentStructure,
+  runStructureIntegrationHooks,
+  type DocumentStructureIntegrationHook,
+  type StructuredDocument,
+} from "@moritzbrantner/document-structure-extraction";
 import { ocrToTextDocument, type OcrDocument } from "@moritzbrantner/ocr";
 import type { QuestionAnswer, QuestionAnsweringPipeline } from "@moritzbrantner/question-answering";
 import type {
@@ -24,6 +30,9 @@ export interface DocumentAnalysisReport<
 > {
   sourceType: "ocr" | "text";
   document: TextDocument<Metadata>;
+  structured?: StructuredDocument;
+  structureFindings: string[];
+  structureMetadata?: Record<string, unknown>;
   summary?: TextSummaryResult;
   sentiment?: SentimentAnalysisResult;
   analysis?: TextAnalysisResult<Metadata>;
@@ -37,6 +46,7 @@ export interface CreateDocumentAnalysisPipelineOptions<
   textAnalysis?: TextAnalysisPipeline<Metadata>;
   sentimentAnalysis?: SentimentAnalysisPipeline<Metadata>;
   summarization?: TextSummarizationPipeline<Metadata>;
+  structureHooks?: DocumentStructureIntegrationHook[];
   defaultQuestions?: string[];
 }
 
@@ -45,6 +55,7 @@ export interface AnalyzeDocumentOptions {
   includeSummary?: boolean;
   includeSentiment?: boolean;
   includeTextAnalysis?: boolean;
+  includeStructure?: boolean;
 }
 
 export interface DocumentAnalysisPipeline<
@@ -65,8 +76,20 @@ export function createDocumentAnalysisPipeline<
     async analyze(input, analysisOptions = {}) {
       const normalized = normalizeDocumentInput(input);
       const questions = analysisOptions.questions ?? options.defaultQuestions ?? [];
+      const includeStructure =
+        analysisOptions.includeStructure !== false &&
+        normalized.sourceType === "ocr" &&
+        normalized.ocrDocument;
 
-      const [summary, sentiment, analysis, answers] = await Promise.all([
+      const structurePromise = includeStructure
+        ? buildStructuredFindings(
+            normalized.ocrDocument,
+            options.structureHooks,
+          )
+        : Promise.resolve(undefined);
+
+      const [structure, summary, sentiment, analysis, answers] = await Promise.all([
+        structurePromise,
         analysisOptions.includeSummary !== false && options.summarization
           ? options.summarization.summarize(normalized.document)
           : Promise.resolve(undefined),
@@ -89,12 +112,33 @@ export function createDocumentAnalysisPipeline<
       return {
         sourceType: normalized.sourceType,
         document: normalized.document,
+        structured: structure?.structured,
+        structureFindings: structure?.findings ?? [],
+        structureMetadata: structure?.metadata,
         summary,
         sentiment,
         analysis,
         answers,
       };
     },
+  };
+}
+
+async function buildStructuredFindings(
+  document: OcrDocument,
+  hooks: DocumentStructureIntegrationHook[] | undefined,
+): Promise<{
+  structured: StructuredDocument;
+  findings: string[];
+  metadata: Record<string, unknown>;
+}> {
+  const structured = extractDocumentStructure(document);
+  const integration = await runStructureIntegrationHooks(document, structured, hooks);
+
+  return {
+    structured,
+    findings: integration.findings,
+    metadata: integration.metadata,
   };
 }
 
@@ -105,10 +149,12 @@ function normalizeDocumentInput<
 ): {
   sourceType: "ocr" | "text";
   document: TextDocument<Metadata>;
+  ocrDocument?: OcrDocument;
 } {
   if (isOcrDocument(input)) {
     return {
       sourceType: "ocr",
+      ocrDocument: input,
       document: ocrToTextDocument(input, {
         granularity: "word",
       }) as TextDocument<Metadata>,

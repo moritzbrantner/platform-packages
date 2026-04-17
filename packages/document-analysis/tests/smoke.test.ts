@@ -3,9 +3,18 @@ import { describe, expect, test } from "vitest";
 import { createDocumentAnalysisPipeline } from "@moritzbrantner/document-analysis";
 
 describe("@moritzbrantner/document-analysis", () => {
-  test("orchestrates summary, sentiment, text analysis, and QA", async () => {
+  test("orchestrates summary, sentiment, text analysis, QA, and structure hooks", async () => {
     const pipeline = createDocumentAnalysisPipeline({
       defaultQuestions: ["Where?"],
+      structureHooks: [
+        {
+          id: "structure-auditor",
+          run: ({ structured }) => ({
+            findings: [`blocks=${structured.pages[0]?.blocks.length ?? 0}`],
+            metadata: { pageCount: structured.pages.length },
+          }),
+        },
+      ],
       summarization: {
         summarize: async () => ({
           model: "sum",
@@ -51,11 +60,20 @@ describe("@moritzbrantner/document-analysis", () => {
       },
     });
 
-    const report = await pipeline.analyze("Clara runs support from Berlin.");
+    const report = await pipeline.analyze({
+      id: "ocr-1",
+      sourceType: "pdf",
+      pages: [{ index: 0, blocks: [{ text: "Where: Berlin" }] }],
+    });
 
     expect(report.summary?.summary).toBe("Clara runs support from Berlin.");
     expect(report.sentiment?.sentiment).toBe("positive");
     expect(report.analysis?.entities[0]?.text).toBe("Berlin");
     expect(report.answers[0]?.answer?.answer).toBe("Berlin");
+    expect(report.structureFindings).toEqual(["blocks=1"]);
+    expect(report.structureMetadata).toEqual({
+      "structure-auditor": { pageCount: 1 },
+    });
+    expect(report.structured?.pages[0]?.blocks[0]?.kind).toBe("headerValue");
   });
 });
