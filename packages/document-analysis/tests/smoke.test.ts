@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { createDocumentAnalysisPipeline } from "@moritzbrantner/document-analysis";
 
 describe("@moritzbrantner/document-analysis", () => {
-  test("orchestrates summary, sentiment, text analysis, syntax analysis, and QA", async () => {
+  test("orchestrates summary, sentiment, text analysis, syntax analysis, QA, and structure extraction", async () => {
     const pipeline = createDocumentAnalysisPipeline({
       defaultQuestions: ["Where?"],
       summarization: {
@@ -28,7 +28,7 @@ describe("@moritzbrantner/document-analysis", () => {
         }),
       },
       textAnalysis: {
-        analyze: async (input) => ({
+        analyze: async (input: any) => ({
           document: typeof input === "string" ? (null as never) : input,
           categories: [{ label: "support", score: 0.8 }],
           entities: [{ text: "Berlin", label: "LOC", score: 0.9, count: 1 }],
@@ -37,7 +37,7 @@ describe("@moritzbrantner/document-analysis", () => {
         }),
       },
       syntaxAnalysis: {
-        analyzeSyntax: async (input) => ({
+        analyzeSyntax: async (input: any) => ({
           document: typeof input === "string" ? (null as never) : input,
           tokens: [
             {
@@ -89,12 +89,22 @@ describe("@moritzbrantner/document-analysis", () => {
       },
     });
 
-    const report = await pipeline.analyze("Clara runs support from Berlin.");
+    const report = await pipeline.analyze({
+      id: "ocr-1",
+      sourceType: "pdf",
+      pages: [
+        {
+          index: 0,
+          blocks: [{ text: "INVOICE", bbox: [0, 0, 50, 10] }, { text: "Amount: 42", bbox: [0, 15, 80, 25] }],
+        },
+      ],
+    });
 
     expect(report.summary?.summary).toBe("Clara runs support from Berlin.");
     expect(report.sentiment?.sentiment).toBe("positive");
     expect(report.analysis?.entities[0]?.text).toBe("Berlin");
     expect(report.syntaxSummary?.topLemmas[0]?.lemma).toBe("clara");
     expect(report.answers[0]?.answer?.answer).toBe("Berlin");
+    expect(report.structure?.headerValuePairs[0]?.key).toBe("Amount");
   });
 });

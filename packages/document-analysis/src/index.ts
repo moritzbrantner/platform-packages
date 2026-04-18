@@ -3,6 +3,11 @@ import {
   segmentTextDocument,
   type TextDocument,
 } from "@moritzbrantner/linguistics-core";
+import {
+  extractDocumentStructure,
+  type CreateStructureExtractorOptions,
+  type DocumentStructureResult,
+} from "@moritzbrantner/document-structure-extraction";
 import { ocrToTextDocument, type OcrDocument } from "@moritzbrantner/ocr";
 import type { QuestionAnswer, QuestionAnsweringPipeline } from "@moritzbrantner/question-answering";
 import type {
@@ -34,7 +39,12 @@ export interface DocumentAnalysisReport<
   analysis?: TextAnalysisResult<Metadata>;
   syntax?: SyntaxAnalysisResult<Metadata>;
   syntaxSummary?: SyntaxDocumentSummary;
+  structure?: DocumentStructureResult;
   answers: Array<{ question: string; answer: QuestionAnswer | null }>;
+}
+
+export interface DocumentStructureHook {
+  extract(document: OcrDocument): Promise<DocumentStructureResult>;
 }
 
 export interface CreateDocumentAnalysisPipelineOptions<
@@ -46,6 +56,11 @@ export interface CreateDocumentAnalysisPipelineOptions<
   sentimentAnalysis?: SentimentAnalysisPipeline<Metadata>;
   summarization?: TextSummarizationPipeline<Metadata>;
   defaultQuestions?: string[];
+  structureExtraction?:
+    | DocumentStructureHook
+    | {
+        extractorOptions?: CreateStructureExtractorOptions;
+      };
 }
 
 export interface AnalyzeDocumentOptions {
@@ -54,6 +69,7 @@ export interface AnalyzeDocumentOptions {
   includeSentiment?: boolean;
   includeTextAnalysis?: boolean;
   includeSyntax?: boolean;
+  includeStructure?: boolean;
 }
 
 export interface DocumentAnalysisPipeline<
@@ -75,7 +91,7 @@ export function createDocumentAnalysisPipeline<
       const normalized = normalizeDocumentInput(input);
       const questions = analysisOptions.questions ?? options.defaultQuestions ?? [];
 
-      const [summary, sentiment, analysis, syntax, answers] = await Promise.all([
+      const [summary, sentiment, analysis, syntax, answers, structure] = await Promise.all([
         analysisOptions.includeSummary !== false && options.summarization
           ? options.summarization.summarize(normalized.document)
           : Promise.resolve(undefined),
@@ -96,6 +112,9 @@ export function createDocumentAnalysisPipeline<
               })),
             )
           : Promise.resolve([]),
+        analysisOptions.includeStructure !== false && normalized.ocrDocument
+          ? extractStructure(normalized.ocrDocument, options.structureExtraction)
+          : Promise.resolve(undefined),
       ]);
 
       return {
@@ -106,6 +125,7 @@ export function createDocumentAnalysisPipeline<
         analysis,
         syntax,
         syntaxSummary: syntax?.summary,
+        structure,
         answers,
       };
     },
@@ -119,6 +139,7 @@ function normalizeDocumentInput<
 ): {
   sourceType: "ocr" | "text";
   document: TextDocument<Metadata>;
+  ocrDocument?: OcrDocument;
 } {
   if (isOcrDocument(input)) {
     return {
@@ -126,6 +147,7 @@ function normalizeDocumentInput<
       document: ocrToTextDocument(input, {
         granularity: "word",
       }) as TextDocument<Metadata>,
+      ocrDocument: input,
     };
   }
 
@@ -146,6 +168,18 @@ function normalizeDocumentInput<
     sourceType: "text",
     document: input,
   };
+}
+
+async function extractStructure(
+  ocrDocument: OcrDocument,
+  hook: CreateDocumentAnalysisPipelineOptions["structureExtraction"],
+): Promise<DocumentStructureResult> {
+  if (hook && "extract" in hook && typeof hook.extract === "function") {
+    return hook.extract(ocrDocument);
+  }
+
+  const extractorOptions = hook && "extractorOptions" in hook ? hook.extractorOptions : undefined;
+  return extractDocumentStructure(ocrDocument, extractorOptions);
 }
 
 function isOcrDocument(value: unknown): value is OcrDocument {
