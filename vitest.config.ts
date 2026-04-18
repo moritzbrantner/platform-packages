@@ -16,6 +16,10 @@ export default defineConfig({
         rootDir,
         "packages/document-analysis/src/index.ts",
       ),
+      "@moritzbrantner/document-structure-extraction": path.resolve(
+        rootDir,
+        "packages/document-structure-extraction/src/index.ts",
+      ),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
       "@moritzbrantner/hexagon-grids": path.resolve(
         rootDir,

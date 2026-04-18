@@ -93,6 +93,7 @@
       "name": "@moritzbrantner/document-analysis",
       "version": "0.1.0",
       "dependencies": {
+        "@moritzbrantner/document-structure-extraction": "workspace:*",
         "@moritzbrantner/linguistics-core": "workspace:*",
         "@moritzbrantner/ocr": "workspace:*",
         "@moritzbrantner/question-answering": "workspace:*",
@@ -100,6 +101,14 @@
         "@moritzbrantner/syntax-analysis": "workspace:*",
         "@moritzbrantner/text-analysis": "workspace:*",
         "@moritzbrantner/text-summarization": "workspace:*",
+      },
+    },
+    "packages/document-structure-extraction": {
+      "name": "@moritzbrantner/document-structure-extraction",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/ocr": "workspace:*",
       },
     },
     "packages/eslint-config": {
@@ -659,6 +668,8 @@
     "@moritzbrantner/collaboration": ["@moritzbrantner/collaboration@workspace:packages/collaboration"],
 
     "@moritzbrantner/document-analysis": ["@moritzbrantner/document-analysis@workspace:packages/document-analysis"],
+
+    "@moritzbrantner/document-structure-extraction": ["@moritzbrantner/document-structure-extraction@workspace:packages/document-structure-extraction"],
 
     "@moritzbrantner/eslint-config": ["@moritzbrantner/eslint-config@workspace:packages/eslint-config"],
 
