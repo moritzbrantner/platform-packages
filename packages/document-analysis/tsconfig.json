@@ -12,6 +12,9 @@
       "@moritzbrantner/document-structure-extraction": [
         "../document-structure-extraction/src/index.ts"
       ],
+      "@moritzbrantner/huggingface-universal": [
+        "../huggingface-universal/src/index.ts"
+      ],
       "@moritzbrantner/linguistics-core": [
         "../linguistics-core/src/index.ts"
       ],

@@ -745,16 +745,22 @@ function mergeRelations(
   relations: readonly ExtractedRelation[],
   relationSimilarityWindow: number,
 ): ExtractedRelation[] {
-  const merged = new Map<string, ExtractedRelation & { totalConfidence: number; count: number }>();
+  const merged = new Map<
+    string,
+    ExtractedRelation & { totalConfidence: number; maxConfidence: number; count: number }
+  >();
 
   for (const relation of relations) {
-    const key = `${normalizeKey(relation.subject)}\u0000${normalizeKey(relation.relation)}\u0000${normalizeKey(relation.object)}`;
+    const exactKey = relationMergeKey(relation);
+    const key =
+      findSimilarRelationKey(merged, relation, relationSimilarityWindow) ?? exactKey;
     const existing = merged.get(key);
 
     if (!existing) {
       merged.set(key, {
         ...relation,
         totalConfidence: relation.confidence,
+        maxConfidence: relation.confidence,
         count: 1,
       });
       continue;
@@ -764,6 +770,7 @@ function mergeRelations(
       Math.abs(existing.evidenceSpan.start - relation.evidenceSpan.start) <= relationSimilarityWindow;
 
     existing.totalConfidence += relation.confidence;
+    existing.maxConfidence = Math.max(existing.maxConfidence, relation.confidence);
     existing.count += 1;
 
     if (isNearby || relation.confidence > existing.confidence) {
@@ -775,9 +782,16 @@ function mergeRelations(
   return Array.from(merged.values())
     .map((item) => ({
       ...item,
-      confidence: clamp01(item.totalConfidence / item.count),
+      confidence: clamp01(item.maxConfidence),
     }))
-    .map(({ totalConfidence: _totalConfidence, count: _count, ...relation }) => relation)
+    .map(
+      ({
+        totalConfidence: _totalConfidence,
+        maxConfidence: _maxConfidence,
+        count: _count,
+        ...relation
+      }) => relation,
+    )
     .sort(
       (left, right) =>
         right.confidence - left.confidence ||
@@ -785,6 +799,51 @@ function mergeRelations(
         left.relation.localeCompare(right.relation) ||
         left.object.localeCompare(right.object),
     );
+}
+
+function relationMergeKey(relation: ExtractedRelation): string {
+  return `${normalizeKey(relation.subject)}\u0000${normalizeKey(relation.relation)}\u0000${normalizeKey(relation.object)}`;
+}
+
+function findSimilarRelationKey(
+  relations: ReadonlyMap<string, ExtractedRelation>,
+  relation: ExtractedRelation,
+  relationSimilarityWindow: number,
+): string | undefined {
+  for (const [key, existing] of relations) {
+    if (
+      normalizeKey(existing.subject) !== normalizeKey(relation.subject) ||
+      normalizeKey(existing.relation) !== normalizeKey(relation.relation)
+    ) {
+      continue;
+    }
+
+    const objectSimilarity = hasNearObjectPrefix(existing.object, relation.object);
+    const isNearby =
+      Math.abs(existing.evidenceSpan.start - relation.evidenceSpan.start) <= relationSimilarityWindow;
+
+    if (objectSimilarity && (isNearby || existing.object.length !== relation.object.length)) {
+      return key;
+    }
+  }
+
+  return undefined;
+}
+
+function hasNearObjectPrefix(left: string, right: string): boolean {
+  const normalizedLeft = normalizeKey(left);
+  const normalizedRight = normalizeKey(right);
+
+  if (normalizedLeft === normalizedRight) {
+    return true;
+  }
+
+  const [shorter, longer] =
+    normalizedLeft.length <= normalizedRight.length
+      ? [normalizedLeft, normalizedRight]
+      : [normalizedRight, normalizedLeft];
+
+  return longer.startsWith(shorter) && longer.length - shorter.length <= 2;
 }
 
 function mergeEvents(events: readonly ExtractedEventFrame[]): ExtractedEventFrame[] {

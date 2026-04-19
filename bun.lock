@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "platform-packages",
@@ -58,6 +59,41 @@
         "vite": "^8.0.8",
       },
     },
+    "packages/any-to-any": {
+      "name": "@moritzbrantner/any-to-any",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/audio-classification": {
+      "name": "@moritzbrantner/audio-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/audio-text-to-text": {
+      "name": "@moritzbrantner/audio-text-to-text",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/audio-to-audio": {
+      "name": "@moritzbrantner/audio-to-audio",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/automatic-speech-recognition": {
+      "name": "@moritzbrantner/automatic-speech-recognition",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/card-games": {
       "name": "@moritzbrantner/card-games",
       "version": "0.1.0",
@@ -89,6 +125,13 @@
         "react-dom": "^19.0.0",
       },
     },
+    "packages/depth-estimation": {
+      "name": "@moritzbrantner/depth-estimation",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/document-analysis": {
       "name": "@moritzbrantner/document-analysis",
       "version": "0.1.0",
@@ -101,6 +144,13 @@
         "@moritzbrantner/syntax-analysis": "workspace:*",
         "@moritzbrantner/text-analysis": "workspace:*",
         "@moritzbrantner/text-summarization": "workspace:*",
+      },
+    },
+    "packages/document-question-answering": {
+      "name": "@moritzbrantner/document-question-answering",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/document-structure-extraction": {
@@ -121,6 +171,20 @@
     "packages/extraction-schema": {
       "name": "@moritzbrantner/extraction-schema",
       "version": "0.1.0",
+    },
+    "packages/feature-extraction": {
+      "name": "@moritzbrantner/feature-extraction",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/fill-mask": {
+      "name": "@moritzbrantner/fill-mask",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
     },
     "packages/flat-design": {
       "name": "@moritzbrantner/flat-design",
@@ -143,6 +207,80 @@
         "h3-js": "^4.4.0",
       },
     },
+    "packages/huggingface-universal": {
+      "name": "@moritzbrantner/huggingface-universal",
+      "version": "0.1.0",
+    },
+    "packages/image-classification": {
+      "name": "@moritzbrantner/image-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-feature-extraction": {
+      "name": "@moritzbrantner/image-feature-extraction",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-segmentation": {
+      "name": "@moritzbrantner/image-segmentation",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-text-to-image": {
+      "name": "@moritzbrantner/image-text-to-image",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-text-to-text": {
+      "name": "@moritzbrantner/image-text-to-text",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-text-to-video": {
+      "name": "@moritzbrantner/image-text-to-video",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-to-3d": {
+      "name": "@moritzbrantner/image-to-3d",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-to-image": {
+      "name": "@moritzbrantner/image-to-image",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-to-text": {
+      "name": "@moritzbrantner/image-to-text",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/image-to-video": {
+      "name": "@moritzbrantner/image-to-video",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/information-extraction": {
       "name": "@moritzbrantner/information-extraction",
       "version": "0.1.0",
@@ -154,6 +292,13 @@
     "packages/keyboard": {
       "name": "@moritzbrantner/keyboard",
       "version": "0.1.0",
+    },
+    "packages/keypoint-detection": {
+      "name": "@moritzbrantner/keypoint-detection",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
     },
     "packages/linguistics-core": {
       "name": "@moritzbrantner/linguistics-core",
@@ -197,6 +342,20 @@
         "react-dom": "^19.0.0",
       },
     },
+    "packages/mask-generation": {
+      "name": "@moritzbrantner/mask-generation",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/object-detection": {
+      "name": "@moritzbrantner/object-detection",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/ocr": {
       "name": "@moritzbrantner/ocr",
       "version": "0.1.0",
@@ -226,8 +385,23 @@
       "name": "@moritzbrantner/question-answering",
       "version": "0.1.0",
       "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
         "@moritzbrantner/linguistics-core": "workspace:*",
         "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/reinforcement-learning": {
+      "name": "@moritzbrantner/reinforcement-learning",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/sentence-similarity": {
+      "name": "@moritzbrantner/sentence-similarity",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/sentiment-analysis": {
@@ -303,12 +477,40 @@
       "name": "@moritzbrantner/subtitles",
       "version": "0.1.0",
     },
+    "packages/summarization": {
+      "name": "@moritzbrantner/summarization",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/syntax-analysis": {
       "name": "@moritzbrantner/syntax-analysis",
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/linguistics-core": "workspace:*",
         "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/table-question-answering": {
+      "name": "@moritzbrantner/table-question-answering",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/tabular-classification": {
+      "name": "@moritzbrantner/tabular-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/tabular-regression": {
+      "name": "@moritzbrantner/tabular-regression",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/text-analysis": {
@@ -319,6 +521,20 @@
         "@moritzbrantner/text-inference": "workspace:*",
       },
     },
+    "packages/text-classification": {
+      "name": "@moritzbrantner/text-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/text-generation": {
+      "name": "@moritzbrantner/text-generation",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/text-inference": {
       "name": "@moritzbrantner/text-inference",
       "version": "0.1.0",
@@ -326,11 +542,60 @@
         "@moritzbrantner/linguistics-core": "workspace:*",
       },
     },
+    "packages/text-ranking": {
+      "name": "@moritzbrantner/text-ranking",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/text-summarization": {
       "name": "@moritzbrantner/text-summarization",
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/text-inference": "workspace:*",
+      },
+    },
+    "packages/text-to-3d": {
+      "name": "@moritzbrantner/text-to-3d",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/text-to-image": {
+      "name": "@moritzbrantner/text-to-image",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/text-to-speech": {
+      "name": "@moritzbrantner/text-to-speech",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/text-to-video": {
+      "name": "@moritzbrantner/text-to-video",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/token-classification": {
+      "name": "@moritzbrantner/token-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/translation": {
+      "name": "@moritzbrantner/translation",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/typescript-config": {
@@ -374,6 +639,48 @@
         "react-dom": "^19.0.0",
       },
     },
+    "packages/unconditional-image-generation": {
+      "name": "@moritzbrantner/unconditional-image-generation",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/video-classification": {
+      "name": "@moritzbrantner/video-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/video-text-to-text": {
+      "name": "@moritzbrantner/video-text-to-text",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/video-to-video": {
+      "name": "@moritzbrantner/video-to-video",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/visual-document-retrieval": {
+      "name": "@moritzbrantner/visual-document-retrieval",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/visual-question-answering": {
+      "name": "@moritzbrantner/visual-question-answering",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
     "packages/word-prediction": {
       "name": "@moritzbrantner/word-prediction",
       "version": "0.1.0",
@@ -395,6 +702,27 @@
       "dependencies": {
         "@moritzbrantner/linguistics-core": "workspace:*",
         "@moritzbrantner/linguistics-corpus": "workspace:*",
+      },
+    },
+    "packages/zero-shot-classification": {
+      "name": "@moritzbrantner/zero-shot-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/zero-shot-image-classification": {
+      "name": "@moritzbrantner/zero-shot-image-classification",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/zero-shot-object-detection": {
+      "name": "@moritzbrantner/zero-shot-object-detection",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
   },
@@ -663,11 +991,25 @@
 
     "@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.29.0", "", { "dependencies": { "@hono/node-server": "1.19.12", "ajv": "8.18.0", "ajv-formats": "3.0.1", "content-type": "1.0.5", "cors": "2.8.6", "cross-spawn": "7.0.6", "eventsource": "3.0.7", "eventsource-parser": "3.0.6", "express": "5.2.1", "express-rate-limit": "8.3.2", "hono": "4.12.9", "jose": "6.2.2", "json-schema-typed": "8.0.2", "pkce-challenge": "5.0.1", "raw-body": "3.0.2", "zod-to-json-schema": "3.25.2" }, "peerDependencies": { "zod": "3.25.76" } }, "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="],
 
+    "@moritzbrantner/any-to-any": ["@moritzbrantner/any-to-any@workspace:packages/any-to-any"],
+
+    "@moritzbrantner/audio-classification": ["@moritzbrantner/audio-classification@workspace:packages/audio-classification"],
+
+    "@moritzbrantner/audio-text-to-text": ["@moritzbrantner/audio-text-to-text@workspace:packages/audio-text-to-text"],
+
+    "@moritzbrantner/audio-to-audio": ["@moritzbrantner/audio-to-audio@workspace:packages/audio-to-audio"],
+
+    "@moritzbrantner/automatic-speech-recognition": ["@moritzbrantner/automatic-speech-recognition@workspace:packages/automatic-speech-recognition"],
+
     "@moritzbrantner/card-games": ["@moritzbrantner/card-games@workspace:packages/card-games"],
 
     "@moritzbrantner/collaboration": ["@moritzbrantner/collaboration@workspace:packages/collaboration"],
 
+    "@moritzbrantner/depth-estimation": ["@moritzbrantner/depth-estimation@workspace:packages/depth-estimation"],
+
     "@moritzbrantner/document-analysis": ["@moritzbrantner/document-analysis@workspace:packages/document-analysis"],
+
+    "@moritzbrantner/document-question-answering": ["@moritzbrantner/document-question-answering@workspace:packages/document-question-answering"],
 
     "@moritzbrantner/document-structure-extraction": ["@moritzbrantner/document-structure-extraction@workspace:packages/document-structure-extraction"],
 
@@ -675,13 +1017,41 @@
 
     "@moritzbrantner/extraction-schema": ["@moritzbrantner/extraction-schema@workspace:packages/extraction-schema"],
 
+    "@moritzbrantner/feature-extraction": ["@moritzbrantner/feature-extraction@workspace:packages/feature-extraction"],
+
+    "@moritzbrantner/fill-mask": ["@moritzbrantner/fill-mask@workspace:packages/fill-mask"],
+
     "@moritzbrantner/flat-design": ["@moritzbrantner/flat-design@workspace:packages/flat-design"],
 
     "@moritzbrantner/hexagon-grids": ["@moritzbrantner/hexagon-grids@workspace:packages/hexagon-grids"],
 
+    "@moritzbrantner/huggingface-universal": ["@moritzbrantner/huggingface-universal@workspace:packages/huggingface-universal"],
+
+    "@moritzbrantner/image-classification": ["@moritzbrantner/image-classification@workspace:packages/image-classification"],
+
+    "@moritzbrantner/image-feature-extraction": ["@moritzbrantner/image-feature-extraction@workspace:packages/image-feature-extraction"],
+
+    "@moritzbrantner/image-segmentation": ["@moritzbrantner/image-segmentation@workspace:packages/image-segmentation"],
+
+    "@moritzbrantner/image-text-to-image": ["@moritzbrantner/image-text-to-image@workspace:packages/image-text-to-image"],
+
+    "@moritzbrantner/image-text-to-text": ["@moritzbrantner/image-text-to-text@workspace:packages/image-text-to-text"],
+
+    "@moritzbrantner/image-text-to-video": ["@moritzbrantner/image-text-to-video@workspace:packages/image-text-to-video"],
+
+    "@moritzbrantner/image-to-3d": ["@moritzbrantner/image-to-3d@workspace:packages/image-to-3d"],
+
+    "@moritzbrantner/image-to-image": ["@moritzbrantner/image-to-image@workspace:packages/image-to-image"],
+
+    "@moritzbrantner/image-to-text": ["@moritzbrantner/image-to-text@workspace:packages/image-to-text"],
+
+    "@moritzbrantner/image-to-video": ["@moritzbrantner/image-to-video@workspace:packages/image-to-video"],
+
     "@moritzbrantner/information-extraction": ["@moritzbrantner/information-extraction@workspace:packages/information-extraction"],
 
     "@moritzbrantner/keyboard": ["@moritzbrantner/keyboard@workspace:packages/keyboard"],
+
+    "@moritzbrantner/keypoint-detection": ["@moritzbrantner/keypoint-detection@workspace:packages/keypoint-detection"],
 
     "@moritzbrantner/linguistics-core": ["@moritzbrantner/linguistics-core@workspace:packages/linguistics-core"],
 
@@ -691,6 +1061,10 @@
 
     "@moritzbrantner/maps": ["@moritzbrantner/maps@workspace:packages/maps"],
 
+    "@moritzbrantner/mask-generation": ["@moritzbrantner/mask-generation@workspace:packages/mask-generation"],
+
+    "@moritzbrantner/object-detection": ["@moritzbrantner/object-detection@workspace:packages/object-detection"],
+
     "@moritzbrantner/ocr": ["@moritzbrantner/ocr@workspace:packages/ocr"],
 
     "@moritzbrantner/parallel-text": ["@moritzbrantner/parallel-text@workspace:packages/parallel-text"],
@@ -698,6 +1072,10 @@
     "@moritzbrantner/playground": ["@moritzbrantner/playground@workspace:examples/playground"],
 
     "@moritzbrantner/question-answering": ["@moritzbrantner/question-answering@workspace:packages/question-answering"],
+
+    "@moritzbrantner/reinforcement-learning": ["@moritzbrantner/reinforcement-learning@workspace:packages/reinforcement-learning"],
+
+    "@moritzbrantner/sentence-similarity": ["@moritzbrantner/sentence-similarity@workspace:packages/sentence-similarity"],
 
     "@moritzbrantner/sentiment-analysis": ["@moritzbrantner/sentiment-analysis@workspace:packages/sentiment-analysis"],
 
@@ -711,21 +1089,65 @@
 
     "@moritzbrantner/subtitles": ["@moritzbrantner/subtitles@workspace:packages/subtitles"],
 
+    "@moritzbrantner/summarization": ["@moritzbrantner/summarization@workspace:packages/summarization"],
+
     "@moritzbrantner/syntax-analysis": ["@moritzbrantner/syntax-analysis@workspace:packages/syntax-analysis"],
+
+    "@moritzbrantner/table-question-answering": ["@moritzbrantner/table-question-answering@workspace:packages/table-question-answering"],
+
+    "@moritzbrantner/tabular-classification": ["@moritzbrantner/tabular-classification@workspace:packages/tabular-classification"],
+
+    "@moritzbrantner/tabular-regression": ["@moritzbrantner/tabular-regression@workspace:packages/tabular-regression"],
 
     "@moritzbrantner/text-analysis": ["@moritzbrantner/text-analysis@workspace:packages/text-analysis"],
 
+    "@moritzbrantner/text-classification": ["@moritzbrantner/text-classification@workspace:packages/text-classification"],
+
+    "@moritzbrantner/text-generation": ["@moritzbrantner/text-generation@workspace:packages/text-generation"],
+
     "@moritzbrantner/text-inference": ["@moritzbrantner/text-inference@workspace:packages/text-inference"],
 
+    "@moritzbrantner/text-ranking": ["@moritzbrantner/text-ranking@workspace:packages/text-ranking"],
+
     "@moritzbrantner/text-summarization": ["@moritzbrantner/text-summarization@workspace:packages/text-summarization"],
+
+    "@moritzbrantner/text-to-3d": ["@moritzbrantner/text-to-3d@workspace:packages/text-to-3d"],
+
+    "@moritzbrantner/text-to-image": ["@moritzbrantner/text-to-image@workspace:packages/text-to-image"],
+
+    "@moritzbrantner/text-to-speech": ["@moritzbrantner/text-to-speech@workspace:packages/text-to-speech"],
+
+    "@moritzbrantner/text-to-video": ["@moritzbrantner/text-to-video@workspace:packages/text-to-video"],
+
+    "@moritzbrantner/token-classification": ["@moritzbrantner/token-classification@workspace:packages/token-classification"],
+
+    "@moritzbrantner/translation": ["@moritzbrantner/translation@workspace:packages/translation"],
 
     "@moritzbrantner/typescript-config": ["@moritzbrantner/typescript-config@workspace:packages/typescript-config"],
 
     "@moritzbrantner/ui": ["@moritzbrantner/ui@workspace:packages/ui"],
 
+    "@moritzbrantner/unconditional-image-generation": ["@moritzbrantner/unconditional-image-generation@workspace:packages/unconditional-image-generation"],
+
+    "@moritzbrantner/video-classification": ["@moritzbrantner/video-classification@workspace:packages/video-classification"],
+
+    "@moritzbrantner/video-text-to-text": ["@moritzbrantner/video-text-to-text@workspace:packages/video-text-to-text"],
+
+    "@moritzbrantner/video-to-video": ["@moritzbrantner/video-to-video@workspace:packages/video-to-video"],
+
+    "@moritzbrantner/visual-document-retrieval": ["@moritzbrantner/visual-document-retrieval@workspace:packages/visual-document-retrieval"],
+
+    "@moritzbrantner/visual-question-answering": ["@moritzbrantner/visual-question-answering@workspace:packages/visual-question-answering"],
+
     "@moritzbrantner/word-prediction": ["@moritzbrantner/word-prediction@workspace:packages/word-prediction"],
 
     "@moritzbrantner/word-vectors": ["@moritzbrantner/word-vectors@workspace:packages/word-vectors"],
+
+    "@moritzbrantner/zero-shot-classification": ["@moritzbrantner/zero-shot-classification@workspace:packages/zero-shot-classification"],
+
+    "@moritzbrantner/zero-shot-image-classification": ["@moritzbrantner/zero-shot-image-classification@workspace:packages/zero-shot-image-classification"],
+
+    "@moritzbrantner/zero-shot-object-detection": ["@moritzbrantner/zero-shot-object-detection@workspace:packages/zero-shot-object-detection"],
 
     "@mswjs/interceptors": ["@mswjs/interceptors@0.41.3", "", { "dependencies": { "@open-draft/deferred-promise": "2.2.0", "@open-draft/logger": "0.3.0", "@open-draft/until": "2.1.0", "is-node-process": "1.2.0", "outvariant": "1.4.3", "strict-event-emitter": "0.5.1" } }, "sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA=="],
 

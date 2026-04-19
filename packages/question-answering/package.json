@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "@moritzbrantner/huggingface-universal": "workspace:*",
     "@moritzbrantner/linguistics-core": "workspace:*",
     "@moritzbrantner/text-inference": "workspace:*"
   },

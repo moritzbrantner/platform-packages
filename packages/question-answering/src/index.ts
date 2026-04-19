@@ -1,5 +1,12 @@
 import type { TextDocument } from "@moritzbrantner/linguistics-core";
 import {
+  createHuggingFaceTaskPackage,
+  createUniversalTaskPipeline,
+  getHuggingFaceTaskDescriptor,
+  type CreateUniversalTaskPipelineOptions,
+  type UniversalTaskPipeline,
+} from "@moritzbrantner/huggingface-universal";
+import {
   chunkTextForInference,
   type ChunkTextOptions,
   type HuggingFaceModelReference,
@@ -9,6 +16,18 @@ import {
 
 const DEFAULT_MAX_ANSWERS = 3;
 const DEFAULT_MIN_SCORE = 0;
+
+export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("question-answering");
+export const huggingFaceTask = createHuggingFaceTaskPackage("question-answering");
+export const createModelReference = huggingFaceTask.createModelReference;
+
+export type QuestionAnsweringUniversalPipeline<Input = unknown, Output = unknown> =
+  UniversalTaskPipeline<"question-answering", Input, Output>;
+
+export type CreateQuestionAnsweringUniversalPipelineOptions = Omit<
+  CreateUniversalTaskPipelineOptions<"question-answering">,
+  "descriptor"
+>;
 
 export interface QuestionAnswer {
   question: string;
@@ -129,6 +148,15 @@ export function createQuestionAnsweringPipeline<
       return this.answer(question, document, answerOptions);
     },
   };
+}
+
+export function createQuestionAnsweringUniversalPipeline<Input = unknown, Output = unknown>(
+  options: CreateQuestionAnsweringUniversalPipelineOptions,
+): QuestionAnsweringUniversalPipeline<Input, Output> {
+  return createUniversalTaskPipeline({
+    ...options,
+    descriptor: huggingFaceTaskDescriptor,
+  });
 }
 
 function dedupeAnswers(answers: readonly QuestionAnswer[]): QuestionAnswer[] {

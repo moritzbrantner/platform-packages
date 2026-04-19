@@ -1,0 +1,36 @@
+{
+  "name": "@moritzbrantner/zero-shot-image-classification",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moritzbrantner/platform-packages.git",
+    "directory": "packages/zero-shot-image-classification"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
+    "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
+    "prepack": "bun run build",
+    "check-types": "tsc --noEmit",
+    "test": "cd ../.. && vitest run packages/zero-shot-image-classification/tests"
+  },
+  "dependencies": {
+    "@moritzbrantner/huggingface-universal": "workspace:*"
+  }
+}
