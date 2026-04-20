@@ -13,6 +13,7 @@ import {
   type FlatDesignScene,
 } from "@moritzbrantner/flat-design";
 import {
+  AspectRatio,
   Badge,
   Button,
   Card,
@@ -223,14 +224,17 @@ function FlatDesignPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-[1.75rem] border border-border/60 bg-white/60 p-4">
+            <AspectRatio
+              ratio={16 / 10}
+              className="overflow-hidden rounded-xl border border-border/60 bg-white/60 p-4"
+            >
               <FlatScene
                 scene={showcaseScene}
                 width="100%"
-                height="auto"
-                style={{ display: "block", width: "100%", height: "auto" }}
+                height="100%"
+                style={{ display: "block", width: "100%", height: "100%" }}
               />
-            </div>
+            </AspectRatio>
           </CardContent>
         </Card>
 
@@ -248,14 +252,17 @@ function FlatDesignPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="rounded-[1.5rem] border border-border/60 bg-white/70 p-4">
+            <AspectRatio
+              ratio={16 / 10}
+              className="rounded-xl border border-border/60 bg-white/70 p-4"
+            >
               <FlatScene
                 scene={customScene}
                 width="100%"
-                height="auto"
-                style={{ display: "block", width: "100%", height: "auto" }}
+                height="100%"
+                style={{ display: "block", width: "100%", height: "100%" }}
               />
-            </div>
+            </AspectRatio>
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>Flat scenes are plain objects, so they work in React and export flows.</p>
               <p>The rendered markup below comes from `renderFlatSceneToSvg()`.</p>

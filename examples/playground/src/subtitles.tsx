@@ -11,6 +11,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -58,10 +62,16 @@ function SubtitlesPage() {
             <p><strong>Overlap count:</strong> {overlaps.length}</p>
             <p><strong>Issue count:</strong> {validation.length}</p>
             {validation.map((issue) => (
-              <div key={`${issue.code}-${issue.cueId}`} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                <p className="font-medium">{issue.code}</p>
-                <p className="text-muted-foreground">{issue.message}</p>
-              </div>
+              <Item
+                key={`${issue.code}-${issue.cueId}`}
+                variant="muted"
+                className="bg-muted/20"
+              >
+                <ItemContent>
+                  <ItemTitle>{issue.code}</ItemTitle>
+                  <ItemDescription>{issue.message}</ItemDescription>
+                </ItemContent>
+              </Item>
             ))}
           </CardContent>
         </Card>
@@ -76,12 +86,21 @@ function SubtitlesPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               {document.cues.map((cue) => (
-                <div key={cue.id} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                  <p className="font-medium">{cue.id}</p>
-                  <p className="text-muted-foreground">{cue.startTimeMs}ms → {cue.endTimeMs}ms</p>
-                  <p>{cue.text}</p>
-                  {cue.settings ? <p>settings: {Object.entries(cue.settings).map(([key, value]) => `${key}:${value}`).join(" ")}</p> : null}
-                </div>
+                <Item key={cue.id} variant="muted" className="items-start bg-muted/20">
+                  <ItemContent>
+                    <ItemTitle>{cue.id}</ItemTitle>
+                    <ItemDescription>
+                      {cue.startTimeMs}ms → {cue.endTimeMs}ms
+                    </ItemDescription>
+                    <p>{cue.text}</p>
+                    {cue.settings ? (
+                      <p>
+                        settings:{" "}
+                        {Object.entries(cue.settings).map(([key, value]) => `${key}:${value}`).join(" ")}
+                      </p>
+                    ) : null}
+                  </ItemContent>
+                </Item>
               ))}
             </CardContent>
           </Card>

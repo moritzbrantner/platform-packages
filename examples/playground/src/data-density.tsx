@@ -18,6 +18,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
   Progress,
   Slider,
 } from "@moritzbrantner/ui";
@@ -200,11 +204,13 @@ function DataDensityPage() {
               label="Latency budget"
               value={formatInteger(rowWindow.summary.metrics.latencyBudget ?? 0)}
             />
-            <div className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
-              The same primitive backs dense table, graph node, and timeline views:
-              build an index once, request the currently visible slice, and keep the
-              surrounding UI focused on compact render data.
-            </div>
+            <Item variant="muted" className="items-start bg-muted/20">
+              <ItemDescription className="line-clamp-none leading-6">
+                The same primitive backs dense table, graph node, and timeline views:
+                build an index once, request the currently visible slice, and keep the
+                surrounding UI focused on compact render data.
+              </ItemDescription>
+            </Item>
           </CardContent>
         </Card>
       </section>
@@ -374,12 +380,14 @@ function MetricCard({
 
 function MetricStrip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-2 text-xl font-semibold">{value}</p>
-    </div>
+    <Item variant="muted" className="items-start bg-muted/20 p-4">
+      <ItemContent>
+        <ItemDescription className="text-xs uppercase tracking-[0.18em]">
+          {label}
+        </ItemDescription>
+        <ItemTitle className="mt-1 text-xl font-semibold">{value}</ItemTitle>
+      </ItemContent>
+    </Item>
   );
 }
 
@@ -391,7 +399,10 @@ function OperationsRowItem({
   const latencyPercent = Math.min(100, Math.round((entry.item.latencyMs / 260) * 100));
 
   return (
-    <div className="grid gap-3 rounded-[1.25rem] border border-border/60 bg-muted/20 p-3 text-sm md:grid-cols-[1.1fr_0.9fr_0.8fr] md:items-center">
+    <Item
+      variant="muted"
+      className="grid gap-3 bg-muted/20 p-3 text-sm md:grid-cols-[1.1fr_0.9fr_0.8fr] md:items-center"
+    >
       <div>
         <p className="font-medium">{entry.item.account}</p>
         <p className="text-muted-foreground">
@@ -411,7 +422,7 @@ function OperationsRowItem({
           {formatCurrency(entry.metrics.revenue)}
         </p>
       </div>
-    </div>
+    </Item>
   );
 }
 
@@ -423,7 +434,7 @@ function SeriesBars({ bins }: { bins: Array<BinnedSeriesBin> }) {
   const labelStep = Math.max(1, Math.floor(bins.length / 6));
 
   return (
-    <div className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-4">
+    <Item variant="muted" className="block bg-muted/20 p-4">
       <div className="flex h-56 items-end gap-1">
         {bins.map((bin) => {
           const height = Math.max(4, ((bin.averageY ?? 0) / maxAverage) * 100);
@@ -445,7 +456,7 @@ function SeriesBars({ bins }: { bins: Array<BinnedSeriesBin> }) {
           );
         })}
       </div>
-    </div>
+    </Item>
   );
 }
 
@@ -459,7 +470,7 @@ function GeoPreview({
   const visibleFeatures = features.slice(0, 120);
 
   return (
-    <div className="relative min-h-[360px] overflow-hidden rounded-[1.25rem] border border-border/60 bg-muted/20">
+    <Item variant="muted" className="relative block min-h-[360px] overflow-hidden bg-muted/20">
       <div className="absolute inset-x-0 top-1/2 border-t border-border/50" />
       <div className="absolute inset-y-0 left-1/2 border-l border-border/50" />
       {visibleFeatures.map((feature) => {
@@ -494,10 +505,10 @@ function GeoPreview({
           </div>
         );
       })}
-      <div className="absolute bottom-3 left-3 rounded-full border border-border/60 bg-background/85 px-3 py-1 text-xs text-muted-foreground">
+      <Badge variant="outline" className="absolute bottom-3 left-3 bg-background/85">
         Rendering {visibleFeatures.length} of {features.length} aggregation features
-      </div>
-    </div>
+      </Badge>
+    </Item>
   );
 }
 
@@ -512,7 +523,10 @@ function FeatureRow({
       : feature.point.label;
 
   return (
-    <div className="grid gap-3 rounded-[1.25rem] border border-border/60 bg-muted/20 p-4 text-sm md:grid-cols-[1fr_auto] md:items-center">
+    <Item
+      variant="muted"
+      className="grid gap-3 bg-muted/20 p-4 text-sm md:grid-cols-[1fr_auto] md:items-center"
+    >
       <div>
         <p className="font-medium">{label}</p>
         <p className="text-muted-foreground">
@@ -527,16 +541,20 @@ function FeatureRow({
           {formatInteger(feature.metrics.demand ?? 0)} demand
         </p>
       </div>
-    </div>
+    </Item>
   );
 }
 
 function SuggestionPoint({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-4">
-      <p className="font-medium">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
-    </div>
+    <Item variant="muted" className="items-start bg-muted/20 p-4">
+      <ItemContent>
+        <ItemTitle>{title}</ItemTitle>
+        <ItemDescription className="line-clamp-none leading-6">
+          {text}
+        </ItemDescription>
+      </ItemContent>
+    </Item>
   );
 }
 

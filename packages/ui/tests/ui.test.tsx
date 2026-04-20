@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, test, vi } from "vitest";
 
 import {
   Button,
@@ -12,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
   cn,
+  PlatformNavbar,
+  type PlatformNavbarGroup,
 } from "../src";
 
 const calendarIcsData = [
@@ -43,6 +45,46 @@ const calendarIcsData = [
     ],
   ],
 ] as const satisfies CalendarIcsData;
+
+const navigationGroups = [
+  {
+    id: "discover",
+    label: "Discover",
+    eyebrow: "Public",
+    description: "Open routes for visitors.",
+    items: [
+      {
+        id: "about",
+        label: "About",
+        href: "/about",
+        description: "Project overview and status.",
+      },
+      {
+        id: "story",
+        label: "Story Demo",
+        href: "/story",
+        description: "Narrative component preview.",
+      },
+    ],
+  },
+  {
+    id: "workspace",
+    label: "Workspace",
+    items: [
+      {
+        id: "people",
+        label: "People",
+        href: "/people",
+        description: "Directory and profiles.",
+      },
+      {
+        id: "forms",
+        label: "Forms",
+        href: "/forms",
+      },
+    ],
+  },
+] as const satisfies PlatformNavbarGroup[];
 
 describe("@moritzbrantner/ui", () => {
   test("renders shared primitives in jsdom", () => {
@@ -108,5 +150,49 @@ describe("@moritzbrantner/ui", () => {
 
     expect(screen.getAllByText(/Design sync/).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Release window").length).toBeGreaterThan(1);
+  });
+
+  test("renders an animated glass navbar with an open submenu", () => {
+    render(
+      <PlatformNavbar
+        brand="Platform"
+        groups={navigationGroups}
+        activeItemId="people"
+        defaultOpenGroupId="workspace"
+        variant="web"
+      />,
+    );
+
+    expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Workspace/ }).getAttribute("aria-expanded")).toBe(
+      "true",
+    );
+    expect(screen.getByRole("link", { name: /People/ }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByText("Directory and profiles.")).toBeTruthy();
+  });
+
+  test("opens submenus and reports selected navbar items", () => {
+    const onNavigate = vi.fn();
+
+    render(
+      <PlatformNavbar
+        brand="Platform"
+        groups={navigationGroups}
+        defaultOpenGroupId={null}
+        onNavigate={onNavigate}
+        variant="desktop"
+      />,
+    );
+
+    expect(screen.queryByRole("link", { name: /About/ })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Discover/ }));
+    expect(screen.getByRole("link", { name: /About/ })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("link", { name: /Story Demo/ }));
+    expect(onNavigate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "story" }),
+      expect.objectContaining({ id: "discover" }),
+    );
   });
 });

@@ -7,6 +7,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -59,11 +63,15 @@ function LinguisticsCorpusPage() {
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             {searchResults.map((result) => (
-              <div key={result.documentId} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-4 text-sm">
-                <p className="font-medium">{result.documentId}</p>
-                <p className="text-muted-foreground">score {result.score} • matches {result.matches}</p>
-                <p className="mt-2">{result.snippet}</p>
-              </div>
+              <Item key={result.documentId} variant="muted" className="items-start bg-muted/20">
+                <ItemContent>
+                  <ItemTitle>{result.documentId}</ItemTitle>
+                  <ItemDescription>
+                    score {result.score} • matches {result.matches}
+                  </ItemDescription>
+                  <p className="mt-1 text-sm">{result.snippet}</p>
+                </ItemContent>
+              </Item>
             ))}
           </CardContent>
         </Card>
@@ -87,10 +95,18 @@ function LinguisticsCorpusPage() {
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
             {frequencies.map((entry) => (
-              <div key={`${entry.language}-${entry.term}`} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-4">
-                <p className="font-medium">{entry.term}</p>
-                <p className="text-muted-foreground">{entry.language} • {entry.count}</p>
-              </div>
+              <Item
+                key={`${entry.language}-${entry.term}`}
+                variant="muted"
+                className="bg-muted/20"
+              >
+                <ItemContent>
+                  <ItemTitle>{entry.term}</ItemTitle>
+                  <ItemDescription>
+                    {entry.language} • {entry.count}
+                  </ItemDescription>
+                </ItemContent>
+              </Item>
             ))}
           </CardContent>
         </Card>

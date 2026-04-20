@@ -17,6 +17,10 @@ import {
   CardHeader,
   CardTitle,
   Input,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
   Progress,
   Slider,
   Tabs,
@@ -237,7 +241,7 @@ function SpeedReadingPlaygroundPage() {
                 ) : null}
 
                 {extractionProgress ? (
-                  <div className="space-y-3 rounded-[1.5rem] border border-border/60 bg-background/65 p-4">
+                  <Item variant="muted" className="block bg-background/65 p-4">
                     <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       <Badge variant="outline">{extractionProgress.stage}</Badge>
                       <span>
@@ -246,10 +250,10 @@ function SpeedReadingPlaygroundPage() {
                       </span>
                     </div>
                     <Progress value={Math.max(4, extractionProgress.progress * 100)} />
-                    <p className="text-sm leading-6 text-muted-foreground">
+                    <ItemDescription className="mt-3 line-clamp-none leading-6">
                       {extractionProgress.detail}
-                    </p>
-                  </div>
+                    </ItemDescription>
+                  </Item>
                 ) : null}
 
                 {extractionError ? (
@@ -400,15 +404,20 @@ function SpeedReadingPlaygroundPage() {
                   <div className="grid gap-2 text-sm leading-6 text-muted-foreground">
                     {extractionResult.removedBlocks.length > 0 ? (
                       extractionResult.removedBlocks.slice(0, 8).map((artifact, index) => (
-                        <div
+                        <Item
                           key={`${artifact.pageIndex}-${artifact.reason}-${index}`}
-                          className="rounded-2xl border border-border/60 bg-background/70 px-4 py-3"
+                          variant="muted"
+                          className="items-start bg-background/70 px-4 py-3"
                         >
-                          <strong className="text-foreground">
-                            Page {artifact.pageIndex + 1} · {artifact.reason}
-                          </strong>
-                          <p className="mt-1">{artifact.text}</p>
-                        </div>
+                          <ItemContent>
+                            <ItemTitle>
+                              Page {artifact.pageIndex + 1} · {artifact.reason}
+                            </ItemTitle>
+                            <ItemDescription className="line-clamp-none">
+                              {artifact.text}
+                            </ItemDescription>
+                          </ItemContent>
+                        </Item>
                       ))
                     ) : (
                       <p>No removable page-number or repeated-margin artifacts were detected.</p>

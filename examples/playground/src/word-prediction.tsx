@@ -14,6 +14,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldTitle,
   Label,
   Slider,
   Switch,
@@ -202,16 +206,22 @@ function WordPredictionPage() {
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-[1.35rem] border border-border/60 bg-muted/30 px-4 py-3">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Use built-in default data</p>
-                <p className="text-sm text-muted-foreground">
+            <Field
+              orientation="horizontal"
+              className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3"
+            >
+              <FieldContent>
+                <FieldTitle>Use built-in default data</FieldTitle>
+                <FieldDescription>
                   Starts from {DEFAULT_WORD_PREDICTION_TEXTS.length} seed phrases before
                   applying the preset corpus and live conversation.
-                </p>
-              </div>
-              <Switch checked={includeDefaultData} onCheckedChange={setIncludeDefaultData} />
-            </div>
+                </FieldDescription>
+              </FieldContent>
+              <Switch
+                checked={includeDefaultData}
+                onCheckedChange={setIncludeDefaultData}
+              />
+            </Field>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">

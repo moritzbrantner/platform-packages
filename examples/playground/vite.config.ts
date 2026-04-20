@@ -166,6 +166,7 @@ export default defineConfig({
         linguisticsLearning: path.resolve(rootDir, "linguistics-learning.html"),
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
+        navbars: path.resolve(rootDir, "navbars.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         speedReading: path.resolve(rootDir, "speed-reading.html"),
         speech: path.resolve(rootDir, "speech.html"),

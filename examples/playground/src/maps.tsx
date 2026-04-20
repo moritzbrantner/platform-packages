@@ -17,6 +17,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -313,16 +317,22 @@ function MetricCard({
   value: string;
 }) {
   return (
-    <div className="rounded-[1.25rem] border border-border/60 bg-card/70 p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-      <p
-        data-testid={testId}
-        className="mt-2 text-3xl font-semibold tracking-tight text-foreground"
-      >
-        {value}
-      </p>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{hint}</p>
-    </div>
+    <Item variant="muted" className="items-start bg-card/70 p-4">
+      <ItemContent>
+        <ItemDescription className="text-xs uppercase tracking-[0.2em]">
+          {label}
+        </ItemDescription>
+        <ItemTitle
+          data-testid={testId}
+          className="mt-1 text-3xl font-semibold tracking-tight"
+        >
+          {value}
+        </ItemTitle>
+        <ItemDescription className="line-clamp-none leading-6">
+          {hint}
+        </ItemDescription>
+      </ItemContent>
+    </Item>
   );
 }
 

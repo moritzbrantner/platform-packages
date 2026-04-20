@@ -20,7 +20,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldTitle,
   Input,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
   Label,
   Slider,
   Switch,
@@ -183,17 +191,21 @@ function SpeechPage() {
               />
             </div>
 
-            <div className="rounded-[1.35rem] border border-border/60 bg-muted/30 px-4 py-3">
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Include built-in word data</p>
-                  <p className="text-sm text-muted-foreground">
-                    Keeps the composer useful before your first transcript arrives.
-                  </p>
-                </div>
-                <Switch checked={includeDefaultData} onCheckedChange={setIncludeDefaultData} />
-              </div>
-            </div>
+            <Field
+              orientation="horizontal"
+              className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3"
+            >
+              <FieldContent>
+                <FieldTitle>Include built-in word data</FieldTitle>
+                <FieldDescription>
+                  Keeps the composer useful before your first transcript arrives.
+                </FieldDescription>
+              </FieldContent>
+              <Switch
+                checked={includeDefaultData}
+                onCheckedChange={setIncludeDefaultData}
+              />
+            </Field>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
@@ -273,16 +285,18 @@ function SpeechPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-[1.35rem] border border-border/60 bg-muted/30 px-4 py-3">
-                  <p className="text-sm font-medium">Current mode</p>
-                  <p className="text-sm text-muted-foreground">
-                    {endpoint.trim()
-                      ? usesWebSocket
-                        ? `WebSocket mode using ${modelName.trim() || "whisper-live"}`
-                        : `HTTP mode using ${modelName.trim() || "whisper-1"}`
-                      : "Mock mode using scripted transcripts"}
-                  </p>
-                </div>
+                <Item variant="muted" className="bg-muted/30 px-4 py-3">
+                  <ItemContent>
+                    <ItemTitle>Current mode</ItemTitle>
+                    <ItemDescription className="line-clamp-none">
+                      {endpoint.trim()
+                        ? usesWebSocket
+                          ? `WebSocket mode using ${modelName.trim() || "whisper-live"}`
+                          : `HTTP mode using ${modelName.trim() || "whisper-1"}`
+                        : "Mock mode using scripted transcripts"}
+                    </ItemDescription>
+                  </ItemContent>
+                </Item>
 
                 <div className="space-y-2">
                   <p className="text-sm font-medium">Transcript phrases</p>

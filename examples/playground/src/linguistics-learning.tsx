@@ -13,6 +13,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -73,10 +77,12 @@ function LinguisticsLearningPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {interlinear.tokens.map((token) => (
-              <div key={token.sourceTokenIndex} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                <p className="font-medium">{token.text}</p>
-                <p className="text-muted-foreground">{token.gloss}</p>
-              </div>
+              <Item key={token.sourceTokenIndex} variant="muted" className="bg-muted/20">
+                <ItemContent>
+                  <ItemTitle>{token.text}</ItemTitle>
+                  <ItemDescription>{token.gloss}</ItemDescription>
+                </ItemContent>
+              </Item>
             ))}
           </CardContent>
         </Card>
@@ -91,13 +97,15 @@ function LinguisticsLearningPage() {
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
               {terms.slice(0, 8).map((term) => (
-                <div key={term.id} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                  <p className="font-medium">{term.lemma}</p>
-                  <p className="text-muted-foreground">
-                    {term.kind} • {term.count} hits • {term.documentCount} docs
-                  </p>
-                  <p>{term.surfaces.join(", ")}</p>
-                </div>
+                <Item key={term.id} variant="muted" className="items-start bg-muted/20">
+                  <ItemContent>
+                    <ItemTitle>{term.lemma}</ItemTitle>
+                    <ItemDescription>
+                      {term.kind} • {term.count} hits • {term.documentCount} docs
+                    </ItemDescription>
+                    <p>{term.surfaces.join(", ")}</p>
+                  </ItemContent>
+                </Item>
               ))}
             </CardContent>
           </Card>
@@ -108,16 +116,20 @@ function LinguisticsLearningPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               {flashcards.cards.map((card) => (
-                <div key={card.id} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                  <p className="font-medium">{card.front}</p>
-                  <p className="text-muted-foreground">{card.back}</p>
-                </div>
+                <Item key={card.id} variant="muted" className="bg-muted/20">
+                  <ItemContent>
+                    <ItemTitle>{card.front}</ItemTitle>
+                    <ItemDescription>{card.back}</ItemDescription>
+                  </ItemContent>
+                </Item>
               ))}
-              <div className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                <p className="font-medium">Next review</p>
-                <p className="text-muted-foreground">{review.intervalDays} day interval</p>
-                <p>{review.dueAt}</p>
-              </div>
+              <Item variant="muted" className="items-start bg-muted/20">
+                <ItemContent>
+                  <ItemTitle>Next review</ItemTitle>
+                  <ItemDescription>{review.intervalDays} day interval</ItemDescription>
+                  <p>{review.dueAt}</p>
+                </ItemContent>
+              </Item>
             </CardContent>
           </Card>
         </div>

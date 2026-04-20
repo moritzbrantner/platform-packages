@@ -14,6 +14,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -76,10 +80,12 @@ function WordVectorsPage() {
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
               {similarWords.map((entry) => (
-                <div key={entry.word} className="rounded-[1.25rem] border border-border/60 bg-muted/20 p-3">
-                  <p className="font-medium">{entry.word}</p>
-                  <p className="text-muted-foreground">score {entry.score.toFixed(3)}</p>
-                </div>
+                <Item key={entry.word} variant="muted" className="bg-muted/20">
+                  <ItemContent>
+                    <ItemTitle>{entry.word}</ItemTitle>
+                    <ItemDescription>score {entry.score.toFixed(3)}</ItemDescription>
+                  </ItemContent>
+                </Item>
               ))}
             </CardContent>
           </Card>
