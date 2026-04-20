@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "@moritzbrantner/data-density": "workspace:*",
     "@moritzbrantner/linguistics-core": "workspace:*"
   },
   "publishConfig": {
