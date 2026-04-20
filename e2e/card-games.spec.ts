@@ -41,6 +41,28 @@ test("renders the card games playground preview and updates the focus card", asy
     "Ember ace",
   );
 
+  const vanguardSlot = page.getByRole("button", { name: "Vanguard field slot" });
+
+  await vanguardSlot.click({ button: "right" });
+  await expect(page.getByRole("menuitem", { name: "Inspect card" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Return to hand" })).toBeVisible();
+
+  await page.getByRole("menuitem", { name: "Inspect card" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Rules text");
+  await expect(
+    page.getByRole("heading", { name: "Ember ace", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  await vanguardSlot.click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Return to hand" }).click();
+  const returnedCard = page.getByRole("button", { name: "Select Ember ace" });
+
+  await expect(returnedCard).toBeVisible();
+  await returnedCard.click();
+  await vanguardSlot.click();
+  await expect(vanguardSlot).toContainText("Ember ace");
+
   const discardZone = page.getByRole("button", { name: "Discard selected card" });
 
   await discardZone.click();
