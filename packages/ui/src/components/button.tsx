@@ -7,21 +7,21 @@ import { Slot } from "radix-ui";
 import { cn } from "../lib/cn";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 origin-bottom transform-gpu items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-[transform,box-shadow,background-color,color,border-color] duration-200 ease-out will-change-transform hover:-translate-y-[1px] hover:scale-[1.055] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+  "inline-flex shrink-0 origin-bottom transform-gpu items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-[transform,box-shadow,background-color,color,border-color,filter] duration-150 ease-out will-change-transform hover:-translate-y-[1px] hover:scale-[1.055] active:brightness-110 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_12px_28px_-14px_rgb(15_23_42_/_0.52)] hover:bg-primary/90 hover:shadow-[0_22px_42px_-18px_rgb(15_23_42_/_0.58)] active:bg-primary/80 active:shadow-[0_8px_18px_-12px_rgb(15_23_42_/_0.42)]",
+          "bg-primary text-primary-foreground shadow-[0_12px_28px_-14px_rgb(15_23_42_/_0.52)] hover:bg-primary/90 hover:shadow-[0_22px_42px_-18px_rgb(15_23_42_/_0.58)] active:bg-primary active:shadow-[0_8px_18px_-12px_rgb(15_23_42_/_0.42)]",
         destructive:
-          "bg-destructive text-white shadow-[0_12px_28px_-14px_rgb(127_29_29_/_0.45)] hover:bg-destructive/90 hover:shadow-[0_22px_42px_-18px_rgb(127_29_29_/_0.52)] active:bg-destructive/85 active:shadow-[0_8px_18px_-12px_rgb(127_29_29_/_0.38)] focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-white shadow-[0_12px_28px_-14px_rgb(127_29_29_/_0.45)] hover:bg-destructive/90 hover:shadow-[0_22px_42px_-18px_rgb(127_29_29_/_0.52)] active:bg-destructive active:shadow-[0_8px_18px_-12px_rgb(127_29_29_/_0.38)] focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border bg-background shadow-[0_10px_24px_-16px_rgb(15_23_42_/_0.3)] hover:bg-accent hover:text-accent-foreground hover:shadow-[0_18px_34px_-18px_rgb(15_23_42_/_0.34)] active:bg-accent/80 active:text-accent-foreground active:shadow-[0_8px_18px_-14px_rgb(15_23_42_/_0.26)] dark:border-input dark:bg-input/30 dark:hover:bg-input/50 dark:active:bg-input/60",
+          "border bg-background shadow-[0_10px_24px_-16px_rgb(15_23_42_/_0.3)] hover:bg-accent hover:text-accent-foreground hover:shadow-[0_18px_34px_-18px_rgb(15_23_42_/_0.34)] active:bg-accent active:text-accent-foreground active:shadow-[0_8px_18px_-14px_rgb(15_23_42_/_0.26)] dark:border-input dark:bg-input/30 dark:hover:bg-input/50 dark:active:bg-input",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-[0_10px_24px_-16px_rgb(15_23_42_/_0.26)] hover:bg-secondary/80 hover:shadow-[0_18px_34px_-18px_rgb(15_23_42_/_0.32)] active:bg-secondary/70 active:shadow-[0_8px_18px_-14px_rgb(15_23_42_/_0.24)]",
+          "bg-secondary text-secondary-foreground shadow-[0_10px_24px_-16px_rgb(15_23_42_/_0.26)] hover:bg-secondary/80 hover:shadow-[0_18px_34px_-18px_rgb(15_23_42_/_0.32)] active:bg-secondary active:shadow-[0_8px_18px_-14px_rgb(15_23_42_/_0.24)]",
         ghost:
-          "shadow-none hover:bg-accent hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgb(15_23_42_/_0.28)] active:bg-accent/80 active:text-accent-foreground active:shadow-[0_8px_18px_-16px_rgb(15_23_42_/_0.2)] dark:hover:bg-accent/50 dark:active:bg-accent/65",
-        link: "text-primary underline-offset-4 shadow-none hover:translate-y-0 hover:scale-100 hover:underline hover:shadow-none active:text-primary/80 active:shadow-none",
+          "shadow-none hover:bg-accent hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgb(15_23_42_/_0.28)] active:bg-accent active:text-accent-foreground active:shadow-[0_8px_18px_-16px_rgb(15_23_42_/_0.2)] dark:hover:bg-accent/50 dark:active:bg-accent",
+        link: "text-primary underline-offset-4 shadow-none hover:translate-y-0 hover:scale-100 hover:underline hover:shadow-none active:text-primary active:shadow-none",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

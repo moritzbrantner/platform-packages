@@ -43,8 +43,11 @@ type CalendarCellComponentProps = React.ComponentProps<typeof DayButton> & {
   maxEventsPerDay?: number
 }
 
+type CalendarDayComponentProps = CalendarCellComponentProps
+
 type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  dayComponent?: React.ComponentType<CalendarDayComponentProps>
   cellComponent?: React.ComponentType<CalendarCellComponentProps>
   icsData?: CalendarIcsData
   maxEventsPerDay?: number
@@ -56,6 +59,7 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  dayComponent: DayComponent,
   cellComponent: CellComponent,
   defaultMonth,
   month,
@@ -70,7 +74,7 @@ function Calendar({
   const calendarEvents = React.useMemo(() => getCalendarEventsFromIcsData(icsData), [icsData])
   const eventsByDay = React.useMemo(() => getEventsByDay(calendarEvents), [calendarEvents])
   const defaultDayButton = (dayButtonProps: React.ComponentProps<typeof DayButton>) => {
-    const DayButtonComponent = CellComponent ?? CalendarDayButton
+    const DayButtonComponent = DayComponent ?? CellComponent ?? CalendarDayButton
     const dayEvents = eventsByDay.get(getDayKey(dayButtonProps.day.date)) ?? []
 
     return (
@@ -148,7 +152,7 @@ function Calendar({
         table: "w-full border-collapse",
         weekdays: cn("flex", defaultClassNames.weekdays),
         weekday: cn(
-          "flex-1 rounded-(--cell-radius) text-[0.8rem] font-normal text-muted-foreground select-none",
+          "flex h-(--cell-size) w-(--cell-size) shrink-0 items-center justify-center rounded-(--cell-radius) text-[0.8rem] font-normal text-muted-foreground select-none",
           defaultClassNames.weekday
         ),
         week: cn("mt-2 flex w-full", defaultClassNames.week),
@@ -161,11 +165,15 @@ function Calendar({
           defaultClassNames.week_number
         ),
         day: cn(
-          "group/day relative aspect-square h-full w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius)",
+          "group/day relative size-(--cell-size) shrink-0 rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius)",
           props.showWeekNumber
             ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-(--cell-radius)"
             : "[&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
           defaultClassNames.day
+        ),
+        day_button: cn(
+          "size-full min-h-0 min-w-0",
+          defaultClassNames.day_button
         ),
         range_start: cn(
           "relative isolate z-0 rounded-l-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:right-0 after:w-4 after:bg-muted",
@@ -276,8 +284,8 @@ function CalendarDayButton({
       data-range-middle={modifiers.range_middle}
       data-has-events={events.length > 0 || undefined}
       className={cn(
-        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col items-start justify-start gap-1 overflow-hidden border-0 p-1.5 text-left leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground",
-        defaultClassNames.day,
+        "relative isolate z-10 flex h-full w-full min-h-0 min-w-0 flex-col items-start justify-start gap-1 overflow-hidden border-0 p-1.5 text-left leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground",
+        defaultClassNames.day_button,
         className
       )}
       {...props}
@@ -310,6 +318,7 @@ function CalendarDayButton({
 export { Calendar, CalendarDayButton }
 export type {
   CalendarProps,
+  CalendarDayComponentProps,
   CalendarCellComponentProps,
   CalendarEvent,
   CalendarIcsComponent,

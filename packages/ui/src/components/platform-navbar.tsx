@@ -52,23 +52,23 @@ type PlatformNavbarProps = Omit<React.ComponentPropsWithoutRef<"nav">, "children
 
 const variantConfig = {
   mobile: {
-    nav: "mx-auto w-full max-w-md rounded-[2rem] p-2",
+    nav: "mx-auto w-full max-w-md rounded-xl p-2",
     chrome: "flex-col gap-2",
     brand: "w-full justify-between px-3",
     groups: "grid w-full grid-cols-3 gap-1",
     trigger: "min-h-14 flex-col px-2 py-2 text-xs",
     panel:
-      "left-2 right-2 top-[calc(100%+0.5rem)] max-h-[70vh] origin-top overflow-y-auto rounded-[1.75rem] p-2",
+      "left-2 right-2 top-[calc(100%+0.5rem)] max-h-[70vh] origin-top overflow-y-auto rounded-xl p-2",
     list: "grid gap-2",
   },
   web: {
-    nav: "mx-auto w-full max-w-5xl rounded-full p-1.5",
+    nav: "mx-auto w-full max-w-5xl rounded-xl p-1.5",
     chrome: "items-center gap-2",
     brand: "min-w-36 px-4",
     groups: "flex min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto",
     trigger: "h-10 px-4 text-sm",
     panel:
-      "left-1/2 top-[calc(100%+0.75rem)] w-[min(58rem,calc(100vw-2rem))] -translate-x-1/2 origin-top rounded-[1.75rem] p-3",
+      "left-1/2 top-[calc(100%+0.75rem)] w-[min(58rem,calc(100vw-2rem))] -translate-x-1/2 origin-top rounded-xl p-3",
     list: "grid gap-2 sm:grid-cols-2 lg:grid-cols-3",
   },
   desktop: {
@@ -243,7 +243,7 @@ export function PlatformNavbar({
           data-slot="platform-navbar"
           data-variant={variant}
           className={cn(
-            "relative isolate border border-border/60 bg-background/58 text-foreground shadow-[var(--glass-shadow)] backdrop-blur-2xl supports-backdrop-filter:backdrop-blur-2xl",
+            "relative isolate overflow-hidden border border-border/60 bg-card/70 text-foreground shadow-[var(--glass-shadow)] backdrop-blur-2xl supports-backdrop-filter:backdrop-blur-2xl",
             config.nav,
             className,
           )}
@@ -272,11 +272,11 @@ export function PlatformNavbar({
                     aria-controls={`platform-navbar-submenu-${group.id}`}
                     aria-expanded={isOpen}
                     className={cn(
-                      "relative inline-flex min-w-0 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full border text-center font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50",
+                      "relative inline-flex min-w-0 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-md border text-center font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50",
                       config.trigger,
                       isOpen || isActive
                         ? "border-primary/45 bg-primary text-primary-foreground shadow-[var(--glass-interactive-shadow)]"
-                        : "border-border/55 bg-background/42 text-foreground/78 hover:border-border hover:bg-accent/50 hover:text-foreground",
+                        : "border-border/55 bg-background/36 text-foreground/78 hover:border-border hover:bg-accent/45 hover:text-foreground",
                     )}
                     whileHover={reduceMotion ? undefined : { y: -1 }}
                     whileTap={reduceMotion ? undefined : { scale: 0.97 }}
@@ -285,7 +285,7 @@ export function PlatformNavbar({
                     {isOpen ? (
                       <motion.span
                         layoutId="platform-navbar-active-pill"
-                        className="absolute inset-0 -z-10 rounded-full bg-primary"
+                        className="absolute inset-0 -z-10 rounded-md bg-primary"
                         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                       />
                     ) : null}
@@ -313,7 +313,7 @@ export function PlatformNavbar({
               id={`platform-navbar-submenu-${openGroup.id}`}
               data-slot="platform-navbar-submenu"
               className={cn(
-                "absolute z-50 border border-border/60 bg-popover/72 text-popover-foreground shadow-[var(--glass-shadow)] backdrop-blur-2xl",
+                "absolute z-50 overflow-hidden border border-border/60 bg-popover/74 text-popover-foreground shadow-[var(--glass-shadow)] backdrop-blur-2xl",
                 config.panel,
               )}
               initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8, scale: 0.98 }}
@@ -343,7 +343,7 @@ export function PlatformNavbar({
                     "group flex min-h-16 min-w-0 items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
                     isCurrent
                       ? "border-primary/45 bg-primary text-primary-foreground"
-                      : "border-border/45 bg-background/42 text-foreground hover:border-border hover:bg-accent/50",
+                      : "border-border/45 bg-background/36 text-foreground hover:border-border hover:bg-accent/45",
                     item.disabled ? "pointer-events-none opacity-50" : undefined,
                   );
                   const content = (
