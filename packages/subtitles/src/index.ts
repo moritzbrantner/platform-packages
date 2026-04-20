@@ -13,14 +13,18 @@ export {
 } from "./editing";
 export {
   detectTimedTextFormat,
+  parseAss,
   parseSrt,
   parseTimedText,
   parseTranscriptJson,
   parseVtt,
+  parseYoutube,
+  serializeAss,
   serializeSrt,
   serializeTimedText,
   serializeTranscriptJson,
   serializeVtt,
+  serializeYoutube,
 } from "./formats";
 export type {
   NormalizeTimedTextDocumentOptions,

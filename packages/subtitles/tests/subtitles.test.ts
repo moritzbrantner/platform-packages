@@ -6,13 +6,17 @@ import {
   detectTimedTextFormat,
   fromTranscriptSegments,
   insertTimedTextCue,
+  parseAss,
   parseSrt,
   parseTimedText,
   parseTranscriptJson,
   parseVtt,
+  parseYoutube,
   removeTimedTextCue,
+  serializeAss,
   serializeSrt,
   serializeTimedText,
+  serializeYoutube,
   shiftTimedText,
   toTranscriptSegments,
   updateTimedTextCue,
@@ -93,6 +97,105 @@ General Kenobi
     expect(serializeTimedText(document, { format: "vtt" })).toContain(
       "00:00:01.000 --> 00:00:02.500 align:start position:50%",
     );
+  });
+
+  test("parses and serializes ASS documents with style metadata", () => {
+    const input = `[Script Info]
+Title: Demo captions
+ScriptType: v4.00+
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, BackColour, Bold, Italic, Underline, Alignment, MarginL, MarginR, MarginV
+Style: Default,Arial,42,&H00FFFFFF,&H96000000,0,0,0,2,0000,0000,0040
+Style: Top,Arial,36,&H0000FFFF,&H96000000,-1,0,0,8,0020,0020,0030
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:01.00,0:00:03.25,Top,Narrator,0000,0000,0030,,{\\an8}Hello\\Nthere
+`;
+
+    expect(detectTimedTextFormat(input, "captions.ass")).toBe("ass");
+
+    const document = parseAss(input);
+
+    expect(document).toMatchObject({
+      format: "ass",
+      cues: [
+        {
+          startTimeMs: 1000,
+          endTimeMs: 3250,
+          text: "Hello\nthere",
+          settings: {
+            "ass-style": "Top",
+            "ass-name": "Narrator",
+            "ass-alignment": "8",
+            "ass-font": "Arial",
+            "ass-font-size": "36",
+          },
+        },
+      ],
+    });
+
+    expect(serializeAss(document)).toContain("Dialogue: 0,0:00:01.00,0:00:03.25,Top,Narrator");
+    expect(serializeTimedText(document, { format: "ass" })).toContain("Hello\\Nthere");
+  });
+
+  test("parses and serializes YouTube SBV captions", () => {
+    const input = `0:00:01.000,0:00:02.500
+Hello there
+
+0:00:03.000,0:00:04.200
+General Kenobi
+`;
+
+    expect(detectTimedTextFormat(input, "captions.sbv")).toBe("youtube");
+
+    const document = parseYoutube(input);
+
+    expect(document).toMatchObject({
+      format: "youtube",
+      cues: [
+        {
+          startTimeMs: 1000,
+          endTimeMs: 2500,
+          text: "Hello there",
+        },
+        {
+          startTimeMs: 3000,
+          endTimeMs: 4200,
+          text: "General Kenobi",
+        },
+      ],
+    });
+
+    expect(serializeYoutube(document)).toBe(input);
+    expect(serializeTimedText(document, { format: "youtube" })).toBe(input);
+  });
+
+  test("parses YouTube timedtext XML captions", () => {
+    const document = parseTimedText(
+      `<transcript><text start="1.2" dur="2.3">Hello &amp; welcome</text><text start="4" dur="1">Next&lt;br&gt;line</text></transcript>`,
+      {
+        fileName: "captions.xml",
+        format: "youtube",
+      },
+    );
+
+    expect(document).toMatchObject({
+      format: "youtube",
+      cues: [
+        {
+          startTimeMs: 1200,
+          endTimeMs: 3500,
+          text: "Hello & welcome",
+        },
+        {
+          startTimeMs: 4000,
+          endTimeMs: 5000,
+          text: "Next\nline",
+        },
+      ],
+    });
   });
 
   test("parses transcript JSON files and supports generic format detection", () => {
