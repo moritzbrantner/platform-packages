@@ -49,6 +49,7 @@ export default defineConfig({
       "@moritzbrantner/ocr": path.resolve(rootDir, "packages/ocr/src/index.ts"),
       "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
       "@moritzbrantner/parallel-text/model": path.resolve(rootDir, "packages/parallel-text/src/model.ts"),
+      "@moritzbrantner/pipeline-core": path.resolve(rootDir, "packages/pipeline-core/src/index.ts"),
       "@moritzbrantner/question-answering": path.resolve(rootDir, "packages/question-answering/src/index.ts"),
       "@moritzbrantner/reinforcement-learning": path.resolve(rootDir, "packages/reinforcement-learning/src/index.ts"),
       "@moritzbrantner/sentence-similarity": path.resolve(rootDir, "packages/sentence-similarity/src/index.ts"),

@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   createInformationExtractionPipeline,
   toGraphJson,
+  toSchemaInformationExtractionOutput,
   type RelationExtractionProvider,
 } from "../src/index";
 import type { TokenClassificationProvider } from "@moritzbrantner/text-inference";
@@ -110,5 +111,37 @@ describe("@moritzbrantner/information-extraction", () => {
       events: result.events,
     });
     expect(graph.metadata.relationCount).toBe(result.relations.length);
+  });
+
+  test("normalizes and validates extraction output against a schema", async () => {
+    const pipeline = createInformationExtractionPipeline({
+      schema: {
+        schema: {
+          entities: [
+            {
+              type: "entity",
+              fields: [{ name: "value", type: "string", required: true }],
+            },
+          ],
+          relations: [{ type: "acquired", from: "entity", to: "entity" }],
+        },
+      },
+    });
+
+    const result = await pipeline.extract("Nova acquired Luma in 2024.");
+
+    expect(result.validation?.ok).toBe(true);
+    expect(result.normalizedExtraction?.entities.map((entity) => entity.id)).toEqual([
+      "entity:luma",
+      "entity:nova",
+    ]);
+    expect(result.normalizedExtraction?.relations[0]).toMatchObject({
+      type: "acquired",
+      fromEntityId: "entity:nova",
+      toEntityId: "entity:luma",
+    });
+
+    const raw = toSchemaInformationExtractionOutput(result.relations, result.events);
+    expect(raw.entities?.length).toBeGreaterThanOrEqual(2);
   });
 });

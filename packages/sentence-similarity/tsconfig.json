@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/sentence-similarity": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

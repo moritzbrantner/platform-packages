@@ -19,6 +19,9 @@
       "import": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@moritzbrantner/pipeline-core": "workspace:*"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"

@@ -1,3 +1,9 @@
+import {
+  createPipelineFromRun,
+  type Pipeline,
+  type PipelineRunContext,
+} from "@moritzbrantner/pipeline-core";
+
 const DEFAULT_HUGGING_FACE_BASE_URL = "https://router.huggingface.co/hf-inference/models";
 
 export const HUGGING_FACE_TASK_CATEGORIES = [
@@ -471,10 +477,8 @@ export interface UniversalHuggingFaceProvider {
   ): Promise<UniversalTaskResult<Task, unknown>>;
 }
 
-export interface UniversalTaskRunOptions {
+export interface UniversalTaskRunOptions extends PipelineRunContext {
   parameters?: Record<string, unknown>;
-  signal?: AbortSignal;
-  metadata?: Record<string, unknown>;
 }
 
 export interface UniversalTaskPipeline<
@@ -489,9 +493,28 @@ export interface UniversalTaskPipeline<
     inputs: Iterable<Input>,
     options?: UniversalTaskRunOptions,
   ): Promise<Array<UniversalTaskResult<Task, Output>>>;
+  pipe<NextOutput>(
+    next: Pipeline<UniversalTaskResult<Task, Output>, NextOutput>,
+  ): Pipeline<Input, NextOutput>;
+  map<NextOutput>(
+    mapper: (
+      output: UniversalTaskResult<Task, Output>,
+      context: PipelineRunContext,
+    ) => NextOutput | Promise<NextOutput>,
+  ): Pipeline<Input, NextOutput>;
+  tap(
+    effect: (
+      output: UniversalTaskResult<Task, Output>,
+      context: PipelineRunContext,
+    ) => void | Promise<void>,
+  ): Pipeline<Input, UniversalTaskResult<Task, Output>>;
   connect<NextTask extends HuggingFaceTaskSlug, NextOutput = unknown>(
     next: UniversalTaskPipeline<NextTask, Output, NextOutput>,
-    map?: (result: UniversalTaskResult<Task, Output>) => Output,
+    map?: (result: UniversalTaskResult<Task, Output>) => Output | Promise<Output>,
+  ): UniversalTaskPipeline<NextTask, Input, NextOutput>;
+  connect<NextTask extends HuggingFaceTaskSlug, NextInput, NextOutput = unknown>(
+    next: UniversalTaskPipeline<NextTask, NextInput, NextOutput>,
+    map: (result: UniversalTaskResult<Task, Output>) => NextInput | Promise<NextInput>,
   ): UniversalTaskPipeline<NextTask, Input, NextOutput>;
 }
 
@@ -582,7 +605,7 @@ export function createUniversalTaskPipeline<
 >(
   options: CreateUniversalTaskPipelineOptions<Task>,
 ): UniversalTaskPipeline<Task, Input, Output> {
-  return createPipelineFromRun({
+  return createUniversalPipelineFromRun({
     descriptor: options.descriptor,
     model: options.model,
     run: async (input, runOptions = {}) => {
@@ -652,7 +675,7 @@ export function createHuggingFaceRouterProvider(
   };
 }
 
-function createPipelineFromRun<
+function createUniversalPipelineFromRun<
   Task extends HuggingFaceTaskSlug,
   Input = unknown,
   Output = unknown,
@@ -661,20 +684,29 @@ function createPipelineFromRun<
   model: HuggingFaceModelReference<Task>;
   run(input: Input, runOptions?: UniversalTaskRunOptions): Promise<UniversalTaskResult<Task, Output>>;
 }): UniversalTaskPipeline<Task, Input, Output> {
+  const pipeline = createPipelineFromRun<Input, UniversalTaskResult<Task, Output>>((input, context) =>
+    options.run(input, context as UniversalTaskRunOptions),
+  );
+
   return {
     descriptor: options.descriptor,
     model: options.model,
-    run: options.run,
-    async batch(inputs, runOptions) {
-      return Promise.all(Array.from(inputs, (input) => options.run(input, runOptions)));
-    },
-    connect(next, map) {
-      return createPipelineFromRun({
+    run: pipeline.run,
+    batch: pipeline.batch,
+    pipe: pipeline.pipe,
+    map: pipeline.map,
+    tap: pipeline.tap,
+    connect<NextTask extends HuggingFaceTaskSlug, NextInput = Output, NextOutput = unknown>(
+      next: UniversalTaskPipeline<NextTask, NextInput, NextOutput>,
+      map?: (result: UniversalTaskResult<Task, Output>) => NextInput | Promise<NextInput>,
+    ) {
+      return createUniversalPipelineFromRun({
         descriptor: next.descriptor,
         model: next.model,
         run: async (input: Input, runOptions) => {
           const current = await options.run(input, runOptions);
-          return next.run(map ? map(current) : current.output, runOptions);
+          const nextInput = map ? await map(current) : (current.output as unknown as NextInput);
+          return next.run(nextInput, runOptions);
         },
       });
     },

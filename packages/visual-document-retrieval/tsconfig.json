@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/visual-document-retrieval": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

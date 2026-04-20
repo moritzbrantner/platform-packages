@@ -1,6 +1,6 @@
 # @moritzbrantner/text-inference
 
-Shared text-model inference contracts, chunking helpers, and a thin Hugging Face HTTP wrapper for task-specific packages.
+Shared text-model inference contracts, compatibility re-exports for core chunking helpers, and a thin Hugging Face HTTP wrapper for task-specific packages.
 
 ## Main APIs
 
@@ -13,4 +13,5 @@ Shared text-model inference contracts, chunking helpers, and a thin Hugging Face
 ## Notes
 
 - The default Hugging Face base URL targets `https://router.huggingface.co/hf-inference/models`.
+- Generic chunking lives in `@moritzbrantner/linguistics-core`; this package re-exports the inference-friendly wrapper for existing callers.
 - The package keeps task packages provider-agnostic by exporting separate provider interfaces for classification, embeddings, QA, and summarization.

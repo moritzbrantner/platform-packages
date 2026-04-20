@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   anchorSpan,
+  chunkTextDocument,
   createTextDocument,
   normalizeText,
   reanchorSpan,
@@ -83,5 +84,30 @@ describe("@moritzbrantner/linguistics-core", () => {
     expect(document.tokens.filter((token) => token.isWordLike).map((token) => token.text)).toEqual(
       ["One", "sentence", "Two", "more"],
     );
+  });
+
+  test("chunks text documents with source spans", () => {
+    const document = createTextDocument({
+      id: "chunked",
+      text: "Alpha one. Beta two. Gamma three.",
+      metadata: { source: "fixture" },
+    });
+
+    const chunks = chunkTextDocument(document, {
+      strategy: "sentence",
+      maxCharacters: 16,
+    });
+
+    expect(chunks.map((chunk) => chunk.text)).toEqual([
+      "Alpha one.",
+      "Beta two.",
+      "Gamma three.",
+    ]);
+    expect(chunks[1]).toMatchObject({
+      documentId: "chunked",
+      start: 11,
+      end: 20,
+      metadata: { source: "fixture" },
+    });
   });
 });

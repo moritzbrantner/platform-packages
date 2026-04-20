@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/image-to-video": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

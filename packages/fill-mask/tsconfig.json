@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/fill-mask": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

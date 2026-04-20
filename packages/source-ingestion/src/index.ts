@@ -1,11 +1,13 @@
 import {
+  chunkTextDocument,
   createTextDocument,
   normalizeText,
   segmentTextDocument,
+  type ChunkTextDocumentOptions,
   type LanguageTag,
   type TextDocument,
+  type TextChunk,
 } from "@moritzbrantner/linguistics-core";
-import { chunkTextForInference, type ChunkTextOptions, type TextChunk } from "@moritzbrantner/text-inference";
 
 export type IngestionConnector = "html" | "plain-text" | "json-feed" | "file-drop";
 
@@ -235,7 +237,7 @@ export function chunkIngestedDocumentForInference(
   options: ChunkIngestedDocumentOptions = {},
 ): IngestionChunk[] {
   const chunking = resolveChunkingPreset(options.preset ?? "balanced");
-  const chunks = chunkTextForInference<IngestionMetadata>(ingested.document, chunking);
+  const chunks = chunkTextDocument<IngestionMetadata>(ingested.document, chunking);
 
   return chunks.map((chunk: TextChunk<IngestionMetadata>) => ({
     ...chunk,
@@ -640,7 +642,7 @@ function trimOffsets(text: string, offsets: number[]): number[] {
   return expanded;
 }
 
-function resolveChunkingPreset(preset: ChunkingPreset): ChunkTextOptions<IngestionMetadata> {
+function resolveChunkingPreset(preset: ChunkingPreset): ChunkTextDocumentOptions {
   switch (preset) {
     case "compact":
       return {

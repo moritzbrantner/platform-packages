@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@moritzbrantner/document-structure-extraction": "workspace:*",
+    "@moritzbrantner/information-extraction": "workspace:*",
     "@moritzbrantner/linguistics-core": "workspace:*",
     "@moritzbrantner/ocr": "workspace:*",
     "@moritzbrantner/question-answering": "workspace:*",
