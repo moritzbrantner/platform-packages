@@ -1,9 +1,15 @@
 export {
   createBobbingAnimation,
   createDriftAnimation,
+  createFloatAnimation,
   createOpacityPulseAnimation,
+  createPopAnimation,
   createPulseAnimation,
   createSpinAnimation,
+  createSwayAnimation,
+  createTimelineAnimations,
+  type FlatMotionKeyframe,
+  type FlatTimelineAnimationOptions,
 } from "./animation-presets";
 export { FlatScene, type FlatSceneProps } from "./flat-scene";
 export {
@@ -13,6 +19,7 @@ export {
   createFlatFigureAnimations,
   createFlatSparkleFigure,
   createFlatSunFigure,
+  type FlatBuiltInFigureAnimationPreset,
   type FlatBadgeFigureOptions,
   type FlatCardFigureOptions,
   type FlatCloudFigureOptions,

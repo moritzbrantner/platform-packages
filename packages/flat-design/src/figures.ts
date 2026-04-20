@@ -1,8 +1,15 @@
 import {
   createBobbingAnimation,
   createDriftAnimation,
+  createFloatAnimation,
   createOpacityPulseAnimation,
+  createPopAnimation,
   createPulseAnimation,
+  createSpinAnimation,
+  createSwayAnimation,
+  createTimelineAnimations,
+  type FlatMotionKeyframe,
+  type FlatTimelineAnimationOptions,
 } from "./animation-presets";
 import { defaultFlatDesignPalette } from "./palette";
 import type {
@@ -13,23 +20,45 @@ import type {
 
 type Axis = "x" | "y";
 
-export type FlatFigureAnimationPreset = "bobbing" | "drift" | "pulse";
+export type FlatBuiltInFigureAnimationPreset =
+  | "bobbing"
+  | "drift"
+  | "float"
+  | "pulse"
+  | "pop"
+  | "sway"
+  | "spin"
+  | "blink";
+
+export type FlatFigureAnimationPreset =
+  | FlatBuiltInFigureAnimationPreset
+  | "timeline";
 
 export type FlatFigureAnimationOptions = FlatAnimationTiming & {
   axis?: Axis;
+  angle?: number;
+  cx?: number;
+  cy?: number;
+  drift?: number;
   distance?: number;
   from?: number;
   to?: number;
   minOpacity?: number;
   maxOpacity?: number;
+  keyframes?: FlatMotionKeyframe[];
+  rotateCenter?: FlatTimelineAnimationOptions["rotateCenter"];
 };
 
 export type FlatFigureMotion =
   | false
-  | FlatFigureAnimationPreset
+  | FlatBuiltInFigureAnimationPreset
   | {
-      preset: FlatFigureAnimationPreset;
+      preset: FlatBuiltInFigureAnimationPreset;
       options?: FlatFigureAnimationOptions;
+    }
+  | {
+      preset: "timeline";
+      options: FlatTimelineAnimationOptions;
     };
 
 type FlatFigureBaseOptions = {
@@ -80,8 +109,13 @@ export function createFlatFigureAnimations(
     return undefined;
   }
 
+  if (typeof motion !== "string" && motion.preset === "timeline") {
+    return createTimelineAnimations(motion.options);
+  }
+
   const preset = typeof motion === "string" ? motion : motion.preset;
-  const options = typeof motion === "string" ? {} : motion.options ?? {};
+  const options: FlatFigureAnimationOptions =
+    typeof motion === "string" ? {} : motion.options ?? {};
 
   switch (preset) {
     case "bobbing":
@@ -114,6 +148,21 @@ export function createFlatFigureAnimations(
           fillMode: options.fillMode,
         }),
       ];
+    case "float":
+      return [
+        createFloatAnimation({
+          distance: options.distance,
+          drift: options.drift,
+          begin: options.begin,
+          dur: options.dur,
+          repeatCount: options.repeatCount,
+          keyTimes: options.keyTimes,
+          keySplines: options.keySplines,
+          calcMode: options.calcMode,
+          additive: options.additive,
+          fillMode: options.fillMode,
+        }),
+      ];
     case "pulse":
       return [
         createPulseAnimation({
@@ -128,6 +177,67 @@ export function createFlatFigureAnimations(
           additive: options.additive,
           fillMode: options.fillMode,
         }),
+        createOpacityPulseAnimation({
+          minOpacity: options.minOpacity,
+          maxOpacity: options.maxOpacity,
+          begin: options.begin,
+          dur: options.dur,
+          repeatCount: options.repeatCount,
+          keyTimes: options.keyTimes,
+          keySplines: options.keySplines,
+          calcMode: options.calcMode,
+          fillMode: options.fillMode,
+        }),
+      ];
+    case "pop":
+      return [
+        createPopAnimation({
+          from: options.from,
+          to: options.to,
+          begin: options.begin,
+          dur: options.dur,
+          repeatCount: options.repeatCount,
+          keyTimes: options.keyTimes,
+          keySplines: options.keySplines,
+          calcMode: options.calcMode,
+          additive: options.additive,
+          fillMode: options.fillMode,
+        }),
+      ];
+    case "sway":
+      return [
+        createSwayAnimation({
+          angle: options.angle,
+          cx: options.cx,
+          cy: options.cy,
+          begin: options.begin,
+          dur: options.dur,
+          repeatCount: options.repeatCount,
+          keyTimes: options.keyTimes,
+          keySplines: options.keySplines,
+          calcMode: options.calcMode,
+          additive: options.additive,
+          fillMode: options.fillMode,
+        }),
+      ];
+    case "spin":
+      return [
+        createSpinAnimation({
+          angle: options.angle,
+          cx: options.cx,
+          cy: options.cy,
+          begin: options.begin,
+          dur: options.dur,
+          repeatCount: options.repeatCount,
+          keyTimes: options.keyTimes,
+          keySplines: options.keySplines,
+          calcMode: options.calcMode,
+          additive: options.additive,
+          fillMode: options.fillMode,
+        }),
+      ];
+    case "blink":
+      return [
         createOpacityPulseAnimation({
           minOpacity: options.minOpacity,
           maxOpacity: options.maxOpacity,
