@@ -4,7 +4,8 @@ Typed SVG primitives for building flat-design illustrations and lightweight anim
 
 ## What it includes
 - A scene schema for layered SVG artwork.
-- Helper factories for bobbing, drift, pulse, opacity, and spin animations.
+- Helper factories for bobbing, drift, float, pulse, pop, sway, blink, opacity, and spin animations.
+- Timeline animation helpers for building motion presets from keyframes.
 - Figure builders for common flat-design elements such as clouds, badges, cards, sparkles, and suns.
 - A `FlatScene` React component for direct rendering.
 - A `renderFlatSceneToSvg()` helper for exporting raw SVG strings.
@@ -36,7 +37,17 @@ const scene: FlatDesignScene = {
         createFlatBadgeFigure({
           x: 204,
           y: 112,
-          motion: { preset: "bobbing", options: { distance: 10 } },
+          motion: {
+            preset: "timeline",
+            options: {
+              dur: "5s",
+              keyframes: [
+                { time: 0, x: 0, y: 0, scale: 1 },
+                { time: 0.5, x: 10, y: -12, scale: 1.08 },
+                { time: 1, x: 0, y: 0, scale: 1 },
+              ],
+            },
+          },
         }),
       ],
     },

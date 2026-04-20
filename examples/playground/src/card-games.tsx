@@ -17,6 +17,11 @@ import {
   ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@moritzbrantner/ui";
 
 import { PlaygroundPage } from "./app-shell";
@@ -42,6 +47,11 @@ type FieldSlotId = "vanguard" | "support" | "reserve";
 type SelectedMove =
   | { zone: "hand"; cardId: string }
   | { zone: "field"; cardId: string; slotId: FieldSlotId };
+
+type InspectedCard = {
+  card: ShowcaseCard;
+  origin: string;
+};
 
 const openingHand: ShowcaseCard[] = [
   {
@@ -153,6 +163,7 @@ function CardGamesPage() {
   const [fieldCards, setFieldCards] = useState(createEmptyField);
   const [discardPile, setDiscardPile] = useState<FieldCard[]>([]);
   const [selectedMove, setSelectedMove] = useState<SelectedMove | null>(null);
+  const [inspectedCard, setInspectedCard] = useState<InspectedCard | null>(null);
 
   const activeCard = openingHand[selectedCard] ?? openingHand[0];
   const selectedFieldCard =
@@ -164,6 +175,10 @@ function CardGamesPage() {
 
   const runDefaultAction = (card: ShowcaseCard) => {
     setLastAction(`Played ${card.headline}`);
+  };
+
+  const inspectCard = (card: ShowcaseCard, origin: string) => {
+    setInspectedCard({ card, origin });
   };
 
   const drawCard = () => {
@@ -181,6 +196,22 @@ function CardGamesPage() {
   };
 
   const selectFieldCard = (slotId: FieldSlotId, card: FieldCard) => {
+    setSelectedMove({ zone: "field", cardId: card.id, slotId });
+  };
+
+  const placeHandCard = (card: FieldCard, slotId: FieldSlotId) => {
+    const displacedCard = fieldCards[slotId];
+
+    setFieldCards({
+      ...fieldCards,
+      [slotId]: card,
+    });
+    setFieldHand(fieldHand.filter((handCard) => handCard.id !== card.id));
+
+    if (displacedCard && displacedCard.id !== card.id) {
+      setDiscardPile([displacedCard, ...discardPile]);
+    }
+
     setSelectedMove({ zone: "field", cardId: card.id, slotId });
   };
 
@@ -227,6 +258,30 @@ function CardGamesPage() {
     setSelectedMove({ zone: "hand", cardId: selectedFieldCard.id });
   };
 
+  const returnFieldCardToHand = (slotId: FieldSlotId, card: FieldCard) => {
+    setFieldCards({ ...fieldCards, [slotId]: null });
+    setFieldHand([...fieldHand, card]);
+    setSelectedMove({ zone: "hand", cardId: card.id });
+  };
+
+  const discardHandCard = (card: FieldCard) => {
+    setFieldHand(fieldHand.filter((handCard) => handCard.id !== card.id));
+    setDiscardPile([card, ...discardPile]);
+
+    if (selectedMove?.cardId === card.id) {
+      setSelectedMove(null);
+    }
+  };
+
+  const discardFieldCard = (slotId: FieldSlotId, card: FieldCard) => {
+    setFieldCards({ ...fieldCards, [slotId]: null });
+    setDiscardPile([card, ...discardPile]);
+
+    if (selectedMove?.cardId === card.id) {
+      setSelectedMove(null);
+    }
+  };
+
   const resetField = () => {
     setDrawPile(fieldDeck);
     setFieldHand([]);
@@ -250,26 +305,52 @@ function CardGamesPage() {
         >
           <PlayerHand aria-label="Player hand">
             {openingHand.map((card, index) => (
-              <button
-                key={`${card.rank}-${card.suit}`}
-                type="button"
-                aria-label={`Select ${card.headline}`}
-                className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none transition-transform duration-200 ease-out focus-visible:ring-2 focus-visible:ring-white/80"
-                onClick={() => setSelectedCard(index)}
-              >
-                <PlayingCard
-                  rank={card.rank}
-                  suit={card.suit}
-                  size="sm"
-                  effect={card.effect}
-                  tone={card.tone}
-                  headline={card.headline}
-                  subtitle={card.subtitle}
-                  description={card.description}
-                  badge={card.badge}
-                  selected={selectedCard === index}
-                />
-              </button>
+              <ContextMenu key={`${card.rank}-${card.suit}`}>
+                <ContextMenuTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`Select ${card.headline}`}
+                    className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none transition-transform duration-200 ease-out focus-visible:ring-2 focus-visible:ring-white/80"
+                    onClick={() => setSelectedCard(index)}
+                  >
+                    <PlayingCard
+                      rank={card.rank}
+                      suit={card.suit}
+                      size="sm"
+                      effect={card.effect}
+                      tone={card.tone}
+                      headline={card.headline}
+                      subtitle={card.subtitle}
+                      description={card.description}
+                      badge={card.badge}
+                      selected={selectedCard === index}
+                    />
+                  </button>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuLabel>{card.headline}</ContextMenuLabel>
+                  <ContextMenuItem onSelect={() => inspectCard(card, "Player hand")}>
+                    Inspect card
+                  </ContextMenuItem>
+                  <ContextMenuSeparator />
+                  <ContextMenuItem
+                    onSelect={() => {
+                      setSelectedCard(index);
+                      runDefaultAction(card);
+                    }}
+                  >
+                    Play card
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onSelect={() => {
+                      setSelectedCard(index);
+                      setLastAction(`Held ${card.headline}`);
+                    }}
+                  >
+                    Hold card
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             ))}
           </PlayerHand>
         </CardTable>
@@ -310,6 +391,10 @@ function CardGamesPage() {
               </ContextMenuTrigger>
               <ContextMenuContent>
                 <ContextMenuLabel>{activeCard.headline}</ContextMenuLabel>
+                <ContextMenuItem onSelect={() => inspectCard(activeCard, "Focus card")}>
+                  Inspect card
+                </ContextMenuItem>
+                <ContextMenuSeparator />
                 <ContextMenuItem onSelect={() => runDefaultAction(activeCard)}>
                   Play card
                 </ContextMenuItem>
@@ -428,18 +513,44 @@ function CardGamesPage() {
                       }}
                     >
                       {card ? (
-                        <PlayingCard
-                          rank={card.rank}
-                          suit={card.suit}
-                          size="sm"
-                          tone={card.tone}
-                          effect={card.effect}
-                          headline={card.headline}
-                          subtitle={card.subtitle}
-                          description={card.description}
-                          selected={isSelected}
-                          interactive={false}
-                        />
+                        <ContextMenu>
+                          <ContextMenuTrigger asChild>
+                            <span className="block rounded-[1.8rem] outline-none focus-visible:ring-2 focus-visible:ring-white/80">
+                              <PlayingCard
+                                rank={card.rank}
+                                suit={card.suit}
+                                size="sm"
+                                tone={card.tone}
+                                effect={card.effect}
+                                headline={card.headline}
+                                subtitle={card.subtitle}
+                                description={card.description}
+                                selected={isSelected}
+                                interactive={false}
+                              />
+                            </span>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuLabel>{card.headline}</ContextMenuLabel>
+                            <ContextMenuItem
+                              onSelect={() => inspectCard(card, `${slot.label} slot`)}
+                            >
+                              Inspect card
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onSelect={() => returnFieldCardToHand(slot.id, card)}
+                            >
+                              Return to hand
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem
+                              variant="destructive"
+                              onSelect={() => discardFieldCard(slot.id, card)}
+                            >
+                              Discard card
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
                       ) : (
                         <span className="text-sm font-bold text-white/58">Open</span>
                       )}
@@ -459,28 +570,55 @@ function CardGamesPage() {
               <PlayerHand aria-label="Playing field hand" className="min-h-[14rem] rounded-lg border border-white/14 bg-white/8">
                 {fieldHand.length > 0 ? (
                   fieldHand.map((card) => (
-                    <button
-                      key={card.id}
-                      type="button"
-                      aria-label={`Select ${card.headline}`}
-                      className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                      onClick={() => selectHandCard(card)}
-                    >
-                      <PlayingCard
-                        rank={card.rank}
-                        suit={card.suit}
-                        size="sm"
-                        tone={card.tone}
-                        effect={card.effect}
-                        headline={card.headline}
-                        subtitle={card.subtitle}
-                        description={card.description}
-                        selected={
-                          selectedMove?.zone === "hand" && selectedMove.cardId === card.id
-                        }
-                        interactive={false}
-                      />
-                    </button>
+                    <ContextMenu key={card.id}>
+                      <ContextMenuTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label={`Select ${card.headline}`}
+                          className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                          onClick={() => selectHandCard(card)}
+                        >
+                          <PlayingCard
+                            rank={card.rank}
+                            suit={card.suit}
+                            size="sm"
+                            tone={card.tone}
+                            effect={card.effect}
+                            headline={card.headline}
+                            subtitle={card.subtitle}
+                            description={card.description}
+                            selected={
+                              selectedMove?.zone === "hand" && selectedMove.cardId === card.id
+                            }
+                            interactive={false}
+                          />
+                        </button>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuLabel>{card.headline}</ContextMenuLabel>
+                        <ContextMenuItem
+                          onSelect={() => inspectCard(card, "Playing field hand")}
+                        >
+                          Inspect card
+                        </ContextMenuItem>
+                        <ContextMenuSeparator />
+                        {fieldSlots.map((slot) => (
+                          <ContextMenuItem
+                            key={slot.id}
+                            onSelect={() => placeHandCard(card, slot.id)}
+                          >
+                            Move to {slot.label}
+                          </ContextMenuItem>
+                        ))}
+                        <ContextMenuSeparator />
+                        <ContextMenuItem
+                          variant="destructive"
+                          onSelect={() => discardHandCard(card)}
+                        >
+                          Discard card
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
                   ))
                 ) : (
                   <span className="grid min-h-[11rem] place-items-center text-sm font-bold text-white/58">
@@ -597,6 +735,91 @@ function CardGamesPage() {
           </div>
         </CardTable>
       </div>
+
+      <Dialog
+        open={Boolean(inspectedCard)}
+        onOpenChange={(open) => {
+          if (!open) setInspectedCard(null);
+        }}
+      >
+        <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto bg-slate-950 text-white sm:max-w-4xl">
+          {inspectedCard ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{inspectedCard.card.headline}</DialogTitle>
+                <DialogDescription className="text-white/68">
+                  {inspectedCard.origin} - {inspectedCard.card.subtitle}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-5 md:grid-cols-[minmax(0,24rem)_1fr] md:items-start">
+                <div className="grid justify-items-center">
+                  <PlayingCard
+                    rank={inspectedCard.card.rank}
+                    suit={inspectedCard.card.suit}
+                    size="lg"
+                    tone={inspectedCard.card.tone}
+                    effect={inspectedCard.card.effect}
+                    headline={inspectedCard.card.headline}
+                    subtitle={inspectedCard.card.subtitle}
+                    description={inspectedCard.card.description}
+                    badge={inspectedCard.card.badge}
+                    selected
+                    interactive
+                  />
+                </div>
+
+                <dl className="grid gap-3 rounded-lg border border-white/12 bg-white/8 p-4 text-sm">
+                  <div>
+                    <dt className="font-bold text-white/58">Rank</dt>
+                    <dd className="mt-1 text-base font-semibold text-white">
+                      {inspectedCard.card.rank}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-white/58">Suit</dt>
+                    <dd className="mt-1 text-base font-semibold capitalize text-white">
+                      {inspectedCard.card.suit}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-white/58">Role</dt>
+                    <dd className="mt-1 text-base font-semibold text-white">
+                      {inspectedCard.card.subtitle}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-white/58">Rules text</dt>
+                    <dd className="mt-1 leading-6 text-white/86">
+                      {inspectedCard.card.description}
+                    </dd>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <dt className="font-bold text-white/58">Finish</dt>
+                      <dd className="mt-1 capitalize text-white/86">
+                        {inspectedCard.card.effect ?? "standard"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-white/58">Tone</dt>
+                      <dd className="mt-1 capitalize text-white/86">
+                        {inspectedCard.card.tone ?? "classic"}
+                      </dd>
+                    </div>
+                  </div>
+                  {inspectedCard.card.badge ? (
+                    <div>
+                      <dt className="font-bold text-white/58">Badge</dt>
+                      <dd className="mt-1 text-white/86">{inspectedCard.card.badge}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </div>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </PlaygroundPage>
   );
 }
