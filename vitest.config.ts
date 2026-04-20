@@ -79,6 +79,7 @@ export default defineConfig({
       "@moritzbrantner/text-to-video": path.resolve(rootDir, "packages/text-to-video/src/index.ts"),
       "@moritzbrantner/token-classification": path.resolve(rootDir, "packages/token-classification/src/index.ts"),
       "@moritzbrantner/translation": path.resolve(rootDir, "packages/translation/src/index.ts"),
+      "@moritzbrantner/tree-structures": path.resolve(rootDir, "packages/tree-structures/src/index.ts"),
       "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
       "@moritzbrantner/unconditional-image-generation": path.resolve(rootDir, "packages/unconditional-image-generation/src/index.ts"),
       "@moritzbrantner/video-classification": path.resolve(rootDir, "packages/video-classification/src/index.ts"),

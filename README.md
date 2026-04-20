@@ -40,6 +40,7 @@ Everything else in this repository remains valid, but is not required for `scaff
 - `@moritzbrantner/text-analysis`: composable labels, entities, embeddings, and keyword extraction pipeline over raw text or `TextDocument`s.
 - `@moritzbrantner/text-inference`: shared chunking, task contracts, and Hugging Face HTTP wrappers used by the text-focused AI packages.
 - `@moritzbrantner/text-summarization`: chunked summarization pipeline with optional multi-pass reduction for longer documents.
+- `@moritzbrantner/tree-structures`: parent-link tree indexing, traversal helpers, subtree queries, and aggregate tree statistics for hierarchy-heavy data.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
 - `@moritzbrantner/storytelling`: branching and scroll-driven storytelling primitives with interactive choices, motion.dev transitions, and optional Remotion/Three.js adapters.
 - `@moritzbrantner/word-prediction`: next-word suggestion engine for chat-style and keyboard-style text prediction, with optional semantic backoff from word vectors.
@@ -60,6 +61,7 @@ Everything else in this repository remains valid, but is not required for `scaff
 - `@moritzbrantner/graphs` consumes data-density windows and metric reductions for node-link graph subgraphs.
 - `@moritzbrantner/tables` consumes data-density windows for virtualized row slices and metric-preserving table summaries.
 - `@moritzbrantner/maps` consumes data-density for clustering while keeping MapLibre rendering and map-specific interaction in the maps package.
+- `@moritzbrantner/tree-structures` is dependency-free hierarchy infrastructure for packages that need validated parent/child indexes or traversal without taking on graph semantics.
 - The playground is intended to validate those layers in order: core and corpus pages establish the text model, vectors and learning consume corpus data, and speech exercises prediction with vector-backed backoff.
 
 ## Repository scope
