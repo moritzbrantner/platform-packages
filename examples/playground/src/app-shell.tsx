@@ -17,6 +17,7 @@ import {
 type PageKey =
   | "home"
   | "card-games"
+  | "data-density"
   | "flat-design"
   | "linguistics-core"
   | "linguistics-corpus"
@@ -42,6 +43,11 @@ type AppShellProps = {
 const navigation = [
   { key: "home", href: "/index.html", label: "Overview" },
   { key: "card-games", href: "/card-games.html", label: "Card games package" },
+  {
+    key: "data-density",
+    href: "/data-density.html",
+    label: "Data density package",
+  },
   {
     key: "flat-design",
     href: "/flat-design.html",

@@ -20,6 +20,13 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/data-density$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/data-density/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/flat-design$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -125,6 +132,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: [
       "@moritzbrantner/card-games",
+      "@moritzbrantner/data-density",
       "@moritzbrantner/flat-design",
       "@moritzbrantner/linguistics-core",
       "@moritzbrantner/linguistics-corpus",
@@ -151,6 +159,7 @@ export default defineConfig({
       input: {
         home: path.resolve(rootDir, "index.html"),
         cardGames: path.resolve(rootDir, "card-games.html"),
+        dataDensity: path.resolve(rootDir, "data-density.html"),
         flatDesign: path.resolve(rootDir, "flat-design.html"),
         linguisticsCore: path.resolve(rootDir, "linguistics-core.html"),
         linguisticsCorpus: path.resolve(rootDir, "linguistics-corpus.html"),

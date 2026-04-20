@@ -19,6 +19,13 @@ function HomePage() {
           cta="Open card games demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/data-density"
+          title="Dense data indexing demo"
+          description="Query ordered row windows, chart-sized numeric bins, and viewport-aware geo aggregation while preserving metric totals for dashboards."
+          href="/data-density.html"
+          cta="Open data-density demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/flat-design"
           title="Flat-design scene demo"
           description="Build layered SVG illustrations, swap palettes, and inspect looping flat-motion presets rendered from the new scene schema."
@@ -130,6 +137,11 @@ function HomePage() {
               and stack layouts should still read well on small screens.
             </p>
             <p>
+              The data-density page validates the shared indexing primitives behind
+              dense interfaces: virtual row windows, chart binning, geo aggregation,
+              and metric rollups for the current view.
+            </p>
+            <p>
               The flat design page validates the new SVG scene package: palette
               swapping, layered vector composition, and animation helpers should all
               remain sharp without a canvas dependency.
@@ -166,6 +178,9 @@ function HomePage() {
           <CardContent className="flex flex-col gap-3">
             <Button asChild variant="outline">
               <a href="/card-games.html">Open card games package page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/data-density.html">Open data density package page</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/flat-design.html">Open flat design package page</a>

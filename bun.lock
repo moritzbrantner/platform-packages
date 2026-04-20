@@ -26,6 +26,7 @@
       "name": "@moritzbrantner/playground",
       "dependencies": {
         "@moritzbrantner/card-games": "workspace:*",
+        "@moritzbrantner/data-density": "workspace:*",
         "@moritzbrantner/flat-design": "workspace:*",
         "@moritzbrantner/linguistics-core": "workspace:*",
         "@moritzbrantner/linguistics-corpus": "workspace:*",
@@ -106,6 +107,13 @@
       "peerDependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+      },
+    },
+    "packages/charts": {
+      "name": "@moritzbrantner/charts",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/data-density": "^0.1.0",
       },
     },
     "packages/collaboration": {
@@ -208,6 +216,13 @@
       "peerDependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+      },
+    },
+    "packages/graphs": {
+      "name": "@moritzbrantner/graphs",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/data-density": "^0.1.0",
       },
     },
     "packages/hexagon-grids": {
@@ -457,7 +472,7 @@
       "name": "@moritzbrantner/storytelling",
       "version": "0.2.0",
       "dependencies": {
-        "@moritzbrantner/ui": "workspace:^",
+        "@moritzbrantner/ui": "^0.3.0",
         "motion": "^12.35.0",
       },
       "devDependencies": {
@@ -506,6 +521,13 @@
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/tables": {
+      "name": "@moritzbrantner/tables",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/data-density": "^0.1.0",
       },
     },
     "packages/tabular-classification": {
@@ -1012,6 +1034,8 @@
 
     "@moritzbrantner/card-games": ["@moritzbrantner/card-games@workspace:packages/card-games"],
 
+    "@moritzbrantner/charts": ["@moritzbrantner/charts@workspace:packages/charts"],
+
     "@moritzbrantner/collaboration": ["@moritzbrantner/collaboration@workspace:packages/collaboration"],
 
     "@moritzbrantner/data-density": ["@moritzbrantner/data-density@workspace:packages/data-density"],
@@ -1033,6 +1057,8 @@
     "@moritzbrantner/fill-mask": ["@moritzbrantner/fill-mask@workspace:packages/fill-mask"],
 
     "@moritzbrantner/flat-design": ["@moritzbrantner/flat-design@workspace:packages/flat-design"],
+
+    "@moritzbrantner/graphs": ["@moritzbrantner/graphs@workspace:packages/graphs"],
 
     "@moritzbrantner/hexagon-grids": ["@moritzbrantner/hexagon-grids@workspace:packages/hexagon-grids"],
 
@@ -1105,6 +1131,8 @@
     "@moritzbrantner/syntax-analysis": ["@moritzbrantner/syntax-analysis@workspace:packages/syntax-analysis"],
 
     "@moritzbrantner/table-question-answering": ["@moritzbrantner/table-question-answering@workspace:packages/table-question-answering"],
+
+    "@moritzbrantner/tables": ["@moritzbrantner/tables@workspace:packages/tables"],
 
     "@moritzbrantner/tabular-classification": ["@moritzbrantner/tabular-classification@workspace:packages/tabular-classification"],
 
