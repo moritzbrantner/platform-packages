@@ -141,8 +141,8 @@ function getBackBackground(tone: PlayingCardTone) {
 
 function getFoilOverlay() {
   return [
-    "radial-gradient(circle at var(--mb-card-glare-x) var(--mb-card-glare-y), rgba(255, 255, 255, 0.55), transparent 28%)",
-    "linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.36) 36%, rgba(138, 187, 255, 0.28) 44%, rgba(255, 182, 193, 0.22) 54%, transparent 72%)",
+    "linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.22) 36%, rgba(138, 187, 255, 0.18) 44%, rgba(255, 182, 193, 0.14) 54%, transparent 72%)",
+    "linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 28%, transparent 74%, rgba(255, 255, 255, 0.1))",
   ].join(", ");
 }
 
@@ -166,15 +166,11 @@ function updateTilt(
   const rotateY = ((x / rect.width) - 0.5) * 18;
   const rotateX = (0.5 - y / rect.height) * 18;
 
-  element.style.setProperty("--mb-card-glare-x", `${(x / rect.width) * 100}%`);
-  element.style.setProperty("--mb-card-glare-y", `${(y / rect.height) * 100}%`);
   element.style.setProperty("--mb-card-rotate-x", `${rotateX.toFixed(2)}deg`);
   element.style.setProperty("--mb-card-rotate-y", `${rotateY.toFixed(2)}deg`);
 }
 
 function resetTilt(element: HTMLDivElement) {
-  element.style.setProperty("--mb-card-glare-x", "50%");
-  element.style.setProperty("--mb-card-glare-y", "50%");
   element.style.setProperty("--mb-card-rotate-x", "0deg");
   element.style.setProperty("--mb-card-rotate-y", "0deg");
 }
@@ -231,7 +227,7 @@ export function PlayingCard({
       ref={rootRef}
       aria-label={label}
       className={cx(
-        "mb-playing-card relative isolate overflow-hidden rounded-[1.65rem] border [transform-style:preserve-3d] transition-[transform,box-shadow,border-color] duration-200 ease-out [transform:perspective(1100px)_translateY(var(--mb-card-lift))_rotateX(var(--mb-card-rotate-x))_rotateY(var(--mb-card-rotate-y))_scale(var(--mb-card-scale))] [width:min(100%,var(--mb-card-width))] aspect-[5/7]",
+        "mb-playing-card relative isolate aspect-[5/7] w-[var(--mb-card-width)] max-w-full select-none overflow-hidden rounded-[1.65rem] border [transform-style:preserve-3d] transition-[transform,box-shadow,border-color] duration-200 ease-out [transform:perspective(1100px)_translateY(var(--mb-card-lift))_rotateX(var(--mb-card-rotate-x))_rotateY(var(--mb-card-rotate-y))_scale(var(--mb-card-scale))]",
         interactive ? "cursor-pointer hover:[--mb-card-scale:1.015]" : null,
         selected
           ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_58px_rgba(16,20,31,0.24)]"
@@ -256,8 +252,6 @@ export function PlayingCard({
           borderColor: tonePalette.border,
           color: tonePalette.text,
           "--mb-card-accent": suitPalette.accent,
-          "--mb-card-glare-x": "50%",
-          "--mb-card-glare-y": "50%",
           "--mb-card-lift": selected ? "-0.45rem" : "0px",
           "--mb-card-rotate-x": "0deg",
           "--mb-card-rotate-y": "0deg",
@@ -285,14 +279,14 @@ export function PlayingCard({
       ) : null}
 
       <div
-        className="mb-playing-card__frame absolute inset-[0.72rem] z-10 flex flex-col gap-[0.9rem] rounded-[1.2rem] border p-[0.85rem]"
+        className="mb-playing-card__frame absolute inset-[0.72rem] z-10 rounded-[1.2rem] border p-[0.85rem]"
         style={{
           background: getFrameBackground(tone),
           borderColor: "color-mix(in srgb, var(--mb-card-accent) 25%, transparent)",
         }}
       >
         <div
-          className="mb-playing-card__corner inline-flex w-fit flex-col items-center gap-[0.05rem] font-extrabold leading-none tracking-[0.02em] [transform:translateZ(32px)]"
+          className="mb-playing-card__corner absolute left-[0.85rem] top-[0.85rem] inline-flex w-fit flex-col items-center gap-[0.05rem] font-extrabold leading-none tracking-[0.02em] [transform:translateZ(32px)]"
           aria-hidden="true"
           style={{ color: "var(--mb-card-suit-color)" }}
         >
@@ -312,7 +306,7 @@ export function PlayingCard({
           </div>
         ) : null}
 
-        <div className="mb-playing-card__body grid min-h-0 flex-1 place-items-center gap-[0.9rem]">
+        <div className="mb-playing-card__body grid h-full min-h-0 w-full place-items-center gap-[0.9rem]">
           {face === "back" ? (
             <div
               className="mb-playing-card__back relative grid min-h-40 w-full place-items-center rounded-[1.1rem] border p-4 [transform:translateZ(48px)]"
@@ -422,7 +416,7 @@ export function PlayingCard({
         </div>
 
         <div
-          className="mb-playing-card__corner mb-playing-card__corner--bottom ml-auto mt-auto inline-flex w-fit flex-col items-center gap-[0.05rem] font-extrabold leading-none tracking-[0.02em] [transform:rotate(180deg)_translateZ(32px)]"
+          className="mb-playing-card__corner mb-playing-card__corner--bottom absolute bottom-[0.85rem] right-[0.85rem] inline-flex w-fit flex-col items-center gap-[0.05rem] font-extrabold leading-none tracking-[0.02em] [transform:rotate(180deg)_translateZ(32px)]"
           aria-hidden="true"
           style={{ color: "var(--mb-card-suit-color)" }}
         >

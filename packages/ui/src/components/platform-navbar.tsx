@@ -238,7 +238,7 @@ export function PlatformNavbar({
           }
         }}
       >
-        <motion.nav
+        <nav
           aria-label={ariaLabel}
           data-slot="platform-navbar"
           data-variant={variant}
@@ -247,12 +247,14 @@ export function PlatformNavbar({
             config.nav,
             className,
           )}
-          initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-          animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           {...props}
         >
-          <div className={cn("flex min-w-0", config.chrome)}>
+          <motion.div
+            className={cn("flex min-w-0", config.chrome)}
+            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className={cn("flex min-w-0 items-center gap-2", config.brand)}>
               <div className="min-w-0 truncate text-sm font-semibold">{brand}</div>
               {variant === "mobile" && actions ? <div className="shrink-0">{actions}</div> : null}
@@ -301,8 +303,8 @@ export function PlatformNavbar({
             </div>
 
             {variant !== "mobile" && actions ? <div className="shrink-0">{actions}</div> : null}
-          </div>
-        </motion.nav>
+          </motion.div>
+        </nav>
 
         <AnimatePresence>
           {openGroup ? (

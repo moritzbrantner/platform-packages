@@ -4,7 +4,7 @@ import path from "node:path";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
-import { CardFan, CardStack, CardTable, PlayingCard } from "../src";
+import { CardStack, CardTable, PlayerHand, PlayingCard } from "../src";
 
 describe("@moritzbrantner/card-games", () => {
   test("renders a playing card with a generated label", () => {
@@ -27,6 +27,8 @@ describe("@moritzbrantner/card-games", () => {
     expect(screen.getAllByText("♥").length).toBeGreaterThan(0);
     expect(card.className).toContain("rounded-[1.65rem]");
     expect(card.className).toContain("aspect-[5/7]");
+    expect(card.className).toContain("select-none");
+    expect(card.className).toContain("w-[var(--mb-card-width)]");
   });
 
   test("renders layout helpers for hands, piles, and the table surface", () => {
@@ -36,11 +38,11 @@ describe("@moritzbrantner/card-games", () => {
         title="Night market showdown"
         subtitle="Manual validation surface for stacks, hands, and face-down decks."
       >
-        <CardFan aria-label="Player hand">
+        <PlayerHand aria-label="Player hand">
           <PlayingCard rank="Q" suit="spades" size="sm" />
           <PlayingCard rank="7" suit="diamonds" size="sm" effect="foil" />
           <PlayingCard rank="K" suit="clubs" size="sm" />
-        </CardFan>
+        </PlayerHand>
 
         <CardStack aria-label="Draw pile">
           <PlayingCard rank="?" suit="joker" size="sm" face="back" />
@@ -52,6 +54,7 @@ describe("@moritzbrantner/card-games", () => {
     expect(screen.getByText("Night market showdown")).toBeTruthy();
     expect(screen.getByLabelText("Player hand")).toBeTruthy();
     expect(screen.getByLabelText("Draw pile")).toBeTruthy();
+    expect(container.querySelector(".mb-player-hand")).toBeTruthy();
     expect(container.querySelectorAll(".mb-card-fan__item")).toHaveLength(3);
     expect(container.querySelectorAll(".mb-card-stack__item")).toHaveLength(2);
     expect(screen.getAllByRole("img", { name: "Card back" })).toHaveLength(2);

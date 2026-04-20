@@ -56,13 +56,13 @@ const navigationGroups = [
       {
         id: "about",
         label: "About",
-        href: "/about",
+        href: "#about",
         description: "Project overview and status.",
       },
       {
         id: "story",
         label: "Story Demo",
-        href: "/story",
+        href: "#story",
         description: "Narrative component preview.",
       },
     ],
@@ -74,13 +74,13 @@ const navigationGroups = [
       {
         id: "people",
         label: "People",
-        href: "/people",
+        href: "#people",
         description: "Directory and profiles.",
       },
       {
         id: "forms",
         label: "Forms",
-        href: "/forms",
+        href: "#forms",
       },
     ],
   },
