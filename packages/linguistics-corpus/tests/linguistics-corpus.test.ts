@@ -4,6 +4,7 @@ import { createTextDocument } from "@moritzbrantner/linguistics-core";
 import {
   concordance,
   createCorpusIndex,
+  getCorpusDocumentWindow,
   searchCorpus,
   termFrequencies,
 } from "@moritzbrantner/linguistics-corpus";
@@ -103,6 +104,67 @@ describe("@moritzbrantner/linguistics-corpus", () => {
         language: "en",
       },
     ]);
+  });
+
+  test("creates density windows for corpus documents and terms", () => {
+    const index = createCorpusIndex(documents);
+    const documentWindow = index.getDocumentWindow({
+      languages: ["en"],
+      limit: 2,
+      offset: 0,
+    });
+    const termWindow = index.getTermWindow({
+      byLanguage: true,
+      languages: ["en"],
+      limit: 2,
+      offset: 0,
+    });
+
+    expect(documentWindow.documents.map((entry) => entry.id)).toEqual(["en-market", "en-poem"]);
+    expect(documentWindow.summary.totalItemCount).toBe(3);
+    expect(documentWindow.summary.filteredItemCount).toBe(2);
+    expect(documentWindow.summary.metrics).toMatchObject({
+      sentences: 3,
+      uniqueTerms: 15,
+      wordTokens: 17,
+    });
+    expect(documentWindow.documents[0]?.metrics).toMatchObject({
+      sentences: 2,
+      uniqueTerms: 9,
+      wordTokens: 11,
+    });
+
+    expect(termWindow.terms.map((entry) => entry.item)).toEqual([
+      expect.objectContaining({
+        count: 3,
+        documentCount: 2,
+        id: "en:harbor",
+        language: "en",
+        normalized: "harbor",
+        term: "harbor",
+      }),
+      expect.objectContaining({
+        count: 2,
+        documentCount: 1,
+        id: "en:the",
+        language: "en",
+        normalized: "the",
+        term: "the",
+      }),
+    ]);
+    expect(termWindow.summary.metrics).toEqual({ count: 5, documentCount: 3 });
+  });
+
+  test("exposes standalone corpus document density windows", () => {
+    const documentWindow = getCorpusDocumentWindow(documents, {
+      limit: 1,
+      metadataFilters: { genre: "poetry" },
+      offset: 0,
+    });
+
+    expect(documentWindow.documents).toHaveLength(1);
+    expect(documentWindow.documents[0]?.id).toBe("en-poem");
+    expect(documentWindow.summary.metrics.wordTokens).toBe(6);
   });
 
   test("handles a large in-memory corpus without dropping results", () => {

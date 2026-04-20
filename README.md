@@ -27,7 +27,7 @@ Everything else in this repository remains valid, but is not required for `scaff
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
 - `@moritzbrantner/document-analysis`: orchestration layer that combines OCR/text normalization with summarization, sentiment, text analysis, and question answering into one document report.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
-- `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, and multilingual term frequencies.
+- `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, multilingual term frequencies, and density-aware corpus windows.
 - `@moritzbrantner/linguistics-learning`: interlinear annotation, corpus-derived study-term extraction, flashcard derivation, and SM-2 style recall grading on top of the corpus layer.
 - `@moritzbrantner/maps`: browser map component built on the shared data-density geo aggregation utilities for large clustered datasets.
 - `@moritzbrantner/question-answering`: chunk-aware extractive question answering pipeline with ranked answers across long contexts.

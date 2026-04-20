@@ -5,26 +5,43 @@ import {
   type TextDocument,
   type TextToken,
 } from "@moritzbrantner/linguistics-core";
+import {
+  createDataDensityWindowIndex,
+  type DataDensityItemWindowQuery,
+  type DataDensityMetricRecord,
+  type DataDensityWindowSummary,
+  type IndexedDataDensityItem,
+} from "@moritzbrantner/data-density";
 
-export interface CorpusSearchOptions {
-  fields?: string[];
+export type CorpusMetricRecord = DataDensityMetricRecord;
+
+export interface CorpusDocumentFilterOptions {
+  documentIds?: ReadonlyArray<string>;
   languages?: ReadonlyArray<LanguageTag>;
   metadataFilters?: Record<
     string,
     string | number | boolean | null | ReadonlyArray<string | number | boolean | null>
   >;
+}
+
+export interface CorpusSearchOptions extends CorpusDocumentFilterOptions {
+  fields?: string[];
   limit?: number;
 }
 
-export interface ConcordanceOptions {
-  documentIds?: ReadonlyArray<string>;
+export interface ConcordanceOptions extends Pick<CorpusDocumentFilterOptions, "documentIds"> {
   windowTokens?: number;
 }
 
-export interface TermFrequencyOptions {
+export interface TermFrequencyOptions extends CorpusDocumentFilterOptions {
   byLanguage?: boolean;
   minCount?: number;
 }
+
+export type CorpusDocumentWindowQuery = DataDensityItemWindowQuery &
+  CorpusDocumentFilterOptions;
+
+export type CorpusTermWindowQuery = DataDensityItemWindowQuery & TermFrequencyOptions;
 
 export interface CorpusSearchResult {
   documentId: string;
@@ -49,11 +66,47 @@ export interface TermFrequencyEntry {
   language?: LanguageTag;
 }
 
+export interface CorpusDocumentDensityItem {
+  characterCount: number;
+  document: TextDocument;
+  documentId: string;
+  language: LanguageTag;
+  metadata: Record<string, unknown>;
+  sentenceCount: number;
+  tokenCount: number;
+  uniqueTermCount: number;
+  wordTokenCount: number;
+}
+
+export type IndexedCorpusDocumentDensityItem =
+  IndexedDataDensityItem<CorpusDocumentDensityItem>;
+
+export interface CorpusDocumentWindow {
+  documents: IndexedCorpusDocumentDensityItem[];
+  summary: DataDensityWindowSummary;
+}
+
+export interface CorpusTermDensityItem extends TermFrequencyEntry {
+  documentCount: number;
+  id: string;
+  normalized: string;
+}
+
+export type IndexedCorpusTermDensityItem =
+  IndexedDataDensityItem<CorpusTermDensityItem>;
+
+export interface CorpusTermWindow {
+  summary: DataDensityWindowSummary;
+  terms: IndexedCorpusTermDensityItem[];
+}
+
 export interface CorpusIndex {
   documents: TextDocument[];
   searchCorpus(query: string, options?: CorpusSearchOptions): CorpusSearchResult[];
   concordance(term: string, options?: ConcordanceOptions): ConcordanceEntry[];
   termFrequencies(options?: TermFrequencyOptions): TermFrequencyEntry[];
+  getDocumentWindow(query: CorpusDocumentWindowQuery): CorpusDocumentWindow;
+  getTermWindow(query: CorpusTermWindowQuery): CorpusTermWindow;
 }
 
 interface IndexedDocument {
@@ -83,6 +136,12 @@ export function createCorpusIndex(documents: Iterable<TextDocument>): CorpusInde
     termFrequencies(options) {
       return termFrequencies(entries, options);
     },
+    getDocumentWindow(query) {
+      return getCorpusDocumentWindow(entries, query);
+    },
+    getTermWindow(query) {
+      return getCorpusTermWindow(entries, query);
+    },
   };
 }
 
@@ -98,9 +157,7 @@ export function searchCorpus(
     return [];
   }
 
-  const matches = entries
-    .filter((entry) => matchesLanguage(entry.document, options.languages))
-    .filter((entry) => matchesMetadata(entry.document.metadata, options.metadataFilters))
+  const matches = filterEntries(entries, options)
     .map((entry) => scoreDocument(entry, queryTerms, options.fields))
     .filter((result): result is CorpusSearchResult => result !== null)
     .sort(
@@ -120,7 +177,6 @@ export function concordance(
 ): ConcordanceEntry[] {
   const entries = resolveEntries(source);
   const normalizedTerm = normalizeTerm(term);
-  const allowedIds = options.documentIds ? new Set(options.documentIds) : undefined;
   const windowTokens = Math.max(1, Math.floor(options.windowTokens ?? DEFAULT_CONCORDANCE_WINDOW));
 
   if (!normalizedTerm) {
@@ -129,11 +185,7 @@ export function concordance(
 
   const results: ConcordanceEntry[] = [];
 
-  for (const entry of entries) {
-    if (allowedIds && !allowedIds.has(entry.document.id)) {
-      continue;
-    }
-
+  for (const entry of filterEntries(entries, options)) {
     const bySentence = new Map<string, typeof entry.wordTokens>();
 
     for (const token of entry.wordTokens) {
@@ -186,11 +238,67 @@ export function termFrequencies(
   source: CorpusIndex | Iterable<TextDocument> | IndexedDocument[],
   options: TermFrequencyOptions = {},
 ): TermFrequencyEntry[] {
-  const entries = resolveEntries(source);
-  const minCount = Math.max(1, Math.floor(options.minCount ?? 1));
-  const counts = new Map<string, { count: number; language?: LanguageTag; surface: Map<string, number> }>();
+  return createTermDensityItems(resolveEntries(source), options).map((entry) => ({
+    term: entry.term,
+    count: entry.count,
+    language: entry.language,
+  }));
+}
 
-  for (const entry of entries) {
+export function getCorpusDocumentWindow(
+  source: CorpusIndex | Iterable<TextDocument> | IndexedDocument[],
+  query: CorpusDocumentWindowQuery,
+): CorpusDocumentWindow {
+  const matchesDocument = createDocumentFilter(query);
+  const items = resolveEntries(source).map((entry) => createDocumentDensityItem(entry));
+  const index = createDataDensityWindowIndex(items, {
+    filterItem: (item) => matchesDocument(item.document),
+    getId: (item) => item.documentId,
+    getMetrics: getDocumentDensityMetrics,
+  });
+  const window = index.getWindow(query);
+
+  return {
+    documents: window.items,
+    summary: window.summary,
+  };
+}
+
+export function getCorpusTermWindow(
+  source: CorpusIndex | Iterable<TextDocument> | IndexedDocument[],
+  query: CorpusTermWindowQuery,
+): CorpusTermWindow {
+  const items = createTermDensityItems(resolveEntries(source), query);
+  const index = createDataDensityWindowIndex(items, {
+    getId: (item) => item.id,
+    getMetrics: getTermDensityMetrics,
+  });
+  const window = index.getWindow(query);
+
+  return {
+    summary: window.summary,
+    terms: window.items,
+  };
+}
+
+function createTermDensityItems(
+  entries: IndexedDocument[],
+  options: TermFrequencyOptions = {},
+): CorpusTermDensityItem[] {
+  const filteredEntries = filterEntries(entries, options);
+  const minCount = Math.max(1, Math.floor(options.minCount ?? 1));
+  const counts = new Map<
+    string,
+    {
+      count: number;
+      documentIds: Set<string>;
+      language?: LanguageTag;
+      normalized: string;
+      surface: Map<string, number>;
+    }
+  >();
+
+  for (const entry of filteredEntries) {
     for (let index = 0; index < entry.tokenNormals.length; index += 1) {
       const normalized = entry.tokenNormals[index];
       const surface = entry.tokenTexts[index];
@@ -198,11 +306,14 @@ export function termFrequencies(
       const key = `${languageKey}\u0000${normalized}`;
       const next = counts.get(key) ?? {
         count: 0,
+        documentIds: new Set<string>(),
         language: options.byLanguage ? entry.document.language ?? "und" : undefined,
+        normalized,
         surface: new Map<string, number>(),
       };
 
       next.count += 1;
+      next.documentIds.add(entry.document.id);
       next.surface.set(surface, (next.surface.get(surface) ?? 0) + 1);
       counts.set(key, next);
     }
@@ -214,10 +325,13 @@ export function termFrequencies(
       const [, normalized] = key.split("\u0000");
 
       return {
+        id: createTermDensityId(normalized, value.language),
         term: resolveSurfaceForm(normalized, value.surface),
         count: value.count,
+        documentCount: value.documentIds.size,
         language: value.language,
-      } satisfies TermFrequencyEntry;
+        normalized: value.normalized,
+      } satisfies CorpusTermDensityItem;
     })
     .sort(
       (left, right) =>
@@ -225,6 +339,43 @@ export function termFrequencies(
         (left.language ?? "").localeCompare(right.language ?? "") ||
         left.term.localeCompare(right.term),
     );
+}
+
+function createDocumentDensityItem(entry: IndexedDocument): CorpusDocumentDensityItem {
+  const wordTokenCount = entry.tokenNormals.length;
+
+  return {
+    characterCount: entry.document.text.length,
+    document: entry.document,
+    documentId: entry.document.id,
+    language: entry.document.language ?? "und",
+    metadata: entry.document.metadata ?? {},
+    sentenceCount: entry.document.sentences.length,
+    tokenCount: entry.wordTokens.length,
+    uniqueTermCount: new Set(entry.tokenNormals).size,
+    wordTokenCount,
+  };
+}
+
+function getDocumentDensityMetrics(item: CorpusDocumentDensityItem): CorpusMetricRecord {
+  return {
+    characters: item.characterCount,
+    sentences: item.sentenceCount,
+    tokens: item.tokenCount,
+    uniqueTerms: item.uniqueTermCount,
+    wordTokens: item.wordTokenCount,
+  };
+}
+
+function getTermDensityMetrics(item: CorpusTermDensityItem): CorpusMetricRecord {
+  return {
+    count: item.count,
+    documentCount: item.documentCount,
+  };
+}
+
+function createTermDensityId(normalized: string, language: LanguageTag | undefined): string {
+  return `${language ?? "all"}:${normalized}`;
 }
 
 function resolveEntries(
@@ -374,6 +525,26 @@ function resolveFields(
   return fields;
 }
 
+function filterEntries<TOptions extends CorpusDocumentFilterOptions>(
+  entries: IndexedDocument[],
+  filters: TOptions,
+): IndexedDocument[] {
+  const matchesDocument = createDocumentFilter(filters);
+
+  return entries.filter((entry) => matchesDocument(entry.document));
+}
+
+function createDocumentFilter<TOptions extends CorpusDocumentFilterOptions>(
+  filters: TOptions,
+): (document: TextDocument) => boolean {
+  const allowedIds = filters.documentIds ? new Set(filters.documentIds) : undefined;
+
+  return (document) =>
+    (!allowedIds || allowedIds.has(document.id)) &&
+    matchesLanguage(document, filters.languages) &&
+    matchesMetadata(document.metadata, filters.metadataFilters);
+}
+
 function matchesLanguage(
   document: TextDocument,
   languages: ReadonlyArray<LanguageTag> | undefined,
@@ -383,7 +554,7 @@ function matchesLanguage(
 
 function matchesMetadata(
   metadata: Record<string, unknown> | undefined,
-  filters: CorpusSearchOptions["metadataFilters"],
+  filters: CorpusDocumentFilterOptions["metadataFilters"],
 ): boolean {
   if (!filters) {
     return true;
