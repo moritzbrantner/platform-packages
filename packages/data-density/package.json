@@ -1,16 +1,15 @@
 {
-  "name": "@moritzbrantner/maps",
+  "name": "@moritzbrantner/data-density",
   "version": "0.1.0",
   "private": false,
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moritzbrantner/platform-packages.git",
-    "directory": "packages/maps"
+    "directory": "packages/data-density"
   },
   "files": [
-    "dist",
-    "styles.css"
+    "dist"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,29 +17,13 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./styles.css": "./styles.css"
-  },
-  "sideEffects": [
-    "*.css"
-  ],
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    }
   },
   "dependencies": {
-    "@moritzbrantner/data-density": "^0.1.0",
-    "@moritzbrantner/ui": "^0.3.0",
-    "d3-delaunay": "^6.0.4",
-    "maplibre-gl": "^5.10.0",
-    "tailwindcss": "^4.1.14"
+    "supercluster": "^8.0.1"
   },
   "devDependencies": {
-    "@types/d3-delaunay": "^6.0.4",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "@types/supercluster": "^7.1.3"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
@@ -51,6 +34,6 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/maps/tests/aggregation.test.ts packages/maps/tests/cluster-area.test.ts packages/maps/tests/cluster-area-visuals.test.ts packages/maps/tests/temporal-points.test.ts"
+    "test": "cd ../.. && vitest run packages/data-density/tests/smoke.test.ts"
   }
 }

@@ -5,7 +5,7 @@
 2. Confirm your package scope matches the GitHub Packages owner. GitHub Packages only accepts npm scopes owned by the publishing user or organization.
 3. If you are not publishing from a `platform` GitHub owner, rename `@moritzbrantner/*` packages to your real GitHub scope before the first release.
 4. Prepare or publish `@moritzbrantner/ui`, `@moritzbrantner/storytelling`, `@moritzbrantner/eslint-config`, and `@moritzbrantner/typescript-config` first because they are the scaffold-critical package set.
-5. For the first standalone install wave, also publish `@moritzbrantner/maps` because `electron-template` currently consumes it from the shared package repository.
+5. For the first standalone install wave, also publish `@moritzbrantner/data-density` and `@moritzbrantner/maps` because `electron-template` currently consumes maps from the shared package repository and maps depends on data-density.
 6. Open a pull request and merge it into `main`.
 7. Wait for the `Publish Private Packages` workflow to finish on `main`.
 
@@ -14,6 +14,7 @@ The current workflow validates and publishes only the first scaffold release set
 - `@moritzbrantner/storytelling`
 - `@moritzbrantner/eslint-config`
 - `@moritzbrantner/typescript-config`
+- `@moritzbrantner/data-density`
 - `@moritzbrantner/maps`
 
 It skips unrelated packages until the rest of the repository is release-ready.

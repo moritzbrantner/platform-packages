@@ -125,6 +125,16 @@
         "react-dom": "^19.0.0",
       },
     },
+    "packages/data-density": {
+      "name": "@moritzbrantner/data-density",
+      "version": "0.1.0",
+      "dependencies": {
+        "supercluster": "^8.0.1",
+      },
+      "devDependencies": {
+        "@types/supercluster": "^7.1.3",
+      },
+    },
     "packages/depth-estimation": {
       "name": "@moritzbrantner/depth-estimation",
       "version": "0.1.0",
@@ -323,17 +333,16 @@
       "name": "@moritzbrantner/maps",
       "version": "0.1.0",
       "dependencies": {
-        "@moritzbrantner/ui": "workspace:^",
+        "@moritzbrantner/data-density": "^0.1.0",
+        "@moritzbrantner/ui": "^0.3.0",
         "d3-delaunay": "^6.0.4",
         "maplibre-gl": "^5.10.0",
-        "supercluster": "^8.0.1",
         "tailwindcss": "^4.1.14",
       },
       "devDependencies": {
         "@types/d3-delaunay": "^6.0.4",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
-        "@types/supercluster": "^7.1.3",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
       },
@@ -1004,6 +1013,8 @@
     "@moritzbrantner/card-games": ["@moritzbrantner/card-games@workspace:packages/card-games"],
 
     "@moritzbrantner/collaboration": ["@moritzbrantner/collaboration@workspace:packages/collaboration"],
+
+    "@moritzbrantner/data-density": ["@moritzbrantner/data-density@workspace:packages/data-density"],
 
     "@moritzbrantner/depth-estimation": ["@moritzbrantner/depth-estimation@workspace:packages/depth-estimation"],
 

@@ -11,6 +11,7 @@ const releasePackages = [
   "packages/storytelling",
   "packages/eslint-config",
   "packages/typescript-config",
+  "packages/data-density",
   "packages/maps",
 ];
 

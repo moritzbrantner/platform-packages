@@ -19,20 +19,24 @@ Everything else in this repository remains valid, but is not required for `scaff
 
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
+- `@moritzbrantner/charts`: chart-ready density adapters for binned numeric series, sample extraction, and metric-preserving viewport summaries.
+- `@moritzbrantner/data-density`: reusable indexing, windowing, binning, clustering, and metric aggregation helpers for high-volume maps, charts, tables, and timeline-style views.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
+- `@moritzbrantner/graphs`: node-link graph density helpers for node windows, subgraph extraction, and edge metric aggregation.
 - `@moritzbrantner/hexagon-grids`: globe-aware H3 hex indexing, polygon coverage, neighborhood/path helpers, and point aggregation into hex cells.
 - `@moritzbrantner/keyboard`: placeholder scaffold for future keyboard-related runtime APIs.
 - `@moritzbrantner/document-analysis`: orchestration layer that combines OCR/text normalization with summarization, sentiment, text analysis, and question answering into one document report.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
 - `@moritzbrantner/linguistics-corpus`: in-memory corpus indexing with metadata filters, concordance windows, and multilingual term frequencies.
 - `@moritzbrantner/linguistics-learning`: interlinear annotation, corpus-derived study-term extraction, flashcard derivation, and SM-2 style recall grading on top of the corpus layer.
-- `@moritzbrantner/maps`: browser map component plus standalone point aggregation utilities for large clustered datasets.
+- `@moritzbrantner/maps`: browser map component built on the shared data-density geo aggregation utilities for large clustered datasets.
 - `@moritzbrantner/question-answering`: chunk-aware extractive question answering pipeline with ranked answers across long contexts.
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
 - `@moritzbrantner/sentiment-analysis`: label-normalized sentiment scoring on top of text-classification models, with chunk aggregation for longer texts.
 - `@moritzbrantner/speech`: microphone capture, chunked speech-to-text orchestration, and Whisper-compatible HTTP transcription adapters for live or batch transcription flows.
   Includes local Python and Bun websocket server examples for the default streaming protocol.
 - `@moritzbrantner/subtitles`: SRT/VTT/transcript timed-text parsing, editing, validation, overlap detection, and word-level timing preservation.
+- `@moritzbrantner/tables`: virtualized table-window helpers with density-aware row summaries, row lookup, and lightweight column descriptors.
 - `@moritzbrantner/text-analysis`: composable labels, entities, embeddings, and keyword extraction pipeline over raw text or `TextDocument`s.
 - `@moritzbrantner/text-inference`: shared chunking, task contracts, and Hugging Face HTTP wrappers used by the text-focused AI packages.
 - `@moritzbrantner/text-summarization`: chunked summarization pipeline with optional multi-pass reduction for longer documents.
@@ -51,6 +55,11 @@ Everything else in this repository remains valid, but is not required for `scaff
 - `@moritzbrantner/word-vectors` builds on corpus-backed documents so similarity models are trained from an explicit corpus layer.
 - `@moritzbrantner/linguistics-learning` sits above corpus so study-term extraction can aggregate across documents instead of only per-document text.
 - `@moritzbrantner/word-prediction` sits above word vectors and can use them for semantic backoff when exact n-gram context is sparse.
+- `@moritzbrantner/data-density` is the shared high-volume data layer for viewport queries, metric reductions, chart binning, table windows, and geo point clustering.
+- `@moritzbrantner/charts` consumes data-density binning and exposes chart-shaped samples without taking on a renderer dependency.
+- `@moritzbrantner/graphs` consumes data-density windows and metric reductions for node-link graph subgraphs.
+- `@moritzbrantner/tables` consumes data-density windows for virtualized row slices and metric-preserving table summaries.
+- `@moritzbrantner/maps` consumes data-density for clustering while keeping MapLibre rendering and map-specific interaction in the maps package.
 - The playground is intended to validate those layers in order: core and corpus pages establish the text model, vectors and learning consume corpus data, and speech exercises prediction with vector-backed backoff.
 
 ## Repository scope

@@ -3,15 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
-    "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["node"],
     "paths": {
       "@moritzbrantner/data-density": ["../data-density/src/index.ts"],
-      "@moritzbrantner/maps": ["./src/index.ts"],
-      "@moritzbrantner/ui": ["../ui/src/index.ts"]
+      "@moritzbrantner/graphs": ["./src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

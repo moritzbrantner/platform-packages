@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@moritzbrantner/charts": ["./src/index.ts"],
+      "@moritzbrantner/data-density": ["../data-density/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}
