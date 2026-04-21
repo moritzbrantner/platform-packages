@@ -196,7 +196,9 @@
     [data-slot="select-content"],
     [data-slot="combobox-content"],
     [data-slot="command"],
-    [data-slot="toast"]
+    [data-slot="toast"],
+    [data-slot="toolbar"],
+    [data-slot="dropzone"]
   ) {
     position: relative;
     isolation: isolate;
@@ -263,7 +265,8 @@
     [data-slot="item"],
     [data-slot="separator"],
     [data-slot="empty"],
-    [data-slot="skeleton"]
+    [data-slot="skeleton"],
+    [data-slot="stepper-indicator"]
   ) {
     position: relative;
     isolation: isolate;
@@ -358,7 +361,8 @@
     [data-slot="table-cell"],
     [data-slot="item"],
     [data-slot="empty"],
-    [data-slot="skeleton"]
+    [data-slot="skeleton"],
+    [data-slot="stepper-indicator"]
   ) {
     background-image:
       linear-gradient(
@@ -407,7 +411,9 @@
     [data-slot="toggle-group-item"],
     [data-slot="accordion-trigger"],
     [data-slot="item"],
-    [data-slot="empty"]
+    [data-slot="empty"],
+    [data-slot="dropzone"],
+    [data-slot="stepper-indicator"]
   )::after,
   :where(
     [data-slot="card"],
@@ -429,7 +435,8 @@
     [data-slot="select-content"],
     [data-slot="combobox-content"],
     [data-slot="command"],
-    [data-slot="toast"]
+    [data-slot="toast"],
+    [data-slot="toolbar"]
   )::after {
     content: "";
     position: absolute;
@@ -481,6 +488,8 @@
     [data-slot="combobox-content"] > *,
     [data-slot="command"] > *,
     [data-slot="toast"] > *,
+    [data-slot="toolbar"] > *,
+    [data-slot="dropzone"] > *,
     [data-slot="badge"] > *,
     [data-slot="tabs-list"] > *,
     [data-slot="tabs-trigger"] > *,
@@ -489,7 +498,8 @@
     [data-slot="toggle-group-item"] > *,
     [data-slot="accordion-trigger"] > *,
     [data-slot="item"] > *,
-    [data-slot="empty"] > *
+    [data-slot="empty"] > *,
+    [data-slot="stepper-indicator"] > *
   ) {
     position: relative;
     z-index: 1;
