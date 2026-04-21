@@ -1,8 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const MAP_CANVAS_LABEL = "Clustered delivery demand map";
-const CLUSTER_LAYER_ID = "moritzbrantner-maps-clusters";
-const POINT_LAYER_ID = "moritzbrantner-maps-points";
+const CLUSTER_MARKER_SELECTOR = ".mb-maps__cluster-marker";
+const POINT_MARKER_SELECTOR = ".mb-maps__point-marker";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/maps.html?e2e=1");
@@ -12,6 +12,7 @@ test.beforeEach(async ({ page }) => {
 
     return Boolean(handle?.map && handle.readyCount >= 1);
   });
+  await page.getByLabel(MAP_CANVAS_LABEL).scrollIntoViewIfNeeded();
   await expect(page.getByTestId("metric-visible-points")).toBeVisible();
   await expect.poll(() => getMetricValue(page, "metric-visible-points")).toBeGreaterThan(0);
 });
@@ -21,7 +22,10 @@ test("keeps a single map instance alive while zooming", async ({ page }) => {
 
   await expect.poll(() => getReadyCount(page)).toBe(1);
 
-  await page.getByRole("button", { name: "Zoom in" }).click();
+  await page
+    .getByLabel(MAP_CANVAS_LABEL)
+    .getByRole("button", { name: "Zoom in" })
+    .click();
 
   await expect.poll(() => getZoom(page)).toBeGreaterThan(initialZoom + 0.4);
   await expect.poll(() => getReadyCount(page)).toBe(1);
@@ -29,7 +33,7 @@ test("keeps a single map instance alive while zooming", async ({ page }) => {
 });
 
 test("supports cluster expansion and individual point selection", async ({ page }) => {
-  const clusterTarget = await waitForFeatureTarget(page, CLUSTER_LAYER_ID);
+  const clusterTarget = await waitForFeatureTarget(page, CLUSTER_MARKER_SELECTOR);
   const zoomBeforeClusterClick = await getZoom(page);
 
   await page.mouse.click(clusterTarget.x, clusterTarget.y);
@@ -40,13 +44,13 @@ test("supports cluster expansion and individual point selection", async ({ page 
   await page.evaluate(() => {
     const handle = (window as WindowWithMapHandle).__MB_MAPS_E2E__;
 
-    handle?.map.jumpTo({
-      center: [-74.006, 40.7128],
-      zoom: 11.5,
-    });
+    handle?.map.stop();
+    handle?.map.setView([40.7128, -74.006], 13, { animate: false });
+    handle?.map.fire("moveend");
   });
+  await expect.poll(() => getZoom(page)).toBeGreaterThan(12);
 
-  const pointTarget = await waitForFeatureTarget(page, POINT_LAYER_ID);
+  const pointTarget = await waitForFeatureTarget(page, POINT_MARKER_SELECTOR);
 
   await page.mouse.click(pointTarget.x, pointTarget.y);
 
@@ -68,27 +72,17 @@ async function getReadyCount(page: Page) {
   });
 }
 
-async function waitForFeatureTarget(page: Page, layerId: string) {
-  await page.waitForFunction((targetLayerId) => {
-    const handle = (window as WindowWithMapHandle).__MB_MAPS_E2E__;
+async function waitForFeatureTarget(page: Page, selector: string) {
+  await page.getByLabel(MAP_CANVAS_LABEL).scrollIntoViewIfNeeded();
+  await page.waitForSelector(selector, {
+    state: "visible",
+  });
+  await expect.poll(() => getFeatureTarget(page, selector)).not.toBeNull();
 
-    if (!handle?.map) {
-      return false;
-    }
-
-    const features = handle.map.queryRenderedFeatures(undefined, {
-      layers: [targetLayerId],
-    });
-
-    return features.length > 0;
-  }, layerId);
-
-  await expect.poll(() => getFeatureTarget(page, layerId)).not.toBeNull();
-
-  const target = await getFeatureTarget(page, layerId);
+  const target = await getFeatureTarget(page, selector);
 
   if (!target) {
-    throw new Error(`Could not find a clickable feature for layer ${layerId}.`);
+    throw new Error(`Could not find a clickable feature for selector ${selector}.`);
   }
 
   return target;
@@ -100,74 +94,50 @@ async function getMetricValue(page: Page, testId: string) {
   return Number.parseInt((rawValue ?? "").replace(/[^\d]/g, ""), 10) || 0;
 }
 
-async function getFeatureTarget(page: Page, layerId: string) {
-  return page.evaluate((targetLayerId) => {
-    const handle = (window as WindowWithMapHandle).__MB_MAPS_E2E__;
-    const map = handle?.map;
+async function getFeatureTarget(page: Page, selector: string) {
+  return page.evaluate(({ mapLabel, targetSelector }) => {
+    const mapRegion = document.querySelector(`[aria-label="${mapLabel}"]`);
+    const markers = Array.from(
+      mapRegion?.querySelectorAll<SVGElement>(targetSelector) ?? [],
+    );
 
-    if (!map) {
-      return null;
-    }
+    for (const marker of markers) {
+      const rect = marker.getBoundingClientRect();
 
-    const canvas = map.getCanvas();
-    const canvasRect = canvas.getBoundingClientRect();
-    const features = map.queryRenderedFeatures(undefined, {
-      layers: [targetLayerId],
-    });
-
-    for (const feature of features) {
-      if (feature.geometry.type !== "Point") {
+      if (rect.width <= 0 || rect.height <= 0) {
         continue;
       }
 
-      const [longitude, latitude] = feature.geometry.coordinates;
-      const projectedPoint = map.project([longitude, latitude]);
-
       if (
-        projectedPoint.x > 48 &&
-        projectedPoint.x < canvasRect.width - 48 &&
-        projectedPoint.y > 48 &&
-        projectedPoint.y < canvasRect.height - 48
+        rect.left > 48 &&
+        rect.top > 48 &&
+        rect.right < window.innerWidth - 48 &&
+        rect.bottom < window.innerHeight - 48
       ) {
         return {
-          x: canvasRect.left + projectedPoint.x,
-          y: canvasRect.top + projectedPoint.y,
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
         };
       }
     }
 
     return null;
-  }, layerId);
+  }, { mapLabel: MAP_CANVAS_LABEL, targetSelector: selector });
 }
 
 type WindowWithMapHandle = Window & {
   __MB_MAPS_E2E__?: {
     map: {
-      getCanvas(): HTMLCanvasElement;
       getZoom(): number;
-      jumpTo(options: {
-        center: [number, number];
-        zoom: number;
-      }): void;
-      project(lngLat: [number, number]): {
-        x: number;
-        y: number;
-      };
-      queryRenderedFeatures(
-        geometry?: unknown,
+      fire(eventName: string): void;
+      stop(): void;
+      setView(
+        center: [number, number],
+        zoom: number,
         options?: {
-          layers?: string[];
+          animate?: boolean;
         },
-      ): Array<{
-        geometry:
-          | {
-              type: "Point";
-              coordinates: [number, number];
-            }
-          | {
-              type: string;
-            };
-      }>;
+      ): void;
     };
     readyCount: number;
   };

@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "paths": {
+      "@moritzbrantner/auth-contract": ["../auth-contract/src/index.ts"],
+      "@moritzbrantner/foundation-contract": ["../foundation-contract/src/index.ts"],
+      "@moritzbrantner/foundation-ui": ["./src/index.tsx"],
+      "@moritzbrantner/ui": ["../ui/src/index.ts"],
+      "@moritzbrantner/upload-playbook": ["../upload-playbook/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
+}

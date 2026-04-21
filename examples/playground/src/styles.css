@@ -1,4 +1,4 @@
-@import "@moritzbrantner/ui/styles.css";
+@import "@moritzbrantner/ui/bobba/styles.css";
 @import "@moritzbrantner/maps/styles.css";
 
 @source "./**/*.{ts,tsx}";

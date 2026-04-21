@@ -103,6 +103,14 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/ui/src/index.ts"),
       },
       {
+        find: /^@moritzbrantner\/ui\/bobba$/,
+        replacement: path.resolve(workspaceRoot, "packages/ui/src/bobba.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/ui\/zleek$/,
+        replacement: path.resolve(workspaceRoot, "packages/ui/src/zleek.ts"),
+      },
+      {
         find: /^@moritzbrantner\/storytelling$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -114,6 +122,13 @@ export default defineConfig({
         replacement: path.resolve(
           workspaceRoot,
           "packages/storytelling/src/three.tsx",
+        ),
+      },
+      {
+        find: /^@moritzbrantner\/storytelling\/remotion$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/storytelling/src/remotion.tsx",
         ),
       },
       {

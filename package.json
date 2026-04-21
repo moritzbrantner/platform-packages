@@ -4,7 +4,11 @@
   "packageManager": "bun@1.3.12",
   "workspaces": [
     "examples/*",
-    "packages/*"
+    "packages/*",
+    "packages/auth-contract",
+    "packages/foundation-contract",
+    "packages/foundation-ui",
+    "packages/upload-playbook"
   ],
   "scripts": {
     "build": "turbo run build",

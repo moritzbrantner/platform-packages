@@ -10,12 +10,11 @@ import {
   useState,
 } from "react";
 import type {
-  GeoJSONSource,
-  Map as MaplibreMap,
-  MapMouseEvent,
-  MapGeoJSONFeature,
-  StyleSpecification,
-} from "maplibre-gl";
+  LayerGroup,
+  Map as LeafletMap,
+  PathOptions,
+  TileLayerOptions,
+} from "leaflet";
 
 import {
   createPointAggregationIndex,
@@ -28,9 +27,7 @@ import {
   type ViewportAggregationQuery,
   type VisibleAggregationSummary,
 } from "./aggregation";
-import {
-  createProjectedClusterVoronoiGeometry,
-} from "./cluster-area";
+import { createProjectedClusterVoronoiGeometry } from "./cluster-area";
 import {
   assignClusterAreaColors,
   createBoundaryLineColor,
@@ -38,55 +35,45 @@ import {
   getClusterAreaId,
 } from "./cluster-area-visuals";
 
-const SOURCE_ID = "moritzbrantner-maps-source";
-const CLUSTER_AREA_FILL_LAYER_ID = "moritzbrantner-maps-cluster-area-fill";
-const CLUSTER_AREA_LINE_LAYER_ID = "moritzbrantner-maps-cluster-area-line";
-const CLUSTER_LAYER_ID = "moritzbrantner-maps-clusters";
-const CLUSTER_COUNT_LAYER_ID = "moritzbrantner-maps-cluster-count";
-const POINT_LAYER_ID = "moritzbrantner-maps-points";
-
 export type MapViewState = {
   center: [longitude: number, latitude: number];
   zoom: number;
 };
 
+export type RasterMapStyle = {
+  attribution?: string;
+  maxZoom?: number;
+  minZoom?: number;
+  tileSize?: number;
+  tiles?: string | readonly string[] | false;
+} & Record<string, unknown>;
+
 export type ClusteredMapProps<TProperties = Record<string, unknown>> = {
   className?: string;
-  clusterRadius?: PointAggregationIndexOptions["radius"];
+  clusterRadius?: PointAggregationIndexOptions<TProperties>["radius"];
   filterPoint?: MapPointFilter<TProperties>;
   fitBoundsPadding?: number;
   fitToData?: boolean;
   initialViewState?: MapViewState;
   mapLabel?: string;
-  mapStyle?: string | StyleSpecification;
-  maxZoom?: PointAggregationIndexOptions["maxZoom"];
-  minZoom?: PointAggregationIndexOptions["minZoom"];
+  mapStyle?: string | RasterMapStyle;
+  maxZoom?: PointAggregationIndexOptions<TProperties>["maxZoom"];
+  minZoom?: PointAggregationIndexOptions<TProperties>["minZoom"];
   onFeatureSelect?: (feature: AggregatedMapFeature<TProperties> | null) => void;
-  onMapReady?: (map: MaplibreMap) => void;
+  onMapReady?: (map: LeafletMap) => void;
   onViewportAggregationChange?: (summary: VisibleAggregationSummary) => void;
   points: readonly MapPoint<TProperties>[];
   showAttributionControl?: boolean;
   style?: React.CSSProperties;
 };
 
-export const defaultRasterMapStyle: StyleSpecification = {
-  version: 8,
-  sources: {
-    openstreetmap: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: "\u00a9 OpenStreetMap contributors",
-    },
-  },
-  layers: [
-    {
-      id: "openstreetmap",
-      type: "raster",
-      source: "openstreetmap",
-    },
-  ],
+export const defaultRasterMapStyle: RasterMapStyle = {
+  attribution: "\u00a9 OpenStreetMap contributors",
+  tiles: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  tileSize: 256,
 };
+
+const MAX_CLUSTER_AREA_FEATURES = 160;
 
 export function ClusteredMap<TProperties = Record<string, unknown>>({
   className,
@@ -107,7 +94,9 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
   style,
 }: ClusteredMapProps<TProperties>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<MaplibreMap | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const overlayRef = useRef<LayerGroup | null>(null);
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const lastViewportSummaryKeyRef = useRef<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const deferredPoints = useDeferredValue(points);
@@ -124,14 +113,10 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
 
   const syncSource = useEffectEvent(() => {
     const map = mapRef.current;
+    const overlay = overlayRef.current;
+    const leaflet = leafletRef.current;
 
-    if (!map) {
-      return;
-    }
-
-    const source = map.getSource(SOURCE_ID) as GeoJSONSource | undefined;
-
-    if (!source) {
+    if (!map || !overlay || !leaflet) {
       return;
     }
 
@@ -142,7 +127,15 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
     };
     const aggregation = index.getViewportAggregation(query);
 
-    source.setData(toFeatureCollection(aggregation.features, index, map));
+    renderAggregationOverlay({
+      features: aggregation.features,
+      handleClick,
+      index,
+      leaflet,
+      map,
+      overlay,
+    });
+
     const nextSummaryKey = serializeVisibleAggregationSummary(aggregation.summary);
 
     if (lastViewportSummaryKeyRef.current === nextSummaryKey) {
@@ -161,7 +154,7 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
     });
   });
 
-  const handleMapReady = useEffectEvent((map: MaplibreMap) => {
+  const handleMapReady = useEffectEvent((map: LeafletMap) => {
     setIsReady(true);
     startTransition(() => {
       onMapReady?.(map);
@@ -170,184 +163,44 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
 
   useEffect(() => {
     let isCancelled = false;
-    let localMap: MaplibreMap | null = null;
+    let localMap: LeafletMap | null = null;
 
     async function initializeMap() {
       if (!containerRef.current) {
         return;
       }
 
-      const maplibre = await import("maplibre-gl");
+      const leaflet = await import("leaflet");
 
       if (isCancelled || !containerRef.current) {
         return;
       }
 
-      localMap = new maplibre.Map({
-        attributionControl: showAttributionControl ? undefined : false,
-        container: containerRef.current,
-        center: initialViewState?.center ?? [12, 25],
-        style: mapStyle,
+      leafletRef.current = leaflet;
+      localMap = leaflet.map(containerRef.current, {
+        attributionControl: showAttributionControl,
+        center: toLeafletLatLng(initialViewState?.center ?? [12, 25]),
         zoom: initialViewState?.zoom ?? 1.6,
+        zoomControl: true,
       });
       mapRef.current = localMap;
-      localMap.addControl(new maplibre.NavigationControl(), "top-right");
 
-      localMap.on("load", () => {
-        if (!localMap || localMap.getSource(SOURCE_ID)) {
+      const tileLayerOptions = resolveTileLayerOptions(mapStyle);
+
+      if (tileLayerOptions) {
+        leaflet.tileLayer(tileLayerOptions.url, tileLayerOptions.options).addTo(localMap);
+      }
+
+      overlayRef.current = leaflet.layerGroup().addTo(localMap);
+      localMap.on("moveend", syncSource);
+
+      queueMicrotask(() => {
+        if (isCancelled || !localMap) {
           return;
         }
-
-        localMap.addSource(SOURCE_ID, {
-          type: "geojson",
-          data: toFeatureCollection([]),
-        });
-        localMap.addLayer({
-          id: CLUSTER_AREA_FILL_LAYER_ID,
-          type: "fill",
-          source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "cluster-area"],
-          paint: {
-            "fill-color": [
-              "coalesce",
-              ["get", "clusterColor"],
-              "#2563eb",
-            ],
-            "fill-opacity": 0.56,
-          },
-        });
-        localMap.addLayer({
-          id: CLUSTER_AREA_LINE_LAYER_ID,
-          type: "line",
-          source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "cluster-area-boundary"],
-          paint: {
-            "line-color": [
-              "coalesce",
-              ["get", "lineColor"],
-              "#0f172a",
-            ],
-            "line-opacity": 0.9,
-            "line-width": 2,
-          },
-        });
-        localMap.addLayer({
-          id: CLUSTER_LAYER_ID,
-          type: "circle",
-          source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "cluster"],
-          paint: {
-            "circle-color": [
-              "coalesce",
-              ["get", "clusterColor"],
-              [
-                "step",
-                ["get", "pointCount"],
-                "#0f766e",
-                25,
-                "#0284c7",
-                250,
-                "#7c3aed",
-                2_500,
-                "#ea580c",
-              ],
-            ],
-            "circle-opacity": 0.9,
-            "circle-radius": [
-              "step",
-              ["get", "pointCount"],
-              18,
-              25,
-              24,
-              250,
-              32,
-              2_500,
-              42,
-            ],
-            "circle-stroke-color": "#ffffff",
-            "circle-stroke-width": 2,
-          },
-        });
-        localMap.addLayer({
-          id: CLUSTER_COUNT_LAYER_ID,
-          type: "symbol",
-          source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "cluster"],
-          layout: {
-            "text-field": ["get", "pointCountAbbreviated"],
-            "text-size": 12,
-            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          },
-          paint: {
-            "text-color": "#ffffff",
-          },
-        });
-        localMap.addLayer({
-          id: POINT_LAYER_ID,
-          type: "circle",
-          source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "point"],
-          paint: {
-            "circle-color": [
-              "coalesce",
-              ["get", "clusterColor"],
-              "#0f172a",
-            ],
-            "circle-opacity": 0.92,
-            "circle-radius": 6,
-            "circle-stroke-color": "#ffffff",
-            "circle-stroke-width": 2,
-          },
-        });
 
         syncSource();
         handleMapReady(localMap);
-      });
-
-      localMap.on("moveend", syncSource);
-      localMap.on("click", (event: MapMouseEvent) => {
-        const renderedFeatures = localMap?.queryRenderedFeatures(event.point, {
-          layers: [CLUSTER_LAYER_ID, POINT_LAYER_ID],
-        });
-        const selectedFeature = renderedFeatures?.[0]
-          ? resolveRenderedFeature(renderedFeatures[0], index)
-          : null;
-
-        if (!selectedFeature) {
-          handleClick(null);
-          return;
-        }
-
-        if (selectedFeature.kind === "cluster") {
-          localMap?.easeTo({
-            center: selectedFeature.coordinates,
-            zoom: selectedFeature.expansionZoom,
-          });
-          handleClick(selectedFeature);
-          return;
-        }
-
-        handleClick(selectedFeature);
-      });
-      localMap.on("mouseenter", CLUSTER_LAYER_ID, () => {
-        if (localMap) {
-          localMap.getCanvas().style.cursor = "pointer";
-        }
-      });
-      localMap.on("mouseenter", POINT_LAYER_ID, () => {
-        if (localMap) {
-          localMap.getCanvas().style.cursor = "pointer";
-        }
-      });
-      localMap.on("mouseleave", CLUSTER_LAYER_ID, () => {
-        if (localMap) {
-          localMap.getCanvas().style.cursor = "";
-        }
-      });
-      localMap.on("mouseleave", POINT_LAYER_ID, () => {
-        if (localMap) {
-          localMap.getCanvas().style.cursor = "";
-        }
       });
     }
 
@@ -359,10 +212,13 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
       setIsReady(false);
 
       if (localMap) {
+        localMap.off("moveend", syncSource);
         localMap.remove();
       }
 
+      overlayRef.current = null;
       mapRef.current = null;
+      leafletRef.current = null;
     };
   }, []);
 
@@ -379,19 +235,19 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
       if (dataBounds) {
         map.fitBounds(
           [
-            [dataBounds[0], dataBounds[1]],
-            [dataBounds[2], dataBounds[3]],
+            [dataBounds[1], dataBounds[0]],
+            [dataBounds[3], dataBounds[2]],
           ],
           {
-            duration: 0,
-            padding: fitBoundsPadding,
+            animate: false,
+            padding: [fitBoundsPadding, fitBoundsPadding],
           },
         );
       }
     }
 
     syncSource();
-  }, [deferredPoints, fitBoundsPadding, fitToData, index, syncSource]);
+  }, [deferredPoints, fitBoundsPadding, fitToData, index, initialViewState, syncSource]);
 
   return (
     <div
@@ -409,62 +265,177 @@ export function ClusteredMap<TProperties = Record<string, unknown>>({
   );
 }
 
-function joinClassNames(...values: Array<string | undefined>) {
-  return values.filter(Boolean).join(" ");
+function renderAggregationOverlay<TProperties>({
+  features,
+  handleClick,
+  index,
+  leaflet,
+  map,
+  overlay,
+}: {
+  features: readonly AggregatedMapFeature<TProperties>[];
+  handleClick: (feature: AggregatedMapFeature<TProperties> | null) => void;
+  index: PointAggregationIndex<TProperties>;
+  leaflet: typeof import("leaflet");
+  map: LeafletMap;
+  overlay: LayerGroup;
+}) {
+  overlay.clearLayers();
+
+  const areaFeatures = createClusterAreaFeatures(features, index, map);
+
+  for (const areaFeature of areaFeatures.areaFeatures) {
+    addClusterAreaLayer(areaFeature, leaflet, overlay);
+  }
+
+  for (const feature of features) {
+    const clusterColor = areaFeatures.colorsByAreaId.get(getClusterAreaId(feature)) ?? null;
+
+    if (feature.kind === "cluster") {
+      addClusterMarker(feature, clusterColor, leaflet, map, overlay, handleClick);
+      continue;
+    }
+
+    addPointMarker(feature, clusterColor, leaflet, map, overlay, handleClick);
+  }
 }
 
-function toFeatureCollection<TProperties>(
-  features: readonly AggregatedMapFeature<TProperties>[],
-  index?: PointAggregationIndex<TProperties>,
-  map?: MaplibreMap,
+function addClusterMarker<TProperties>(
+  feature: Extract<AggregatedMapFeature<TProperties>, { kind: "cluster" }>,
+  clusterColor: string | null,
+  leaflet: typeof import("leaflet"),
+  map: LeafletMap,
+  overlay: LayerGroup,
+  handleClick: (feature: AggregatedMapFeature<TProperties>) => void,
 ) {
-  const areaFeatures = index && map
-    ? createClusterAreaFeatures(features, index, map)
-    : { areaFeatures: [], colorsByAreaId: new Map<string, string>() };
+  const marker = leaflet.circleMarker(toLeafletLatLng(feature.coordinates), {
+    className: "mb-maps__cluster-marker",
+    color: "#ffffff",
+    fillColor: clusterColor ?? getClusterColor(feature.pointCount),
+    fillOpacity: 0.9,
+    opacity: 1,
+    radius: getClusterRadius(feature.pointCount),
+    weight: 2,
+  });
 
-  return {
-    type: "FeatureCollection" as const,
-    features: [
-      ...areaFeatures.areaFeatures,
-      ...features.map((feature) => ({
-        type: "Feature" as const,
-        properties:
-          feature.kind === "cluster"
-            ? {
-                kind: "cluster",
-                clusterId: feature.clusterId,
-                clusterColor:
-                  areaFeatures.colorsByAreaId.get(getClusterAreaId(feature)) ?? null,
-                pointCount: feature.pointCount,
-                pointCountAbbreviated: feature.pointCountAbbreviated,
-                ...feature.metrics,
-              }
-            : {
-                kind: "point",
-                clusterColor:
-                  areaFeatures.colorsByAreaId.get(getClusterAreaId(feature)) ?? null,
-                pointId: feature.point.id,
-                label: feature.point.label,
-                ...feature.metrics,
-              },
-        geometry: {
-          type: "Point" as const,
-          coordinates: feature.coordinates,
-        },
-      })),
-    ],
+  marker.on("click", () => {
+    map.setView(toLeafletLatLng(feature.coordinates), feature.expansionZoom, {
+      animate: false,
+    });
+    handleClick(feature);
+  });
+  marker.on("mouseover", () => {
+    map.getContainer().style.cursor = "pointer";
+  });
+  marker.on("mouseout", () => {
+    map.getContainer().style.cursor = "";
+  });
+  marker.addTo(overlay);
+
+  leaflet
+    .marker(toLeafletLatLng(feature.coordinates), {
+      icon: leaflet.divIcon({
+        className: "mb-maps__cluster-count",
+        html: escapeHtml(feature.pointCountAbbreviated),
+        iconAnchor: [18, 18],
+        iconSize: [36, 36],
+      }),
+      interactive: false,
+    })
+    .addTo(overlay);
+}
+
+function addPointMarker<TProperties>(
+  feature: Extract<AggregatedMapFeature<TProperties>, { kind: "point" }>,
+  clusterColor: string | null,
+  leaflet: typeof import("leaflet"),
+  map: LeafletMap,
+  overlay: LayerGroup,
+  handleClick: (feature: AggregatedMapFeature<TProperties>) => void,
+) {
+  const marker = leaflet.circleMarker(toLeafletLatLng(feature.coordinates), {
+    className: "mb-maps__point-marker",
+    color: "#ffffff",
+    fillColor: clusterColor ?? "#0f172a",
+    fillOpacity: 0.92,
+    opacity: 1,
+    radius: 6,
+    weight: 2,
+  });
+
+  marker.on("click", () => {
+    handleClick(feature);
+  });
+  marker.on("mouseover", () => {
+    map.getContainer().style.cursor = "pointer";
+  });
+  marker.on("mouseout", () => {
+    map.getContainer().style.cursor = "";
+  });
+  marker.addTo(overlay);
+}
+
+function addClusterAreaLayer(
+  feature:
+    | ReturnType<typeof createClusterAreaFeature>
+    | ReturnType<typeof createClusterAreaBoundaryFeature>,
+  leaflet: typeof import("leaflet"),
+  overlay: LayerGroup,
+) {
+  if ("lineColor" in feature.properties) {
+    const coordinates = feature.geometry.coordinates as Array<[number, number]>;
+
+    leaflet
+      .polyline(coordinates.map(toLeafletLatLng), {
+        className: "mb-maps__cluster-area-boundary",
+        color: feature.properties.lineColor,
+        opacity: 0.9,
+        weight: 2,
+      })
+      .addTo(overlay);
+    return;
+  }
+
+  const areaFeature = feature as ReturnType<typeof createClusterAreaFeature>;
+  const options: PathOptions = {
+    className: "mb-maps__cluster-area",
+    color: "transparent",
+    fillColor: areaFeature.properties.clusterColor,
+    fillOpacity: 0.56,
+    interactive: false,
+    weight: 0,
   };
+
+  if (areaFeature.geometry.type === "MultiPolygon") {
+    leaflet
+      .polygon(
+        areaFeature.geometry.coordinates.map((polygon) =>
+          polygon.map((ring) => ring.map(toLeafletLatLng)),
+        ),
+        options,
+      )
+      .addTo(overlay);
+    return;
+  }
+
+  leaflet
+    .polygon(areaFeature.geometry.coordinates.map((ring) => ring.map(toLeafletLatLng)), options)
+    .addTo(overlay);
 }
 
 function createClusterAreaFeatures<TProperties>(
   features: readonly AggregatedMapFeature<TProperties>[],
   index: PointAggregationIndex<TProperties>,
-  map: MaplibreMap,
+  map: LeafletMap,
 ) {
   const viewportWidth = map.getContainer().clientWidth;
   const viewportHeight = map.getContainer().clientHeight;
 
   if (viewportWidth <= 0 || viewportHeight <= 0) {
+    return { areaFeatures: [], colorsByAreaId: new Map<string, string>() };
+  }
+
+  if (features.length > MAX_CLUSTER_AREA_FEATURES) {
     return { areaFeatures: [], colorsByAreaId: new Map<string, string>() };
   }
 
@@ -486,11 +457,11 @@ function createClusterAreaFeatures<TProperties>(
   const geometry = createProjectedClusterVoronoiGeometry(projectedInputs, {
     includeOuterEdges: false,
     project(coordinate) {
-      const point = map.project(coordinate);
+      const point = map.latLngToContainerPoint(toLeafletLatLng(coordinate));
       return [point.x, point.y];
     },
     unproject(coordinate) {
-      const point = map.unproject(coordinate);
+      const point = map.containerPointToLatLng(coordinate);
       return [point.lng, point.lat];
     },
     viewportBounds: [-24, -24, viewportWidth + 24, viewportHeight + 24],
@@ -588,6 +559,78 @@ function createClusterAreaBoundaryFeature(
   };
 }
 
+function resolveTileLayerOptions(mapStyle: string | RasterMapStyle): {
+  options: TileLayerOptions;
+  url: string;
+} | null {
+  if (typeof mapStyle === "string") {
+    return {
+      options: {
+        attribution: defaultRasterMapStyle.attribution,
+      },
+      url: mapStyle,
+    };
+  }
+
+  const tiles = mapStyle.tiles ?? defaultRasterMapStyle.tiles;
+
+  if (tiles === false) {
+    return null;
+  }
+
+  const url = Array.isArray(tiles) ? tiles[0] : tiles;
+
+  return {
+    options: {
+      attribution: mapStyle.attribution ?? defaultRasterMapStyle.attribution,
+      maxZoom: typeof mapStyle.maxZoom === "number" ? mapStyle.maxZoom : undefined,
+      minZoom: typeof mapStyle.minZoom === "number" ? mapStyle.minZoom : undefined,
+      tileSize: typeof mapStyle.tileSize === "number" ? mapStyle.tileSize : undefined,
+    },
+    url: url ?? String(defaultRasterMapStyle.tiles),
+  };
+}
+
+function getClusterColor(pointCount: number) {
+  if (pointCount >= 2_500) {
+    return "#ea580c";
+  }
+
+  if (pointCount >= 250) {
+    return "#7c3aed";
+  }
+
+  if (pointCount >= 25) {
+    return "#0284c7";
+  }
+
+  return "#0f766e";
+}
+
+function getClusterRadius(pointCount: number) {
+  if (pointCount >= 2_500) {
+    return 42;
+  }
+
+  if (pointCount >= 250) {
+    return 32;
+  }
+
+  if (pointCount >= 25) {
+    return 24;
+  }
+
+  return 18;
+}
+
+function toLeafletLatLng([longitude, latitude]: [number, number]) {
+  return [latitude, longitude] as [number, number];
+}
+
+function joinClassNames(...values: Array<string | undefined>) {
+  return values.filter(Boolean).join(" ");
+}
+
 function isDefined<T>(value: T | null): value is T {
   return value !== null;
 }
@@ -605,70 +648,11 @@ function serializeVisibleAggregationSummary(summary: VisibleAggregationSummary) 
   });
 }
 
-function resolveRenderedFeature<TProperties>(
-  feature: MapGeoJSONFeature,
-  index: ReturnType<typeof createPointAggregationIndex<TProperties>>,
-): AggregatedMapFeature<TProperties> | null {
-  if (feature.properties?.kind === "cluster") {
-    const clusterId = Number(feature.properties.clusterId);
-
-    if (!Number.isFinite(clusterId)) {
-      return null;
-    }
-
-    if (feature.geometry.type !== "Point") {
-      return null;
-    }
-
-    return {
-      kind: "cluster",
-      clusterId,
-      coordinates: [
-        feature.geometry.coordinates[0],
-        feature.geometry.coordinates[1],
-      ],
-      expansionZoom: index.getClusterExpansionZoom(clusterId),
-      metrics: readFeatureMetrics(feature),
-      pointCount: Number(feature.properties.pointCount ?? 0),
-      pointCountAbbreviated: String(
-        feature.properties.pointCountAbbreviated ?? feature.properties.pointCount ?? "",
-      ),
-    };
-  }
-
-  const pointId = String(feature.properties?.pointId ?? "");
-  const point = index.getPointById(pointId);
-
-  if (!point || feature.geometry.type !== "Point") {
-    return null;
-  }
-
-  return {
-    kind: "point",
-    coordinates: [
-      feature.geometry.coordinates[0],
-      feature.geometry.coordinates[1],
-    ],
-    metrics: point.metrics,
-    point,
-  };
-}
-
-function readFeatureMetrics(feature: MapGeoJSONFeature) {
-  const metrics: Record<string, number> = {};
-  const reservedKeys = new Set([
-    "clusterId",
-    "kind",
-    "pointCount",
-    "pointCountAbbreviated",
-    "pointId",
-  ]);
-
-  for (const [key, value] of Object.entries(feature.properties ?? {})) {
-    if (!reservedKeys.has(key) && typeof value === "number" && Number.isFinite(value)) {
-      metrics[key] = value;
-    }
-  }
-
-  return metrics;
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }

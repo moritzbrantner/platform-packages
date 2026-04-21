@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "maplibre-gl/dist/maplibre-gl.css";
+@import "leaflet/dist/leaflet.css";
 
 @source "./dist/**/*.{js,mjs}";
 @source "./src/**/*.{ts,tsx}";
@@ -13,21 +13,35 @@
   }
 
   .mb-maps__canvas,
-  .mb-maps .maplibregl-canvas-container,
-  .mb-maps .maplibregl-canvas {
+  .mb-maps .leaflet-container {
     @apply absolute inset-0 size-full;
   }
 
-  .mb-maps .maplibregl-ctrl-top-right {
-    @apply right-4 top-4;
+  .mb-maps .leaflet-control-container .leaflet-top.leaflet-left {
+    @apply left-4 top-4;
   }
 
-  .mb-maps .maplibregl-ctrl-group {
+  .mb-maps .leaflet-bar {
     @apply overflow-hidden rounded-full border border-slate-900/10 shadow-[0_10px_30px_rgb(15_23_42_/_0.18)];
   }
 
-  .mb-maps .maplibregl-ctrl button {
+  .mb-maps .leaflet-bar a {
     @apply size-[34px];
+  }
+
+  .mb-maps__cluster-count {
+    @apply grid place-items-center text-xs font-bold text-white;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  .mb-maps__cluster-marker,
+  .mb-maps__point-marker {
+    cursor: pointer;
+  }
+
+  .mb-maps__heat-marker {
+    mix-blend-mode: multiply;
   }
 
   .mb-temporal-map {

@@ -3,41 +3,60 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { TemporalClusteredMap, type TemporalMapTrack } from "../src";
 
-const maplibreMock = vi.hoisted(() => {
-  type Source = {
-    data: unknown;
-    setData: (data: unknown) => void;
-  };
+const leafletMock = vi.hoisted(() => {
   type Handler = (...args: unknown[]) => void;
+  type Layer = {
+    latLng?: [number, number];
+    options?: Record<string, unknown>;
+    type: string;
+  };
 
   const maps: MockMap[] = [];
+  const layerGroups: MockLayerGroup[] = [];
+
+  class MockLayerGroup {
+    layers: Layer[] = [];
+
+    constructor() {
+      layerGroups.push(this);
+    }
+
+    addLayer(layer: Layer) {
+      this.layers.push(layer);
+    }
+
+    addTo() {
+      return this;
+    }
+
+    clearLayers() {
+      this.layers = [];
+    }
+  }
 
   class MockMap {
     handlers = new Map<string, Handler[]>();
-    sources = new Map<string, Source>();
     removed = false;
+    zoom = 6;
 
     constructor() {
       maps.push(this);
-      queueMicrotask(() => {
-        this.emit("load");
-      });
     }
 
-    addControl() {}
+    container = {
+      clientHeight: 640,
+      clientWidth: 960,
+      style: {
+        cursor: "",
+      },
+    };
 
-    addLayer() {}
-
-    addSource(id: string, source: { data: unknown }) {
-      this.sources.set(id, {
-        data: source.data,
-        setData(data: unknown) {
-          this.data = data;
-        },
-      });
+    containerPointToLatLng([x, y]: [number, number]) {
+      return {
+        lat: 90 - y / 2,
+        lng: x / 2 - 180,
+      };
     }
-
-    easeTo() {}
 
     fitBounds() {}
 
@@ -50,27 +69,19 @@ const maplibreMock = vi.hoisted(() => {
       };
     }
 
-    getCanvas() {
-      return {
-        style: {
-          cursor: "",
-        },
-      };
-    }
-
     getContainer() {
-      return {
-        clientHeight: 640,
-        clientWidth: 960,
-      };
-    }
-
-    getSource(id: string) {
-      return this.sources.get(id);
+      return this.container;
     }
 
     getZoom() {
-      return 6;
+      return this.zoom;
+    }
+
+    latLngToContainerPoint([lat, lng]: [number, number]) {
+      return {
+        x: (lng + 180) * 2,
+        y: (90 - lat) * 2,
+      };
     }
 
     off() {}
@@ -82,56 +93,69 @@ const maplibreMock = vi.hoisted(() => {
       this.handlers.set(event, handlers);
     }
 
-    project([lng, lat]: [number, number]) {
-      return {
-        x: (lng + 180) * 2,
-        y: (90 - lat) * 2,
-      };
-    }
-
-    queryRenderedFeatures() {
-      return [];
-    }
-
     remove() {
       this.removed = true;
     }
 
-    unproject([x, y]: [number, number]) {
-      return {
-        lat: 90 - y / 2,
-        lng: x / 2 - 180,
-      };
-    }
-
-    emit(event: string, ...args: unknown[]) {
-      for (const handler of this.handlers.get(event) ?? []) {
-        handler(...args);
-      }
+    setView(_latLng: [number, number], zoom: number) {
+      this.zoom = zoom;
     }
   }
 
+  function createLayer(type: string, latLng?: [number, number], options?: Record<string, unknown>) {
+    const layer: Layer & {
+      addTo: (group: MockLayerGroup) => typeof layer;
+      on: () => typeof layer;
+    } = {
+      latLng,
+      options,
+      type,
+      addTo(group: MockLayerGroup) {
+        group.addLayer(this);
+        return this;
+      },
+      on() {
+        return this;
+      },
+    };
+
+    return layer;
+  }
+
   return {
-    Map: MockMap,
-    NavigationControl: class MockNavigationControl {},
+    circleMarker: (latLng: [number, number], options: Record<string, unknown>) =>
+      createLayer("circleMarker", latLng, options),
+    divIcon: (options: Record<string, unknown>) => options,
+    getLayerGroups: () => layerGroups,
     getMaps: () => maps,
+    layerGroup: () => new MockLayerGroup(),
+    map: () => new MockMap(),
+    marker: (latLng: [number, number], options: Record<string, unknown>) =>
+      createLayer("marker", latLng, options),
+    polygon: (_latLngs: unknown, options: Record<string, unknown>) =>
+      createLayer("polygon", undefined, options),
+    polyline: (_latLngs: unknown, options: Record<string, unknown>) =>
+      createLayer("polyline", undefined, options),
     reset: () => {
       maps.length = 0;
+      layerGroups.length = 0;
     },
+    tileLayer: () => ({
+      addTo() {
+        return this;
+      },
+    }),
   };
 });
 
-vi.mock("maplibre-gl", () => ({
-  Map: maplibreMock.Map,
-  NavigationControl: maplibreMock.NavigationControl,
-}));
+vi.mock("leaflet", () => leafletMock);
 
 afterEach(() => {
-  maplibreMock.reset();
+  leafletMock.reset();
 });
 
 describe("@moritzbrantner/maps TemporalClusteredMap", () => {
-  test("renders timeline controls and slices track points into the map source", async () => {
+  test("renders timeline controls and slices track points into the map overlay", async () => {
     const tracks: TemporalMapTrack<{ status: string }>[] = [
       {
         id: "courier-1",
@@ -191,38 +215,13 @@ describe("@moritzbrantner/maps TemporalClusteredMap", () => {
       );
     });
 
-    const source = maplibreMock.getMaps()[0]?.sources.get(
-      "moritzbrantner-maps-source",
-    );
-    const data = source?.data as
-      | {
-          features: Array<{
-            geometry?: {
-              coordinates?: unknown;
-              type?: string;
-            };
-            properties?: Record<string, unknown>;
-            type?: string;
-          }>;
-          type: string;
-        }
-      | undefined;
-    const pointFeature = data?.features.find(
-      (feature) => feature.properties?.kind === "point",
-    );
+    const pointMarker = leafletMock
+      .getLayerGroups()[0]
+      ?.layers.find((layer) => layer.options?.className === "mb-maps__point-marker");
 
-    expect(data?.type).toBe("FeatureCollection");
-    expect(pointFeature).toMatchObject({
-      geometry: {
-        coordinates: [30, 15],
-        type: "Point",
-      },
-      properties: {
-        kind: "point",
-        load: 4,
-        pointId: "courier-1",
-      },
-      type: "Feature",
+    expect(pointMarker).toMatchObject({
+      latLng: [15, 30],
+      type: "circleMarker",
     });
   });
 

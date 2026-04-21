@@ -1,21 +1,27 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import type { Mesh } from "three";
-import { useRef } from "react";
 
 import { cn } from "@moritzbrantner/ui";
 
+import {
+  getStoryRendererKey,
+  getStoryStageProps,
+} from "./story-render-registry";
 import type {
   StoryNodeData,
   StoryRenderProps,
+  StoryRendererRegistry,
+  StoryThreeSceneComponent,
   StoryThreeSceneProps,
-} from "./story-types";
+} from "./story-model";
 
 export type StoryCanvasStageProps<
   TData extends StoryNodeData = StoryNodeData,
 > = StoryRenderProps<TData> & {
+  registry?: StoryRendererRegistry<TData>;
   className?: string;
   cameraPosition?: [number, number, number];
 };
@@ -41,7 +47,11 @@ function DefaultThreeScene<TData extends StoryNodeData = StoryNodeData>({
       <color attach="background" args={["#050816"]} />
       <ambientLight intensity={0.8} />
       <directionalLight position={[3, 4, 5]} intensity={1.8} />
-      <pointLight position={[-4, -3, 2]} intensity={1.2} color={`hsl(${hue}, 85%, 70%)`} />
+      <pointLight
+        position={[-4, -3, 2]}
+        intensity={1.2}
+        color={`hsl(${hue}, 85%, 70%)`}
+      />
       <mesh ref={meshRef} scale={1 + progress * 0.35}>
         <icosahedronGeometry args={[1.75, 1]} />
         <meshStandardMaterial
@@ -64,27 +74,31 @@ export function StoryCanvasStage<
   TData extends StoryNodeData = StoryNodeData,
 >({
   node,
+  registry,
   className,
   cameraPosition = [0, 0, 6],
   ...renderProps
 }: StoryCanvasStageProps<TData>) {
-  const Scene = (node.threeScene ?? DefaultThreeScene) as ComponentType<
-    StoryThreeSceneProps<TData>
-  >;
+  const rendererKey = getStoryRendererKey(node);
+  const Scene = (registry?.three?.[rendererKey] ?? DefaultThreeScene) as
+    StoryThreeSceneComponent<TData>;
 
   return (
     <div
       className={cn(
-        "relative min-h-[24rem] overflow-hidden rounded-[2rem] border bg-black shadow-2xl shadow-black/20",
-        node.stageClassName,
+        "relative min-h-[24rem] overflow-hidden rounded-lg border bg-black shadow-2xl shadow-black/20",
         className,
       )}
     >
       <Canvas camera={{ position: cameraPosition, fov: 42 }}>
-        <Scene node={node} {...renderProps} />
+        <Scene
+          node={node}
+          {...renderProps}
+          stageProps={getStoryStageProps(node)}
+        />
       </Canvas>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/55 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/70 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/65 to-transparent" />
     </div>
   );
 }
