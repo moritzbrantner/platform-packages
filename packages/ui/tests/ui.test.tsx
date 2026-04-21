@@ -88,6 +88,18 @@ import {
   ToolbarSpacer,
   ToolbarTitle,
 } from "../src";
+import {
+  BobbaTheme,
+  Button as BobbaButton,
+  bobbaTheme,
+  uiTheme as bobbaUiTheme,
+} from "../src/bobba";
+import {
+  Button as ZleekButton,
+  ZleekTheme,
+  uiTheme as zleekUiTheme,
+  zleekTheme,
+} from "../src/zleek";
 
 const shadcnBasicComponentFiles = [
   "accordion",
@@ -245,6 +257,26 @@ describe("@moritzbrantner/ui", () => {
 
     expect(screen.getByRole("button", { name: "Press" })).toBeTruthy();
     expect(screen.getByText("Shared UI")).toBeTruthy();
+  });
+
+  test("exports zleek and bobba component entrypoints", () => {
+    render(
+      <>
+        <ZleekTheme>
+          <ZleekButton>Zleek action</ZleekButton>
+        </ZleekTheme>
+        <BobbaTheme>
+          <BobbaButton>Bobba action</BobbaButton>
+        </BobbaTheme>
+      </>,
+    );
+
+    expect(screen.getByRole("button", { name: "Zleek action" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Bobba action" })).toBeTruthy();
+    expect(zleekTheme.name).toBe("zleek");
+    expect(bobbaTheme.name).toBe("bobba");
+    expect(zleekUiTheme).toBe(zleekTheme);
+    expect(bobbaUiTheme).toBe(bobbaTheme);
   });
 
   test("renders an app layout page shell with semantic content", () => {

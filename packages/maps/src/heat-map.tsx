@@ -9,12 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  GeoJSONSource,
-  HeatmapLayerSpecification,
-  Map as MaplibreMap,
-  StyleSpecification,
-} from "maplibre-gl";
+import type { LayerGroup, Map as LeafletMap } from "leaflet";
 
 import {
   createPointAggregationIndex,
@@ -26,10 +21,12 @@ import {
   type PointAggregationIndexOptions,
   type ViewportAggregationQuery,
 } from "./aggregation";
-import { defaultRasterMapStyle, type MapViewState } from "./clustered-map";
+import {
+  defaultRasterMapStyle,
+  type MapViewState,
+  type RasterMapStyle,
+} from "./clustered-map";
 
-const HEAT_MAP_SOURCE_ID = "moritzbrantner-maps-heat-source";
-const HEAT_MAP_LAYER_ID = "moritzbrantner-maps-heat-layer";
 const HEAT_MAP_WEIGHT_METRIC = "__moritzbrantnerHeatMapWeight";
 
 export type HeatMapWeightAccessor<TProperties = Record<string, unknown>> = (
@@ -105,8 +102,8 @@ export type HeatMapProps<TProperties = Record<string, unknown>> =
     heatmapRadius?: HeatMapRadius;
     initialViewState?: MapViewState;
     mapLabel?: string;
-    mapStyle?: string | StyleSpecification;
-    onMapReady?: (map: MaplibreMap) => void;
+    mapStyle?: string | RasterMapStyle;
+    onMapReady?: (map: LeafletMap) => void;
     points: readonly MapPoint<TProperties>[];
     showAttributionControl?: boolean;
     style?: React.CSSProperties;
@@ -149,7 +146,9 @@ export function HeatMap<TProperties = Record<string, unknown>>({
   weightMetric,
 }: HeatMapProps<TProperties>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<MaplibreMap | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const heatLayerRef = useRef<LayerGroup | null>(null);
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const [isReady, setIsReady] = useState(false);
   const deferredPoints = useDeferredValue(points);
   const densityIndex = useMemo(
@@ -178,14 +177,10 @@ export function HeatMap<TProperties = Record<string, unknown>>({
 
   const syncSource = useEffectEvent(() => {
     const map = mapRef.current;
+    const heatLayer = heatLayerRef.current;
+    const leaflet = leafletRef.current;
 
-    if (!map) {
-      return;
-    }
-
-    const source = map.getSource(HEAT_MAP_SOURCE_ID) as GeoJSONSource | undefined;
-
-    if (!source) {
+    if (!map || !heatLayer || !leaflet) {
       return;
     }
 
@@ -195,10 +190,20 @@ export function HeatMap<TProperties = Record<string, unknown>>({
       zoom: map.getZoom(),
     };
 
-    source.setData(densityIndex.getFeatureCollection(query));
+    renderHeatOverlay({
+      colorRamp: heatmapColorRamp,
+      data: densityIndex.getFeatureCollection(query),
+      intensity: heatmapIntensity,
+      layer: heatLayer,
+      leaflet,
+      map,
+      maxZoom: heatmapMaxZoom,
+      opacity: heatmapOpacity,
+      radius: heatmapRadius,
+    });
   });
 
-  const handleMapReady = useEffectEvent((map: MaplibreMap) => {
+  const handleMapReady = useEffectEvent((map: LeafletMap) => {
     setIsReady(true);
     startTransition(() => {
       onMapReady?.(map);
@@ -207,56 +212,45 @@ export function HeatMap<TProperties = Record<string, unknown>>({
 
   useEffect(() => {
     let isCancelled = false;
-    let localMap: MaplibreMap | null = null;
+    let localMap: LeafletMap | null = null;
 
     async function initializeMap() {
       if (!containerRef.current) {
         return;
       }
 
-      const maplibre = await import("maplibre-gl");
+      const leaflet = await import("leaflet");
 
       if (isCancelled || !containerRef.current) {
         return;
       }
 
-      localMap = new maplibre.Map({
-        attributionControl: showAttributionControl ? undefined : false,
-        container: containerRef.current,
-        center: initialViewState?.center ?? [12, 25],
-        style: mapStyle,
+      leafletRef.current = leaflet;
+      localMap = leaflet.map(containerRef.current, {
+        attributionControl: showAttributionControl,
+        center: toLeafletLatLng(initialViewState?.center ?? [12, 25]),
         zoom: initialViewState?.zoom ?? 1.6,
+        zoomControl: true,
       });
       mapRef.current = localMap;
-      localMap.addControl(new maplibre.NavigationControl(), "top-right");
 
-      localMap.on("load", () => {
-        if (!localMap || localMap.getSource(HEAT_MAP_SOURCE_ID)) {
+      const tileLayerOptions = resolveTileLayerOptions(mapStyle);
+
+      if (tileLayerOptions) {
+        leaflet.tileLayer(tileLayerOptions.url, tileLayerOptions.options).addTo(localMap);
+      }
+
+      heatLayerRef.current = leaflet.layerGroup().addTo(localMap);
+      localMap.on("moveend", syncSource);
+
+      queueMicrotask(() => {
+        if (isCancelled || !localMap) {
           return;
         }
-
-        localMap.addSource(HEAT_MAP_SOURCE_ID, {
-          type: "geojson",
-          data: createEmptyHeatMapFeatureCollection(),
-        });
-        localMap.addLayer({
-          id: HEAT_MAP_LAYER_ID,
-          maxzoom: heatmapMaxZoom,
-          paint: createHeatMapPaint({
-            colorRamp: heatmapColorRamp,
-            intensity: heatmapIntensity,
-            opacity: heatmapOpacity,
-            radius: heatmapRadius,
-          }),
-          source: HEAT_MAP_SOURCE_ID,
-          type: "heatmap",
-        });
 
         syncSource();
         handleMapReady(localMap);
       });
-
-      localMap.on("moveend", syncSource);
     }
 
     initializeMap();
@@ -266,10 +260,13 @@ export function HeatMap<TProperties = Record<string, unknown>>({
       setIsReady(false);
 
       if (localMap) {
+        localMap.off("moveend", syncSource);
         localMap.remove();
       }
 
+      heatLayerRef.current = null;
       mapRef.current = null;
+      leafletRef.current = null;
     };
   }, []);
 
@@ -286,12 +283,12 @@ export function HeatMap<TProperties = Record<string, unknown>>({
       if (dataBounds) {
         map.fitBounds(
           [
-            [dataBounds[0], dataBounds[1]],
-            [dataBounds[2], dataBounds[3]],
+            [dataBounds[1], dataBounds[0]],
+            [dataBounds[3], dataBounds[2]],
           ],
           {
-            duration: 0,
-            padding: fitBoundsPadding,
+            animate: false,
+            padding: [fitBoundsPadding, fitBoundsPadding],
           },
         );
       }
@@ -434,11 +431,56 @@ export function resolveHeatMapPointWeight<TProperties = Record<string, unknown>>
   return Math.max(0, rawWeight);
 }
 
-function createEmptyHeatMapFeatureCollection(): HeatMapFeatureCollection {
-  return {
-    features: [],
-    type: "FeatureCollection",
-  };
+function renderHeatOverlay({
+  colorRamp,
+  data,
+  intensity,
+  layer,
+  leaflet,
+  map,
+  maxZoom,
+  opacity,
+  radius,
+}: {
+  colorRamp: readonly HeatMapColorStop[];
+  data: HeatMapFeatureCollection;
+  intensity: number;
+  layer: LayerGroup;
+  leaflet: typeof import("leaflet");
+  map: LeafletMap;
+  maxZoom: number;
+  opacity: number;
+  radius: HeatMapRadius;
+}) {
+  layer.clearLayers();
+
+  if (map.getZoom() > maxZoom) {
+    return;
+  }
+
+  const safeOpacity = clamp(opacity, 0, 1);
+
+  for (const feature of data.features) {
+    const [longitude, latitude] = feature.geometry.coordinates;
+    const weight = clamp(feature.properties.weight, 0, Number.POSITIVE_INFINITY);
+    const normalizedWeight = clamp(weight, 0, 1);
+    const markerRadius =
+      resolveHeatMapRadius(radius, map.getZoom()) *
+      Math.max(0.35, Math.sqrt(normalizedWeight)) *
+      Math.max(0, intensity);
+
+    leaflet
+      .circleMarker([latitude, longitude], {
+        className: "mb-maps__heat-marker",
+        color: "transparent",
+        fillColor: resolveHeatMapColor(colorRamp, normalizedWeight),
+        fillOpacity: safeOpacity * Math.min(1, 0.35 + normalizedWeight * 0.65),
+        opacity: 0,
+        radius: markerRadius,
+        weight: 0,
+      })
+      .addTo(layer);
+  }
 }
 
 function createHeatMapFeatureCollectionFromAggregates<TProperties>(
@@ -471,14 +513,8 @@ function createHeatMapFeatureFromAggregate<TProperties>(
     properties: {
       ...copyPublicHeatMapMetrics(feature.metrics),
       kind: feature.kind === "cluster" ? "heat-cluster" : "heat-point",
-      label:
-        feature.kind === "cluster"
-          ? feature.pointCountAbbreviated
-          : feature.point.label,
-      pointId:
-        feature.kind === "cluster"
-          ? `cluster-${feature.clusterId}`
-          : feature.point.id,
+      label: feature.kind === "cluster" ? feature.pointCountAbbreviated : feature.point.label,
+      pointId: feature.kind === "cluster" ? `cluster-${feature.clusterId}` : feature.point.id,
       pointCount: feature.kind === "cluster" ? feature.pointCount : 1,
       rawWeight,
       weight: Math.max(0, rawWeight / effectiveMaxWeight),
@@ -508,53 +544,67 @@ function getRawHeatMapPointWeight<TProperties>(
   return point.metrics.weight ?? 1;
 }
 
-function createHeatMapPaint({
-  colorRamp,
-  intensity,
-  opacity,
-  radius,
-}: {
-  colorRamp: readonly HeatMapColorStop[];
-  intensity: number;
-  opacity: number;
-  radius: HeatMapRadius;
-}) {
+function resolveTileLayerOptions(mapStyle: string | RasterMapStyle) {
+  if (typeof mapStyle === "string") {
+    return {
+      options: {
+        attribution: defaultRasterMapStyle.attribution,
+      },
+      url: mapStyle,
+    };
+  }
+
+  const tiles = mapStyle.tiles ?? defaultRasterMapStyle.tiles;
+
+  if (tiles === false) {
+    return null;
+  }
+
+  const url = Array.isArray(tiles) ? tiles[0] : tiles;
+
   return {
-    "heatmap-color": [
-      "interpolate",
-      ["linear"],
-      ["heatmap-density"],
-      ...colorRamp.flatMap(([density, color]) => [density, color]),
-    ],
-    "heatmap-intensity": [
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-      0,
-      Math.max(0, intensity * 0.55),
-      9,
-      Math.max(0, intensity),
-    ],
-    "heatmap-opacity": clamp(opacity, 0, 1),
-    "heatmap-radius": createHeatMapRadiusExpression(radius),
-    "heatmap-weight": ["get", "weight"],
-  } as NonNullable<HeatmapLayerSpecification["paint"]>;
+    options: {
+      attribution: mapStyle.attribution ?? defaultRasterMapStyle.attribution,
+      maxZoom: typeof mapStyle.maxZoom === "number" ? mapStyle.maxZoom : undefined,
+      minZoom: typeof mapStyle.minZoom === "number" ? mapStyle.minZoom : undefined,
+      tileSize: typeof mapStyle.tileSize === "number" ? mapStyle.tileSize : undefined,
+    },
+    url: url ?? String(defaultRasterMapStyle.tiles),
+  };
 }
 
-function createHeatMapRadiusExpression(radius: HeatMapRadius) {
+function resolveHeatMapRadius(radius: HeatMapRadius, zoom: number) {
   if (typeof radius === "number") {
     return Math.max(0, radius);
   }
 
-  return [
-    "interpolate",
-    ["linear"],
-    ["zoom"],
-    radius.minZoom ?? 0,
-    Math.max(0, radius.min),
-    radius.maxZoom ?? 9,
-    Math.max(0, radius.max),
-  ];
+  const minZoom = radius.minZoom ?? 0;
+  const maxZoom = radius.maxZoom ?? 9;
+
+  if (maxZoom <= minZoom) {
+    return Math.max(0, radius.max);
+  }
+
+  const progress = clamp((zoom - minZoom) / (maxZoom - minZoom), 0, 1);
+
+  return Math.max(0, radius.min + (radius.max - radius.min) * progress);
+}
+
+function resolveHeatMapColor(colorRamp: readonly HeatMapColorStop[], weight: number) {
+  if (colorRamp.length === 0) {
+    return "#dc2626";
+  }
+
+  const sortedRamp = [...colorRamp].sort(([left], [right]) => left - right);
+  const fallback = sortedRamp[sortedRamp.length - 1];
+
+  for (const [density, color] of sortedRamp) {
+    if (weight <= density) {
+      return color;
+    }
+  }
+
+  return fallback?.[1] ?? "#dc2626";
 }
 
 function getEffectiveMaxWeight(rawWeights: readonly number[], maxWeight: number | undefined) {
@@ -581,6 +631,10 @@ function toIndexedMapPoint<TProperties>(
 
 function isValidHeatMapPoint<TProperties>(point: IndexedMapPoint<TProperties>) {
   return Number.isFinite(point.latitude) && Number.isFinite(point.longitude);
+}
+
+function toLeafletLatLng([longitude, latitude]: [number, number]) {
+  return [latitude, longitude] as [number, number];
 }
 
 function clamp(value: number, min: number, max: number) {

@@ -26,6 +26,8 @@
       "@moritzbrantner/storytelling/three": ["../../packages/storytelling/src/three.tsx"],
       "@moritzbrantner/subtitles": ["../../packages/subtitles/src/index.ts"],
       "@moritzbrantner/ui": ["../../packages/ui/src/index.ts"],
+      "@moritzbrantner/ui/bobba": ["../../packages/ui/src/bobba.ts"],
+      "@moritzbrantner/ui/zleek": ["../../packages/ui/src/zleek.ts"],
       "@moritzbrantner/word-prediction": ["../../packages/word-prediction/src/index.ts"],
       "@moritzbrantner/word-vectors": ["../../packages/word-vectors/src/index.ts"],
       "@moritzbrantner/word-vectors/documents": ["../../packages/word-vectors/src/documents.ts"]

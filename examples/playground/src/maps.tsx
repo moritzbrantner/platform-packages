@@ -46,17 +46,8 @@ type PlaygroundMapInstance = Parameters<
 >[0];
 type PlaygroundMapStyle = Exclude<ClusteredMapProps["mapStyle"], string | undefined>;
 const E2E_MAP_STYLE: PlaygroundMapStyle = {
-  version: 8,
-  sources: {},
-  layers: [
-    {
-      id: "background",
-      type: "background",
-      paint: {
-        "background-color": "#f4f4f5",
-      },
-    },
-  ],
+  attribution: "",
+  tiles: false,
 };
 
 function MapsPage() {

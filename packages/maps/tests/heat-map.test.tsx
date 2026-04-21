@@ -11,50 +11,53 @@ import {
   type TemporalMapTrack,
 } from "../src";
 
-const maplibreMock = vi.hoisted(() => {
-  type Source = {
-    data: unknown;
-    setData: (data: unknown) => void;
-  };
+const leafletMock = vi.hoisted(() => {
+  type Handler = (...args: unknown[]) => void;
   type Layer = {
-    id: string;
-    maxzoom?: number;
-    paint?: Record<string, unknown>;
-    source?: string;
+    latLng?: [number, number];
+    options?: Record<string, unknown>;
     type: string;
   };
-  type Handler = (...args: unknown[]) => void;
 
   const maps: MockMap[] = [];
+  const layerGroups: MockLayerGroup[] = [];
 
-  class MockMap {
-    handlers = new Map<string, Handler[]>();
+  class MockLayerGroup {
     layers: Layer[] = [];
-    sources = new Map<string, Source>();
-    removed = false;
-    zoom = 2;
 
     constructor() {
-      maps.push(this);
-      queueMicrotask(() => {
-        this.emit("load");
-      });
+      layerGroups.push(this);
     }
-
-    addControl() {}
 
     addLayer(layer: Layer) {
       this.layers.push(layer);
     }
 
-    addSource(id: string, source: { data: unknown }) {
-      this.sources.set(id, {
-        data: source.data,
-        setData(data: unknown) {
-          this.data = data;
-        },
-      });
+    addTo() {
+      return this;
     }
+
+    clearLayers() {
+      this.layers = [];
+    }
+  }
+
+  class MockMap {
+    handlers = new Map<string, Handler[]>();
+    removed = false;
+    zoom = 2;
+
+    constructor() {
+      maps.push(this);
+    }
+
+    container = {
+      clientHeight: 640,
+      clientWidth: 960,
+      style: {
+        cursor: "",
+      },
+    };
 
     fitBounds() {}
 
@@ -67,13 +70,15 @@ const maplibreMock = vi.hoisted(() => {
       };
     }
 
-    getSource(id: string) {
-      return this.sources.get(id);
+    getContainer() {
+      return this.container;
     }
 
     getZoom() {
       return this.zoom;
     }
+
+    off() {}
 
     on(event: string, handler: Handler) {
       const handlers = this.handlers.get(event) ?? [];
@@ -85,31 +90,47 @@ const maplibreMock = vi.hoisted(() => {
     remove() {
       this.removed = true;
     }
+  }
 
-    emit(event: string, ...args: unknown[]) {
-      for (const handler of this.handlers.get(event) ?? []) {
-        handler(...args);
-      }
-    }
+  function createLayer(type: string, latLng?: [number, number], options?: Record<string, unknown>) {
+    const layer: Layer & {
+      addTo: (group: MockLayerGroup) => typeof layer;
+    } = {
+      latLng,
+      options,
+      type,
+      addTo(group: MockLayerGroup) {
+        group.addLayer(this);
+        return this;
+      },
+    };
+
+    return layer;
   }
 
   return {
-    Map: MockMap,
-    NavigationControl: class MockNavigationControl {},
+    circleMarker: (latLng: [number, number], options: Record<string, unknown>) =>
+      createLayer("circleMarker", latLng, options),
+    getLayerGroups: () => layerGroups,
     getMaps: () => maps,
+    layerGroup: () => new MockLayerGroup(),
+    map: () => new MockMap(),
     reset: () => {
       maps.length = 0;
+      layerGroups.length = 0;
     },
+    tileLayer: () => ({
+      addTo() {
+        return this;
+      },
+    }),
   };
 });
 
-vi.mock("maplibre-gl", () => ({
-  Map: maplibreMock.Map,
-  NavigationControl: maplibreMock.NavigationControl,
-}));
+vi.mock("leaflet", () => leafletMock);
 
 afterEach(() => {
-  maplibreMock.reset();
+  leafletMock.reset();
 });
 
 describe("@moritzbrantner/maps heat maps", () => {
@@ -259,7 +280,7 @@ describe("@moritzbrantner/maps heat maps", () => {
     expect(data.features[0]?.properties).not.toHaveProperty("__moritzbrantnerHeatMapWeight");
   });
 
-  test("renders a MapLibre heatmap layer and source", async () => {
+  test("renders weighted Leaflet heat markers", async () => {
     render(
       <HeatMap
         heatmapIntensity={1.4}
@@ -286,29 +307,18 @@ describe("@moritzbrantner/maps heat maps", () => {
       );
     });
 
-    const map = maplibreMock.getMaps()[0];
-    const layer = map?.layers.find((candidate) => candidate.id === "moritzbrantner-maps-heat-layer");
-    const source = map?.sources.get("moritzbrantner-maps-heat-source");
-    const data = source?.data as
-      | {
-          features: Array<{
-            properties?: Record<string, unknown>;
-          }>;
-          type: string;
-        }
-      | undefined;
+    const marker = leafletMock
+      .getLayerGroups()[0]
+      ?.layers.find((layer) => layer.options?.className === "mb-maps__heat-marker");
 
-    expect(layer).toMatchObject({
-      maxzoom: 12,
-      source: "moritzbrantner-maps-heat-source",
-      type: "heatmap",
+    expect(marker).toMatchObject({
+      latLng: [40, -74],
+      options: {
+        fillOpacity: 0.84,
+      },
+      type: "circleMarker",
     });
-    expect(layer?.paint?.["heatmap-weight"]).toEqual(["get", "weight"]);
-    expect(data?.features[0]?.properties).toMatchObject({
-      pointId: "a",
-      rawWeight: 6,
-      weight: 1,
-    });
+    expect(marker?.options?.radius).toBeGreaterThan(0);
   });
 
   test("slices temporal tracks into weighted heat-map frames", async () => {
@@ -364,30 +374,13 @@ describe("@moritzbrantner/maps heat maps", () => {
       );
     });
 
-    const source = maplibreMock.getMaps()[0]?.sources.get(
-      "moritzbrantner-maps-heat-source",
-    );
-    const data = source?.data as
-      | {
-          features: Array<{
-            geometry?: {
-              coordinates?: unknown;
-            };
-            properties?: Record<string, unknown>;
-          }>;
-        }
-      | undefined;
+    const marker = leafletMock
+      .getLayerGroups()[0]
+      ?.layers.find((layer) => layer.options?.className === "mb-maps__heat-marker");
 
-    expect(data?.features[0]).toMatchObject({
-      geometry: {
-        coordinates: [30, 15],
-      },
-      properties: {
-        demand: 7,
-        pointId: "courier-1",
-        rawWeight: 7,
-        weight: 0.7,
-      },
+    expect(marker).toMatchObject({
+      latLng: [15, 30],
+      type: "circleMarker",
     });
   });
 });

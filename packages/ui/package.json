@@ -10,7 +10,9 @@
   },
   "files": [
     "dist",
-    "styles.css"
+    "styles.css",
+    "zleek",
+    "bobba"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +21,17 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./styles.css"
+    "./zleek": {
+      "types": "./dist/zleek.d.ts",
+      "import": "./dist/zleek.js"
+    },
+    "./bobba": {
+      "types": "./dist/bobba.d.ts",
+      "import": "./dist/bobba.js"
+    },
+    "./styles.css": "./styles.css",
+    "./zleek/styles.css": "./zleek/styles.css",
+    "./bobba/styles.css": "./bobba/styles.css"
   },
   "sideEffects": [
     "*.css"
@@ -73,7 +85,7 @@
     "access": "restricted"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
+    "build": "tsup src/index.ts src/zleek.ts src/bobba.ts --format esm --dts --clean --out-dir dist",
     "build-storybook": "storybook build --output-dir storybook-static",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "prepack": "bun run build",

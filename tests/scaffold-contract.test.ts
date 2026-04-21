@@ -10,8 +10,15 @@ const scaffoldCriticalPackages = [
     dir: "ui",
     name: "@moritzbrantner/ui",
     version: "0.3.1",
-    files: ["dist", "styles.css"],
-    exports: [".", "./styles.css"],
+    files: ["dist", "styles.css", "zleek", "bobba"],
+    exports: [
+      ".",
+      "./zleek",
+      "./bobba",
+      "./styles.css",
+      "./zleek/styles.css",
+      "./bobba/styles.css",
+    ],
     scripts: ["build", "lint", "check-types", "test", "build-storybook"],
   },
   {
