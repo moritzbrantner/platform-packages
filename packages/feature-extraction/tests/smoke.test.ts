@@ -25,7 +25,7 @@ describe("@moritzbrantner/feature-extraction", () => {
         };
       },
     };
-    const pipeline = createFeatureExtractionPipeline({
+    const pipeline = createFeatureExtractionPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/feature-extraction", {
         parameters: { shared: true },

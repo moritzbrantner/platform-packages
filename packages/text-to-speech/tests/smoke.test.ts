@@ -25,7 +25,7 @@ describe("@moritzbrantner/text-to-speech", () => {
         };
       },
     };
-    const pipeline = createTextToSpeechPipeline({
+    const pipeline = createTextToSpeechPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/text-to-speech", {
         parameters: { shared: true },

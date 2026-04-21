@@ -3,24 +3,40 @@ import {
   createUniversalTaskPipeline,
   getHuggingFaceTaskDescriptor,
   type CreateUniversalTaskPipelineOptions,
+  type UniversalTaskInput,
+  type UniversalTaskOutput,
   type UniversalTaskPipeline,
+  type UniversalTaskRequest,
+  type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
 export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("depth-estimation");
 export const huggingFaceTask = createHuggingFaceTaskPackage("depth-estimation");
 
-export type DepthEstimationPipeline<Input = unknown, Output = unknown> = UniversalTaskPipeline<
+export type DepthEstimationInput = UniversalTaskInput<"depth-estimation">;
+export type DepthEstimationOutput = UniversalTaskOutput<"depth-estimation">;
+export type DepthEstimationRequest<Input = DepthEstimationInput> = UniversalTaskRequest<
   "depth-estimation",
-  Input,
+  Input
+>;
+export type DepthEstimationResult<Output = DepthEstimationOutput> = UniversalTaskResult<
+  "depth-estimation",
   Output
 >;
+export type DepthEstimationPipeline<
+  Input = DepthEstimationInput,
+  Output = DepthEstimationOutput,
+> = UniversalTaskPipeline<"depth-estimation", Input, Output>;
 
 export type CreateDepthEstimationPipelineOptions = Omit<
   CreateUniversalTaskPipelineOptions<"depth-estimation">,
   "descriptor"
 >;
 
-export function createDepthEstimationPipeline<Input = unknown, Output = unknown>(
+export function createDepthEstimationPipeline<
+  Input = DepthEstimationInput,
+  Output = DepthEstimationOutput,
+>(
   options: CreateDepthEstimationPipelineOptions,
 ): DepthEstimationPipeline<Input, Output> {
   return createUniversalTaskPipeline({

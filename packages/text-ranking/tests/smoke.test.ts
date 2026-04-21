@@ -25,7 +25,7 @@ describe("@moritzbrantner/text-ranking", () => {
         };
       },
     };
-    const pipeline = createTextRankingPipeline({
+    const pipeline = createTextRankingPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/text-ranking", {
         parameters: { shared: true },

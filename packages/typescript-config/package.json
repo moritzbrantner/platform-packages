@@ -8,10 +8,16 @@
     "directory": "packages/typescript-config"
   },
   "files": [
-    "base.json"
+    "base.json",
+    "next-app.json",
+    "node.json",
+    "react-library.json"
   ],
   "exports": {
-    "./base.json": "./base.json"
+    "./base.json": "./base.json",
+    "./next-app.json": "./next-app.json",
+    "./node.json": "./node.json",
+    "./react-library.json": "./react-library.json"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

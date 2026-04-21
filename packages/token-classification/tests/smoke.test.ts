@@ -25,7 +25,7 @@ describe("@moritzbrantner/token-classification", () => {
         };
       },
     };
-    const pipeline = createTokenClassificationPipeline({
+    const pipeline = createTokenClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/token-classification", {
         parameters: { shared: true },

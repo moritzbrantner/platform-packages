@@ -25,7 +25,7 @@ describe("@moritzbrantner/unconditional-image-generation", () => {
         };
       },
     };
-    const pipeline = createUnconditionalImageGenerationPipeline({
+    const pipeline = createUnconditionalImageGenerationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/unconditional-image-generation", {
         parameters: { shared: true },

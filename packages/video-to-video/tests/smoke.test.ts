@@ -25,7 +25,7 @@ describe("@moritzbrantner/video-to-video", () => {
         };
       },
     };
-    const pipeline = createVideoToVideoPipeline({
+    const pipeline = createVideoToVideoPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/video-to-video", {
         parameters: { shared: true },

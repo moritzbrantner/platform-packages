@@ -1,4 +1,5 @@
 import {
+  createDensityViewportSummary,
   createBinnedSeriesIndex,
   type BinnedSeries,
   type BinnedSeriesBin,
@@ -6,6 +7,7 @@ import {
   type BinnedSeriesQuery,
   type BinnedSeriesSummary,
   type DataDensityMetricRecord,
+  type DataDensityViewportSummary,
   type IndexedNumericSeriesPoint,
   type NumericSeriesPoint,
 } from "@moritzbrantner/data-density";
@@ -43,6 +45,13 @@ export type ChartDensitySample<TProperties = Record<string, unknown>> = {
 export type ChartDensitySummary = BinnedSeriesSummary & {
   sampleCount: number;
   valueMode: ChartDensityValueMode;
+};
+
+export type ChartDensityViewportSummary = DataDensityViewportSummary & {
+  binCount: number;
+  sampleCount: number;
+  valueMode: ChartDensityValueMode;
+  xDomain: BinnedSeriesSummary["xDomain"];
 };
 
 export type ChartDensitySeries<TProperties = Record<string, unknown>> = {
@@ -123,6 +132,22 @@ export function createChartDensitySample<TProperties = Record<string, unknown>>(
     x0: bin.x0,
     x1: bin.x1,
     y: getChartDensityValue(bin, valueMode),
+  };
+}
+
+export function createChartDensityViewportSummary<TProperties = Record<string, unknown>>(
+  series: ChartDensitySeries<TProperties>,
+): ChartDensityViewportSummary {
+  return {
+    ...createDensityViewportSummary(
+      "chart",
+      series.bins.map((bin) => bin.metrics),
+      series.summary.pointCount,
+    ),
+    binCount: series.summary.binCount,
+    sampleCount: series.summary.sampleCount,
+    valueMode: series.summary.valueMode,
+    xDomain: series.summary.xDomain,
   };
 }
 

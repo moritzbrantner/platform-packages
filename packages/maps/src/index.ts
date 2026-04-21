@@ -1,12 +1,14 @@
 "use client";
 
 export {
+  createMapDensityViewportSummary,
   createPointAggregationIndex,
   getBoundsFromPoints,
   type AggregatedMapCluster,
   type AggregatedMapFeature,
   type AggregatedMapPoint,
   type IndexedMapPoint,
+  type MapDensityViewportSummary,
   type MapMetricRecord,
   type MapPointFilter,
   type MapPoint,

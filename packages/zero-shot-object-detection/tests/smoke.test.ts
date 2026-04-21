@@ -25,7 +25,7 @@ describe("@moritzbrantner/zero-shot-object-detection", () => {
         };
       },
     };
-    const pipeline = createZeroShotObjectDetectionPipeline({
+    const pipeline = createZeroShotObjectDetectionPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/zero-shot-object-detection", {
         parameters: { shared: true },

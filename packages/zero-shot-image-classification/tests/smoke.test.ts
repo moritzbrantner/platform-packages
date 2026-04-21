@@ -25,7 +25,7 @@ describe("@moritzbrantner/zero-shot-image-classification", () => {
         };
       },
     };
-    const pipeline = createZeroShotImageClassificationPipeline({
+    const pipeline = createZeroShotImageClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/zero-shot-image-classification", {
         parameters: { shared: true },

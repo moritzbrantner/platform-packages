@@ -34,8 +34,8 @@ const scaffoldCriticalPackages = [
     dir: "typescript-config",
     name: "@moritzbrantner/typescript-config",
     version: "0.1.0",
-    files: ["base.json"],
-    exports: ["./base.json"],
+    files: ["base.json", "next-app.json", "node.json", "react-library.json"],
+    exports: ["./base.json", "./next-app.json", "./node.json", "./react-library.json"],
     scripts: [],
   },
 ] as const;
@@ -59,6 +59,33 @@ test("readme marks the scaffold-critical package set explicitly", () => {
   expect(readme).toContain("Do not move `@repo/auth-contract` or `@repo/upload-playbook`");
 });
 
+test("readme package inventory lists every workspace package", () => {
+  const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
+  const inventoryPackages = Array.from(
+    readme.matchAll(/^\| `(@moritzbrantner\/[^`]+)` \| ([^|]+) \|/gm),
+    (match) => ({
+      name: match[1]!,
+      status: match[2]!.trim(),
+    }),
+  );
+  const workspacePackages = readdirSync(packagesRoot)
+    .filter((packageDir) => existsSync(path.join(packagesRoot, packageDir, "package.json")))
+    .map((packageDir) => readPackageJson(packageDir).name)
+    .sort((left, right) => left.localeCompare(right));
+
+  expect(
+    inventoryPackages.map((entry) => entry.name).sort((left, right) => left.localeCompare(right)),
+  ).toEqual(workspacePackages);
+  expect(new Set(inventoryPackages.map((entry) => entry.status))).toEqual(
+    new Set([
+      "experimental",
+      "generated task wrapper",
+      "release-ready",
+      "scaffold-critical",
+    ]),
+  );
+});
+
 test("publishing guide prioritizes the scaffold-critical packages for first release", () => {
   const publishingGuide = readFileSync(
     path.join(repoRoot, "docs/publishing.md"),
@@ -69,6 +96,7 @@ test("publishing guide prioritizes the scaffold-critical packages for first rele
     "Prepare or publish `@moritzbrantner/ui`, `@moritzbrantner/storytelling`, `@moritzbrantner/eslint-config`, and `@moritzbrantner/typescript-config` first",
   );
   expect(publishingGuide).toContain("consumer repos should adopt these first");
+  expect(publishingGuide).toContain("Release-readiness categories");
 });
 
 test("scaffold-critical packages keep their public package contracts", () => {
@@ -93,13 +121,29 @@ test("config packages import and parse from their package roots", async () => {
   );
 
   expect(Array.isArray(eslintConfig.default)).toBe(true);
+  expect(Array.isArray(eslintConfig.base)).toBe(true);
+  expect(Array.isArray(eslintConfig.typescript)).toBe(true);
+  expect(Array.isArray(eslintConfig.react)).toBe(true);
+  expect(Array.isArray(eslintConfig.next)).toBe(true);
+  expect(Array.isArray(eslintConfig.library)).toBe(true);
+  expect(eslintConfig.default).toBe(eslintConfig.library);
 
-  const typescriptConfig = JSON.parse(
-    readFileSync(path.join(packagesRoot, "typescript-config", "base.json"), "utf8"),
+  const typescriptConfigs = Object.fromEntries(
+    ["base.json", "react-library.json", "next-app.json", "node.json"].map((configFile) => [
+      configFile,
+      JSON.parse(
+        readFileSync(path.join(packagesRoot, "typescript-config", configFile), "utf8"),
+      ),
+    ]),
   );
 
-  expect(typescriptConfig.compilerOptions.module).toBe("NodeNext");
-  expect(typescriptConfig.compilerOptions.strict).toBe(true);
+  expect(typescriptConfigs["base.json"].compilerOptions.module).toBe("NodeNext");
+  expect(typescriptConfigs["base.json"].compilerOptions.strict).toBe(true);
+  expect(typescriptConfigs["react-library.json"].compilerOptions.jsx).toBe("react-jsx");
+  expect(typescriptConfigs["next-app.json"].compilerOptions.plugins).toEqual([
+    { name: "next" },
+  ]);
+  expect(typescriptConfigs["node.json"].compilerOptions.types).toContain("node");
 });
 
 test("publishable package metadata exposes matching build artifacts", () => {
@@ -141,6 +185,29 @@ test("publishable package metadata exposes matching build artifacts", () => {
   }
 });
 
+test("release-ready package inventory entries have publishable metadata", () => {
+  const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
+  const releaseReadyPackageNames = Array.from(
+    readme.matchAll(/^\| `@moritzbrantner\/([^`]+)` \| (scaffold-critical|release-ready) \|/gm),
+    (match) => match[1]!,
+  );
+
+  expect(releaseReadyPackageNames).toContain("ui");
+  expect(releaseReadyPackageNames).toContain("maps");
+
+  for (const packageDir of releaseReadyPackageNames) {
+    const packageJson = readPackageJson(packageDir);
+
+    expect(packageJson.private, `${packageJson.name} private`).toBe(false);
+    expect(packageJson.repository?.directory, `${packageJson.name} repository directory`).toBe(
+      `packages/${packageDir}`,
+    );
+    expect(packageJson.publishConfig?.registry, `${packageJson.name} registry`).toBe(
+      "https://npm.pkg.github.com",
+    );
+  }
+});
+
 test("Hugging Face task wrappers follow the generated package contract", () => {
   const universalSource = readFileSync(
     path.join(packagesRoot, "huggingface-universal", "src", "index.ts"),
@@ -177,6 +244,10 @@ test("Hugging Face task wrappers follow the generated package contract", () => {
       expect(source).toContain("export const createPipeline");
     }
     expect(source).toContain("export const createModelReference");
+    expect(source).toContain(`export type ${pascalName}Input`);
+    expect(source).toContain(`export type ${pascalName}Output`);
+    expect(source).toContain(`export type ${pascalName}Request`);
+    expect(source).toContain(`export type ${pascalName}Result`);
   }
 });
 
@@ -192,6 +263,14 @@ function readPackageJson(packageDir: string) {
     scripts?: Record<string, string>;
     sideEffects?: string[];
     version: string;
+    publishConfig?: {
+      registry?: string;
+    };
+    repository?: {
+      directory?: string;
+      type?: string;
+      url?: string;
+    };
   };
 }
 

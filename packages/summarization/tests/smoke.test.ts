@@ -25,7 +25,7 @@ describe("@moritzbrantner/summarization", () => {
         };
       },
     };
-    const pipeline = createSummarizationPipeline({
+    const pipeline = createSummarizationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/summarization", {
         parameters: { shared: true },

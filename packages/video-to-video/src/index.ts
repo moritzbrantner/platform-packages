@@ -3,24 +3,40 @@ import {
   createUniversalTaskPipeline,
   getHuggingFaceTaskDescriptor,
   type CreateUniversalTaskPipelineOptions,
+  type UniversalTaskInput,
+  type UniversalTaskOutput,
   type UniversalTaskPipeline,
+  type UniversalTaskRequest,
+  type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
 export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("video-to-video");
 export const huggingFaceTask = createHuggingFaceTaskPackage("video-to-video");
 
-export type VideoToVideoPipeline<Input = unknown, Output = unknown> = UniversalTaskPipeline<
+export type VideoToVideoInput = UniversalTaskInput<"video-to-video">;
+export type VideoToVideoOutput = UniversalTaskOutput<"video-to-video">;
+export type VideoToVideoRequest<Input = VideoToVideoInput> = UniversalTaskRequest<
   "video-to-video",
-  Input,
+  Input
+>;
+export type VideoToVideoResult<Output = VideoToVideoOutput> = UniversalTaskResult<
+  "video-to-video",
   Output
 >;
+export type VideoToVideoPipeline<
+  Input = VideoToVideoInput,
+  Output = VideoToVideoOutput,
+> = UniversalTaskPipeline<"video-to-video", Input, Output>;
 
 export type CreateVideoToVideoPipelineOptions = Omit<
   CreateUniversalTaskPipelineOptions<"video-to-video">,
   "descriptor"
 >;
 
-export function createVideoToVideoPipeline<Input = unknown, Output = unknown>(
+export function createVideoToVideoPipeline<
+  Input = VideoToVideoInput,
+  Output = VideoToVideoOutput,
+>(
   options: CreateVideoToVideoPipelineOptions,
 ): VideoToVideoPipeline<Input, Output> {
   return createUniversalTaskPipeline({

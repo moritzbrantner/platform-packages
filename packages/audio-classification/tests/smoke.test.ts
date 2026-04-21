@@ -25,7 +25,7 @@ describe("@moritzbrantner/audio-classification", () => {
         };
       },
     };
-    const pipeline = createAudioClassificationPipeline({
+    const pipeline = createAudioClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/audio-classification", {
         parameters: { shared: true },

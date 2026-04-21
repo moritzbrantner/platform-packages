@@ -25,7 +25,7 @@ describe("@moritzbrantner/image-segmentation", () => {
         };
       },
     };
-    const pipeline = createImageSegmentationPipeline({
+    const pipeline = createImageSegmentationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/image-segmentation", {
         parameters: { shared: true },

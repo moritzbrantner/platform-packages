@@ -25,7 +25,7 @@ describe("@moritzbrantner/image-to-text", () => {
         };
       },
     };
-    const pipeline = createImageToTextPipeline({
+    const pipeline = createImageToTextPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/image-to-text", {
         parameters: { shared: true },

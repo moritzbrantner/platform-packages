@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 
-import { createTableDensityIndex, type TableDensityColumn } from "@moritzbrantner/tables";
+import {
+  createTableDensityIndex,
+  createTableDensityViewportSummary,
+  type TableDensityColumn,
+} from "@moritzbrantner/tables";
 
 describe("@moritzbrantner/tables", () => {
   test("creates virtualized table windows with metric summaries", () => {
@@ -30,6 +34,15 @@ describe("@moritzbrantner/tables", () => {
     expect(window.summary.filteredItemCount).toBe(10);
     expect(window.summary.visibleItemCount).toBe(6);
     expect(window.summary.metrics.revenue).toBe(540);
+    expect(createTableDensityViewportSummary(window)).toMatchObject({
+      filteredRowCount: 10,
+      itemCount: 6,
+      kind: "table",
+      metricKeys: ["revenue"],
+      metrics: { revenue: 540 },
+      rowCount: 6,
+      totalRowCount: 20,
+    });
     expect(index.getRowById("row-6")?.item.status).toBe("open");
   });
 

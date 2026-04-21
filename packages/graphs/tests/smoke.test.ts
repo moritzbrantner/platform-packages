@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 
-import { createGraphDensityIndex } from "@moritzbrantner/graphs";
+import {
+  createGraphDensityIndex,
+  createGraphDensityViewportSummary,
+} from "@moritzbrantner/graphs";
 
 describe("@moritzbrantner/graphs", () => {
   test("creates node windows and edge summaries from graph data", () => {
@@ -34,6 +37,16 @@ describe("@moritzbrantner/graphs", () => {
     expect(subgraph.edges.map((edge) => edge.id)).toEqual(["edge-1-2", "edge-2-3"]);
     expect(subgraph.summary.edgeCount).toBe(2);
     expect(subgraph.summary.edgeMetrics.weight).toBe(7);
+    expect(createGraphDensityViewportSummary(subgraph)).toMatchObject({
+      edgeCount: 2,
+      edgeMetricKeys: ["weight"],
+      edgeMetrics: { weight: 7 },
+      itemCount: 3,
+      kind: "graph",
+      metricKeys: ["demand"],
+      metrics: { demand: 9 },
+      nodeCount: 3,
+    });
     expect(index.getEdgeById("dangling")).toBeNull();
   });
 

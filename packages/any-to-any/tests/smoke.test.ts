@@ -25,7 +25,7 @@ describe("@moritzbrantner/any-to-any", () => {
         };
       },
     };
-    const pipeline = createAnyToAnyPipeline({
+    const pipeline = createAnyToAnyPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/any-to-any", {
         parameters: { shared: true },

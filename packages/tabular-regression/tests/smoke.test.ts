@@ -25,7 +25,7 @@ describe("@moritzbrantner/tabular-regression", () => {
         };
       },
     };
-    const pipeline = createTabularRegressionPipeline({
+    const pipeline = createTabularRegressionPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/tabular-regression", {
         parameters: { shared: true },

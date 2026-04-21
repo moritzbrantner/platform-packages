@@ -6,7 +6,15 @@ import {
   createUniversalTaskPipeline,
   getHuggingFaceTaskDescriptor,
   listHuggingFaceTasks,
+  normalizeAutomaticSpeechRecognitionOutput,
+  normalizeImageOutput,
+  normalizeObjectDetectionOutput,
+  normalizeRankingOutput,
+  normalizeScoredLabelsOutput,
+  normalizeTextGenerationOutput,
   type UniversalHuggingFaceProvider,
+  type UniversalTaskInput,
+  type UniversalTaskOutput,
 } from "@moritzbrantner/huggingface-universal";
 
 describe("@moritzbrantner/huggingface-universal", () => {
@@ -72,12 +80,12 @@ describe("@moritzbrantner/huggingface-universal", () => {
         };
       },
     };
-    const first = createUniversalTaskPipeline({
+    const first = createUniversalTaskPipeline<"image-to-text", string, string>({
       descriptor: getHuggingFaceTaskDescriptor("image-to-text"),
       provider,
       model: { task: "image-to-text", model: "demo/captioner" },
     });
-    const second = createUniversalTaskPipeline({
+    const second = createUniversalTaskPipeline<"translation", string | { inputs: string }, string>({
       descriptor: getHuggingFaceTaskDescriptor("translation"),
       provider,
       model: { task: "translation", model: "demo/translator" },
@@ -94,5 +102,45 @@ describe("@moritzbrantner/huggingface-universal", () => {
         .map((result) => result.output)
         .run("image-bytes"),
     ).resolves.toBe("translation:[object Object]");
+  });
+
+  test("normalizes common task outputs while preserving raw escape hatches", () => {
+    expect(normalizeTextGenerationOutput([{ generated_text: "Hello" }])).toEqual([
+      { generatedText: "Hello" },
+    ]);
+    expect(normalizeScoredLabelsOutput([{ label: "cat", score: 0.9 }])).toEqual([
+      { label: "cat", score: 0.9 },
+    ]);
+    expect(
+      normalizeObjectDetectionOutput([
+        { box: { xmax: 3, xmin: 1, ymax: 4, ymin: 2 }, label: "box", score: 0.8 },
+      ]),
+    ).toEqual([
+      { box: { xmax: 3, xmin: 1, ymax: 4, ymin: 2 }, label: "box", score: 0.8 },
+    ]);
+    expect(
+      normalizeAutomaticSpeechRecognitionOutput({
+        chunks: [{ text: "hi", timestamp: [0, 1] }],
+        text: "hi",
+      }),
+    ).toEqual({ chunks: [{ text: "hi", timestamp: [0, 1] }], text: "hi" });
+    expect(normalizeImageOutput({ image: "base64", mime_type: "image/png" })).toEqual({
+      data: "base64",
+      mimeType: "image/png",
+      url: undefined,
+    });
+    expect(normalizeRankingOutput([{ index: 1, score: 0.7, text: "passage" }])).toEqual([
+      { index: 1, score: 0.7, text: "passage" },
+    ]);
+  });
+
+  test("exposes task-specific input and output defaults", () => {
+    const textInput: UniversalTaskInput<"text-generation"> = "Prompt";
+    const labels: UniversalTaskOutput<"image-classification"> = [
+      { label: "invoice", score: 0.98 },
+    ];
+
+    expect(textInput).toBe("Prompt");
+    expect(labels[0]?.label).toBe("invoice");
   });
 });

@@ -3,24 +3,40 @@ import {
   createUniversalTaskPipeline,
   getHuggingFaceTaskDescriptor,
   type CreateUniversalTaskPipelineOptions,
+  type UniversalTaskInput,
+  type UniversalTaskOutput,
   type UniversalTaskPipeline,
+  type UniversalTaskRequest,
+  type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
 export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("text-ranking");
 export const huggingFaceTask = createHuggingFaceTaskPackage("text-ranking");
 
-export type TextRankingPipeline<Input = unknown, Output = unknown> = UniversalTaskPipeline<
+export type TextRankingInput = UniversalTaskInput<"text-ranking">;
+export type TextRankingOutput = UniversalTaskOutput<"text-ranking">;
+export type TextRankingRequest<Input = TextRankingInput> = UniversalTaskRequest<
   "text-ranking",
-  Input,
+  Input
+>;
+export type TextRankingResult<Output = TextRankingOutput> = UniversalTaskResult<
+  "text-ranking",
   Output
 >;
+export type TextRankingPipeline<
+  Input = TextRankingInput,
+  Output = TextRankingOutput,
+> = UniversalTaskPipeline<"text-ranking", Input, Output>;
 
 export type CreateTextRankingPipelineOptions = Omit<
   CreateUniversalTaskPipelineOptions<"text-ranking">,
   "descriptor"
 >;
 
-export function createTextRankingPipeline<Input = unknown, Output = unknown>(
+export function createTextRankingPipeline<
+  Input = TextRankingInput,
+  Output = TextRankingOutput,
+>(
   options: CreateTextRankingPipelineOptions,
 ): TextRankingPipeline<Input, Output> {
   return createUniversalTaskPipeline({

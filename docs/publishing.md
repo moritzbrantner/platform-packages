@@ -29,6 +29,23 @@ It skips unrelated packages until the rest of the repository is release-ready.
 
 The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`.
 
+## Release-readiness categories
+
+The README package inventory is the local source of truth for package status:
+
+- `scaffold-critical`: must stay publishable and adoptable by the maintained scaffold family.
+- `release-ready`: validated for the first non-scaffold standalone install wave.
+- `generated task wrapper`: generated around `@moritzbrantner/huggingface-universal`; publish only after the universal task type map and generated package contract are validated.
+- `experimental`: valid workspace packages that are not included in the first publish expansion.
+
+Before widening `.github/workflows/publish-packages.yml` beyond the scaffold release set:
+
+1. Move each target package to `release-ready` in the README inventory.
+2. Confirm package metadata satisfies the requirements below.
+3. Confirm package tests cover empty inputs, representative data, and cross-package data flow when the package is an adapter.
+4. Add a Changeset for every package being published.
+5. Extend `release:build`, `release:lint`, `release:typecheck`, and `release:test` before adding the package to the publish script.
+
 ## Package requirements
 Every publishable package under `packages/*` must have:
 - a scoped lowercase package name owned by the GitHub Packages publisher

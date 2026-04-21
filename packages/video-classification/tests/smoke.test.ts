@@ -25,7 +25,7 @@ describe("@moritzbrantner/video-classification", () => {
         };
       },
     };
-    const pipeline = createVideoClassificationPipeline({
+    const pipeline = createVideoClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/video-classification", {
         parameters: { shared: true },

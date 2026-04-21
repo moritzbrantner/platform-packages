@@ -1,7 +1,9 @@
 import {
   createDataDensityWindowIndex,
+  createDensityViewportSummary,
   type DataDensityItemWindowQuery,
   type DataDensityMetricRecord,
+  type DataDensityViewportSummary,
   type DataDensityWindow,
   type DataDensityWindowIndexOptions,
   type DataDensityWindowSummary,
@@ -21,6 +23,14 @@ export type TableDensityColumn<TRow> = {
 export type TableDensityRowWindow<TRow> = {
   rows: Array<IndexedTableDensityRow<TRow>>;
   summary: DataDensityWindowSummary;
+};
+
+export type TableDensityViewportSummary = DataDensityViewportSummary & {
+  endIndex: number;
+  filteredRowCount: number;
+  rowCount: number;
+  startIndex: number;
+  totalRowCount: number;
 };
 
 export type TableDensityIndex<TRow> = {
@@ -58,3 +68,20 @@ export function createTableDensityIndex<TRow>(
 }
 
 export const createTableWindowIndex = createTableDensityIndex;
+
+export function createTableDensityViewportSummary<TRow>(
+  window: TableDensityRowWindow<TRow>,
+): TableDensityViewportSummary {
+  return {
+    ...createDensityViewportSummary(
+      "table",
+      window.rows.map((row) => row.metrics),
+      window.summary.visibleItemCount,
+    ),
+    endIndex: window.summary.endIndex,
+    filteredRowCount: window.summary.filteredItemCount,
+    rowCount: window.summary.visibleItemCount,
+    startIndex: window.summary.startIndex,
+    totalRowCount: window.summary.totalItemCount,
+  };
+}

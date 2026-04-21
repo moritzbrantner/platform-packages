@@ -45,6 +45,8 @@ jobs:
       - name: Test
         run: bun run release:test
 
+      # Keep this scoped to the README scaffold-critical and release-ready set.
+      # Expand package scripts and docs/publishing.md readiness checks before widening it.
       - name: Publish scaffold release set
         run: bun run release:publish
         env:

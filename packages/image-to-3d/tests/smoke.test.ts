@@ -25,7 +25,7 @@ describe("@moritzbrantner/image-to-3d", () => {
         };
       },
     };
-    const pipeline = createImageTo3DPipeline({
+    const pipeline = createImageTo3DPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/image-to-3d", {
         parameters: { shared: true },

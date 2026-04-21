@@ -4,7 +4,11 @@ import {
   createUniversalTaskPipeline,
   getHuggingFaceTaskDescriptor,
   type CreateUniversalTaskPipelineOptions,
+  type UniversalTaskInput,
+  type UniversalTaskOutput,
   type UniversalTaskPipeline,
+  type UniversalTaskRequest,
+  type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 import {
   chunkTextForInference,
@@ -21,8 +25,20 @@ export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("question-
 export const huggingFaceTask = createHuggingFaceTaskPackage("question-answering");
 export const createModelReference = huggingFaceTask.createModelReference;
 
-export type QuestionAnsweringUniversalPipeline<Input = unknown, Output = unknown> =
-  UniversalTaskPipeline<"question-answering", Input, Output>;
+export type QuestionAnsweringInput = UniversalTaskInput<"question-answering">;
+export type QuestionAnsweringOutput = UniversalTaskOutput<"question-answering">;
+export type QuestionAnsweringRequest<Input = QuestionAnsweringInput> = UniversalTaskRequest<
+  "question-answering",
+  Input
+>;
+export type QuestionAnsweringResult<Output = QuestionAnsweringOutput> = UniversalTaskResult<
+  "question-answering",
+  Output
+>;
+export type QuestionAnsweringUniversalPipeline<
+  Input = QuestionAnsweringInput,
+  Output = QuestionAnsweringOutput,
+> = UniversalTaskPipeline<"question-answering", Input, Output>;
 
 export type CreateQuestionAnsweringUniversalPipelineOptions = Omit<
   CreateUniversalTaskPipelineOptions<"question-answering">,
@@ -150,7 +166,10 @@ export function createQuestionAnsweringPipeline<
   };
 }
 
-export function createQuestionAnsweringUniversalPipeline<Input = unknown, Output = unknown>(
+export function createQuestionAnsweringUniversalPipeline<
+  Input = QuestionAnsweringInput,
+  Output = QuestionAnsweringOutput,
+>(
   options: CreateQuestionAnsweringUniversalPipelineOptions,
 ): QuestionAnsweringUniversalPipeline<Input, Output> {
   return createUniversalTaskPipeline({

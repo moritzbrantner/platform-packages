@@ -25,7 +25,7 @@ describe("@moritzbrantner/depth-estimation", () => {
         };
       },
     };
-    const pipeline = createDepthEstimationPipeline({
+    const pipeline = createDepthEstimationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/depth-estimation", {
         parameters: { shared: true },

@@ -25,7 +25,7 @@ describe("@moritzbrantner/tabular-classification", () => {
         };
       },
     };
-    const pipeline = createTabularClassificationPipeline({
+    const pipeline = createTabularClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/tabular-classification", {
         parameters: { shared: true },

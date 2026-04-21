@@ -1,4 +1,5 @@
 export {
+  createGeoDensityViewportSummary as createMapDensityViewportSummary,
   createGeoPointAggregationIndex as createPointAggregationIndex,
   getBoundsFromGeoPoints as getBoundsFromPoints,
 } from "@moritzbrantner/data-density";
@@ -8,6 +9,7 @@ export type {
   AggregatedGeoDensityPoint as AggregatedMapPoint,
   DataDensityMetricRecord as MapMetricRecord,
   GeoDensityPoint as MapPoint,
+  GeoDensityViewportSummary as MapDensityViewportSummary,
   GeoDensityPointFilter as MapPointFilter,
   GeoPointAggregationIndex as PointAggregationIndex,
   GeoPointAggregationIndexOptions as PointAggregationIndexOptions,

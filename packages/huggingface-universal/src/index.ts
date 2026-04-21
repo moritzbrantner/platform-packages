@@ -447,9 +447,297 @@ export interface HuggingFaceModelReference<
   parameters?: Record<string, unknown>;
 }
 
+export type UniversalBinaryInput = Blob | ArrayBuffer | Uint8Array | string;
+
+export type UniversalImageInput = UniversalBinaryInput;
+export type UniversalAudioInput = UniversalBinaryInput;
+export type UniversalVideoInput = UniversalBinaryInput;
+export type UniversalDocumentInput = UniversalBinaryInput;
+
+export type UniversalTableInput =
+  | readonly Record<string, unknown>[]
+  | {
+      rows: readonly Record<string, unknown>[];
+      columns?: readonly string[];
+    };
+
+export type UniversalTextPairInput = {
+  context?: string;
+  prompt?: string;
+  question?: string;
+  text?: string;
+};
+
+export type UniversalImageTextInput = {
+  image: UniversalImageInput;
+  prompt?: string;
+  text?: string;
+};
+
+export type UniversalAudioTextInput = {
+  audio: UniversalAudioInput;
+  prompt?: string;
+  text?: string;
+};
+
+export type UniversalVideoTextInput = {
+  prompt?: string;
+  text?: string;
+  video: UniversalVideoInput;
+};
+
+export type UniversalLabelInput<TInput = string> = {
+  candidateLabels: readonly string[];
+  input: TInput;
+};
+
+export type UniversalTaskFallbackInput = unknown;
+export type UniversalTaskFallbackOutput = unknown;
+
+export interface UniversalScoredLabel {
+  label: string;
+  score: number;
+}
+
+export interface UniversalTextGenerationOutput {
+  generatedText: string;
+}
+
+export interface UniversalTranscriptionOutput {
+  text: string;
+  chunks?: Array<{
+    text: string;
+    timestamp?: [start: number, end: number];
+  }>;
+}
+
+export interface UniversalBoundingBox {
+  xmax: number;
+  xmin: number;
+  ymax: number;
+  ymin: number;
+}
+
+export interface UniversalObjectDetectionOutput extends UniversalScoredLabel {
+  box: UniversalBoundingBox;
+}
+
+export interface UniversalImageOutput {
+  blob?: Blob;
+  data?: ArrayBuffer | Uint8Array | string;
+  mimeType?: string;
+  url?: string;
+}
+
+export type UniversalEmbeddingOutput = number[] | number[][];
+
+export interface UniversalRankingOutput {
+  index?: number;
+  label?: string;
+  score: number;
+  text?: string;
+}
+
+export type UniversalTaskTypeMap = {
+  "any-to-any": {
+    input: UniversalTaskFallbackInput;
+    output: UniversalTaskFallbackOutput;
+  };
+  "audio-classification": {
+    input: UniversalAudioInput;
+    output: UniversalScoredLabel[];
+  };
+  "audio-text-to-text": {
+    input: UniversalAudioTextInput;
+    output: UniversalTextGenerationOutput[];
+  };
+  "audio-to-audio": {
+    input: UniversalAudioInput;
+    output: UniversalAudioInput;
+  };
+  "automatic-speech-recognition": {
+    input: UniversalAudioInput;
+    output: UniversalTranscriptionOutput;
+  };
+  "depth-estimation": {
+    input: UniversalImageInput;
+    output: UniversalImageOutput;
+  };
+  "document-question-answering": {
+    input: UniversalTextPairInput & { document: UniversalDocumentInput };
+    output: UniversalTextGenerationOutput | UniversalScoredLabel[];
+  };
+  "feature-extraction": {
+    input: string;
+    output: UniversalEmbeddingOutput;
+  };
+  "fill-mask": {
+    input: string;
+    output: UniversalScoredLabel[];
+  };
+  "image-classification": {
+    input: UniversalImageInput;
+    output: UniversalScoredLabel[];
+  };
+  "image-feature-extraction": {
+    input: UniversalImageInput;
+    output: UniversalEmbeddingOutput;
+  };
+  "image-segmentation": {
+    input: UniversalImageInput;
+    output: UniversalImageOutput[];
+  };
+  "image-text-to-image": {
+    input: UniversalImageTextInput;
+    output: UniversalImageOutput;
+  };
+  "image-text-to-text": {
+    input: UniversalImageTextInput;
+    output: UniversalTextGenerationOutput[];
+  };
+  "image-text-to-video": {
+    input: UniversalImageTextInput;
+    output: UniversalVideoInput;
+  };
+  "image-to-3d": {
+    input: UniversalImageInput;
+    output: UniversalTaskFallbackOutput;
+  };
+  "image-to-image": {
+    input: UniversalImageInput;
+    output: UniversalImageOutput;
+  };
+  "image-to-text": {
+    input: UniversalImageInput;
+    output: UniversalTextGenerationOutput[];
+  };
+  "image-to-video": {
+    input: UniversalImageInput;
+    output: UniversalVideoInput;
+  };
+  "keypoint-detection": {
+    input: UniversalImageInput;
+    output: UniversalTaskFallbackOutput;
+  };
+  "mask-generation": {
+    input: UniversalImageInput;
+    output: UniversalImageOutput[];
+  };
+  "object-detection": {
+    input: UniversalImageInput;
+    output: UniversalObjectDetectionOutput[];
+  };
+  "question-answering": {
+    input: UniversalTextPairInput;
+    output: UniversalTextGenerationOutput | UniversalScoredLabel[];
+  };
+  "reinforcement-learning": {
+    input: UniversalTaskFallbackInput;
+    output: UniversalTaskFallbackOutput;
+  };
+  "sentence-similarity": {
+    input: readonly string[] | { sentences: readonly string[]; sourceSentence?: string };
+    output: UniversalEmbeddingOutput | UniversalRankingOutput[];
+  };
+  "summarization": {
+    input: string;
+    output: UniversalTextGenerationOutput[];
+  };
+  "table-question-answering": {
+    input: UniversalTextPairInput & { table: UniversalTableInput };
+    output: UniversalTextGenerationOutput | UniversalScoredLabel[];
+  };
+  "tabular-classification": {
+    input: UniversalTableInput;
+    output: UniversalScoredLabel[];
+  };
+  "tabular-regression": {
+    input: UniversalTableInput;
+    output: UniversalScoredLabel[];
+  };
+  "text-classification": {
+    input: string;
+    output: UniversalScoredLabel[];
+  };
+  "text-generation": {
+    input: string;
+    output: UniversalTextGenerationOutput[];
+  };
+  "text-ranking": {
+    input: UniversalTextPairInput | { query: string; texts: readonly string[] };
+    output: UniversalRankingOutput[];
+  };
+  "text-to-3d": {
+    input: string;
+    output: UniversalTaskFallbackOutput;
+  };
+  "text-to-image": {
+    input: string;
+    output: UniversalImageOutput;
+  };
+  "text-to-speech": {
+    input: string;
+    output: UniversalAudioInput;
+  };
+  "text-to-video": {
+    input: string;
+    output: UniversalVideoInput;
+  };
+  "token-classification": {
+    input: string;
+    output: UniversalScoredLabel[];
+  };
+  "translation": {
+    input: string;
+    output: UniversalTextGenerationOutput[];
+  };
+  "unconditional-image-generation": {
+    input: UniversalTaskFallbackInput;
+    output: UniversalImageOutput;
+  };
+  "video-classification": {
+    input: UniversalVideoInput;
+    output: UniversalScoredLabel[];
+  };
+  "video-text-to-text": {
+    input: UniversalVideoTextInput;
+    output: UniversalTextGenerationOutput[];
+  };
+  "video-to-video": {
+    input: UniversalVideoInput;
+    output: UniversalVideoInput;
+  };
+  "visual-document-retrieval": {
+    input: UniversalTextPairInput & { documents?: readonly UniversalDocumentInput[] };
+    output: UniversalRankingOutput[];
+  };
+  "visual-question-answering": {
+    input: UniversalImageTextInput;
+    output: UniversalTextGenerationOutput | UniversalScoredLabel[];
+  };
+  "zero-shot-classification": {
+    input: UniversalLabelInput<string>;
+    output: UniversalScoredLabel[];
+  };
+  "zero-shot-image-classification": {
+    input: UniversalLabelInput<UniversalImageInput>;
+    output: UniversalScoredLabel[];
+  };
+  "zero-shot-object-detection": {
+    input: UniversalLabelInput<UniversalImageInput>;
+    output: UniversalObjectDetectionOutput[];
+  };
+};
+
+export type UniversalTaskInput<Task extends HuggingFaceTaskSlug> =
+  UniversalTaskTypeMap[Task]["input"];
+
+export type UniversalTaskOutput<Task extends HuggingFaceTaskSlug> =
+  UniversalTaskTypeMap[Task]["output"];
+
 export interface UniversalTaskRequest<
   Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug,
-  Input = unknown,
+  Input = UniversalTaskInput<Task>,
 > {
   task: Task;
   model: HuggingFaceModelReference<Task>;
@@ -461,7 +749,7 @@ export interface UniversalTaskRequest<
 
 export interface UniversalTaskResult<
   Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug,
-  Output = unknown,
+  Output = UniversalTaskOutput<Task>,
 > {
   task: Task;
   model: string;
@@ -472,7 +760,7 @@ export interface UniversalTaskResult<
 
 export interface UniversalHuggingFaceProvider {
   id: string;
-  run<Task extends HuggingFaceTaskSlug, Input = unknown>(
+  run<Task extends HuggingFaceTaskSlug, Input = UniversalTaskInput<Task>>(
     request: UniversalTaskRequest<Task, Input>,
   ): Promise<UniversalTaskResult<Task, unknown>>;
 }
@@ -483,8 +771,8 @@ export interface UniversalTaskRunOptions extends PipelineRunContext {
 
 export interface UniversalTaskPipeline<
   Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug,
-  Input = unknown,
-  Output = unknown,
+  Input = UniversalTaskInput<Task>,
+  Output = UniversalTaskOutput<Task>,
 > {
   descriptor: HuggingFaceTaskDescriptor<Task>;
   model: HuggingFaceModelReference<Task>;
@@ -535,7 +823,7 @@ export interface HuggingFaceTaskPackage<
     model: string,
     options?: Omit<HuggingFaceModelReference<Task>, "model" | "task">,
   ): HuggingFaceModelReference<Task>;
-  createPipeline<Input = unknown, Output = unknown>(
+  createPipeline<Input = UniversalTaskInput<Task>, Output = UniversalTaskOutput<Task>>(
     options: Omit<CreateUniversalTaskPipelineOptions<Task>, "descriptor">,
   ): UniversalTaskPipeline<Task, Input, Output>;
 }
@@ -600,8 +888,8 @@ export function createHuggingFaceTaskPackage<Task extends HuggingFaceTaskSlug>(
 
 export function createUniversalTaskPipeline<
   Task extends HuggingFaceTaskSlug,
-  Input = unknown,
-  Output = unknown,
+  Input = UniversalTaskInput<Task>,
+  Output = UniversalTaskOutput<Task>,
 >(
   options: CreateUniversalTaskPipelineOptions<Task>,
 ): UniversalTaskPipeline<Task, Input, Output> {
@@ -625,6 +913,172 @@ export function createUniversalTaskPipeline<
       return result as UniversalTaskResult<Task, Output>;
     },
   });
+}
+
+export function normalizeTextGenerationOutput(
+  raw: unknown,
+): UniversalTextGenerationOutput[] {
+  if (Array.isArray(raw)) {
+    return raw.flatMap((item) => normalizeTextGenerationOutput(item));
+  }
+
+  if (isRecord(raw)) {
+    const generatedText = readString(raw, "generated_text") ?? readString(raw, "generatedText");
+
+    if (generatedText !== undefined) {
+      return [{ generatedText }];
+    }
+
+    const summaryText = readString(raw, "summary_text");
+
+    if (summaryText !== undefined) {
+      return [{ generatedText: summaryText }];
+    }
+
+    const translationText = readString(raw, "translation_text");
+
+    if (translationText !== undefined) {
+      return [{ generatedText: translationText }];
+    }
+  }
+
+  if (typeof raw === "string") {
+    return [{ generatedText: raw }];
+  }
+
+  return [];
+}
+
+export function normalizeScoredLabelsOutput(raw: unknown): UniversalScoredLabel[] {
+  if (Array.isArray(raw)) {
+    return raw.flatMap((item) => normalizeScoredLabelsOutput(item));
+  }
+
+  if (!isRecord(raw)) {
+    return [];
+  }
+
+  const label = readString(raw, "label");
+  const score = readNumber(raw, "score");
+
+  return label !== undefined && score !== undefined ? [{ label, score }] : [];
+}
+
+export function normalizeObjectDetectionOutput(
+  raw: unknown,
+): UniversalObjectDetectionOutput[] {
+  if (Array.isArray(raw)) {
+    return raw.flatMap((item) => normalizeObjectDetectionOutput(item));
+  }
+
+  if (!isRecord(raw) || !isRecord(raw.box)) {
+    return [];
+  }
+
+  const label = readString(raw, "label");
+  const score = readNumber(raw, "score");
+  const xmin = readNumber(raw.box, "xmin");
+  const ymin = readNumber(raw.box, "ymin");
+  const xmax = readNumber(raw.box, "xmax");
+  const ymax = readNumber(raw.box, "ymax");
+
+  if (
+    label === undefined ||
+    score === undefined ||
+    xmin === undefined ||
+    ymin === undefined ||
+    xmax === undefined ||
+    ymax === undefined
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      box: { xmax, xmin, ymax, ymin },
+      label,
+      score,
+    },
+  ];
+}
+
+export function normalizeAutomaticSpeechRecognitionOutput(
+  raw: unknown,
+): UniversalTranscriptionOutput {
+  if (isRecord(raw)) {
+    return {
+      chunks: Array.isArray(raw.chunks)
+        ? raw.chunks
+            .map((chunk) => normalizeTranscriptionChunk(chunk))
+            .filter((chunk): chunk is NonNullable<typeof chunk> => chunk !== null)
+        : undefined,
+      text: readString(raw, "text") ?? "",
+    };
+  }
+
+  return {
+    text: typeof raw === "string" ? raw : "",
+  };
+}
+
+export function normalizeImageOutput(raw: unknown): UniversalImageOutput {
+  if (raw instanceof Blob) {
+    return {
+      blob: raw,
+      mimeType: raw.type || undefined,
+    };
+  }
+
+  if (raw instanceof ArrayBuffer || raw instanceof Uint8Array || typeof raw === "string") {
+    return {
+      data: raw,
+    };
+  }
+
+  if (isRecord(raw)) {
+    return {
+      data: isImageDataValue(raw.image) ? raw.image : undefined,
+      mimeType: readString(raw, "mime_type") ?? readString(raw, "mimeType"),
+      url: readString(raw, "url"),
+    };
+  }
+
+  return {};
+}
+
+export function normalizeRankingOutput(raw: unknown): UniversalRankingOutput[] {
+  if (Array.isArray(raw)) {
+    return raw.flatMap((item) => normalizeRankingOutput(item));
+  }
+
+  if (!isRecord(raw)) {
+    return [];
+  }
+
+  const score = readNumber(raw, "score");
+
+  if (score === undefined) {
+    return [];
+  }
+
+  const output: UniversalRankingOutput = { score };
+  const index = readNumber(raw, "index");
+  const label = readString(raw, "label");
+  const text = readString(raw, "text");
+
+  if (index !== undefined) {
+    output.index = index;
+  }
+
+  if (label !== undefined) {
+    output.label = label;
+  }
+
+  if (text !== undefined) {
+    output.text = text;
+  }
+
+  return [output];
 }
 
 export function createHuggingFaceRouterProvider(
@@ -763,6 +1217,51 @@ function safeParseJson(value: string): unknown {
   } catch {
     return value;
   }
+}
+
+function normalizeTranscriptionChunk(value: unknown) {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const text = readString(value, "text");
+
+  if (text === undefined) {
+    return null;
+  }
+
+  const timestamp = Array.isArray(value.timestamp)
+    ? normalizeTimestamp(value.timestamp)
+    : undefined;
+
+  return timestamp ? { text, timestamp } : { text };
+}
+
+function normalizeTimestamp(value: unknown[]): [start: number, end: number] | undefined {
+  const [start, end] = value;
+
+  return typeof start === "number" &&
+    Number.isFinite(start) &&
+    typeof end === "number" &&
+    Number.isFinite(end)
+    ? [start, end]
+    : undefined;
+}
+
+function readString(record: Record<string, unknown>, key: string): string | undefined {
+  const value = record[key];
+
+  return typeof value === "string" ? value : undefined;
+}
+
+function readNumber(record: Record<string, unknown>, key: string): number | undefined {
+  const value = record[key];
+
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function isImageDataValue(value: unknown): value is UniversalImageOutput["data"] {
+  return value instanceof ArrayBuffer || value instanceof Uint8Array || typeof value === "string";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

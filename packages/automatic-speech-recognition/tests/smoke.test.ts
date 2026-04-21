@@ -25,7 +25,7 @@ describe("@moritzbrantner/automatic-speech-recognition", () => {
         };
       },
     };
-    const pipeline = createAutomaticSpeechRecognitionPipeline({
+    const pipeline = createAutomaticSpeechRecognitionPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/automatic-speech-recognition", {
         parameters: { shared: true },

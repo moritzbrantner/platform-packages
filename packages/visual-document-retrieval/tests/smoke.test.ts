@@ -25,7 +25,7 @@ describe("@moritzbrantner/visual-document-retrieval", () => {
         };
       },
     };
-    const pipeline = createVisualDocumentRetrievalPipeline({
+    const pipeline = createVisualDocumentRetrievalPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/visual-document-retrieval", {
         parameters: { shared: true },

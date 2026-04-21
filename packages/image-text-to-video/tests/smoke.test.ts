@@ -25,7 +25,7 @@ describe("@moritzbrantner/image-text-to-video", () => {
         };
       },
     };
-    const pipeline = createImageTextToVideoPipeline({
+    const pipeline = createImageTextToVideoPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/image-text-to-video", {
         parameters: { shared: true },

@@ -25,7 +25,7 @@ describe("@moritzbrantner/reinforcement-learning", () => {
         };
       },
     };
-    const pipeline = createReinforcementLearningPipeline({
+    const pipeline = createReinforcementLearningPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/reinforcement-learning", {
         parameters: { shared: true },

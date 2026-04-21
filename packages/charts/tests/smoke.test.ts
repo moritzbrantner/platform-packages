@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   createChartDensityIndex,
   createChartDensitySample,
+  createChartDensityViewportSummary,
 } from "@moritzbrantner/charts";
 
 describe("@moritzbrantner/charts", () => {
@@ -27,6 +28,16 @@ describe("@moritzbrantner/charts", () => {
     expect(series.summary.metrics.orders).toBe(12);
     expect(series.summary.valueMode).toBe("count");
     expect(series.samples.map((sample) => sample.y)).toEqual([4, 4, 4]);
+    expect(createChartDensityViewportSummary(series)).toMatchObject({
+      binCount: 3,
+      itemCount: 12,
+      kind: "chart",
+      metricKeys: ["orders"],
+      metrics: { orders: 12 },
+      sampleCount: 3,
+      valueMode: "count",
+      xDomain: [0, 11],
+    });
     expect(index.getPointById("point-5")?.y).toBe(1);
   });
 

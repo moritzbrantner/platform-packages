@@ -25,7 +25,7 @@ describe("@moritzbrantner/keypoint-detection", () => {
         };
       },
     };
-    const pipeline = createKeypointDetectionPipeline({
+    const pipeline = createKeypointDetectionPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/keypoint-detection", {
         parameters: { shared: true },

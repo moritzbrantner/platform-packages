@@ -25,7 +25,7 @@ describe("@moritzbrantner/visual-question-answering", () => {
         };
       },
     };
-    const pipeline = createVisualQuestionAnsweringPipeline({
+    const pipeline = createVisualQuestionAnsweringPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/visual-question-answering", {
         parameters: { shared: true },

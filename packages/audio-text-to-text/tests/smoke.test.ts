@@ -25,7 +25,7 @@ describe("@moritzbrantner/audio-text-to-text", () => {
         };
       },
     };
-    const pipeline = createAudioTextToTextPipeline({
+    const pipeline = createAudioTextToTextPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/audio-text-to-text", {
         parameters: { shared: true },

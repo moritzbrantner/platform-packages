@@ -2,6 +2,16 @@ import Supercluster from "supercluster";
 
 export type DataDensityMetricRecord = Record<string, number>;
 
+export type DataDensityMetricSummary = {
+  itemCount: number;
+  metricKeys: string[];
+  metrics: DataDensityMetricRecord;
+};
+
+export type DataDensityViewportSummary = DataDensityMetricSummary & {
+  kind: "chart" | "graph" | "map" | "table";
+};
+
 export type DataDensityItemWindowQuery = {
   limit: number;
   offset: number;
@@ -159,6 +169,14 @@ export type GeoViewportAggregation<TProperties = Record<string, unknown>> = {
   summary: VisibleGeoAggregationSummary;
 };
 
+export type GeoDensityViewportSummary = DataDensityViewportSummary & {
+  bounds: GeoViewportAggregationQuery["bounds"];
+  visibleClusterCount: number;
+  visiblePointCount: number;
+  visibleUnclusteredCount: number;
+  zoom: number;
+};
+
 export type GeoDensityPointFilter<TProperties = Record<string, unknown>> = (
   point: IndexedGeoDensityPoint<TProperties>,
 ) => boolean;
@@ -253,6 +271,47 @@ export function sumDensityMetrics(
   }
 
   return totals;
+}
+
+export function createDensityMetricSummary(
+  metricRecords: readonly (DataDensityMetricRecord | undefined)[],
+  itemCount = metricRecords.length,
+): DataDensityMetricSummary {
+  const metricKeys = collectDensityMetricKeys(metricRecords);
+
+  return {
+    itemCount,
+    metricKeys,
+    metrics: sumDensityMetrics(metricRecords, metricKeys),
+  };
+}
+
+export function createDensityViewportSummary(
+  kind: DataDensityViewportSummary["kind"],
+  metricRecords: readonly (DataDensityMetricRecord | undefined)[],
+  itemCount = metricRecords.length,
+): DataDensityViewportSummary {
+  return {
+    kind,
+    ...createDensityMetricSummary(metricRecords, itemCount),
+  };
+}
+
+export function createGeoDensityViewportSummary<TProperties = Record<string, unknown>>(
+  aggregation: GeoViewportAggregation<TProperties>,
+): GeoDensityViewportSummary {
+  return {
+    ...createDensityViewportSummary(
+      "map",
+      aggregation.features.map((feature) => feature.metrics),
+      aggregation.summary.visiblePointCount,
+    ),
+    bounds: aggregation.summary.bounds,
+    visibleClusterCount: aggregation.summary.visibleClusterCount,
+    visiblePointCount: aggregation.summary.visiblePointCount,
+    visibleUnclusteredCount: aggregation.summary.visibleUnclusteredCount,
+    zoom: aggregation.summary.zoom,
+  };
 }
 
 export function createDataDensityWindowIndex<TItem>(

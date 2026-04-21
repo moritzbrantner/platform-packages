@@ -25,7 +25,7 @@ describe("@moritzbrantner/mask-generation", () => {
         };
       },
     };
-    const pipeline = createMaskGenerationPipeline({
+    const pipeline = createMaskGenerationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/mask-generation", {
         parameters: { shared: true },

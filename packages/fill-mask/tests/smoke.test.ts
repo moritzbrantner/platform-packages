@@ -25,7 +25,7 @@ describe("@moritzbrantner/fill-mask", () => {
         };
       },
     };
-    const pipeline = createFillMaskPipeline({
+    const pipeline = createFillMaskPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/fill-mask", {
         parameters: { shared: true },

@@ -25,7 +25,7 @@ describe("@moritzbrantner/image-classification", () => {
         };
       },
     };
-    const pipeline = createImageClassificationPipeline({
+    const pipeline = createImageClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/image-classification", {
         parameters: { shared: true },

@@ -25,7 +25,7 @@ describe("@moritzbrantner/sentence-similarity", () => {
         };
       },
     };
-    const pipeline = createSentenceSimilarityPipeline({
+    const pipeline = createSentenceSimilarityPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/sentence-similarity", {
         parameters: { shared: true },

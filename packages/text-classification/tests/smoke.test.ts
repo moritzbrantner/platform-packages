@@ -25,7 +25,7 @@ describe("@moritzbrantner/text-classification", () => {
         };
       },
     };
-    const pipeline = createTextClassificationPipeline({
+    const pipeline = createTextClassificationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/text-classification", {
         parameters: { shared: true },

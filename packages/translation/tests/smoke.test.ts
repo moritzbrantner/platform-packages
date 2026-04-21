@@ -25,7 +25,7 @@ describe("@moritzbrantner/translation", () => {
         };
       },
     };
-    const pipeline = createTranslationPipeline({
+    const pipeline = createTranslationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/translation", {
         parameters: { shared: true },

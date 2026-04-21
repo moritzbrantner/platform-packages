@@ -4,6 +4,9 @@ import {
   collectDensityMetricKeys,
   createBinnedSeriesIndex,
   createDataDensityWindowIndex,
+  createDensityMetricSummary,
+  createDensityViewportSummary,
+  createGeoDensityViewportSummary,
   createGeoPointAggregationIndex,
   getBoundsFromGeoPoints,
   sumDensityMetrics,
@@ -27,6 +30,19 @@ describe("@moritzbrantner/data-density", () => {
         metricKeys,
       ),
     ).toEqual({ margin: 8, orders: 3, revenue: 30 });
+    expect(
+      createDensityMetricSummary([{ orders: 2 }, { orders: 3, revenue: 10 }]),
+    ).toEqual({
+      itemCount: 2,
+      metricKeys: ["orders", "revenue"],
+      metrics: { orders: 5, revenue: 10 },
+    });
+    expect(createDensityViewportSummary("table", [{ rows: 4 }])).toEqual({
+      itemCount: 1,
+      kind: "table",
+      metricKeys: ["rows"],
+      metrics: { rows: 4 },
+    });
   });
 
   test("creates overscanned windows for large ordered data", () => {
@@ -159,6 +175,14 @@ describe("@moritzbrantner/data-density", () => {
     expect(aggregation.summary.visiblePointCount).toBe(3);
     expect(aggregation.summary.metrics.revenue).toBe(2_400);
     expect(aggregation.features.some((feature) => feature.kind === "cluster")).toBe(true);
+    expect(createGeoDensityViewportSummary(aggregation)).toMatchObject({
+      itemCount: 3,
+      kind: "map",
+      metricKeys: ["demand", "revenue"],
+      metrics: { demand: 15, revenue: 2_400 },
+      visiblePointCount: 3,
+      zoom: 2,
+    });
     expect(getBoundsFromGeoPoints(points)).toEqual([-118.2437, 34.0522, -74.002, 40.7134]);
   });
 });

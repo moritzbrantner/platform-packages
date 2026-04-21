@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
 
-import { createPointAggregationIndex, getBoundsFromPoints, type MapPoint } from "../src";
+import {
+  createMapDensityViewportSummary,
+  createPointAggregationIndex,
+  getBoundsFromPoints,
+  type MapPoint,
+} from "../src";
 
 type TestPoint = MapPoint<{
   city: string;
@@ -39,6 +44,12 @@ describe("@moritzbrantner/maps aggregation", () => {
 
     expect(aggregation.summary.visiblePointCount).toBe(3);
     expect(aggregation.summary.metrics.revenue).toBe(2400);
+    expect(createMapDensityViewportSummary(aggregation)).toMatchObject({
+      itemCount: 3,
+      kind: "map",
+      metrics: { demand: 15, revenue: 2400 },
+      visiblePointCount: 3,
+    });
     expect(aggregation.features.some((feature) => feature.kind === "cluster")).toBe(true);
   });
 

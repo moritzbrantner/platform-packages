@@ -3,24 +3,40 @@ import {
   createUniversalTaskPipeline,
   getHuggingFaceTaskDescriptor,
   type CreateUniversalTaskPipelineOptions,
+  type UniversalTaskInput,
+  type UniversalTaskOutput,
   type UniversalTaskPipeline,
+  type UniversalTaskRequest,
+  type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
 export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("translation");
 export const huggingFaceTask = createHuggingFaceTaskPackage("translation");
 
-export type TranslationPipeline<Input = unknown, Output = unknown> = UniversalTaskPipeline<
+export type TranslationInput = UniversalTaskInput<"translation">;
+export type TranslationOutput = UniversalTaskOutput<"translation">;
+export type TranslationRequest<Input = TranslationInput> = UniversalTaskRequest<
   "translation",
-  Input,
+  Input
+>;
+export type TranslationResult<Output = TranslationOutput> = UniversalTaskResult<
+  "translation",
   Output
 >;
+export type TranslationPipeline<
+  Input = TranslationInput,
+  Output = TranslationOutput,
+> = UniversalTaskPipeline<"translation", Input, Output>;
 
 export type CreateTranslationPipelineOptions = Omit<
   CreateUniversalTaskPipelineOptions<"translation">,
   "descriptor"
 >;
 
-export function createTranslationPipeline<Input = unknown, Output = unknown>(
+export function createTranslationPipeline<
+  Input = TranslationInput,
+  Output = TranslationOutput,
+>(
   options: CreateTranslationPipelineOptions,
 ): TranslationPipeline<Input, Output> {
   return createUniversalTaskPipeline({

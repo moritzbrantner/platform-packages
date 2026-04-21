@@ -25,7 +25,7 @@ describe("@moritzbrantner/object-detection", () => {
         };
       },
     };
-    const pipeline = createObjectDetectionPipeline({
+    const pipeline = createObjectDetectionPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/object-detection", {
         parameters: { shared: true },

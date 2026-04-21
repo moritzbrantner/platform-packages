@@ -25,7 +25,7 @@ describe("@moritzbrantner/table-question-answering", () => {
         };
       },
     };
-    const pipeline = createTableQuestionAnsweringPipeline({
+    const pipeline = createTableQuestionAnsweringPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/table-question-answering", {
         parameters: { shared: true },

@@ -25,7 +25,7 @@ describe("@moritzbrantner/text-generation", () => {
         };
       },
     };
-    const pipeline = createTextGenerationPipeline({
+    const pipeline = createTextGenerationPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/text-generation", {
         parameters: { shared: true },

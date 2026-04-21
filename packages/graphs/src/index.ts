@@ -1,10 +1,12 @@
 import {
   collectDensityMetricKeys,
   createDataDensityWindowIndex,
+  createDensityViewportSummary,
   normalizeDensityMetrics,
   sumDensityMetrics,
   type DataDensityItemWindowQuery,
   type DataDensityMetricRecord,
+  type DataDensityViewportSummary,
   type DataDensityWindowSummary,
 } from "@moritzbrantner/data-density";
 
@@ -81,6 +83,15 @@ export type GraphDensitySubgraph<
     edgeMode: GraphDensityEdgeMode;
     selectedNodeCount: number;
   };
+};
+
+export type GraphDensityViewportSummary = DataDensityViewportSummary & {
+  edgeCount: number;
+  edgeMetricKeys: string[];
+  edgeMetrics: GraphMetricRecord;
+  edgeMode: GraphDensityEdgeMode;
+  nodeCount: number;
+  selectedNodeCount: number;
 };
 
 export type GraphDensitySubgraphQuery = DataDensityItemWindowQuery & {
@@ -199,6 +210,34 @@ export function createGraphDensityIndex<
 }
 
 export const createGraphWindowIndex = createGraphDensityIndex;
+
+export function createGraphDensityViewportSummary<
+  TNodeProperties = Record<string, unknown>,
+  TEdgeProperties = Record<string, unknown>,
+>(
+  subgraph: GraphDensitySubgraph<TNodeProperties, TEdgeProperties>,
+): GraphDensityViewportSummary {
+  const edgeMetricKeys = collectDensityMetricKeys(
+    subgraph.edges.map((edge) => edge.metrics),
+  );
+
+  return {
+    ...createDensityViewportSummary(
+      "graph",
+      subgraph.nodes.map((node) => node.metrics),
+      subgraph.nodes.length,
+    ),
+    edgeCount: subgraph.summary.edgeCount,
+    edgeMetricKeys,
+    edgeMetrics: sumDensityMetrics(
+      subgraph.edges.map((edge) => edge.metrics),
+      edgeMetricKeys,
+    ),
+    edgeMode: subgraph.summary.edgeMode,
+    nodeCount: subgraph.nodes.length,
+    selectedNodeCount: subgraph.summary.selectedNodeCount,
+  };
+}
 
 function normalizeGraphNode<TProperties>(
   node: GraphDensityNode<TProperties>,

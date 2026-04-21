@@ -25,7 +25,7 @@ describe("@moritzbrantner/document-question-answering", () => {
         };
       },
     };
-    const pipeline = createDocumentQuestionAnsweringPipeline({
+    const pipeline = createDocumentQuestionAnsweringPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/document-question-answering", {
         parameters: { shared: true },

@@ -25,7 +25,7 @@ describe("@moritzbrantner/text-to-3d", () => {
         };
       },
     };
-    const pipeline = createTextTo3DPipeline({
+    const pipeline = createTextTo3DPipeline<string, unknown>({
       provider,
       model: createModelReference("demo/text-to-3d", {
         parameters: { shared: true },
