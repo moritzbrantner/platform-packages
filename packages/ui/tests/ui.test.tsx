@@ -692,11 +692,52 @@ describe("@moritzbrantner/ui", () => {
     );
 
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Workspace/ }).getAttribute("aria-expanded")).toBe(
-      "true",
-    );
+    const trigger = screen.getByRole("button", { name: /Workspace/ });
+    const submenu = screen
+      .getByText("Directory and profiles.")
+      .closest('[data-slot="platform-navbar-submenu"]');
+
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(trigger.getAttribute("aria-controls")).toBe(submenu?.id);
+    expect(submenu?.className).toContain("fixed");
+    expect(submenu?.className).toContain("z-[100]");
     expect(screen.getByRole("link", { name: /People/ }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByText("Directory and profiles.")).toBeTruthy();
+  });
+
+  test("keeps only the latest navbar submenu open across mounted navbars", async () => {
+    render(
+      <>
+        <PlatformNavbar
+          aria-label="First navigation"
+          brand="First"
+          groups={navigationGroups}
+          defaultOpenGroupId="discover"
+          variant="web"
+        />
+        <PlatformNavbar
+          aria-label="Second navigation"
+          brand="Second"
+          groups={navigationGroups}
+          defaultOpenGroupId="workspace"
+          variant="web"
+        />
+      </>,
+    );
+
+    await waitFor(() => {
+      expect(document.querySelectorAll('[data-slot="platform-navbar-submenu"]').length).toBe(1);
+    });
+    expect(screen.queryByText("Open routes for visitors.")).toBeNull();
+    expect(screen.getByText("Directory and profiles.")).toBeTruthy();
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Discover/ })[0]);
+
+    await waitFor(() => {
+      expect(document.querySelectorAll('[data-slot="platform-navbar-submenu"]').length).toBe(1);
+    });
+    expect(screen.getByText("Open routes for visitors.")).toBeTruthy();
+    expect(screen.queryByText("Directory and profiles.")).toBeNull();
   });
 
   test("opens submenus and reports selected navbar items", () => {

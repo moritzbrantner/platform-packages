@@ -173,6 +173,7 @@ export default defineConfig({
         linguisticsCorpus: path.resolve(rootDir, "linguistics-corpus.html"),
         linguisticsLearning: path.resolve(rootDir, "linguistics-learning.html"),
         maps: path.resolve(rootDir, "maps.html"),
+        mapEdgeCases: path.resolve(rootDir, "map-edge-cases.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
         temporalMaps: path.resolve(rootDir, "temporal-maps.html"),
         mediaEditor: path.resolve(rootDir, "media-editor.html"),

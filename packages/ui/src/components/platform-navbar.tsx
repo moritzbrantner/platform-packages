@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 
 import { cn } from "../lib/cn";
@@ -57,8 +58,7 @@ const variantConfig = {
     brand: "w-full justify-between px-3",
     groups: "grid w-full grid-cols-3 gap-1",
     trigger: "min-h-14 flex-col px-2 py-2 text-xs",
-    panel:
-      "left-2 right-2 top-[calc(100%+0.5rem)] max-h-[70vh] origin-top overflow-y-auto rounded-xl p-2",
+    panel: "origin-top overflow-y-auto rounded-xl p-2",
     list: "grid gap-2",
   },
   web: {
@@ -67,8 +67,7 @@ const variantConfig = {
     brand: "min-w-36 px-4",
     groups: "flex min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto",
     trigger: "h-10 px-4 text-sm",
-    panel:
-      "left-1/2 top-[calc(100%+0.75rem)] w-[min(58rem,calc(100vw-2rem))] -translate-x-1/2 origin-top rounded-xl p-3",
+    panel: "origin-top rounded-xl p-3",
     list: "grid gap-2 sm:grid-cols-2 lg:grid-cols-3",
   },
   desktop: {
@@ -77,8 +76,7 @@ const variantConfig = {
     brand: "min-w-44 px-3",
     groups: "flex min-w-0 flex-1 items-center gap-1 overflow-x-auto",
     trigger: "h-9 px-3 text-sm",
-    panel:
-      "right-0 top-[calc(100%+0.6rem)] w-[min(44rem,calc(100vw-2rem))] origin-top-right rounded-xl p-2",
+    panel: "origin-top rounded-xl p-2",
     list: "grid gap-1.5 sm:grid-cols-2",
   },
 } satisfies Record<
@@ -93,6 +91,18 @@ const variantConfig = {
     list: string;
   }
 >;
+
+const submenuSizeConfig = {
+  mobile: { gap: 8, margin: 8, maxWidth: 28 * 16 },
+  web: { gap: 12, margin: 16, maxWidth: 58 * 16 },
+  desktop: { gap: 10, margin: 16, maxWidth: 44 * 16 },
+} satisfies Record<PlatformNavbarVariant, { gap: number; margin: number; maxWidth: number }>;
+
+const platformNavbarOpenEvent = "platform-navbar:open";
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
 
 function ChevronIcon({ className }: { className?: string }) {
   return (
@@ -178,7 +188,12 @@ export function PlatformNavbar({
   ...props
 }: PlatformNavbarProps) {
   const reduceMotion = useReducedMotion();
+  const instanceId = React.useId();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const submenuRef = React.useRef<HTMLDivElement>(null);
+  const triggerRefs = React.useRef(new Map<string, HTMLButtonElement>());
+  const [portalContainer, setPortalContainer] = React.useState<HTMLElement | null>(null);
+  const [submenuStyle, setSubmenuStyle] = React.useState<React.CSSProperties>();
   const [uncontrolledOpenGroupId, setUncontrolledOpenGroupId] = React.useState<string | null>(() =>
     getInitialOpenGroupId(groups, activeGroupId, activeItemId, defaultOpenGroupId),
   );
@@ -201,13 +216,142 @@ export function PlatformNavbar({
     [onOpenGroupChange, openGroupId],
   );
 
+  const getSubmenuId = React.useCallback(
+    (groupId: string) => `platform-navbar-${instanceId}-submenu-${groupId}`,
+    [instanceId],
+  );
+
+  const containsNavbarTarget = React.useCallback((target: EventTarget | null) => {
+    if (!(target instanceof Node)) {
+      return false;
+    }
+
+    return Boolean(
+      containerRef.current?.contains(target) || submenuRef.current?.contains(target),
+    );
+  }, []);
+
+  const handleBlurCapture = React.useCallback(
+    (event: React.FocusEvent) => {
+      if (!containsNavbarTarget(event.relatedTarget)) {
+        setOpenGroupId(null);
+      }
+    },
+    [containsNavbarTarget, setOpenGroupId],
+  );
+
+  const updateSubmenuPosition = React.useCallback(() => {
+    if (!openGroup || typeof window === "undefined") {
+      setSubmenuStyle(undefined);
+      return;
+    }
+
+    const container = containerRef.current;
+    const trigger = triggerRefs.current.get(openGroup.id);
+
+    if (!container) {
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const triggerRect = trigger?.getBoundingClientRect();
+    const submenuRect = submenuRef.current?.getBoundingClientRect();
+    const { gap, margin, maxWidth } = submenuSizeConfig[variant];
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const availableWidth = Math.max(0, viewportWidth - margin * 2);
+    const containerWidth = containerRect.width || availableWidth;
+    const preferredMobileWidth = Math.min(containerWidth - margin * 2, maxWidth);
+    const width =
+      variant === "mobile"
+        ? Math.min(Math.max(preferredMobileWidth, 0), availableWidth)
+        : Math.min(maxWidth, availableWidth);
+    const triggerCenter =
+      triggerRect && triggerRect.width > 0
+        ? triggerRect.left + triggerRect.width / 2
+        : containerRect.left + containerWidth / 2;
+    const rawLeft =
+      variant === "mobile" ? containerRect.left + margin : triggerCenter - width / 2;
+    const left = clamp(rawLeft, margin, viewportWidth - width - margin);
+    const belowTop = containerRect.bottom + gap;
+    const availableBelow = viewportHeight - belowTop - margin;
+    const aboveBottom = containerRect.top - gap;
+    const availableAbove = aboveBottom - margin;
+    const measuredHeight = submenuRect?.height ?? 0;
+    const preferredHeight = Math.max(measuredHeight, 160);
+    const shouldOpenAbove = availableBelow < 160 && availableAbove > availableBelow;
+    const maxHeight = Math.max(160, shouldOpenAbove ? availableAbove : availableBelow);
+    const top = shouldOpenAbove
+      ? Math.max(margin, aboveBottom - Math.min(preferredHeight, maxHeight))
+      : belowTop;
+
+    setSubmenuStyle({
+      left,
+      maxHeight,
+      top,
+      transformOrigin: shouldOpenAbove ? "bottom center" : "top center",
+      width,
+    });
+  }, [openGroup, variant]);
+
+  React.useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
+
+  React.useEffect(() => {
+    function handleNavbarOpen(event: Event) {
+      const openedInstanceId = (event as CustomEvent<{ instanceId?: string }>).detail?.instanceId;
+
+      if (openedInstanceId && openedInstanceId !== instanceId) {
+        setOpenGroupId(null);
+      }
+    }
+
+    window.addEventListener(platformNavbarOpenEvent, handleNavbarOpen);
+
+    return () => {
+      window.removeEventListener(platformNavbarOpenEvent, handleNavbarOpen);
+    };
+  }, [instanceId, setOpenGroupId]);
+
+  React.useEffect(() => {
+    if (!openGroup) {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(platformNavbarOpenEvent, {
+        detail: { instanceId },
+      }),
+    );
+  }, [instanceId, openGroup]);
+
+  React.useLayoutEffect(() => {
+    if (!openGroup) {
+      setSubmenuStyle(undefined);
+      return;
+    }
+
+    updateSubmenuPosition();
+    const frame = window.requestAnimationFrame(updateSubmenuPosition);
+
+    window.addEventListener("resize", updateSubmenuPosition);
+    window.addEventListener("scroll", updateSubmenuPosition, true);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateSubmenuPosition);
+      window.removeEventListener("scroll", updateSubmenuPosition, true);
+    };
+  }, [openGroup, portalContainer, updateSubmenuPosition]);
+
   React.useEffect(() => {
     if (!openGroup) {
       return;
     }
 
     function handlePointerDown(event: PointerEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
+      if (!containsNavbarTarget(event.target)) {
         setOpenGroupId(null);
       }
     }
@@ -225,18 +369,123 @@ export function PlatformNavbar({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [openGroup, setOpenGroupId]);
+  }, [containsNavbarTarget, openGroup, setOpenGroupId]);
+
+  const submenu = (
+    <AnimatePresence>
+      {openGroup ? (
+        <motion.div
+          key={openGroup.id}
+          ref={submenuRef}
+          id={getSubmenuId(openGroup.id)}
+          data-slot="platform-navbar-submenu"
+          className={cn(
+            "fixed z-[100] overflow-hidden border border-border/60 bg-popover/74 text-popover-foreground shadow-[var(--glass-shadow)] backdrop-blur-2xl",
+            config.panel,
+          )}
+          style={submenuStyle}
+          onBlurCapture={handleBlurCapture}
+          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8, scale: 0.98 }}
+          animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {openGroup.eyebrow || openGroup.description ? (
+            <div className="mb-2 px-2 py-1">
+              {openGroup.eyebrow ? (
+                <p className="text-xs font-medium uppercase text-muted-foreground">
+                  {openGroup.eyebrow}
+                </p>
+              ) : null}
+              {openGroup.description ? (
+                <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                  {openGroup.description}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className={config.list}>
+            {openGroup.items.map((item) => {
+              const isCurrent = item.id === activeItemId || item.active;
+              const itemClassName = cn(
+                "group flex min-h-16 min-w-0 items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
+                isCurrent
+                  ? "border-primary/45 bg-primary text-primary-foreground"
+                  : "border-border/45 bg-background/36 text-foreground hover:border-border hover:bg-accent/45",
+                item.disabled ? "pointer-events-none opacity-50" : undefined,
+              );
+              const content = (
+                <>
+                  {item.icon ? <span className="shrink-0 text-current">{item.icon}</span> : null}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate font-medium">{item.label}</span>
+                      {item.badge ? (
+                        <span className="shrink-0 rounded-full border border-current/20 px-2 py-0.5 text-[0.68rem]">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </span>
+                    {item.description ? (
+                      <span
+                        className={cn(
+                          "mt-1 block text-xs leading-5",
+                          isCurrent ? "text-primary-foreground/75" : "text-muted-foreground",
+                        )}
+                      >
+                        {item.description}
+                      </span>
+                    ) : null}
+                  </span>
+                  {item.meta ? (
+                    <span
+                      className={cn(
+                        "shrink-0 text-xs",
+                        isCurrent ? "text-primary-foreground/75" : "text-muted-foreground",
+                      )}
+                    >
+                      {item.meta}
+                    </span>
+                  ) : null}
+                </>
+              );
+              const handleItemClick = () => {
+                item.onSelect?.();
+                onNavigate?.(item, openGroup);
+                setOpenGroupId(null);
+              };
+
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {(renderLink ?? DefaultLink)({
+                    ...item,
+                    className: itemClassName,
+                    children: content,
+                    "aria-current": isCurrent ? "page" : undefined,
+                    onClick: handleItemClick,
+                  })}
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
 
   return (
     <LayoutGroup>
       <div
         ref={containerRef}
         className="relative overflow-visible"
-        onBlurCapture={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setOpenGroupId(null);
-          }
-        }}
+        onBlurCapture={handleBlurCapture}
       >
         <nav
           aria-label={ariaLabel}
@@ -268,8 +517,15 @@ export function PlatformNavbar({
                 return (
                   <motion.button
                     key={group.id}
+                    ref={(node) => {
+                      if (node) {
+                        triggerRefs.current.set(group.id, node);
+                      } else {
+                        triggerRefs.current.delete(group.id);
+                      }
+                    }}
                     type="button"
-                    aria-controls={`platform-navbar-submenu-${group.id}`}
+                    aria-controls={getSubmenuId(group.id)}
                     aria-expanded={isOpen}
                     className={cn(
                       "relative inline-flex min-w-0 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-md border text-center font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50",
@@ -305,111 +561,8 @@ export function PlatformNavbar({
             {variant !== "mobile" && actions ? <div className="shrink-0">{actions}</div> : null}
           </motion.div>
         </nav>
-
-        <AnimatePresence>
-          {openGroup ? (
-            <motion.div
-              key={openGroup.id}
-              id={`platform-navbar-submenu-${openGroup.id}`}
-              data-slot="platform-navbar-submenu"
-              className={cn(
-                "absolute z-50 overflow-hidden border border-border/60 bg-popover/74 text-popover-foreground shadow-[var(--glass-shadow)] backdrop-blur-2xl",
-                config.panel,
-              )}
-              initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8, scale: 0.98 }}
-              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {openGroup.eyebrow || openGroup.description ? (
-                <div className="mb-2 px-2 py-1">
-                  {openGroup.eyebrow ? (
-                    <p className="text-xs font-medium uppercase text-muted-foreground">
-                      {openGroup.eyebrow}
-                    </p>
-                  ) : null}
-                  {openGroup.description ? (
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                      {openGroup.description}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-
-              <div className={config.list}>
-                {openGroup.items.map((item) => {
-                  const isCurrent = item.id === activeItemId || item.active;
-                  const itemClassName = cn(
-                    "group flex min-h-16 min-w-0 items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
-                    isCurrent
-                      ? "border-primary/45 bg-primary text-primary-foreground"
-                      : "border-border/45 bg-background/36 text-foreground hover:border-border hover:bg-accent/45",
-                    item.disabled ? "pointer-events-none opacity-50" : undefined,
-                  );
-                  const content = (
-                    <>
-                      {item.icon ? <span className="shrink-0 text-current">{item.icon}</span> : null}
-                      <span className="min-w-0 flex-1">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span className="truncate font-medium">{item.label}</span>
-                          {item.badge ? (
-                            <span className="shrink-0 rounded-full border border-current/20 px-2 py-0.5 text-[0.68rem]">
-                              {item.badge}
-                            </span>
-                          ) : null}
-                        </span>
-                        {item.description ? (
-                          <span
-                            className={cn(
-                              "mt-1 block text-xs leading-5",
-                              isCurrent ? "text-primary-foreground/75" : "text-muted-foreground",
-                            )}
-                          >
-                            {item.description}
-                          </span>
-                        ) : null}
-                      </span>
-                      {item.meta ? (
-                        <span
-                          className={cn(
-                            "shrink-0 text-xs",
-                            isCurrent ? "text-primary-foreground/75" : "text-muted-foreground",
-                          )}
-                        >
-                          {item.meta}
-                        </span>
-                      ) : null}
-                    </>
-                  );
-                  const handleItemClick = () => {
-                    item.onSelect?.();
-                    onNavigate?.(item, openGroup);
-                    setOpenGroupId(null);
-                  };
-
-                  return (
-                    <motion.div
-                      key={item.id}
-                      layout
-                      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-                      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      {(renderLink ?? DefaultLink)({
-                        ...item,
-                        className: itemClassName,
-                        children: content,
-                        "aria-current": isCurrent ? "page" : undefined,
-                        onClick: handleItemClick,
-                      })}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
       </div>
+      {portalContainer ? createPortal(submenu, portalContainer) : submenu}
     </LayoutGroup>
   );
 }

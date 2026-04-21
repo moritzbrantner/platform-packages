@@ -25,6 +25,7 @@ export type PageKey =
   | "linguistics-corpus"
   | "linguistics-learning"
   | "maps"
+  | "map-edge-cases"
   | "media-editor"
   | "navbars"
   | "parallel-text"
@@ -107,10 +108,10 @@ export const playgroundExampleGroups: readonly PlaygroundExampleGroup[] = [
     ],
   },
   {
-    id: "visual-data",
-    label: "Visual & data",
-    eyebrow: "Surfaces",
-    description: "Map, density, storytelling, card, and illustration packages.",
+    id: "maps",
+    label: "Maps",
+    eyebrow: "Geospatial",
+    description: "Clustered, temporal, heat, and edge-case map scenarios.",
     items: [
       {
         key: "maps",
@@ -135,6 +136,26 @@ export const playgroundExampleGroups: readonly PlaygroundExampleGroup[] = [
         navDescription: "Timeline playback with static and moving tracks.",
         badge: "New",
       },
+      {
+        key: "map-edge-cases",
+        href: "/map-edge-cases.html",
+        label: "Map edge cases",
+        eyebrow: "@moritzbrantner/maps",
+        title: "Map edge-case lab",
+        description:
+          "Stress the maps package with dateline-adjacent points, duplicate coordinates, filtered clusters, weighted heat maps, invalid records, and sparse temporal signals.",
+        cta: "Open edge-case lab",
+        navDescription: "Dateline, duplicate, weighted, and sparse temporal cases.",
+        badge: "New",
+      },
+    ],
+  },
+  {
+    id: "visual-data",
+    label: "Visual & data",
+    eyebrow: "Surfaces",
+    description: "Density, storytelling, card, and illustration packages.",
+    items: [
       {
         key: "data-density",
         href: "/data-density.html",
