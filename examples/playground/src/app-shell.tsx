@@ -24,6 +24,7 @@ type PageKey =
   | "linguistics-learning"
   | "maps"
   | "maps-motion"
+  | "media-editor"
   | "navbars"
   | "parallel-text"
   | "speed-reading"
@@ -71,6 +72,11 @@ const navigation = [
   },
   { key: "maps", href: "/maps.html", label: "Maps package" },
   { key: "maps-motion", href: "/maps-motion.html", label: "Maps motion demo" },
+  {
+    key: "media-editor",
+    href: "/media-editor.html",
+    label: "Media editor package",
+  },
   { key: "navbars", href: "/navbars.html", label: "Navbar testcase" },
   {
     key: "parallel-text",

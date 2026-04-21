@@ -68,6 +68,13 @@ function HomePage() {
           cta="Open motion demo"
         />
         <ExampleLinkCard
+          eyebrow="@moritzbrantner/media-editor"
+          title="Media editor timeline demo"
+          description="Arrange audio, video, and title clips on a zoomable timeline with draggable clips, trimming handles, scrubbing, selection, and drop targets."
+          href="/media-editor.html"
+          cta="Open media editor demo"
+        />
+        <ExampleLinkCard
           eyebrow="@moritzbrantner/parallel-text"
           title="Parallel text comparison demo"
           description="Compare original and translated text side by side, hover tokens to inspect link mapping, and validate manual sentence alignment overrides."
@@ -199,6 +206,9 @@ function HomePage() {
             </Button>
             <Button asChild variant="outline">
               <a href="/maps-motion.html">Open maps motion page</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/media-editor.html">Open media editor package page</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/parallel-text.html">Open parallel text package page</a>

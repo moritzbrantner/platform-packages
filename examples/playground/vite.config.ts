@@ -38,6 +38,13 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
       },
       {
+        find: /^@moritzbrantner\/media-editor$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/media-editor/src/index.ts",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/linguistics-core$/,
         replacement: path.resolve(
           workspaceRoot,
@@ -138,6 +145,7 @@ export default defineConfig({
       "@moritzbrantner/linguistics-corpus",
       "@moritzbrantner/linguistics-learning",
       "@moritzbrantner/maps",
+      "@moritzbrantner/media-editor",
       "@moritzbrantner/ocr",
       "@moritzbrantner/parallel-text",
       "@moritzbrantner/speed-reading",
@@ -166,6 +174,7 @@ export default defineConfig({
         linguisticsLearning: path.resolve(rootDir, "linguistics-learning.html"),
         maps: path.resolve(rootDir, "maps.html"),
         mapsMotion: path.resolve(rootDir, "maps-motion.html"),
+        mediaEditor: path.resolve(rootDir, "media-editor.html"),
         navbars: path.resolve(rootDir, "navbars.html"),
         parallelText: path.resolve(rootDir, "parallel-text.html"),
         speedReading: path.resolve(rootDir, "speed-reading.html"),

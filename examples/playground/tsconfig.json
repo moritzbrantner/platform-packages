@@ -15,6 +15,7 @@
       "@moritzbrantner/linguistics-corpus": ["../../packages/linguistics-corpus/src/index.ts"],
       "@moritzbrantner/linguistics-learning": ["../../packages/linguistics-learning/src/index.ts"],
       "@moritzbrantner/maps": ["../../packages/maps/src/index.ts"],
+      "@moritzbrantner/media-editor": ["../../packages/media-editor/src/index.ts"],
       "@moritzbrantner/ocr": ["../../packages/ocr/src/index.ts"],
       "@moritzbrantner/parallel-text": ["../../packages/parallel-text/src/index.ts"],
       "@moritzbrantner/speed-reading": ["../../packages/speed-reading/src/index.ts"],

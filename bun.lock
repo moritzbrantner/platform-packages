@@ -32,6 +32,7 @@
         "@moritzbrantner/linguistics-corpus": "workspace:*",
         "@moritzbrantner/linguistics-learning": "workspace:*",
         "@moritzbrantner/maps": "workspace:*",
+        "@moritzbrantner/media-editor": "workspace:*",
         "@moritzbrantner/ocr": "workspace:*",
         "@moritzbrantner/parallel-text": "workspace:*",
         "@moritzbrantner/speech": "workspace:*",
@@ -376,6 +377,20 @@
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/huggingface-universal": "workspace:*",
+      },
+    },
+    "packages/media-editor": {
+      "name": "@moritzbrantner/media-editor",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/ui": "workspace:^",
+      },
+      "devDependencies": {
+        "@types/react": "^19.2.2",
+        "react": "^19.2.0",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
       },
     },
     "packages/object-detection": {
@@ -1130,6 +1145,8 @@
     "@moritzbrantner/maps": ["@moritzbrantner/maps@workspace:packages/maps"],
 
     "@moritzbrantner/mask-generation": ["@moritzbrantner/mask-generation@workspace:packages/mask-generation"],
+
+    "@moritzbrantner/media-editor": ["@moritzbrantner/media-editor@workspace:packages/media-editor"],
 
     "@moritzbrantner/object-detection": ["@moritzbrantner/object-detection@workspace:packages/object-detection"],
 

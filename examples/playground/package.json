@@ -17,6 +17,7 @@
     "@moritzbrantner/linguistics-corpus": "workspace:*",
     "@moritzbrantner/linguistics-learning": "workspace:*",
     "@moritzbrantner/maps": "workspace:*",
+    "@moritzbrantner/media-editor": "workspace:*",
     "@moritzbrantner/ocr": "workspace:*",
     "@moritzbrantner/parallel-text": "workspace:*",
     "@moritzbrantner/speed-reading": "workspace:*",
