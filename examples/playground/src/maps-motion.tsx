@@ -7,7 +7,6 @@ import {
   defaultRasterMapStyle,
   getTemporalGeoJsonFeatureCollectionAtTime,
   getTemporalGeoJsonTimeRange,
-  snapTemporalMapTime,
   type AggregatedMapFeature,
   type TemporalGeoJsonGeometryFeatureCollection,
   type TemporalGeoJsonInterpolationStrategy,
@@ -58,6 +57,7 @@ const TIMELINE_START = Date.UTC(2026, 2, 3, 6, 0, 0);
 const TIMELINE_STEP_MS = 20 * 60 * 1000;
 const TIMELINE_STEPS = 18;
 const GEOMETRY_TIMELINE_STEP_MS = TIMELINE_STEP_MS * 3;
+const GEOMETRY_PLAYBACK_SECONDS = 12;
 const GEOMETRY_STRATEGIES: TemporalGeoJsonInterpolationStrategy[] = [
   "hold",
   "compatible",
@@ -216,10 +216,9 @@ function TemporalGeoJsonStrategyDemo() {
   const timeRange = useMemo(() => getTemporalGeoJsonTimeRange(tracks), [tracks]);
   const [time, setTime] = useState(timeRange?.start ?? TIMELINE_START);
   const [strategy, setStrategy] = useState<TemporalGeoJsonInterpolationStrategy>("compatible");
-  const activeTime = useMemo(
-    () => (timeRange ? snapTemporalMapTime(time, timeRange, GEOMETRY_TIMELINE_STEP_MS) : 0),
-    [time, timeRange],
-  );
+  const [isPlaying, setIsPlaying] = useState(true);
+  const activeTime = timeRange ? clampTime(time, timeRange.start, timeRange.end) : 0;
+  const hasPlayableRange = Boolean(timeRange && timeRange.end > timeRange.start);
   const featureCollection = useMemo(
     () =>
       getTemporalGeoJsonFeatureCollectionAtTime(tracks, activeTime, {
@@ -235,9 +234,49 @@ function TemporalGeoJsonStrategyDemo() {
     const nextTime = Number(event.target.value);
 
     if (Number.isFinite(nextTime)) {
+      setIsPlaying(false);
       setTime(nextTime);
     }
   };
+
+  useEffect(() => {
+    if (!isPlaying || !timeRange || !hasPlayableRange) {
+      return;
+    }
+
+    let animationFrameId = 0;
+    let previousTimestamp: number | null = null;
+    const span = timeRange.end - timeRange.start;
+    const playbackRate = span / GEOMETRY_PLAYBACK_SECONDS;
+
+    const tick = (timestamp: number) => {
+      if (previousTimestamp === null) {
+        previousTimestamp = timestamp;
+        animationFrameId = requestAnimationFrame(tick);
+        return;
+      }
+
+      const elapsedSeconds = (timestamp - previousTimestamp) / 1000;
+
+      previousTimestamp = timestamp;
+      setTime((value) => {
+        const nextTime = value + elapsedSeconds * playbackRate;
+
+        if (nextTime <= timeRange.end) {
+          return nextTime;
+        }
+
+        return timeRange.start + ((nextTime - timeRange.start) % span);
+      });
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    animationFrameId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [hasPlayableRange, isPlaying, timeRange]);
 
   return (
     <section className="grid gap-4 xl:grid-cols-[1.35fr_0.8fr]">
@@ -264,6 +303,16 @@ function TemporalGeoJsonStrategyDemo() {
           <div className="grid gap-4 rounded-[1.25rem] border border-border/70 bg-card/75 p-4 lg:grid-cols-[1fr_auto]">
             <div className="grid gap-3">
               <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={!hasPlayableRange}
+                  onClick={() => {
+                    setIsPlaying((value) => !value);
+                  }}
+                >
+                  {isPlaying ? "Pause" : "Play"}
+                </Button>
                 {GEOMETRY_STRATEGIES.map((value) => (
                   <Button
                     key={value}
@@ -285,7 +334,7 @@ function TemporalGeoJsonStrategyDemo() {
                 max={timeRange?.end ?? 0}
                 min={timeRange?.start ?? 0}
                 onChange={handleTimeChange}
-                step={GEOMETRY_TIMELINE_STEP_MS}
+                step={1000}
                 type="range"
                 value={activeTime}
               />
@@ -336,8 +385,9 @@ function TemporalGeoJsonStrategyDemo() {
               the point moves across the same timestamp range.
             </p>
             <p>
-              Topology-safe strategies hold shapes when they cannot make a
-              defensible match; resampling strategies approximate more motion.
+              Compatible, resample, and centroid-radial strategies update on
+              every animation frame; hold intentionally waits for the next
+              keyframe.
             </p>
           </CardContent>
         </Card>
@@ -793,6 +843,14 @@ function formatMotionTime(value: number) {
     minute: "2-digit",
     month: "short",
   }).format(new Date(value));
+}
+
+function clampTime(value: number, start: number, end: number) {
+  if (!Number.isFinite(value)) {
+    return start;
+  }
+
+  return Math.min(Math.max(value, start), end);
 }
 
 function formatStrategyLabel(value: TemporalGeoJsonInterpolationStrategy) {
