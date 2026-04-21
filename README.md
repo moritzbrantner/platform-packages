@@ -30,6 +30,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/audio-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/audio-text-to-text` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/audio-to-audio` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
+| `@moritzbrantner/auth-contract` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/automatic-speech-recognition` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/card-games` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/charts` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
@@ -44,6 +45,8 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/feature-extraction` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/fill-mask` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/flat-design` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/foundation-contract` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/foundation-ui` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/graphs` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/hexagon-grids` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/huggingface-universal` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
@@ -101,6 +104,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/typescript-config` | scaffold-critical | Shared scaffold contract surface. |
 | `@moritzbrantner/ui` | scaffold-critical | Shared scaffold contract surface. |
 | `@moritzbrantner/unconditional-image-generation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
+| `@moritzbrantner/upload-playbook` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/video-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/video-text-to-text` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
 | `@moritzbrantner/video-to-video` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
@@ -141,7 +145,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - `@moritzbrantner/text-summarization`: chunked summarization pipeline with optional multi-pass reduction for longer documents.
 - `@moritzbrantner/tree-structures`: parent-link tree indexing, traversal helpers, subtree queries, and aggregate tree statistics for hierarchy-heavy data.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
-- `@moritzbrantner/storytelling`: branching and scroll-driven storytelling primitives with interactive choices, motion.dev transitions, and optional Remotion/Three.js adapters.
+- `@moritzbrantner/storytelling`: unified serializable story documents with branching playback, scroll previews, renderer registries, and Remotion/Three.js adapters.
 - `@moritzbrantner/word-prediction`: next-word suggestion engine for chat-style and keyboard-style text prediction, with optional semantic backoff from word vectors.
 - `@moritzbrantner/word-vectors`: distributional word vectors with similarity lookup, context inspection, persistence, and corpus-aware training adapters.
 

@@ -117,6 +117,13 @@ export default defineConfig({
         ),
       },
       {
+        find: /^@moritzbrantner\/storytelling\/remotion$/,
+        replacement: path.resolve(
+          workspaceRoot,
+          "packages/storytelling/src/remotion.tsx",
+        ),
+      },
+      {
         find: /^@moritzbrantner\/word-prediction$/,
         replacement: path.resolve(
           workspaceRoot,

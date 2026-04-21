@@ -1,151 +1,115 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import type { ReactNode } from "react";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import {
-  InteractiveStoryPlayer,
-  StoryContainer,
-  StoryScene,
-  StorySeries,
+  StoryPlayer,
+  StoryScroller,
+  StoryStageFrame,
   buildStoryTimeline,
-  createAudioStoryScene,
-  createInteractiveStory,
-  createSubtitleStoryScene,
-  createVideoStoryScene,
+  createStoryRendererRegistry,
+  defineStory,
   resolveStoryPath,
+  validateStory,
+  type StoryDocument,
+  type StoryRenderProps,
 } from "../src";
 
+type FixtureData = {
+  tone: string;
+};
+
+const story = defineStory<FixtureData>({
+  id: "signal",
+  title: "Signal in the fog",
+  subtitle: "A branching test fixture",
+  openingNodeId: "wake",
+  defaults: {
+    durationInFrames: 100,
+    transitionInFrames: 12,
+  },
+  nodes: [
+    {
+      id: "wake",
+      title: "Wake the observatory",
+      eyebrow: "Opening",
+      content: [
+        {
+          type: "paragraph",
+          text: "A low signal reaches the tower.",
+        },
+      ],
+      prompt: "What should the operator do first?",
+      data: { tone: "cold" },
+      choices: [
+        {
+          id: "answer",
+          label: "Answer immediately",
+          target: "answer-node",
+        },
+        {
+          id: "trace",
+          label: "Trace the source",
+          target: "trace-node",
+        },
+        {
+          id: "locked",
+          label: "Locked branch",
+          target: "answer-node",
+          disabled: true,
+        },
+      ],
+    },
+    {
+      id: "answer-node",
+      title: "A distant pilot responds",
+      content: [
+        {
+          type: "paragraph",
+          text: "The message is fragmented.",
+        },
+      ],
+      next: "pilot-ending",
+      data: { tone: "warm" },
+    },
+    {
+      id: "pilot-ending",
+      title: "The city hears the pilot",
+      durationInFrames: 90,
+      content: [
+        {
+          type: "quote",
+          text: "Contact changes the route.",
+        },
+      ],
+      data: { tone: "bright" },
+    },
+    {
+      id: "trace-node",
+      title: "The map reveals a hidden harbor",
+      content: [
+        {
+          type: "paragraph",
+          text: "The signal comes from a cove nobody has charted in decades.",
+        },
+      ],
+      stage: {
+        renderer: "custom",
+      },
+      data: { tone: "green" },
+    },
+  ],
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.resetModules();
+});
+
 describe("@moritzbrantner/storytelling", () => {
-  const branchingStory = createInteractiveStory({
-    id: "signal",
-    title: "Signal in the fog",
-    openingNodeId: "wake",
-    nodes: [
-      {
-        id: "wake",
-        title: "Wake the observatory",
-        body: "A low signal reaches the tower. You decide whether to answer it or trace it first.",
-        prompt: "What should the operator do first?",
-        choices: [
-          {
-            id: "answer",
-            label: "Answer immediately",
-            target: "answer-node",
-          },
-          {
-            id: "trace",
-            label: "Trace the source",
-            target: "trace-node",
-          },
-        ],
-      },
-      {
-        id: "answer-node",
-        title: "A distant pilot responds",
-        body: "The message is fragmented, but the pilot confirms the storm wall is moving fast.",
-      },
-      {
-        id: "trace-node",
-        title: "The map reveals a hidden harbor",
-        body: "The signal comes from a cove nobody has charted in decades.",
-      },
-    ],
-  });
-
-  test("renders a story container in jsdom", () => {
-    render(
-      <StoryContainer title="History" subtitle="Timeline">
-        <StorySeries ariaLabel="Story">
-          <StoryScene id="one" title="One">
-            First scene
-          </StoryScene>
-          <StoryScene id="two" title="Two">
-            Second scene
-          </StoryScene>
-        </StorySeries>
-      </StoryContainer>,
-    );
-
-    expect(screen.getByRole("region", { name: "History" })).toBeTruthy();
-    expect(screen.getByText("First scene")).toBeTruthy();
-    expect(screen.getByRole("navigation", { name: "Story minimap" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Reset" })).toBeTruthy();
-  });
-
-  test("navigates story scenes through the minimap", () => {
-    const originalScrollTo = HTMLElement.prototype.scrollTo;
-    const scrollToMock = vi.fn();
-
-    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-      configurable: true,
-      value: scrollToMock,
-    });
-
-    try {
-      render(
-        <StoryContainer title="History" subtitle="Timeline">
-          <StorySeries ariaLabel="Story">
-            <StoryScene id="one" title="One">
-              First scene
-            </StoryScene>
-            <StoryScene id="two" title="Two">
-              Second scene
-            </StoryScene>
-            <StoryScene id="three" title="Three">
-              Third scene
-            </StoryScene>
-          </StorySeries>
-        </StoryContainer>,
-      );
-
-      fireEvent.click(screen.getByRole("button", { name: "Go to scene 2: Two" }));
-
-      expect(scrollToMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          behavior: "smooth",
-          top: 0,
-        }),
-      );
-    } finally {
-      Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-        configurable: true,
-        value: originalScrollTo,
-      });
-    }
-  });
-
-  test("renders a branching story and advances when a choice is selected", async () => {
-    render(<InteractiveStoryPlayer story={branchingStory} />);
-
-    expect(screen.getAllByText("Wake the observatory").length).toBeGreaterThan(0);
-
-    fireEvent.click(screen.getByRole("button", { name: "Trace the source" }));
-
-    expect(
-      await screen.findByText(
-        "The signal comes from a cove nobody has charted in decades.",
-      ),
-    ).toBeTruthy();
-    expect(
-      screen.getByText(/Restart to explore another branch, or go back to choose a different path/),
-    ).toBeTruthy();
-  });
-
-  test("resolves branching paths for interactive and remotion use cases", () => {
-    const path = resolveStoryPath(branchingStory, ["answer"]);
-
-    expect(path.nodes.map((node) => node.id)).toEqual(["wake", "answer-node"]);
-    expect(path.completed).toBe(true);
-
-    const timeline = buildStoryTimeline(branchingStory, ["trace"]);
-
-    expect(timeline.scenes).toHaveLength(2);
-    expect(timeline.totalFrames).toBe(240);
-    expect(timeline.scenes[1]?.node.id).toBe("trace-node");
-  });
-
-  test("rejects invalid interactive story references", () => {
+  test("validates stories and rejects invalid graph references", () => {
     expect(() =>
-      createInteractiveStory({
+      validateStory({
         id: "broken",
         title: "Broken",
         openingNodeId: "missing",
@@ -154,9 +118,40 @@ describe("@moritzbrantner/storytelling", () => {
     ).toThrow('references missing opening node "missing"');
 
     expect(() =>
-      createInteractiveStory({
-        id: "broken-choice",
-        title: "Broken choice",
+      validateStory({
+        id: "duplicate",
+        title: "Duplicate",
+        openingNodeId: "start",
+        nodes: [
+          { id: "start", title: "Start" },
+          { id: "start", title: "Again" },
+        ],
+      }),
+    ).toThrow('Duplicate id "start"');
+
+    expect(() =>
+      validateStory({
+        id: "duplicate-choice",
+        title: "Duplicate choice",
+        openingNodeId: "start",
+        nodes: [
+          {
+            id: "start",
+            title: "Start",
+            choices: [
+              { id: "go", label: "Go", target: "end" },
+              { id: "go", label: "Again", target: "end" },
+            ],
+          },
+          { id: "end", title: "End" },
+        ],
+      }),
+    ).toThrow('Duplicate choice "go"');
+
+    expect(() =>
+      validateStory({
+        id: "missing-choice",
+        title: "Missing choice",
         openingNodeId: "start",
         nodes: [
           {
@@ -167,64 +162,172 @@ describe("@moritzbrantner/storytelling", () => {
         ],
       }),
     ).toThrow('points to missing node "missing"');
+
+    expect(() =>
+      validateStory({
+        id: "cycle",
+        title: "Cycle",
+        openingNodeId: "a",
+        nodes: [
+          { id: "a", title: "A", next: "b" },
+          { id: "b", title: "B", next: "a" },
+        ],
+      }),
+    ).toThrow("unconditional cycle");
   });
 
-  test("progresses deterministically through linear and branching nodes", () => {
-    const story = createInteractiveStory({
-      id: "route",
-      title: "Route",
-      openingNodeId: "start",
-      nodes: [
-        { id: "start", title: "Start", next: "choice" },
-        {
-          id: "choice",
-          title: "Choice",
-          choices: [
-            { id: "left", label: "Left", target: "left-end" },
-            { id: "right", label: "Right", target: "right-end" },
-          ],
-        },
-        { id: "left-end", title: "Left end", durationInFrames: 60 },
-        { id: "right-end", title: "Right end", durationInFrames: 90 },
-      ],
-    });
+  test("resolves branching, linear auto-advance, disabled choices, stopAt, and maxSteps", () => {
+    expect(
+      resolveStoryPath(story, { choiceIds: ["trace"] }).nodes.map((node) => node.id),
+    ).toEqual(["wake", "trace-node"]);
 
     expect(
-      resolveStoryPath(story, ["right"], { autoAdvanceLinearNodes: true }).nodes.map(
-        (node) => node.id,
-      ),
-    ).toEqual(["start", "choice", "right-end"]);
-    expect(buildStoryTimeline(story, ["right"]).totalFrames).toBe(330);
-  });
+      resolveStoryPath(story, {
+        choiceIds: ["answer"],
+        autoAdvanceLinearNodes: true,
+      }).nodes.map((node) => node.id),
+    ).toEqual(["wake", "answer-node", "pilot-ending"]);
 
-  test("renders media scene fallbacks for missing source content", async () => {
-    const fallbackStory = createInteractiveStory({
-      id: "fallback-media",
-      title: "Fallback media",
-      openingNodeId: "empty-subtitles",
+    const disabled = resolveStoryPath(story, { choiceIds: ["locked"] });
+    expect(disabled.completed).toBe(false);
+    expect(disabled.currentNode.id).toBe("wake");
+
+    const stopped = resolveStoryPath(story, {
+      choiceIds: ["answer"],
+      autoAdvanceLinearNodes: true,
+      stopAt: "answer-node",
+    });
+    expect(stopped.stoppedAt).toBe("answer-node");
+    expect(stopped.nodes.map((node) => node.id)).toEqual(["wake", "answer-node"]);
+
+    const cyclicChoiceStory = defineStory({
+      id: "choice-cycle",
+      title: "Choice cycle",
+      openingNodeId: "a",
       nodes: [
         {
-          id: "empty-subtitles",
-          title: "Empty subtitles",
-          next: "audio",
-          scene: createSubtitleStoryScene({ emptyLabel: "No cues in fixture." }),
-        },
-        {
-          id: "audio",
-          title: "Audio",
-          scene: createAudioStoryScene({ description: "No source supplied." }),
+          id: "a",
+          title: "A",
+          choices: [{ id: "loop", label: "Loop", target: "a" }],
         },
       ],
     });
 
-    render(<InteractiveStoryPlayer story={fallbackStory} />);
+    expect(() =>
+      resolveStoryPath(cyclicChoiceStory, {
+        choiceIds: ["loop"],
+        autoAdvanceLinearNodes: true,
+        maxSteps: 1,
+      }),
+    ).toThrow("exceeded 1 steps");
+  });
 
-    expect(screen.getByText("No cues in fixture.")).toBeTruthy();
+  test("builds deterministic timelines with starts, ends, transitions, and total duration", () => {
+    const timeline = buildStoryTimeline(story, {
+      choiceIds: ["answer"],
+      defaultDurationInFrames: 100,
+      transitionInFrames: 10,
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(timeline.totalFrames).toBe(290);
+    expect(timeline.scenes.map((scene) => scene.startFrame)).toEqual([0, 100, 200]);
+    expect(timeline.scenes.map((scene) => scene.endFrame)).toEqual([100, 200, 290]);
+    expect(timeline.scenes.map((scene) => scene.transitionInFrames)).toEqual([
+      10,
+      10,
+      10,
+    ]);
+    expect(timeline.scenes[2]?.history.map((entry) => entry.nodeId)).toEqual([
+      "wake",
+      "answer-node",
+      "pilot-ending",
+    ]);
+  });
 
-    await screen.findByText("Audio track");
-    expect(document.querySelector("audio")).toBeTruthy();
+  test("renders StoryPlayer content, advances, goes back, restarts, restores focus, and calls callbacks", async () => {
+    const onChoice = vi.fn();
+    const onPathChange = vi.fn();
+
+    render(
+      <StoryPlayer story={story} onChoice={onChoice} onPathChange={onPathChange} />,
+    );
+
+    expect(screen.getByText("A low signal reaches the tower.")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /Trace the source/ }));
+
+    expect(
+      await screen.findByText(
+        "The signal comes from a cove nobody has charted in decades.",
+      ),
+    ).toBeTruthy();
+    expect(onChoice).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "trace" }),
+      expect.arrayContaining([expect.objectContaining({ nodeId: "trace-node" })]),
+    );
+    expect(document.activeElement?.textContent).toContain(
+      "The map reveals a hidden harbor",
+    );
+
+    fireEvent.keyDown(screen.getByRole("region", { name: "Signal in the fog" }), {
+      key: "Escape",
+    });
+    expect(await screen.findByText("A low signal reaches the tower.")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /Trace the source/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Restart" }));
+    expect((await screen.findAllByText("Wake the observatory")).length).toBeGreaterThan(0);
+    expect(onPathChange).toHaveBeenCalled();
+  });
+
+  test("renders StoryScroller with shared minimap navigation", async () => {
+    render(<StoryScroller story={story} pathChoiceIds={["answer"]} />);
+
+    expect(screen.getByRole("navigation", { name: "Story minimap" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Go to scene 2: A distant pilot responds" }));
+
+    expect(await screen.findByText("The message is fragmented.")).toBeTruthy();
+
+    fireEvent.keyDown(screen.getByRole("region", { name: "Signal in the fog" }), {
+      key: "End",
+    });
+    expect(await screen.findByText("Contact changes the route.")).toBeTruthy();
+  });
+
+  test("uses registry stages and falls back to the default stage", () => {
+    function CustomStage(props: StoryRenderProps<FixtureData>) {
+      return <div>Custom stage for {props.node.title}</div>;
+    }
+
+    const registry = createStoryRendererRegistry<FixtureData>({
+      web: {
+        custom: CustomStage,
+      },
+    });
+    const path = resolveStoryPath(story, { choiceIds: ["trace"] });
+    const traceNode = path.currentNode;
+    const renderProps: StoryRenderProps<FixtureData> = {
+      story,
+      node: traceNode,
+      history: path.history,
+      path,
+      currentIndex: 1,
+      progress: 0.5,
+      isEnding: true,
+      canGoBack: true,
+      choices: [],
+      choose: () => {},
+      goBack: () => {},
+      restart: () => {},
+    };
+
+    const { rerender } = render(
+      <StoryStageFrame {...renderProps} registry={registry} />,
+    );
+    expect(screen.getByText("Custom stage for The map reveals a hidden harbor")).toBeTruthy();
+
+    rerender(<StoryStageFrame {...renderProps} registry={createStoryRendererRegistry()} />);
+    expect(screen.getByText("The signal comes from a cove nobody has charted in decades.")).toBeTruthy();
   });
 
   test("imports remotion and three entrypoints without browser-only setup", async () => {
@@ -234,112 +337,76 @@ describe("@moritzbrantner/storytelling", () => {
     await expect(import("../src/three")).resolves.toHaveProperty("StoryCanvasStage");
   });
 
-  test("renders subtitle scenes from subtitle file content", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(
-        `WEBVTT
-
-00:00:00.000 --> 00:00:02.000
-We open on the empty station.
-
-00:00:02.250 --> 00:00:04.500
-The archive starts speaking again.`,
-        { status: 200 },
-      ),
-    );
-
-    vi.stubGlobal("fetch", fetchMock);
-
-    try {
-      const mediaStory = createInteractiveStory({
-        id: "subtitle-story",
-        title: "Subtitle scene story",
-        openingNodeId: "captions",
-        nodes: [
-          {
-            id: "captions",
-            title: "Captions",
-            body: "Subtitle files should render as reusable story stages.",
-            scene: createSubtitleStoryScene({
-              src: "/media/intro.vtt",
-              description: "Caption cues are loaded from the subtitle file.",
-            }),
-          },
-        ],
-      });
-
-      render(<InteractiveStoryPlayer story={mediaStory} />);
-
-      expect(await screen.findByText("We open on the empty station.")).toBeTruthy();
-      expect(screen.getByText("The archive starts speaking again.")).toBeTruthy();
-      expect(fetchMock).toHaveBeenCalledWith("/media/intro.vtt");
-    } finally {
-      vi.unstubAllGlobals();
-    }
-  });
-
-  test("renders audio and video story scenes with native media elements", async () => {
-    const mediaStory = createInteractiveStory({
-      id: "media-story",
-      title: "Media story",
-      openingNodeId: "audio",
-      nodes: [
-        {
-          id: "audio",
-          title: "Listen to the recording",
-          next: "video",
-          scene: createAudioStoryScene({
-            src: "/audio/transmission.mp3",
-            title: "Transmission",
-            tracks: [
-              {
-                src: "/audio/transmission.vtt",
-                label: "English captions",
-                srcLang: "en",
-                kind: "captions",
-              },
-            ],
-          }),
-        },
-        {
-          id: "video",
-          title: "Watch the feed",
-          scene: createVideoStoryScene({
-            src: "/video/feed.mp4",
-            poster: "/video/feed.jpg",
-            title: "Harbor feed",
-            tracks: [
-              {
-                src: "/video/feed.vtt",
-                label: "English subtitles",
-                srcLang: "en",
-                default: true,
-              },
-            ],
-          }),
-        },
-      ],
+  test("computes Remotion composition props", async () => {
+    const { getStoryCompositionProps } = await import("../src/remotion");
+    const composition = getStoryCompositionProps(story, {
+      id: "signal-answer",
+      choiceIds: ["answer"],
+      fps: 24,
+      width: 1280,
+      height: 720,
     });
 
-    render(<InteractiveStoryPlayer story={mediaStory} />);
+    expect(composition).toMatchObject({
+      id: "signal-answer",
+      fps: 24,
+      width: 1280,
+      height: 720,
+      durationInFrames: 290,
+    });
+    expect(composition.defaultProps.choiceIds).toEqual(["answer"]);
+  });
 
-    const audio = document.querySelector("audio");
+  test("passes Remotion frame, progress, history, and node data into custom renderers", async () => {
+    vi.doMock("remotion", () => ({
+      AbsoluteFill: ({ children }: { children?: ReactNode }) => (
+        <div>{children}</div>
+      ),
+      Sequence: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+      interpolate: () => 1,
+      useCurrentFrame: () => 130,
+    }));
 
-    expect(audio?.getAttribute("src")).toBe("/audio/transmission.mp3");
-    expect(audio?.querySelector('track[kind="captions"]')?.getAttribute("src")).toBe(
-      "/audio/transmission.vtt",
+    const { StoryRemotionComposition } = await import("../src/remotion");
+    const capture = vi.fn();
+    const remotionStory: StoryDocument<FixtureData> = {
+      ...story,
+      nodes: story.nodes.map((node) =>
+        node.id === "trace-node"
+          ? { ...node, stage: { renderer: "capture" } }
+          : node,
+      ),
+    };
+    const registry = createStoryRendererRegistry<FixtureData>({
+      remotion: {
+        capture: (props) => {
+          capture(props);
+          return <div>Captured {props.node.title}</div>;
+        },
+      },
+    });
+
+    render(
+      <StoryRemotionComposition
+        story={remotionStory}
+        choiceIds={["trace"]}
+        registry={registry}
+      />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-
-    await screen.findByText("Harbor feed");
-
-    const video = document.querySelector("video");
-
-    expect(video?.getAttribute("src")).toBe("/video/feed.mp4");
-    expect(video?.getAttribute("poster")).toBe("/video/feed.jpg");
-    expect(video?.querySelector('track[label="English subtitles"]')?.getAttribute("src")).toBe(
-      "/video/feed.vtt",
+    expect(screen.getByText("Captured The map reveals a hidden harbor")).toBeTruthy();
+    expect(capture).toHaveBeenCalledWith(
+      expect.objectContaining({
+        absoluteFrame: 130,
+        frame: 30,
+        durationInFrames: 100,
+        sceneProgress: 0.3,
+        currentIndex: 1,
+        history: expect.arrayContaining([
+          expect.objectContaining({ nodeId: "trace-node", data: { tone: "green" } }),
+        ]),
+        node: expect.objectContaining({ data: { tone: "green" } }),
+      }),
     );
   });
 });

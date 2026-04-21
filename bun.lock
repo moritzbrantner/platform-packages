@@ -497,9 +497,9 @@
     },
     "packages/storytelling": {
       "name": "@moritzbrantner/storytelling",
-      "version": "0.2.1",
+      "version": "0.3.0",
       "dependencies": {
-        "@moritzbrantner/ui": "^0.3.0",
+        "@moritzbrantner/ui": "^0.3.1",
         "motion": "^12.35.0",
       },
       "devDependencies": {

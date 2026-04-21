@@ -17,7 +17,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "storytelling",
     name: "@moritzbrantner/storytelling",
-    version: "0.2.1",
+    version: "0.3.0",
     files: ["dist"],
     exports: [".", "./remotion", "./three"],
     scripts: ["build", "lint", "check-types", "test"],
