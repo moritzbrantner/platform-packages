@@ -306,6 +306,7 @@
     [data-slot="surface"][data-variant="muted"],
     [data-slot="table-head"],
     [data-slot="progress"],
+    [data-slot="loading-bar-track"],
     [data-slot="slider-track"],
     [data-slot="skeleton"]
   ) {
@@ -322,6 +323,20 @@
 }
 
 @layer utilities {
+  @keyframes ui-loading-bar {
+    0% {
+      transform: translateX(-120%) scaleX(0.45);
+    }
+
+    50% {
+      transform: translateX(90%) scaleX(1);
+    }
+
+    100% {
+      transform: translateX(320%) scaleX(0.45);
+    }
+  }
+
   .no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;

@@ -38,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DotsSpinner,
   Dropzone,
   DropzoneContent,
   DropzoneDefaultIcon,
@@ -49,6 +50,7 @@ import {
   EmptyDescription,
   EmptyTitle,
   Kbd,
+  LoadingBar,
   PlatformNavbar,
   type PlatformNavbarGroup,
   PageActions,
@@ -58,6 +60,8 @@ import {
   PageShell,
   PageTitle,
   SectionGrid,
+  Spinner,
+  PulseSpinner,
   Stat,
   StatDelta,
   StatGroup,
@@ -135,6 +139,7 @@ const shadcnBasicComponentFiles = [
   "item",
   "kbd",
   "label",
+  "loading-bar",
   "menubar",
   "native-select",
   "navigation-menu",
@@ -460,6 +465,33 @@ describe("@moritzbrantner/ui", () => {
     expect(container.querySelector("[data-slot='kbd']")).toBeTruthy();
     expect(container.querySelector("[data-slot='empty']")).toBeTruthy();
     expect(screen.getByText("No packages")).toBeTruthy();
+  });
+
+  test("renders loading indicators with accessible status and progress state", () => {
+    const { container } = render(
+      <div>
+        <Spinner size="lg" />
+        <DotsSpinner label="Syncing package" />
+        <PulseSpinner decorative />
+        <LoadingBar value={42} label="Upload progress" showValue />
+        <LoadingBar indeterminate label="Fetching package" />
+      </div>,
+    );
+
+    expect(screen.getByRole("status", { name: "Loading" })).toBeTruthy();
+    expect(screen.getByRole("status", { name: "Syncing package" })).toBeTruthy();
+    expect(container.querySelector("[data-slot='pulse-spinner']")?.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
+
+    const upload = screen.getByRole("progressbar", { name: "Upload progress" });
+    const fetching = screen.getByRole("progressbar", { name: "Fetching package" });
+
+    expect(upload.getAttribute("aria-valuenow")).toBe("42");
+    expect(upload.getAttribute("aria-valuemax")).toBe("100");
+    expect(screen.getByText("42%")).toBeTruthy();
+    expect(fetching.getAttribute("aria-valuenow")).toBeNull();
+    expect(fetching.getAttribute("data-indeterminate")).toBe("true");
   });
 
   test("merges class names", () => {

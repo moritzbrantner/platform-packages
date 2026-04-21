@@ -123,6 +123,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DotsSpinner,
   DirectionProvider,
   Drawer,
   DrawerClose,
@@ -185,6 +186,7 @@ import {
   Kbd,
   KbdGroup,
   Label,
+  LoadingBar,
   Menubar,
   MenubarCheckboxItem,
   MenubarContent,
@@ -265,6 +267,7 @@ import {
   Skeleton,
   Slider,
   Spinner,
+  PulseSpinner,
   Switch,
   Table,
   TableBody,
@@ -345,6 +348,7 @@ const catalogComponents = [
   "item",
   "kbd",
   "label",
+  "loading-bar",
   "menubar",
   "native-select",
   "navigation-menu",
@@ -998,6 +1002,13 @@ function CatalogPreview() {
             <Progress aria-label="Catalog completion" value={68} />
           </CatalogSection>
 
+          <CatalogSection id="loading-bar" title="Loading Bar">
+            <div className="grid gap-3">
+              <LoadingBar value={72} label="Package upload" showValue />
+              <LoadingBar indeterminate label="Package analysis" size="sm" />
+            </div>
+          </CatalogSection>
+
           <CatalogSection id="radio-group" title="Radio Group">
             <RadioGroup defaultValue="stable">
               <div className="flex items-center gap-2">
@@ -1156,9 +1167,13 @@ function CatalogPreview() {
           </CatalogSection>
 
           <CatalogSection id="spinner" title="Spinner">
-            <div className="flex items-center gap-2">
-              <Spinner />
-              Loading package
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2">
+                <Spinner />
+                Loading package
+              </span>
+              <DotsSpinner label="Syncing package" variant="primary" />
+              <PulseSpinner label="Live package check" variant="muted" />
             </div>
           </CatalogSection>
 

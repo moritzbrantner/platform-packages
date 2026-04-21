@@ -42,6 +42,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DotsSpinner,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -70,6 +71,7 @@ import {
   InputGroupInput,
   InputGroupText,
   Kbd,
+  LoadingBar,
   NativeSelect,
   NativeSelectOption,
   Progress,
@@ -83,6 +85,7 @@ import {
   Separator,
   Skeleton,
   Slider,
+  Spinner,
   Switch,
   Table,
   TableBody,
@@ -575,6 +578,12 @@ function UiPage() {
                   <span className="text-muted-foreground">{progressValue}%</span>
                 </div>
                 <Progress value={progressValue} />
+                <LoadingBar
+                  value={progressValue}
+                  label="Release loading bar"
+                  size="sm"
+                  showValue
+                />
                 <Slider
                   value={[progressValue]}
                   max={100}
@@ -1126,6 +1135,12 @@ function UiPage() {
               <div className="grid gap-4 lg:grid-cols-[0.48fr_0.52fr]">
                 <div className={`${glassTileClass} space-y-3 p-4`}>
                   <p className="text-sm font-medium">Loading skeletons</p>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <Spinner />
+                    <DotsSpinner label="Loading previews" />
+                    <span>Preparing previews</span>
+                  </div>
+                  <LoadingBar indeterminate label="Preview loading" />
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-24 w-full" />

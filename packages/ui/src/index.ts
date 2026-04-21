@@ -38,6 +38,7 @@ export * from "./components/input-otp";
 export * from "./components/item";
 export * from "./components/kbd";
 export * from "./components/label";
+export * from "./components/loading-bar";
 export * from "./components/menubar";
 export * from "./components/native-select";
 export * from "./components/navigation-menu";

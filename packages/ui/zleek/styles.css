@@ -369,7 +369,11 @@
     background-color: color-mix(in oklch, var(--background) 52%, transparent);
   }
 
-  :where([data-slot="progress"], [data-slot="slider-track"]) {
+  :where(
+    [data-slot="progress"],
+    [data-slot="loading-bar-track"],
+    [data-slot="slider-track"]
+  ) {
     background-color: color-mix(in oklch, var(--muted) 72%, transparent);
   }
 
@@ -384,6 +388,20 @@
 }
 
 @layer utilities {
+  @keyframes ui-loading-bar {
+    0% {
+      transform: translateX(-120%) scaleX(0.45);
+    }
+
+    50% {
+      transform: translateX(90%) scaleX(1);
+    }
+
+    100% {
+      transform: translateX(320%) scaleX(0.45);
+    }
+  }
+
   .no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
