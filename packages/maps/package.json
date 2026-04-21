@@ -31,6 +31,9 @@
   "dependencies": {
     "@moritzbrantner/data-density": "^0.1.0",
     "@moritzbrantner/ui": "^0.3.0",
+    "@turf/boolean-clockwise": "^7.3.5",
+    "@turf/centroid": "^7.3.5",
+    "@turf/helpers": "^7.3.5",
     "d3-delaunay": "^6.0.4",
     "maplibre-gl": "^5.10.0",
     "tailwindcss": "^4.1.14"
@@ -51,6 +54,6 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/maps/tests/aggregation.test.ts packages/maps/tests/cluster-area.test.ts packages/maps/tests/cluster-area-visuals.test.ts packages/maps/tests/temporal-points.test.ts packages/maps/tests/temporal-geojson.test.ts packages/maps/tests/temporal-map.test.tsx"
+    "test": "cd ../.. && vitest run packages/maps/tests/aggregation.test.ts packages/maps/tests/cluster-area.test.ts packages/maps/tests/cluster-area-visuals.test.ts packages/maps/tests/heat-map.test.tsx packages/maps/tests/temporal-points.test.ts packages/maps/tests/temporal-geojson.test.ts packages/maps/tests/temporal-geojson-geometries.test.ts packages/maps/tests/temporal-map.test.tsx"
   }
 }

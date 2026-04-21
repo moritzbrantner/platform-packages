@@ -1,4 +1,13 @@
 import type { MapMetricRecord, MapPoint } from "./aggregation";
+import {
+  getTemporalMapTimeRange as getTemporalTrackTimeRange,
+  interpolate,
+  interpolateMetrics,
+  mergeMetrics,
+  mergeProperties,
+  snapTemporalMapTime,
+  type TemporalMapTimeRange,
+} from "./temporal-core";
 
 export type TemporalMapKeyframe<TProperties = Record<string, unknown>> = {
   latitude: number;
@@ -18,55 +27,12 @@ export type TemporalMapTrack<TProperties = Record<string, unknown>> = {
   frames: readonly TemporalMapKeyframe<TProperties>[];
 };
 
-export type TemporalMapTimeRange = {
-  end: number;
-  start: number;
-};
-
-export function snapTemporalMapTime(
-  time: number,
-  timeRange: TemporalMapTimeRange,
-  step: number | "any" | undefined,
-) {
-  if (step === "any" || !Number.isFinite(step) || (step ?? 0) <= 0) {
-    return clampTemporalMapTime(time, timeRange);
-  }
-
-  const numericStep = Number(step);
-  const clampedTime = clampTemporalMapTime(time, timeRange);
-
-  if (clampedTime === timeRange.end) {
-    return timeRange.end;
-  }
-
-  const stepOffset = clampedTime - timeRange.start;
-  const snappedTime = timeRange.start + Math.floor(stepOffset / numericStep) * numericStep;
-
-  return clampTemporalMapTime(snappedTime, timeRange);
-}
+export { snapTemporalMapTime, type TemporalMapTimeRange };
 
 export function getTemporalMapTimeRange<TProperties = Record<string, unknown>>(
   tracks: readonly TemporalMapTrack<TProperties>[],
 ): TemporalMapTimeRange | null {
-  let start = Number.POSITIVE_INFINITY;
-  let end = Number.NEGATIVE_INFINITY;
-
-  for (const track of tracks) {
-    for (const frame of track.frames) {
-      if (!Number.isFinite(frame.time)) {
-        continue;
-      }
-
-      start = Math.min(start, frame.time);
-      end = Math.max(end, frame.time);
-    }
-  }
-
-  if (!Number.isFinite(start) || !Number.isFinite(end)) {
-    return null;
-  }
-
-  return { end, start };
+  return getTemporalTrackTimeRange(tracks);
 }
 
 export function getTemporalMapPointsAtTime<TProperties = Record<string, unknown>>(
@@ -80,14 +46,6 @@ export function getTemporalMapPointsAtTime<TProperties = Record<string, unknown>
   return tracks
     .map((track, index) => resolveTrackAtTime(track, index, time))
     .filter((point): point is MapPoint<TProperties> => point !== null);
-}
-
-function clampTemporalMapTime(time: number, timeRange: TemporalMapTimeRange) {
-  if (!Number.isFinite(time)) {
-    return timeRange.start;
-  }
-
-  return Math.min(Math.max(time, timeRange.start), timeRange.end);
 }
 
 function resolveTrackAtTime<TProperties>(
@@ -161,43 +119,4 @@ function toMapPoint<TProperties>(
     metrics: mergeMetrics(track.metrics, frame.metrics),
     properties: mergeProperties(track.properties, frame.properties),
   };
-}
-
-function interpolate(left: number, right: number, progress: number) {
-  return left + (right - left) * progress;
-}
-
-function interpolateMetrics(
-  previousMetrics: MapMetricRecord,
-  nextMetrics: MapMetricRecord,
-  progress: number,
-): MapMetricRecord {
-  const keys = new Set([...Object.keys(previousMetrics), ...Object.keys(nextMetrics)]);
-
-  return Object.fromEntries(
-    [...keys].map((key) => [
-      key,
-      interpolate(previousMetrics[key] ?? 0, nextMetrics[key] ?? 0, progress),
-    ]),
-  );
-}
-
-function mergeMetrics(
-  baseMetrics: MapMetricRecord | undefined,
-  frameMetrics: MapMetricRecord | undefined,
-): MapMetricRecord {
-  return {
-    ...(baseMetrics ?? {}),
-    ...(frameMetrics ?? {}),
-  };
-}
-
-function mergeProperties<TProperties>(
-  baseProperties: TProperties | undefined,
-  frameProperties: TProperties | undefined,
-): TProperties {
-  return {
-    ...(baseProperties as Record<string, unknown> | undefined),
-    ...(frameProperties as Record<string, unknown> | undefined),
-  } as TProperties;
 }

@@ -1,4 +1,9 @@
 import type { MapMetricRecord } from "./aggregation";
+import {
+  filterFiniteMetrics,
+  isRecord,
+  parseTemporalGeoJsonTime,
+} from "./temporal-core";
 import type { TemporalMapKeyframe, TemporalMapTrack } from "./temporal-points";
 
 export type TemporalGeoJsonProperties = Record<string, unknown>;
@@ -186,28 +191,6 @@ function readTime<TProperties extends TemporalGeoJsonProperties, TTrackPropertie
   return feature.properties?.time ?? feature.properties?.timestamp;
 }
 
-function parseTemporalGeoJsonTime(value: unknown) {
-  if (typeof value === "number") {
-    return value;
-  }
-
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-
-  if (typeof value === "string") {
-    const numericValue = Number(value);
-
-    if (Number.isFinite(numericValue) && value.trim() !== "") {
-      return numericValue;
-    }
-
-    return Date.parse(value);
-  }
-
-  return Number.NaN;
-}
-
 function readLabel<TProperties extends TemporalGeoJsonProperties, TTrackProperties>(
   feature: TemporalGeoJsonPointFeature<TProperties>,
   index: number,
@@ -254,18 +237,6 @@ function readMetrics<TProperties extends TemporalGeoJsonProperties, TTrackProper
   return metrics;
 }
 
-function filterFiniteMetrics(record: Record<string, unknown>): MapMetricRecord {
-  const metrics: MapMetricRecord = {};
-
-  for (const [key, value] of Object.entries(record)) {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      metrics[key] = value;
-    }
-  }
-
-  return metrics;
-}
-
 function readVisible<TProperties extends TemporalGeoJsonProperties, TTrackProperties>(
   feature: TemporalGeoJsonPointFeature<TProperties>,
   index: number,
@@ -292,8 +263,4 @@ function readProperties<TProperties extends TemporalGeoJsonProperties, TTrackPro
   }
 
   return { ...(feature.properties ?? {}) } as TTrackProperties;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
