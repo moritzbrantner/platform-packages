@@ -23,7 +23,6 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
-          include: ["src/**/*.stories.@(ts|tsx)"],
           setupFiles: ["./.storybook/vitest.setup.ts"],
           browser: {
             enabled: true,

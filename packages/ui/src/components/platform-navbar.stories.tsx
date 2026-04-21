@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "storybook/test";
+import { expect, screen } from "storybook/test";
 import {
   BookOpenIcon,
   DatabaseIcon,
@@ -117,12 +117,11 @@ export const OpensSubmenu: Story = {
     defaultOpenGroupId: null,
   },
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole("button", { name: /Discover/ }));
+    const trigger = canvas.getByRole("button", { name: /Discover/ });
 
-    await expect(canvas.getByRole("link", { name: /About/ })).toBeInTheDocument();
-    await expect(canvas.getByRole("button", { name: /Discover/ })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
+    await userEvent.click(trigger);
+
+    await expect(await screen.findByRole("link", { name: /About/ })).toBeInTheDocument();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
   },
 };

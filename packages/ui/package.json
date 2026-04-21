@@ -1,6 +1,7 @@
 {
   "name": "@moritzbrantner/ui",
   "version": "0.3.1",
+  "description": "Shared Tailwind 4 React UI primitives, themes, and layout components for platform packages.",
   "private": false,
   "type": "module",
   "repository": {
@@ -29,6 +30,18 @@
       "types": "./dist/bobba.d.ts",
       "import": "./dist/bobba.js"
     },
+    "./themes": {
+      "types": "./dist/themes.d.ts",
+      "import": "./dist/themes.js"
+    },
+    "./lib/cn": {
+      "types": "./dist/lib/cn.d.ts",
+      "import": "./dist/lib/cn.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.js"
+    },
     "./styles.css": "./styles.css",
     "./zleek/styles.css": "./zleek/styles.css",
     "./bobba/styles.css": "./bobba/styles.css"
@@ -48,7 +61,6 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.38.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.7.0",
     "motion": "^12.35.0",
@@ -85,13 +97,15 @@
     "access": "restricted"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/zleek.ts src/bobba.ts --format esm --dts --clean --out-dir dist",
+    "build": "tsup --config tsup.config.ts",
     "build-storybook": "storybook build --output-dir storybook-static",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
+    "pack:dry": "npm pack --dry-run --ignore-scripts --json",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
     "storybook": "storybook dev -p 6006 --no-open",
     "test": "cd ../.. && vitest run packages/ui/tests/ui.test.tsx",
+    "test:package": "node ./scripts/verify-package.mjs",
     "test:storybook": "vitest --config vitest.storybook.config.ts --project=storybook --run"
   }
 }

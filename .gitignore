@@ -4,3 +4,4 @@ dist/
 packages/*/dist/
 storybook-static/
 packages/*/storybook-static/
+packages/*/*.tgz

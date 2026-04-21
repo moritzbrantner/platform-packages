@@ -15,6 +15,10 @@ type UiThemeConfig = {
 };
 
 type UiThemeProps = React.ComponentProps<"div"> & {
+  /**
+   * Selects package theme metadata for this wrapper. The actual design tokens
+   * come from the globally imported UI stylesheet, so use one UI theme per app.
+   */
   theme: UiThemeName;
 };
 
