@@ -25,6 +25,7 @@ export {
 export {
   MediaTimeline,
   defaultMediaTimelineHotkeys,
+  type MediaTimelineClipContextMenuContext,
   type MediaTimelineDropDetail,
   type MediaTimelineHotkeyAction,
   type MediaTimelineHotkeyMap,

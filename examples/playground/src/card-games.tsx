@@ -11,6 +11,7 @@ import {
 } from "@moritzbrantner/card-games";
 import {
   Badge,
+  Button,
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
@@ -307,10 +308,11 @@ function CardGamesPage() {
             {openingHand.map((card, index) => (
               <ContextMenu key={`${card.rank}-${card.suit}`}>
                 <ContextMenuTrigger asChild>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     aria-label={`Select ${card.headline}`}
-                    className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none transition-transform duration-200 ease-out focus-visible:ring-2 focus-visible:ring-white/80"
+                    className="block h-auto select-none rounded-[1.8rem] bg-transparent p-0 text-left shadow-none outline-none transition-transform duration-200 ease-out hover:bg-transparent focus-visible:ring-2 focus-visible:ring-white/80"
                     onClick={() => setSelectedCard(index)}
                   >
                     <PlayingCard
@@ -325,7 +327,7 @@ function CardGamesPage() {
                       badge={card.badge}
                       selected={selectedCard === index}
                     />
-                  </button>
+                  </Button>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   <ContextMenuLabel>{card.headline}</ContextMenuLabel>
@@ -364,10 +366,11 @@ function CardGamesPage() {
           <div className="grid justify-items-center gap-4">
             <ContextMenu>
               <ContextMenuTrigger asChild>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   aria-label={`Play ${activeCard.headline}`}
-                  className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                  className="block h-auto select-none rounded-[1.8rem] bg-transparent p-0 text-left shadow-none outline-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-white/80"
                   onClick={() => runDefaultAction(activeCard)}
                 >
                   <PlayingCard
@@ -387,7 +390,7 @@ function CardGamesPage() {
                       </div>
                     }
                   />
-                </button>
+                </Button>
               </ContextMenuTrigger>
               <ContextMenuContent>
                 <ContextMenuLabel>{activeCard.headline}</ContextMenuLabel>
@@ -434,10 +437,11 @@ function CardGamesPage() {
                   {drawPile.length}
                 </span>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 aria-label="Draw card"
-                className="grid min-h-[19rem] w-full select-none place-items-center rounded-lg border border-white/18 bg-white/8 p-3 outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-55"
+                className="grid h-auto min-h-[19rem] w-full select-none place-items-center rounded-lg border border-white/18 bg-white/8 p-3 shadow-none outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-55"
                 onClick={drawCard}
                 disabled={drawPile.length === 0}
               >
@@ -458,33 +462,35 @@ function CardGamesPage() {
                 ) : (
                   <span className="text-sm font-bold text-white/62">Empty</span>
                 )}
-              </button>
+              </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <button
+              <Button
                 type="button"
                 className="rounded-md bg-white px-3 py-2 text-sm font-bold text-slate-950 transition-colors hover:bg-white/86 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={discardSelectedCard}
                 disabled={!selectedMove}
               >
                 Discard
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
                 className="rounded-md border border-white/28 bg-white/10 px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-white/16 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={returnSelectedCardToHand}
                 disabled={selectedMove?.zone !== "field"}
               >
                 Return
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
                 className="rounded-md border border-white/28 bg-white/10 px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-white/16"
                 onClick={resetField}
               >
                 Reset
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -499,10 +505,11 @@ function CardGamesPage() {
                     <p className="text-center text-sm font-bold text-white/82">
                       {slot.label}
                     </p>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       aria-label={`${slot.label} field slot`}
-                      className="grid min-h-[19rem] w-full select-none place-items-center rounded-lg border border-dashed border-white/24 bg-black/10 p-3 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/80"
+                      className="grid h-auto min-h-[19rem] w-full select-none place-items-center rounded-lg border border-dashed border-white/24 bg-black/10 p-3 shadow-none outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/80"
                       onClick={() => {
                         if (card && (!selectedMove || selectedMove.cardId === card.id)) {
                           selectFieldCard(slot.id, card);
@@ -554,7 +561,7 @@ function CardGamesPage() {
                       ) : (
                         <span className="text-sm font-bold text-white/58">Open</span>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 );
               })}
@@ -572,10 +579,11 @@ function CardGamesPage() {
                   fieldHand.map((card) => (
                     <ContextMenu key={card.id}>
                       <ContextMenuTrigger asChild>
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
                           aria-label={`Select ${card.headline}`}
-                          className="block select-none rounded-[1.8rem] bg-transparent p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                          className="block h-auto select-none rounded-[1.8rem] bg-transparent p-0 text-left shadow-none outline-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-white/80"
                           onClick={() => selectHandCard(card)}
                         >
                           <PlayingCard
@@ -592,7 +600,7 @@ function CardGamesPage() {
                             }
                             interactive={false}
                           />
-                        </button>
+                        </Button>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
                         <ContextMenuLabel>{card.headline}</ContextMenuLabel>
@@ -636,10 +644,11 @@ function CardGamesPage() {
                 {discardPile.length}
               </span>
             </div>
-            <button
+            <Button
               type="button"
+              variant="ghost"
               aria-label="Discard selected card"
-              className="grid min-h-[19rem] w-full select-none place-items-center rounded-lg border border-white/18 bg-white/8 p-3 outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-55"
+              className="grid h-auto min-h-[19rem] w-full select-none place-items-center rounded-lg border border-white/18 bg-white/8 p-3 shadow-none outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-55"
               onClick={discardSelectedCard}
               disabled={!selectedMove}
             >
@@ -665,7 +674,7 @@ function CardGamesPage() {
               ) : (
                 <span className="text-sm font-bold text-white/62">Empty</span>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </CardTable>

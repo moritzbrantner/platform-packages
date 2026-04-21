@@ -21,7 +21,7 @@
     "release:typecheck": "bun run --filter @moritzbrantner/ui check-types && bun run --filter @moritzbrantner/storytelling check-types && bun run --filter @moritzbrantner/data-density check-types && bun run --filter @moritzbrantner/maps check-types",
     "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
-    "test": "bun test ./tests/scaffold-contract.test.ts && turbo run test"
+    "test": "bun test ./tests/*.test.ts && turbo run test"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",

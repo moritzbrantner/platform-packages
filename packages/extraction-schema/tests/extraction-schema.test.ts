@@ -154,4 +154,54 @@ describe("@moritzbrantner/extraction-schema", () => {
     expect(validation.ok).toBe(false);
     expect(validation.issues.some((issue) => issue.code === "LOW_CONFIDENCE")).toBe(true);
   });
+
+  test("reports duplicate nested schema fields and invalid output shapes", () => {
+    const invalidSchema = validateExtractionSchema({
+      entities: [
+        {
+          type: "invoice",
+          fields: [
+            { name: "total", type: "number" },
+            { name: "total", type: "number" },
+          ],
+        },
+        { type: "invoice", fields: [] },
+      ],
+      relations: [{ type: "paid_by", from: "invoice", to: "person" }],
+    });
+
+    expect(invalidSchema.ok).toBe(false);
+    expect(invalidSchema.issues.map((issue) => issue.code)).toEqual([
+      "INVALID_FIELD",
+      "INVALID_FIELD",
+      "INVALID_RELATION_ENDPOINT",
+    ]);
+
+    const invalidOutput = validateExtractionOutput(
+      {
+        entities: [
+          {
+            id: "i1",
+            type: "person",
+            confidence: 1,
+            fields: {
+              name: { name: "name", value: 42, rawValue: 42, confidence: 1 },
+              extra: { name: "extra", value: true, rawValue: true, confidence: 1 },
+            },
+          },
+        ],
+        relations: [
+          { type: "member_of", fromEntityId: "i1", toEntityId: "missing", confidence: 1 },
+        ],
+      },
+      schema,
+    );
+
+    expect(invalidOutput.ok).toBe(false);
+    expect(invalidOutput.issues.map((issue) => issue.code)).toEqual([
+      "INVALID_FIELD",
+      "INVALID_FIELD",
+      "INVALID_RELATION_ENDPOINT",
+    ]);
+  });
 });

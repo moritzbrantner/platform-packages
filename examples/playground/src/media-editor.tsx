@@ -292,11 +292,12 @@ function MediaEditorPage() {
             </CardHeader>
             <CardContent className="grid gap-2">
               {mediaAssets.map((asset) => (
-                <button
+                <Button
                   key={asset.id}
                   type="button"
+                  variant="ghost"
                   draggable
-                  className="grid min-h-14 grid-cols-[0.55rem_1fr_auto] items-center gap-3 border border-border bg-background px-3 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="grid h-auto min-h-14 grid-cols-[0.55rem_1fr_auto] items-center gap-3 border border-border bg-background px-3 text-left text-sm shadow-none transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => addAssetAtPlayhead(asset)}
                   onDragStart={(event) => {
                     event.dataTransfer.setData(assetDragType, asset.id);
@@ -317,7 +318,7 @@ function MediaEditorPage() {
                   <span className="text-xs text-muted-foreground">
                     {formatTimelineTime(asset.durationMs)}
                   </span>
-                </button>
+                </Button>
               ))}
             </CardContent>
           </Card>

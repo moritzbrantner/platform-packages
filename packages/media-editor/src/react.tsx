@@ -4,13 +4,24 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
   useCallback,
   useMemo,
   useRef,
   useState,
 } from "react";
 
-import { cn } from "@moritzbrantner/ui";
+import {
+  Button,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+  cn,
+} from "@moritzbrantner/ui";
 
 import {
   canPlaceClipOnTrack,
@@ -21,6 +32,7 @@ import {
   getTimelineDurationMs,
   getTimelineTicks,
   moveTimelineClip,
+  normalizeTimelineTracks,
   resizeTimelineClip,
   snapTimelineTime,
   type MediaTimelineClip,
@@ -55,6 +67,22 @@ export type MediaTimelineHotkeyMap = Partial<
   Record<MediaTimelineHotkeyAction, string | string[]>
 >;
 
+export type MediaTimelineClipContextMenuContext = {
+  clip: MediaTimelineClip;
+  track: MediaTimelineTrack;
+  canEdit: boolean;
+  canMoveDown: boolean;
+  canMoveUp: boolean;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  onMoveDown: () => void;
+  onMoveToPlayhead: () => void;
+  onMoveUp: () => void;
+  onSelect: () => void;
+  onTrimEndToPlayhead: () => void;
+  onTrimStartToPlayhead: () => void;
+};
+
 export type MediaTimelineProps = {
   tracks: MediaTimelineTrack[];
   durationMs?: number;
@@ -66,6 +94,7 @@ export type MediaTimelineProps = {
   hotkeys?: MediaTimelineHotkeyMap;
   hotkeyNudgeMs?: number;
   hotkeySeekMs?: number;
+  renderClipContextMenu?: (context: MediaTimelineClipContextMenuContext) => ReactNode;
   readOnly?: boolean;
   className?: string;
   onTracksChange?: (tracks: MediaTimelineTrack[]) => void;
@@ -129,6 +158,7 @@ export function MediaTimeline({
   hotkeys = defaultMediaTimelineHotkeys,
   hotkeyNudgeMs,
   hotkeySeekMs = 1_000,
+  renderClipContextMenu,
   readOnly = false,
   className,
   onTracksChange,
@@ -221,6 +251,10 @@ export function MediaTimeline({
   );
 
   const startScrub = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+
     if (!onCurrentTimeChange) {
       return;
     }
@@ -235,6 +269,10 @@ export function MediaTimeline({
     clip: MediaTimelineClip,
     operation: "move" | "trim-start" | "trim-end",
   ) => {
+    if (event.button !== 0) {
+      return;
+    }
+
     if (readOnly || clip.locked) {
       return;
     }
@@ -337,7 +375,7 @@ export function MediaTimeline({
     setActiveDragClipId(undefined);
   };
 
-  const moveSelectedClipToTrack = (
+  const findAdjacentTrackForClip = (
     clip: MediaTimelineClip,
     direction: -1 | 1,
   ) => {
@@ -350,10 +388,21 @@ export function MediaTimeline({
     ) {
       const candidate = tracks[nextTrackIndex];
 
-      if (!candidate || !canPlaceClipOnTrack(clip, candidate)) {
-        continue;
+      if (candidate && canPlaceClipOnTrack(clip, candidate)) {
+        return candidate;
       }
+    }
 
+    return undefined;
+  };
+
+  const moveSelectedClipToTrack = (
+    clip: MediaTimelineClip,
+    direction: -1 | 1,
+  ) => {
+    const candidate = findAdjacentTrackForClip(clip, direction);
+
+    if (candidate) {
       return moveTimelineClip(
         tracks,
         { clipId: clip.id, trackId: candidate.id },
@@ -362,6 +411,111 @@ export function MediaTimeline({
     }
 
     return undefined;
+  };
+
+  const deleteClip = (clipId: string) => {
+    if (!onTracksChange || readOnly) {
+      return;
+    }
+
+    const found = findTimelineClip(tracks, clipId);
+
+    if (!found || found.clip.locked || found.track.locked) {
+      return;
+    }
+
+    commitTracks(
+      tracks.map((track) =>
+        track.id === found.track.id
+          ? {
+              ...track,
+              clips: track.clips.filter((clip) => clip.id !== clipId),
+            }
+          : track,
+      ),
+    );
+
+    if (selectedClipId === clipId) {
+      onSelectedClipChange?.(undefined);
+    }
+  };
+
+  const duplicateClip = (clipId: string) => {
+    if (!onTracksChange || readOnly) {
+      return;
+    }
+
+    const found = findTimelineClip(tracks, clipId);
+
+    if (!found || found.clip.locked || found.track.locked) {
+      return;
+    }
+
+    const duplicateId = createDuplicateClipId(tracks, found.clip.id);
+    const duplicate = {
+      ...found.clip,
+      id: duplicateId,
+      startMs: snapTimelineTime(getClipEndMs(found.clip), snapMs),
+    };
+
+    commitTracks(
+      normalizeTimelineTracks(
+        tracks.map((track) =>
+          track.id === found.track.id
+            ? {
+                ...track,
+                clips: [...track.clips, duplicate],
+              }
+            : track,
+        ),
+        { durationMs, minClipDurationMs, snapMs },
+      ),
+    );
+    onSelectedClipChange?.(duplicateId);
+  };
+
+  const moveClipToPlayhead = (clipId: string) => {
+    if (!onTracksChange || readOnly) {
+      return;
+    }
+
+    commitTracks(
+      moveTimelineClip(
+        tracks,
+        { clipId, startMs: currentTimeMs },
+        { durationMs, minClipDurationMs, snapMs },
+      ),
+    );
+  };
+
+  const trimClipToPlayhead = (clipId: string, edge: "start" | "end") => {
+    if (!onTracksChange || readOnly) {
+      return;
+    }
+
+    const found = findTimelineClip(tracks, clipId);
+
+    if (!found) {
+      return;
+    }
+
+    commitTracks(
+      resizeTimelineClip(
+        tracks,
+        edge === "start"
+          ? {
+              clipId,
+              edge,
+              startMs: currentTimeMs,
+            }
+          : {
+              clipId,
+              edge,
+              durationMs: currentTimeMs - found.clip.startMs,
+            },
+        { durationMs, minClipDurationMs, snapMs },
+      ),
+    );
   };
 
   const selectClipByOffset = (offset: -1 | 1) => {
@@ -381,27 +535,11 @@ export function MediaTimeline({
   };
 
   const deleteSelectedClip = () => {
-    if (!selectedClipId || !onTracksChange || readOnly) {
+    if (!selectedClipId) {
       return;
     }
 
-    const found = findTimelineClip(tracks, selectedClipId);
-
-    if (!found || found.clip.locked || found.track.locked) {
-      return;
-    }
-
-    commitTracks(
-      tracks.map((track) =>
-        track.id === found.track.id
-          ? {
-              ...track,
-              clips: track.clips.filter((clip) => clip.id !== selectedClipId),
-            }
-          : track,
-      ),
-    );
-    onSelectedClipChange?.(undefined);
+    deleteClip(selectedClipId);
   };
 
   const handleHotkeyAction = (action: MediaTimelineHotkeyAction) => {
@@ -624,6 +762,52 @@ export function MediaTimeline({
                     left={msToPx(clip.startMs)}
                     width={Math.max(20, msToPx(clip.durationMs))}
                     readOnly={readOnly || Boolean(track.locked)}
+                    contextMenu={
+                      <ClipContextMenuContent
+                        context={{
+                          clip,
+                          track,
+                          canEdit: Boolean(
+                            onTracksChange && !readOnly && !track.locked && !clip.locked,
+                          ),
+                          canMoveDown: Boolean(
+                            onTracksChange &&
+                              !readOnly &&
+                              !track.locked &&
+                              !clip.locked &&
+                              findAdjacentTrackForClip(clip, 1),
+                          ),
+                          canMoveUp: Boolean(
+                            onTracksChange &&
+                              !readOnly &&
+                              !track.locked &&
+                              !clip.locked &&
+                              findAdjacentTrackForClip(clip, -1),
+                          ),
+                          onDelete: () => deleteClip(clip.id),
+                          onDuplicate: () => duplicateClip(clip.id),
+                          onMoveDown: () => {
+                            const nextTracks = moveSelectedClipToTrack(clip, 1);
+
+                            if (nextTracks) {
+                              commitTracks(nextTracks);
+                            }
+                          },
+                          onMoveToPlayhead: () => moveClipToPlayhead(clip.id),
+                          onMoveUp: () => {
+                            const nextTracks = moveSelectedClipToTrack(clip, -1);
+
+                            if (nextTracks) {
+                              commitTracks(nextTracks);
+                            }
+                          },
+                          onSelect: () => onSelectedClipChange?.(clip.id),
+                          onTrimEndToPlayhead: () => trimClipToPlayhead(clip.id, "end"),
+                          onTrimStartToPlayhead: () => trimClipToPlayhead(clip.id, "start"),
+                        }}
+                        renderClipContextMenu={renderClipContextMenu}
+                      />
+                    }
                     onPointerDown={startClipDrag}
                     onSelect={(clipId) => onSelectedClipChange?.(clipId)}
                   />
@@ -668,6 +852,7 @@ function TimelineClipButton({
   left,
   width,
   readOnly,
+  contextMenu,
   onPointerDown,
   onSelect,
 }: {
@@ -677,6 +862,7 @@ function TimelineClipButton({
   left: number;
   width: number;
   readOnly: boolean;
+  contextMenu: ReactNode;
   onPointerDown: (
     event: PointerEvent<HTMLElement>,
     clip: MediaTimelineClip,
@@ -694,48 +880,135 @@ function TimelineClipButton({
   } satisfies CSSProperties;
 
   return (
-    <button
-      type="button"
-      aria-label={`${clip.name}, ${formatTimelineTime(clip.startMs)} to ${formatTimelineTime(getClipEndMs(clip))}`}
-      aria-pressed={selected}
-      className={cn(
-        "absolute top-2 flex h-[calc(100%-1rem)] transform-gpu items-center justify-start overflow-hidden rounded-none border px-2 text-left text-white shadow-sm transition-[transform,box-shadow,filter] duration-150 ease-out",
-        "hover:-translate-y-1 hover:shadow-lg active:translate-y-0 active:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        selected ? "border-white ring-2 ring-ring" : "border-white/35",
-        dragging ? "opacity-80" : undefined,
-        readOnly || clip.locked ? "cursor-default opacity-70" : "cursor-grab active:cursor-grabbing",
-      )}
-      style={style}
-      onClick={(event) => {
-        event.stopPropagation();
-        onSelect(clip.id);
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onPointerDown={(event) => onPointerDown(event, clip, "move")}
-    >
-      {!readOnly && !clip.locked ? (
-        <span
-          aria-hidden="true"
-          className="absolute inset-y-1 left-1 w-1 cursor-ew-resize bg-white/70"
-          onPointerDown={(event) => onPointerDown(event, clip, "trim-start")}
-        />
-      ) : null}
-      <span className="min-w-0 pl-2">
-        <span className="block truncate text-xs font-semibold leading-4">{clip.name}</span>
-        <span className="block truncate text-[11px] leading-4 text-white/80">
-          {formatTimelineTime(clip.durationMs)}
-        </span>
-      </span>
-      {!readOnly && !clip.locked ? (
-        <span
-          aria-hidden="true"
-          className="absolute inset-y-1 right-1 w-1 cursor-ew-resize bg-white/70"
-          onPointerDown={(event) => onPointerDown(event, clip, "trim-end")}
-        />
-      ) : null}
-    </button>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          aria-label={`${clip.name}, ${formatTimelineTime(clip.startMs)} to ${formatTimelineTime(getClipEndMs(clip))}`}
+          aria-pressed={selected}
+          className={cn(
+            "absolute top-2 flex h-[calc(100%-1rem)] transform-gpu items-center justify-start overflow-hidden rounded-none border bg-transparent px-2 text-left text-white shadow-sm transition-[transform,box-shadow,filter] duration-150 ease-out hover:bg-transparent hover:scale-100",
+            "hover:-translate-y-1 hover:shadow-lg active:translate-y-0 active:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            selected ? "border-white ring-2 ring-ring" : "border-white/35",
+            dragging ? "opacity-80" : undefined,
+            readOnly || clip.locked ? "cursor-default opacity-70" : "cursor-grab active:cursor-grabbing",
+          )}
+          style={style}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelect(clip.id);
+          }}
+          onContextMenu={(event) => {
+            event.stopPropagation();
+            onSelect(clip.id);
+          }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onPointerDown={(event) => onPointerDown(event, clip, "move")}
+        >
+          {!readOnly && !clip.locked ? (
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-1 left-1 w-1 cursor-ew-resize bg-white/70"
+              onPointerDown={(event) => onPointerDown(event, clip, "trim-start")}
+            />
+          ) : null}
+          <span className="min-w-0 pl-2">
+            <span className="block truncate text-xs font-semibold leading-4">{clip.name}</span>
+            <span className="block truncate text-[11px] leading-4 text-white/80">
+              {formatTimelineTime(clip.durationMs)}
+            </span>
+          </span>
+          {!readOnly && !clip.locked ? (
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-1 right-1 w-1 cursor-ew-resize bg-white/70"
+              onPointerDown={(event) => onPointerDown(event, clip, "trim-end")}
+            />
+          ) : null}
+        </Button>
+      </ContextMenuTrigger>
+      {contextMenu}
+    </ContextMenu>
   );
+}
+
+function ClipContextMenuContent({
+  context,
+  renderClipContextMenu,
+}: {
+  context: MediaTimelineClipContextMenuContext;
+  renderClipContextMenu?: (context: MediaTimelineClipContextMenuContext) => ReactNode;
+}) {
+  if (renderClipContextMenu) {
+    return <ContextMenuEventBoundary>{renderClipContextMenu(context)}</ContextMenuEventBoundary>;
+  }
+
+  return (
+    <ContextMenuEventBoundary>
+      <ContextMenuContent className="w-56">
+        <ContextMenuLabel className="truncate">{context.clip.name}</ContextMenuLabel>
+        <ContextMenuItem onSelect={context.onSelect}>Select clip</ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem disabled={!context.canEdit} onSelect={context.onMoveToPlayhead}>
+          Move to playhead
+        </ContextMenuItem>
+        <ContextMenuItem disabled={!context.canEdit} onSelect={context.onTrimStartToPlayhead}>
+          Trim start to playhead
+        </ContextMenuItem>
+        <ContextMenuItem disabled={!context.canEdit} onSelect={context.onTrimEndToPlayhead}>
+          Trim end to playhead
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem disabled={!context.canMoveUp} onSelect={context.onMoveUp}>
+          Move up
+          <ContextMenuShortcut>Up</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem disabled={!context.canMoveDown} onSelect={context.onMoveDown}>
+          Move down
+          <ContextMenuShortcut>Down</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem disabled={!context.canEdit} onSelect={context.onDuplicate}>
+          Duplicate
+        </ContextMenuItem>
+        <ContextMenuItem
+          disabled={!context.canEdit}
+          variant="destructive"
+          onSelect={context.onDelete}
+        >
+          Delete
+          <ContextMenuShortcut>Del</ContextMenuShortcut>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenuEventBoundary>
+  );
+}
+
+function ContextMenuEventBoundary({ children }: { children: ReactNode }) {
+  return (
+    <span
+      style={{ display: "contents" }}
+      onClick={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
+    >
+      {children}
+    </span>
+  );
+}
+
+function createDuplicateClipId(tracks: MediaTimelineTrack[], clipId: string) {
+  const existingIds = new Set(tracks.flatMap((track) => track.clips.map((clip) => clip.id)));
+  let candidate = `${clipId}-copy`;
+  let copyIndex = 2;
+
+  while (existingIds.has(candidate)) {
+    candidate = `${clipId}-copy-${copyIndex}`;
+    copyIndex += 1;
+  }
+
+  return candidate;
 }
 
 type NormalizedHotkeyEntry = {

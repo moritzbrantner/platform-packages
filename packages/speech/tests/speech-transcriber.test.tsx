@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import type { SpeechStreamingTranscriber } from "@moritzbrantner/speech";
@@ -101,19 +101,25 @@ describe("@moritzbrantner/speech component", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Start recording" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Start recording" }));
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Recording")).toBeTruthy();
     });
 
-    recorder?.requestData();
+    await act(async () => {
+      recorder?.requestData();
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("hello there")).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Stop recording" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Stop recording" }));
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("hello there from speech")).toBeTruthy();
@@ -188,19 +194,25 @@ describe("@moritzbrantner/speech component", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Start recording" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Start recording" }));
+    });
 
     await waitFor(() => {
       expect(streamingTranscriber.openSession).toHaveBeenCalledTimes(1);
     });
 
-    recorder?.requestData();
+    await act(async () => {
+      recorder?.requestData();
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("hello from")).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Stop recording" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Stop recording" }));
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("hello from websocket")).toBeTruthy();

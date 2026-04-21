@@ -11,6 +11,20 @@ const foundationPackages = new Set([
   "@moritzbrantner/pipeline-core",
   "@moritzbrantner/tree-structures",
 ]);
+const forbiddenFoundationDependencyPatterns = [
+  /^@base-ui\//,
+  /^@moritzbrantner\/(ui|maps|media-editor|parallel-text|speech|storytelling)$/,
+  /^@react-three\//,
+  /^framer-motion$/,
+  /^lucide-react$/,
+  /^maplibre-gl$/,
+  /^motion$/,
+  /^radix-ui$/,
+  /^react$/,
+  /^react-dom$/,
+  /^remotion$/,
+  /^three$/,
+];
 
 describe("package architecture", () => {
   test("foundation packages do not depend on domain, provider, or rendering packages", () => {
@@ -23,6 +37,13 @@ describe("package architecture", () => {
 
       const internalDeps = getInternalDependencies(packageJson);
       expect(internalDeps, `${packageJson.name} has internal dependencies`).toEqual([]);
+
+      const runtimeDeps = getRuntimeDependencies(packageJson);
+      const forbiddenDeps = runtimeDeps.filter((dependency) =>
+        forbiddenFoundationDependencyPatterns.some((pattern) => pattern.test(dependency)),
+      );
+
+      expect(forbiddenDeps, `${packageJson.name} has rendering/provider deps`).toEqual([]);
     }
   });
 
@@ -63,11 +84,16 @@ function readPackages(): Map<string, PackageJson> {
 }
 
 function getInternalDependencies(packageJson: PackageJson): string[] {
+  return getRuntimeDependencies(packageJson).filter((dependency) =>
+    dependency.startsWith("@moritzbrantner/"),
+  );
+}
+
+function getRuntimeDependencies(packageJson: PackageJson): string[] {
   return Object.keys({
     ...packageJson.dependencies,
     ...packageJson.peerDependencies,
   })
-    .filter((dependency) => dependency.startsWith("@moritzbrantner/"))
     .sort((left, right) => left.localeCompare(right));
 }
 

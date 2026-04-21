@@ -80,6 +80,52 @@ describe("@moritzbrantner/data-density", () => {
     });
   });
 
+  test("keeps empty windows and empty bins deterministic at viewport edges", () => {
+    const windowIndex = createDataDensityWindowIndex([{ id: "row-a", metrics: { value: 2 } }]);
+
+    expect(windowIndex.getWindow({ limit: 10, offset: 20 })).toMatchObject({
+      items: [],
+      summary: {
+        endIndex: 1,
+        filteredItemCount: 1,
+        startIndex: 1,
+        totalItemCount: 1,
+        visibleItemCount: 0,
+      },
+    });
+
+    const series = createBinnedSeriesIndex([
+      { id: "a", x: 0, y: 2, metrics: { weight: 4 } },
+      { id: "b", x: 10, y: 6, metrics: { weight: 8 } },
+    ]).getBinnedSeries({
+      includeEmptyBins: true,
+      targetBinCount: 4,
+      xDomain: [0, 20],
+    });
+
+    expect(series.bins).toHaveLength(4);
+    expect(series.bins.map((bin) => bin.pointCount)).toEqual([1, 0, 1, 0]);
+    expect(series.summary.metrics.weight).toBe(12);
+  });
+
+  test("aggregates high-volume series deterministically without mutating input points", () => {
+    const points = Array.from({ length: 1_000 }, (_, index) => ({
+      id: `point-${index}`,
+      x: index,
+      y: index % 7,
+      metrics: { count: 1, weighted: index },
+    }));
+    const snapshot = structuredClone(points);
+    const index = createBinnedSeriesIndex(points);
+    const first = index.getBinnedSeries({ targetBinCount: 10, xDomain: [0, 999] });
+    const second = index.getBinnedSeries({ targetBinCount: 10, xDomain: [0, 999] });
+
+    expect(first).toEqual(second);
+    expect(first.summary.metrics.count).toBe(1_000);
+    expect(first.summary.metrics.weighted).toBe(499_500);
+    expect(points).toEqual(snapshot);
+  });
+
   test("clusters geographic points while preserving metric totals", () => {
     const points: Array<GeoDensityPoint<{ city: string }>> = [
       {

@@ -854,11 +854,12 @@ function FlatDesignPage() {
                 </div>
                 <div className="max-h-[19rem] space-y-1 overflow-auto pr-1">
                   {nodeOptions.map((node) => (
-                    <button
+                    <Button
                       key={node.id}
                       type="button"
+                      variant={node.id === selectedNodeId ? "default" : "ghost"}
                       className={[
-                        "flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left text-sm transition",
+                        "flex h-auto w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left text-sm transition",
                         node.id === selectedNodeId
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-muted",
@@ -877,7 +878,7 @@ function FlatDesignPage() {
                       >
                         {node.animated ? "motion" : node.kind}
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -946,8 +947,9 @@ function FlatDesignPage() {
                   </span>
                   <span>{selectedMotionConfig.duration.toFixed(1)}s</span>
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   className="relative h-12 w-full rounded-md border border-border bg-background"
                   onClick={addTimelinePointFromTrack}
                 >
@@ -970,7 +972,7 @@ function FlatDesignPage() {
                       {index + 1}
                     </span>
                   ))}
-                </button>
+                </Button>
               </div>
 
               <div className="overflow-x-auto">
@@ -997,9 +999,11 @@ function FlatDesignPage() {
                         onClick={() => setActiveKeyframeIndex(index)}
                       >
                         <td className="py-1.5 pr-3 text-xs font-medium text-muted-foreground">
-                          <button
+                          <Button
                             type="button"
-                            className="rounded-full border border-border px-2 py-1 text-foreground"
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto rounded-full border border-border px-2 py-1 text-foreground"
                             onClick={() => setActiveKeyframeIndex(index)}
                           >
                             {getFrameSeconds(
@@ -1007,7 +1011,7 @@ function FlatDesignPage() {
                               selectedMotionConfig.duration,
                             ).toFixed(2)}
                             s
-                          </button>
+                          </Button>
                         </td>
                         {(["time", "x", "y", "scale", "rotate", "opacity"] as const).map(
                           (field) => (

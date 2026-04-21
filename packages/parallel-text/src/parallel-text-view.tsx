@@ -601,7 +601,9 @@ const styles: Record<string, CSSProperties> = {
   },
   translationTab: {
     backgroundColor: "#ffffff",
-    border: "1px solid #d4d4d8",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "#d4d4d8",
     borderRadius: 999,
     color: "#3f3f46",
     cursor: "pointer",

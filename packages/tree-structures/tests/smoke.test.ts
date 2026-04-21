@@ -103,4 +103,30 @@ describe("@moritzbrantner/tree-structures", () => {
       ]),
     ).toThrow("Tree contains a parent cycle");
   });
+
+  test("keeps traversal order and subtree aggregation stable for missing lookups", () => {
+    const index = createTreeIndex([
+      { id: "root" },
+      { id: "a", parentId: "root" },
+      { id: "b", parentId: "root" },
+      { id: "b-1", parentId: "b" },
+    ]);
+
+    expect(index.getNodeById("missing")).toBeNull();
+    expect(index.getChildren("missing")).toEqual([]);
+    expect(index.getPath("missing")).toEqual([]);
+    expect(index.getDescendants("b").map((node) => node.id)).toEqual(["b-1"]);
+    expect(getTreeStats([index.getSubtree("b")!])).toEqual({
+      leafCount: 1,
+      maxDepth: 1,
+      nodeCount: 2,
+      rootCount: 1,
+    });
+    expect(index.flatten({ order: "breadth-first" }).map((node) => node.id)).toEqual([
+      "root",
+      "a",
+      "b",
+      "b-1",
+    ]);
+  });
 });

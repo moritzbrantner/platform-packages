@@ -128,7 +128,7 @@ describe("@moritzbrantner/media-editor React timeline", () => {
     });
 
     expect(clip.className).toContain("hover:-translate-y-1");
-    expect(clip.className).not.toContain("scale");
+    expect(clip.className).toContain("hover:scale-100");
 
     fireEvent.click(clip);
     expect(handleSelectionChange).toHaveBeenCalledWith("clip-1");
@@ -144,6 +144,46 @@ describe("@moritzbrantner/media-editor React timeline", () => {
               startMs: 1_100,
             }),
           ]),
+        }),
+      ]),
+    );
+  });
+
+  test("opens a clip context menu and applies clip actions", () => {
+    const handleTracksChange = vi.fn();
+    const handleCurrentTimeChange = vi.fn();
+    const handleSelectionChange = vi.fn();
+
+    render(
+      <MediaTimeline
+        tracks={tracks}
+        durationMs={10_000}
+        currentTimeMs={3_000}
+        onCurrentTimeChange={handleCurrentTimeChange}
+        selectedClipId="clip-2"
+        onTracksChange={handleTracksChange}
+        onSelectedClipChange={handleSelectionChange}
+      />,
+    );
+
+    const clip = screen.getByRole("button", {
+      name: /Opening shot, 0:01.0 to 0:05.0/,
+    });
+
+    fireEvent.contextMenu(clip);
+    expect(handleSelectionChange).toHaveBeenCalledWith("clip-1");
+
+    const deleteItem = screen.getByRole("menuitem", { name: /Delete/ });
+
+    fireEvent.pointerDown(deleteItem, { button: 0, clientX: 120 });
+    fireEvent.click(deleteItem);
+
+    expect(handleCurrentTimeChange).not.toHaveBeenCalled();
+    expect(handleTracksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "video",
+          clips: [],
         }),
       ]),
     );

@@ -143,6 +143,97 @@ describe("@moritzbrantner/storytelling", () => {
     expect(timeline.scenes[1]?.node.id).toBe("trace-node");
   });
 
+  test("rejects invalid interactive story references", () => {
+    expect(() =>
+      createInteractiveStory({
+        id: "broken",
+        title: "Broken",
+        openingNodeId: "missing",
+        nodes: [{ id: "start", title: "Start" }],
+      }),
+    ).toThrow('references missing opening node "missing"');
+
+    expect(() =>
+      createInteractiveStory({
+        id: "broken-choice",
+        title: "Broken choice",
+        openingNodeId: "start",
+        nodes: [
+          {
+            id: "start",
+            title: "Start",
+            choices: [{ id: "go", label: "Go", target: "missing" }],
+          },
+        ],
+      }),
+    ).toThrow('points to missing node "missing"');
+  });
+
+  test("progresses deterministically through linear and branching nodes", () => {
+    const story = createInteractiveStory({
+      id: "route",
+      title: "Route",
+      openingNodeId: "start",
+      nodes: [
+        { id: "start", title: "Start", next: "choice" },
+        {
+          id: "choice",
+          title: "Choice",
+          choices: [
+            { id: "left", label: "Left", target: "left-end" },
+            { id: "right", label: "Right", target: "right-end" },
+          ],
+        },
+        { id: "left-end", title: "Left end", durationInFrames: 60 },
+        { id: "right-end", title: "Right end", durationInFrames: 90 },
+      ],
+    });
+
+    expect(
+      resolveStoryPath(story, ["right"], { autoAdvanceLinearNodes: true }).nodes.map(
+        (node) => node.id,
+      ),
+    ).toEqual(["start", "choice", "right-end"]);
+    expect(buildStoryTimeline(story, ["right"]).totalFrames).toBe(330);
+  });
+
+  test("renders media scene fallbacks for missing source content", async () => {
+    const fallbackStory = createInteractiveStory({
+      id: "fallback-media",
+      title: "Fallback media",
+      openingNodeId: "empty-subtitles",
+      nodes: [
+        {
+          id: "empty-subtitles",
+          title: "Empty subtitles",
+          next: "audio",
+          scene: createSubtitleStoryScene({ emptyLabel: "No cues in fixture." }),
+        },
+        {
+          id: "audio",
+          title: "Audio",
+          scene: createAudioStoryScene({ description: "No source supplied." }),
+        },
+      ],
+    });
+
+    render(<InteractiveStoryPlayer story={fallbackStory} />);
+
+    expect(screen.getByText("No cues in fixture.")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    await screen.findByText("Audio track");
+    expect(document.querySelector("audio")).toBeTruthy();
+  });
+
+  test("imports remotion and three entrypoints without browser-only setup", async () => {
+    await expect(import("../src/remotion")).resolves.toHaveProperty(
+      "StoryRemotionComposition",
+    );
+    await expect(import("../src/three")).resolves.toHaveProperty("StoryCanvasStage");
+  });
+
   test("renders subtitle scenes from subtitle file content", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(

@@ -22,12 +22,22 @@ import {
   CodeBlockContent,
   CodeBlockHeader,
   CodeBlockTitle,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
   cn,
   CopyButton,
   DescriptionList,
   DescriptionListDetail,
   DescriptionListItem,
   DescriptionListTerm,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
   Dropzone,
   DropzoneContent,
   DropzoneDefaultIcon,
@@ -328,6 +338,73 @@ describe("@moritzbrantner/ui", () => {
 
     expect(button.className).toContain("duration-150");
     expect(button.className).toContain("active:brightness-110");
+  });
+
+  test("preserves button contract details for downstream asChild usage", () => {
+    render(
+      <div>
+        <Button asChild variant="outline" className="custom-link-class">
+          <a href="/docs">Docs</a>
+        </Button>
+        <Button variant="destructive" disabled className="custom-disabled-class">
+          Delete
+        </Button>
+      </div>,
+    );
+
+    const link = screen.getByRole("link", { name: "Docs" });
+    const disabledButton = screen.getByRole("button", { name: "Delete" });
+
+    expect(link.getAttribute("data-slot")).toBe("button");
+    expect(link.getAttribute("data-variant")).toBe("outline");
+    expect(link.className).toContain("custom-link-class");
+    expect(disabledButton).toHaveProperty("disabled", true);
+    expect(disabledButton.getAttribute("data-variant")).toBe("destructive");
+    expect(disabledButton.className).toContain("custom-disabled-class");
+  });
+
+  test("opens context menus and invokes selected menu actions", async () => {
+    const onSelect = vi.fn();
+
+    render(
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <Button variant="outline">Clip</Button>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onSelect={onSelect}>Duplicate</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(screen.getByRole("button", { name: "Clip" }));
+
+    const item = await screen.findByText("Duplicate");
+    fireEvent.click(item);
+
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  test("opens dialogs from triggers and renders accessible content", async () => {
+    render(
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>Open details</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Package details</DialogTitle>
+            <DialogDescription>Stable downstream dialog contract.</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open details" }));
+
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+    expect(screen.getByText("Package details")).toBeTruthy();
+    expect(screen.getByText("Stable downstream dialog contract.")).toBeTruthy();
   });
 
   test("renders auxiliary catalog components with glass styling slots", () => {

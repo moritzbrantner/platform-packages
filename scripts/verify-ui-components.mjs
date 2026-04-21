@@ -12,7 +12,10 @@ function shouldSkipDir(dirPath) {
     normalized.includes("packages/ui/src") ||
     normalized.includes("/node_modules") ||
     normalized.includes("/dist") ||
+    normalized.includes("/build") ||
+    normalized.includes("/coverage") ||
     normalized.includes("/.turbo") ||
+    normalized.includes("/storybook-static") ||
     normalized.includes("/playwright-report") ||
     normalized.includes("/test-results")
   );

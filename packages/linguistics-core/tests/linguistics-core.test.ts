@@ -110,4 +110,35 @@ describe("@moritzbrantner/linguistics-core", () => {
       metadata: { source: "fixture" },
     });
   });
+
+  test("handles empty documents and clamps boundary anchors", () => {
+    const empty = segmentTextDocument(
+      createTextDocument({ id: "empty", text: "" }),
+      { granularity: "word", useIntlSegmenter: false },
+    );
+
+    expect(empty.paragraphs).toEqual([]);
+    expect(empty.sentences).toEqual([]);
+    expect(empty.tokens).toEqual([]);
+
+    const document = createTextDocument({ id: "boundary", text: "Short" });
+
+    expect(anchorSpan(document, { start: -10, end: 50 })).toMatchObject({
+      start: 0,
+      end: 5,
+      text: "Short",
+    });
+  });
+
+  test("reanchors spans after Unicode normalization changes", () => {
+    const original = createTextDocument({ id: "unicode", text: "Cafe\u0301 terrace" });
+    const anchor = anchorSpan(original, { start: 0, end: "Cafe\u0301".length });
+    const edited = createTextDocument({ id: "unicode-edited", text: "Before. Caf\u00E9 terrace" });
+
+    expect(reanchorSpan(edited, anchor)).toEqual({
+      start: "Before. ".length,
+      end: "Before. Caf\u00E9".length,
+      text: "Café",
+    });
+  });
 });
