@@ -54,9 +54,9 @@ function MapsMotionPage() {
 
   return (
     <PlaygroundPage
-      activePage="maps-motion"
-      title="Temporal map motion demo"
-      description="A dedicated timeline page for load-testing moving dots. The map keeps 10,000 dots in play, with 5,000 stationary anchors and 5,000 seeded random routes that shift over time."
+      activePage="temporal-maps"
+      title="Temporal maps playground"
+      description="A dedicated timeline page for load-testing TemporalClusteredMap. The map keeps 10,000 dots in play, with 5,000 stationary anchors and 5,000 seeded random routes that shift over time."
     >
       <section className="grid gap-4 xl:grid-cols-[1.45fr_0.82fr]">
         <Card className="overflow-hidden rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
@@ -75,9 +75,9 @@ function MapsMotionPage() {
             <div className="space-y-2">
               <CardTitle>Motion playback map</CardTitle>
               <CardDescription className="max-w-3xl text-sm leading-6">
-                This page isolates the temporal behavior from the main maps demo.
-                The moving half follows reproducible random routes between major
-                hubs, while the static half stays fixed so you can gauge clustering
+                This page isolates temporal behavior from the main maps demo. The
+                moving half follows reproducible random routes between major hubs,
+                while the static half stays fixed so you can gauge clustering
                 stability as the timeline advances.
               </CardDescription>
             </div>
@@ -169,8 +169,9 @@ function MapsMotionPage() {
                 slices.
               </p>
               <p>
-                The purpose of this page is to stress the temporal map UI without
-                mixing it into the original maps playground page.
+                The purpose of this page is to stress `TemporalClusteredMap` and
+                the temporal track model without mixing it into the original maps
+                playground page.
               </p>
             </CardContent>
           </Card>

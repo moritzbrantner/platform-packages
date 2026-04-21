@@ -33,6 +33,12 @@ export {
   type TemporalMapTrack,
 } from "./temporal-points";
 export {
+  createTemporalMapTracksFromGeoJson,
+  type TemporalGeoJsonPointFeature,
+  type TemporalGeoJsonPointFeatureCollection,
+  type TemporalGeoJsonTrackOptions,
+} from "./temporal-geojson";
+export {
   TemporalClusteredMap,
   type TemporalClusteredMapProps,
 } from "./temporal-map";
