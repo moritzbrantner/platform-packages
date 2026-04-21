@@ -36,6 +36,21 @@ const config: StorybookConfig = {
           allow: [workspaceRoot],
         },
       },
+      optimizeDeps: {
+        include: [
+          "@base-ui/react",
+          "@tanstack/react-table",
+          "cmdk",
+          "date-fns",
+          "embla-carousel-react",
+          "input-otp",
+          "next-themes",
+          "react-resizable-panels",
+          "recharts",
+          "sonner",
+          "vaul",
+        ],
+      },
     });
   },
 };

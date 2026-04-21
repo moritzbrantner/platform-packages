@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "motion/react";
 import { Slot } from "radix-ui";
 import { cn } from "../lib/cn";
+import { glassMotionTransition } from "../lib/motion";
 
 const buttonVariants = cva(
   "inline-flex shrink-0 origin-bottom transform-gpu items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-[transform,box-shadow,background-color,color,border-color,filter] duration-150 ease-out will-change-transform hover:-translate-y-[1px] hover:scale-[1.055] active:brightness-110 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
@@ -85,6 +86,9 @@ function Button(props: ButtonProps) {
       data-size={size}
       className={buttonClassName}
       drag={enableDrag ? "x" : undefined}
+      transition={glassMotionTransition}
+      whileHover={{ y: -1, scale: 1.055 }}
+      whileTap={{ scale: 0.98 }}
       {...(rest as Record<string, unknown>)}
     />
   );

@@ -1,20 +1,26 @@
 import * as React from "react"
+import { motion, type HTMLMotionProps } from "motion/react"
 
 import { cn } from "../lib/cn"
+import { glassSurfaceMotion } from "../lib/motion"
 
 function Card({
   className,
   size = "default",
+  layout = glassSurfaceMotion.layout,
+  transition = glassSurfaceMotion.transition,
   ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+}: HTMLMotionProps<"div"> & { size?: "default" | "sm" }) {
   return (
-    <div
+    <motion.div
       data-slot="card"
       data-size={size}
       className={cn(
         "group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
         className
       )}
+      layout={layout}
+      transition={transition}
       {...props}
     />
   )

@@ -45,8 +45,11 @@ type CalendarCellComponentProps = React.ComponentProps<typeof DayButton> & {
 
 type CalendarDayComponentProps = CalendarCellComponentProps
 
+type CalendarVariant = "default" | "cards"
+
 type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  variant?: CalendarVariant
   dayComponent?: React.ComponentType<CalendarDayComponentProps>
   cellComponent?: React.ComponentType<CalendarCellComponentProps>
   icsData?: CalendarIcsData
@@ -59,29 +62,35 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  variant = "default",
   dayComponent: DayComponent,
   cellComponent: CellComponent,
   defaultMonth,
   month,
   icsData,
-  maxEventsPerDay = 2,
+  maxEventsPerDay,
   locale,
   formatters,
   components,
   ...props
 }: CalendarProps) {
   const defaultClassNames = getDefaultClassNames()
+  const isCardVariant = variant === "cards"
+  const resolvedMaxEventsPerDay = maxEventsPerDay ?? (isCardVariant ? 4 : 2)
   const calendarEvents = React.useMemo(() => getCalendarEventsFromIcsData(icsData), [icsData])
   const eventsByDay = React.useMemo(() => getEventsByDay(calendarEvents), [calendarEvents])
   const defaultDayButton = (dayButtonProps: React.ComponentProps<typeof DayButton>) => {
-    const DayButtonComponent = DayComponent ?? CellComponent ?? CalendarDayButton
+    const DayButtonComponent =
+      DayComponent ??
+      CellComponent ??
+      (isCardVariant ? CalendarCardDayButton : CalendarDayButton)
     const dayEvents = eventsByDay.get(getDayKey(dayButtonProps.day.date)) ?? []
 
     return (
       <DayButtonComponent
         locale={locale}
         events={dayEvents}
-        maxEventsPerDay={maxEventsPerDay}
+        maxEventsPerDay={resolvedMaxEventsPerDay}
         {...dayButtonProps}
       />
     )
@@ -93,7 +102,8 @@ function Calendar({
       defaultMonth={defaultMonth ?? month ?? calendarEvents[0]?.start}
       month={month}
       className={cn(
-        "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        isCardVariant ? "[--cell-size:9rem]" : "[--cell-size:--spacing(7)]",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -106,12 +116,20 @@ function Calendar({
         ...formatters,
       }}
       classNames={{
-        root: cn("w-fit", defaultClassNames.root),
+        root: cn(
+          isCardVariant ? "w-full overflow-x-auto" : "w-fit",
+          defaultClassNames.root
+        ),
         months: cn(
           "relative flex flex-col gap-4 md:flex-row",
+          isCardVariant && "w-full",
           defaultClassNames.months
         ),
-        month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
+        month: cn(
+          "flex w-full flex-col gap-4",
+          isCardVariant && "min-w-[56rem]",
+          defaultClassNames.month
+        ),
         nav: cn(
           "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
           defaultClassNames.nav
@@ -149,13 +167,25 @@ function Calendar({
             : "flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground",
           defaultClassNames.caption_label
         ),
-        table: "w-full border-collapse",
-        weekdays: cn("flex", defaultClassNames.weekdays),
+        table: cn(
+          isCardVariant
+            ? "w-full min-w-[56rem] border-separate border-spacing-0"
+            : "w-full border-collapse"
+        ),
+        weekdays: cn(
+          isCardVariant ? "grid grid-cols-7 gap-2" : "flex",
+          defaultClassNames.weekdays
+        ),
         weekday: cn(
           "flex h-(--cell-size) w-(--cell-size) shrink-0 items-center justify-center rounded-(--cell-radius) text-[0.8rem] font-normal text-muted-foreground select-none",
+          isCardVariant &&
+            "h-9 w-full min-w-0 justify-start bg-muted/40 px-3 text-xs font-medium uppercase tracking-normal",
           defaultClassNames.weekday
         ),
-        week: cn("mt-2 flex w-full", defaultClassNames.week),
+        week: cn(
+          isCardVariant ? "mt-2 grid w-full grid-cols-7 gap-2" : "mt-2 flex w-full",
+          defaultClassNames.week
+        ),
         week_number_header: cn(
           "w-(--cell-size) select-none",
           defaultClassNames.week_number_header
@@ -166,13 +196,14 @@ function Calendar({
         ),
         day: cn(
           "group/day relative size-(--cell-size) shrink-0 rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius)",
+          isCardVariant && "h-auto min-h-36 w-full min-w-0 size-auto",
           props.showWeekNumber
             ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-(--cell-radius)"
             : "[&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
           defaultClassNames.day
         ),
         day_button: cn(
-          "size-full min-h-0 min-w-0",
+          isCardVariant ? "h-full w-full min-w-0" : "size-full min-h-0 min-w-0",
           defaultClassNames.day_button
         ),
         range_start: cn(
@@ -186,6 +217,7 @@ function Calendar({
         ),
         today: cn(
           "rounded-(--cell-radius) bg-muted text-foreground data-[selected=true]:rounded-none",
+          isCardVariant && "bg-accent/30",
           defaultClassNames.today
         ),
         outside: cn(
@@ -315,9 +347,103 @@ function CalendarDayButton({
   )
 }
 
-export { Calendar, CalendarDayButton }
+function CalendarCardDayButton({
+  className,
+  children,
+  day,
+  events = [],
+  maxEventsPerDay = 4,
+  modifiers,
+  locale,
+  ...props
+}: React.ComponentProps<typeof DayButton> & {
+  locale?: Partial<Locale>
+  events?: CalendarEvent[]
+  maxEventsPerDay?: number
+}) {
+  const defaultClassNames = getDefaultClassNames()
+  const visibleEvents = events.slice(0, maxEventsPerDay)
+  const hiddenEventsCount = Math.max(events.length - visibleEvents.length, 0)
+
+  const ref = React.useRef<HTMLButtonElement>(null)
+  React.useEffect(() => {
+    if (modifiers.focused) ref.current?.focus()
+  }, [modifiers.focused])
+
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="icon"
+      data-day={day.date.toLocaleDateString(locale?.code)}
+      data-selected-single={
+        modifiers.selected &&
+        !modifiers.range_start &&
+        !modifiers.range_end &&
+        !modifiers.range_middle
+      }
+      data-range-start={modifiers.range_start}
+      data-range-end={modifiers.range_end}
+      data-range-middle={modifiers.range_middle}
+      data-has-events={events.length > 0 || undefined}
+      className={cn(
+        "relative isolate z-10 flex h-full min-h-36 w-full min-w-0 flex-col items-stretch justify-start gap-3 overflow-hidden rounded-(--cell-radius) border border-border/70 bg-card p-3 text-left leading-none font-normal text-card-foreground shadow-xs group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 hover:border-border hover:bg-accent/20 data-[range-end=true]:border-primary data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-(--cell-radius) data-[range-middle=true]:border-primary/40 data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:border-primary data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:border-primary data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground",
+        defaultClassNames.day_button,
+        className
+      )}
+      {...props}
+    >
+      <div className="flex w-full items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[0.6875rem] leading-none font-medium text-muted-foreground uppercase">
+            {day.date.toLocaleDateString(locale?.code, { weekday: "short" })}
+          </div>
+          <div className="mt-1 text-xl leading-none font-semibold">
+            {children}
+          </div>
+        </div>
+        {events.length > 0 ? (
+          <span className="shrink-0 rounded-sm bg-accent px-2 py-1 text-[0.625rem] leading-none font-medium text-accent-foreground">
+            {events.length}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="flex w-full min-w-0 flex-1 flex-col gap-2 overflow-hidden">
+        {visibleEvents.length > 0 ? (
+          visibleEvents.map((event) => (
+            <span
+              key={getCalendarEventKey(event)}
+              className="block min-w-0 rounded-sm border border-border/60 bg-background/70 px-2 py-1.5 text-left"
+              title={getCalendarEventLabel(event, locale)}
+            >
+              <span className="block truncate text-xs leading-tight font-medium">
+                {event.summary ?? "Untitled event"}
+              </span>
+              <span className="mt-1 block truncate text-[0.6875rem] leading-tight text-muted-foreground">
+                {getCalendarEventMeta(event, locale)}
+              </span>
+            </span>
+          ))
+        ) : (
+          <span className="block rounded-sm border border-dashed border-border/70 px-2 py-1.5 text-[0.6875rem] leading-tight text-muted-foreground">
+            No events
+          </span>
+        )}
+        {hiddenEventsCount > 0 ? (
+          <span className="px-1 text-[0.6875rem] leading-tight font-medium text-muted-foreground">
+            +{hiddenEventsCount} more
+          </span>
+        ) : null}
+      </div>
+    </Button>
+  )
+}
+
+export { Calendar, CalendarDayButton, CalendarCardDayButton }
 export type {
   CalendarProps,
+  CalendarVariant,
   CalendarDayComponentProps,
   CalendarCellComponentProps,
   CalendarEvent,
@@ -526,4 +652,15 @@ function getCalendarEventLabel(event: CalendarEvent, locale?: Partial<Locale>) {
     hour: "numeric",
     minute: "2-digit",
   })} ${summary}`
+}
+
+function getCalendarEventMeta(event: CalendarEvent, locale?: Partial<Locale>) {
+  const time = event.isAllDay
+    ? "All day"
+    : event.start.toLocaleTimeString(locale?.code, {
+        hour: "numeric",
+        minute: "2-digit",
+      })
+
+  return event.location ? `${time} - ${event.location}` : time
 }

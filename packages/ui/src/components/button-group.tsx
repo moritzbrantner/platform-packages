@@ -1,7 +1,9 @@
 import { cva, type VariantProps } from "class-variance-authority"
+import { motion, type HTMLMotionProps } from "motion/react"
 import { Slot } from "radix-ui"
 
 import { cn } from "../lib/cn"
+import { glassSurfaceMotion } from "../lib/motion"
 import { Separator } from "./separator"
 
 const buttonGroupVariants = cva(
@@ -24,14 +26,18 @@ const buttonGroupVariants = cva(
 function ButtonGroup({
   className,
   orientation,
+  layout = glassSurfaceMotion.layout,
+  transition = glassSurfaceMotion.transition,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
+}: HTMLMotionProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
   return (
-    <div
+    <motion.div
       role="group"
       data-slot="button-group"
       data-orientation={orientation}
       className={cn(buttonGroupVariants({ orientation }), className)}
+      layout={layout}
+      transition={transition}
       {...props}
     />
   )
@@ -44,15 +50,28 @@ function ButtonGroupText({
 }: React.ComponentProps<"div"> & {
   asChild?: boolean
 }) {
-  const Comp = asChild ? Slot.Root : "div"
+  if (asChild) {
+    return (
+      <Slot.Root
+        data-slot="button-group-text"
+        className={cn(
+          "flex items-center gap-2 rounded-lg border bg-muted px-2.5 text-sm font-medium [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+          className
+        )}
+        {...props}
+      />
+    )
+  }
 
   return (
-    <Comp
+    <motion.div
+      data-slot="button-group-text"
       className={cn(
         "flex items-center gap-2 rounded-lg border bg-muted px-2.5 text-sm font-medium [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
         className
       )}
-      {...props}
+      {...glassSurfaceMotion}
+      {...(props as HTMLMotionProps<"div">)}
     />
   )
 }

@@ -1,9 +1,13 @@
+import { existsSync, readFileSync } from "node:fs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
   Button,
+  ButtonGroup,
+  ButtonGroupText,
   Calendar,
+  CalendarCardDayButton,
   CalendarDayButton,
   type CalendarCellComponentProps,
   type CalendarDayComponentProps,
@@ -31,6 +35,10 @@ import {
   DropzoneIcon,
   DropzoneInput,
   DropzoneTitle,
+  Empty,
+  EmptyDescription,
+  EmptyTitle,
+  Kbd,
   PlatformNavbar,
   type PlatformNavbarGroup,
   PageActions,
@@ -70,6 +78,68 @@ import {
   ToolbarSpacer,
   ToolbarTitle,
 } from "../src";
+
+const shadcnBasicComponentFiles = [
+  "accordion",
+  "alert",
+  "alert-dialog",
+  "aspect-ratio",
+  "avatar",
+  "badge",
+  "breadcrumb",
+  "button",
+  "button-group",
+  "calendar",
+  "card",
+  "carousel",
+  "chart",
+  "checkbox",
+  "collapsible",
+  "combobox",
+  "command",
+  "context-menu",
+  "data-table",
+  "date-picker",
+  "dialog",
+  "direction",
+  "drawer",
+  "dropdown-menu",
+  "empty",
+  "field",
+  "hover-card",
+  "input",
+  "input-group",
+  "input-otp",
+  "item",
+  "kbd",
+  "label",
+  "menubar",
+  "native-select",
+  "navigation-menu",
+  "pagination",
+  "popover",
+  "progress",
+  "radio-group",
+  "resizable",
+  "scroll-area",
+  "select",
+  "separator",
+  "sheet",
+  "sidebar",
+  "skeleton",
+  "slider",
+  "sonner",
+  "spinner",
+  "switch",
+  "table",
+  "tabs",
+  "textarea",
+  "toast",
+  "toggle",
+  "toggle-group",
+  "tooltip",
+  "typography",
+] as const;
 
 const calendarIcsData = [
   "vcalendar",
@@ -142,6 +212,15 @@ const navigationGroups = [
 ] as const satisfies PlatformNavbarGroup[];
 
 describe("@moritzbrantner/ui", () => {
+  test("ships the full shadcn basic component catalog", () => {
+    const indexSource = readFileSync("packages/ui/src/index.ts", "utf8");
+
+    for (const componentFile of shadcnBasicComponentFiles) {
+      expect(existsSync(`packages/ui/src/components/${componentFile}.tsx`)).toBe(true);
+      expect(indexSource).toContain(`export * from "./components/${componentFile}";`);
+    }
+  });
+
   test("renders shared primitives in jsdom", () => {
     render(
       <Card>
@@ -249,6 +328,29 @@ describe("@moritzbrantner/ui", () => {
 
     expect(button.className).toContain("duration-150");
     expect(button.className).toContain("active:brightness-110");
+  });
+
+  test("renders auxiliary catalog components with glass styling slots", () => {
+    const { container } = render(
+      <div>
+        <ButtonGroup>
+          <Button>Run</Button>
+          <ButtonGroupText>
+            <Kbd>R</Kbd>
+          </ButtonGroupText>
+        </ButtonGroup>
+        <Empty>
+          <EmptyTitle>No packages</EmptyTitle>
+          <EmptyDescription>Create a package to continue.</EmptyDescription>
+        </Empty>
+      </div>,
+    );
+
+    expect(container.querySelector("[data-slot='button-group']")).toBeTruthy();
+    expect(container.querySelector("[data-slot='button-group-text']")).toBeTruthy();
+    expect(container.querySelector("[data-slot='kbd']")).toBeTruthy();
+    expect(container.querySelector("[data-slot='empty']")).toBeTruthy();
+    expect(screen.getByText("No packages")).toBeTruthy();
   });
 
   test("merges class names", () => {
@@ -462,6 +564,43 @@ describe("@moritzbrantner/ui", () => {
 
     expect(screen.getAllByText(/Design sync/).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Release window").length).toBeGreaterThan(1);
+  });
+
+  test("renders calendar cards with listed events", () => {
+    const { container } = render(
+      <Calendar
+        defaultMonth={new Date(2026, 3, 1)}
+        mode="single"
+        showOutsideDays={false}
+        variant="cards"
+        icsData={calendarIcsData}
+      />,
+    );
+
+    const calendar = container.querySelector("[data-slot='calendar']");
+    const eventDay = container.querySelector("[data-has-events='true']");
+
+    expect(calendar?.className).toContain("overflow-x-auto");
+    expect(eventDay?.className).toContain("bg-card");
+    expect(eventDay?.className).toContain("min-h-36");
+    expect(screen.getAllByText(/Design sync/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("All day").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("No events").length).toBeGreaterThan(0);
+  });
+
+  test("exports the calendar card day component for custom layouts", () => {
+    const { container } = render(
+      <Calendar
+        defaultMonth={new Date(2026, 3, 1)}
+        mode="single"
+        showOutsideDays={false}
+        dayComponent={CalendarCardDayButton}
+        icsData={calendarIcsData}
+      />,
+    );
+
+    expect(container.querySelector("[data-has-events='true']")?.className).toContain("bg-card");
+    expect(screen.getAllByText(/Design sync/).length).toBeGreaterThan(0);
   });
 
   test("renders an animated glass navbar with an open submenu", () => {
