@@ -1,5 +1,21 @@
 # @moritzbrantner/storytelling
 
+## 0.3.0
+
+### Minor Changes
+
+- Redesign the package around a serializable `StoryDocument` model shared by
+  branching playback, scroll previews, Three.js stages, and Remotion rendering.
+- Replace renderer components embedded on story nodes with
+  `StoryRendererRegistry`.
+- Replace `InteractiveStoryPlayer` with `StoryPlayer`.
+- Replace `StoryContainer`, `StorySeries`, and `StoryScene` with
+  `StoryScroller`.
+- Replace JSX node bodies with structured `StoryContentBlock[]` content.
+- Expand `@moritzbrantner/storytelling/remotion` with
+  `getStoryCompositionProps`, Remotion scene primitives, and registry-backed
+  composition rendering.
+
 ## 0.2.1
 
 ### Patch Changes

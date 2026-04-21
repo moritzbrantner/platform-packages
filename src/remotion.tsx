@@ -4,146 +4,400 @@ import {
   interpolate,
   useCurrentFrame,
 } from "remotion";
+import type { ReactNode } from "react";
 
-import { buildStoryTimeline, getStoryNode, isStoryEnding } from "./interactive-story";
+import { buildStoryTimeline } from "./story-path";
+import {
+  getStoryChoices,
+  getStoryNode,
+  isStoryEnding,
+  validateStory,
+} from "./story-validation";
+import {
+  defaultStoryTheme,
+  type StoryTheme,
+} from "./story-theme";
+import { getStoryRendererKey } from "./story-render-registry";
 import type {
-  InteractiveStoryDefinition,
+  ResolvedStoryPath,
+  StoryContentBlock,
+  StoryDocument,
   StoryNodeData,
+  StoryRemotionSceneComponent,
   StoryRemotionSceneProps,
-} from "./story-types";
+  StoryRenderProps,
+  StoryRendererRegistry,
+} from "./story-model";
 
-export { buildStoryTimeline } from "./interactive-story";
+export { buildStoryTimeline } from "./story-path";
+
+export type StoryRemotionLayout = {
+  width?: number;
+  height?: number;
+  fps?: number;
+};
 
 export type StoryRemotionCompositionProps<
   TData extends StoryNodeData = StoryNodeData,
 > = {
-  story: InteractiveStoryDefinition<TData>;
+  story: StoryDocument<TData>;
   choiceIds?: string[];
+  registry?: StoryRendererRegistry<TData>;
+  theme?: StoryTheme;
+  layout?: StoryRemotionLayout;
 };
 
-export function DefaultStoryRemotionScene<
-  TData extends StoryNodeData = StoryNodeData,
->({
-  node,
+export type StoryCompositionOptions = {
+  id?: string;
+  choiceIds?: string[];
+  fps?: number;
+  width?: number;
+  height?: number;
+};
+
+export function getStoryCompositionProps<TData extends StoryNodeData>(
+  story: StoryDocument<TData>,
+  options: StoryCompositionOptions = {},
+) {
+  const timeline = buildStoryTimeline(story, {
+    choiceIds: options.choiceIds,
+    fps: options.fps,
+  });
+  const id =
+    options.id ??
+    `${story.id}-${options.choiceIds?.length ? options.choiceIds.join("-") : "default"}`;
+
+  return {
+    id,
+    fps: timeline.fps,
+    width: options.width ?? 1920,
+    height: options.height ?? 1080,
+    durationInFrames: timeline.totalFrames,
+    defaultProps: {
+      story,
+      choiceIds: options.choiceIds ?? [],
+      layout: {
+        fps: timeline.fps,
+        width: options.width ?? 1920,
+        height: options.height ?? 1080,
+      },
+    } satisfies StoryRemotionCompositionProps<TData>,
+  };
+}
+
+export function StoryRemotionContent({
+  content,
+  color = "rgba(255,255,255,0.82)",
+}: {
+  content?: StoryContentBlock[];
+  color?: string;
+}) {
+  if (!content?.length) {
+    return null;
+  }
+
+  return (
+    <div style={{ display: "grid", gap: 18, color }}>
+      {content.map((block, index) => {
+        const key = `${block.type}-${index}`;
+
+        switch (block.type) {
+          case "paragraph":
+            return (
+              <p key={key} style={{ margin: 0, fontSize: 30, lineHeight: 1.45 }}>
+                {block.text}
+              </p>
+            );
+          case "heading": {
+            const size = block.level === 2 ? 46 : block.level === 4 ? 30 : 36;
+
+            return (
+              <p
+                key={key}
+                style={{
+                  margin: 0,
+                  fontSize: size,
+                  lineHeight: 1.15,
+                  fontWeight: 700,
+                  color: "white",
+                }}
+              >
+                {block.text}
+              </p>
+            );
+          }
+          case "quote":
+            return (
+              <div
+                key={key}
+                style={{
+                  borderLeft: "4px solid rgba(255,255,255,0.35)",
+                  paddingLeft: 24,
+                  fontSize: 30,
+                  lineHeight: 1.4,
+                }}
+              >
+                <p style={{ margin: 0 }}>{block.text}</p>
+                {block.cite ? (
+                  <p style={{ margin: "12px 0 0", fontSize: 20, opacity: 0.72 }}>
+                    {block.cite}
+                  </p>
+                ) : null}
+              </div>
+            );
+          case "list":
+            return (
+              <ul key={key} style={{ margin: 0, paddingLeft: 32, fontSize: 28 }}>
+                {block.items.map((item) => (
+                  <li key={item} style={{ marginBottom: 10 }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            );
+          case "image":
+            return (
+              <div key={key} style={{ display: "grid", gap: 12 }}>
+                <img
+                  src={block.src}
+                  alt={block.alt}
+                  style={{
+                    width: "100%",
+                    maxHeight: 420,
+                    objectFit: "cover",
+                    borderRadius: 18,
+                  }}
+                />
+                {block.caption ? (
+                  <p style={{ margin: 0, fontSize: 18, opacity: 0.7 }}>
+                    {block.caption}
+                  </p>
+                ) : null}
+              </div>
+            );
+          case "audio":
+          case "video":
+            return (
+              <div
+                key={key}
+                style={{
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  borderRadius: 18,
+                  padding: 24,
+                  fontSize: 24,
+                }}
+              >
+                {block.title ?? block.src}
+              </div>
+            );
+          default:
+            return null;
+        }
+      })}
+    </div>
+  );
+}
+
+export function StoryRemotionProgress({
+  progress,
+  label,
+}: {
+  progress: number;
+  label: string;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+      <div
+        style={{
+          width: 440,
+          borderRadius: 999,
+          background: "rgba(255,255,255,0.14)",
+          padding: 6,
+        }}
+      >
+        <div
+          style={{
+            width: `${Math.max(0, Math.min(progress, 1)) * 100}%`,
+            height: 10,
+            borderRadius: 999,
+            background: "white",
+          }}
+        />
+      </div>
+      <span
+        style={{
+          fontSize: 17,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          opacity: 0.72,
+        }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+export function StoryRemotionTransition({
   frame,
   durationInFrames,
-  currentIndex,
-  progress,
-}: StoryRemotionSceneProps<TData>) {
+  transitionInFrames,
+  children,
+}: {
+  frame: number;
+  durationInFrames: number;
+  transitionInFrames: number;
+  children: ReactNode;
+}) {
+  const transitionFrames = Math.min(transitionInFrames, Math.floor(durationInFrames / 2));
   const opacity = interpolate(
     frame,
-    [0, durationInFrames * 0.12, durationInFrames * 0.88, durationInFrames],
+    [0, transitionFrames, durationInFrames - transitionFrames, durationInFrames],
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
   const translateY = interpolate(
     frame,
-    [0, durationInFrames * 0.15, durationInFrames],
-    [40, 0, -28],
+    [0, transitionFrames, durationInFrames],
+    [36, 0, -24],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const hue = (currentIndex * 57) % 360;
 
   return (
-    <AbsoluteFill
-      style={{
-        opacity,
-        transform: `translateY(${translateY}px)`,
-        justifyContent: "space-between",
-        padding: 64,
-        background: `radial-gradient(circle at top, hsla(${hue}, 75%, 62%, 0.35), transparent 36%), linear-gradient(180deg, rgba(10, 15, 25, 0.95), rgba(4, 8, 14, 1))`,
-        color: "white",
-        fontFamily: "ui-sans-serif, system-ui, sans-serif",
-      }}
+    <AbsoluteFill style={{ opacity, transform: `translateY(${translateY}px)` }}>
+      {children}
+    </AbsoluteFill>
+  );
+}
+
+export function StoryRemotionSceneFrame<
+  TData extends StoryNodeData = StoryNodeData,
+>(props: StoryRemotionSceneProps<TData> & { theme?: StoryTheme }) {
+  const { node, currentIndex, progress, theme } = props;
+  const resolvedTheme = { ...defaultStoryTheme, ...theme };
+  const accent = node.stage?.props?.accent;
+  const background =
+    typeof accent === "string"
+      ? `linear-gradient(135deg, ${accent}, #111827 55%, #020617)`
+      : `linear-gradient(135deg, ${resolvedTheme.accent}, #111827 55%, #020617)`;
+
+  return (
+    <StoryRemotionTransition
+      frame={props.frame}
+      durationInFrames={props.durationInFrames}
+      transitionInFrames={props.timelineScene.transitionInFrames}
     >
-      <div>
-        {node.eyebrow ? (
-          <p style={{ fontSize: 18, letterSpacing: "0.25em", textTransform: "uppercase", opacity: 0.72 }}>
-            {node.eyebrow}
-          </p>
-        ) : null}
-        <h2 style={{ marginTop: 20, fontSize: 62, lineHeight: 1.05, maxWidth: 980 }}>
-          {node.title}
-        </h2>
-        {node.body ? (
-          <div
+      <AbsoluteFill
+        style={{
+          justifyContent: "space-between",
+          padding: 72,
+          background,
+          color: "white",
+          fontFamily: resolvedTheme.fontFamily,
+        }}
+      >
+        <div style={{ maxWidth: 1040 }}>
+          {node.eyebrow ? (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 18,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                opacity: 0.72,
+              }}
+            >
+              {node.eyebrow}
+            </p>
+          ) : null}
+          <h1
             style={{
-              marginTop: 28,
-              maxWidth: 840,
-              fontSize: 28,
-              lineHeight: 1.55,
-              opacity: 0.82,
+              margin: "20px 0 0",
+              fontSize: 68,
+              lineHeight: 1.03,
+              letterSpacing: 0,
+              maxWidth: 1040,
             }}
           >
-            {node.body}
+            {node.title}
+          </h1>
+          <div style={{ marginTop: 30, maxWidth: 900 }}>
+            <StoryRemotionContent content={node.content} />
           </div>
-        ) : null}
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <div
-          style={{
-            width: 420,
-            borderRadius: 999,
-            background: "rgba(255,255,255,0.12)",
-            padding: 6,
-          }}
-        >
-          <div
-            style={{
-              height: 10,
-              width: `${Math.max(progress * 100, 10)}%`,
-              borderRadius: 999,
-              background: "white",
-            }}
-          />
         </div>
-        <span style={{ fontSize: 16, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.75 }}>
-          Scene {currentIndex + 1}
-        </span>
-      </div>
-    </AbsoluteFill>
+
+        <StoryRemotionProgress
+          progress={progress}
+          label={`Scene ${currentIndex + 1}`}
+        />
+      </AbsoluteFill>
+    </StoryRemotionTransition>
   );
 }
 
 export function StoryRemotionComposition<
   TData extends StoryNodeData = StoryNodeData,
 >({
-  story,
+  story: input,
   choiceIds = [],
+  registry,
+  theme,
 }: StoryRemotionCompositionProps<TData>) {
-  const frame = useCurrentFrame();
-  const timeline = buildStoryTimeline(story, choiceIds);
+  const story = validateStory(input);
+  const absoluteFrame = useCurrentFrame();
+  const timeline = buildStoryTimeline(story, { choiceIds });
 
   return (
     <AbsoluteFill>
       {timeline.scenes.map((scene, index) => {
-        const Scene = scene.node.remotionScene ?? DefaultStoryRemotionScene;
-        const history = timeline.history.slice(0, index + 1);
-        const sceneFrame = Math.max(frame - scene.startFrame, 0);
+        const rendererKey = getStoryRendererKey(scene.node);
+        const CustomScene = registry?.remotion?.[rendererKey] as
+          | StoryRemotionSceneComponent<TData>
+          | undefined;
         const node = getStoryNode(story, scene.node.id);
+        const frame = Math.max(absoluteFrame - scene.startFrame, 0);
+        const history = scene.history;
+        const path: ResolvedStoryPath<TData> = {
+          nodes: timeline.scenes.slice(0, index + 1).map((entry) => entry.node),
+          history,
+          currentNode: node,
+          completed: isStoryEnding(story, node),
+        };
+        const choices = getStoryChoices(story, node);
+        const renderProps: StoryRenderProps<TData> = {
+          story,
+          node,
+          history,
+          path,
+          currentIndex: index,
+          progress: (index + 1) / Math.max(timeline.scenes.length, 1),
+          isEnding: isStoryEnding(story, node),
+          canGoBack: index > 0,
+          choices,
+          choose: () => {},
+          goBack: () => {},
+          restart: () => {},
+        };
+        const sceneProps: StoryRemotionSceneProps<TData> = {
+          ...renderProps,
+          frame,
+          absoluteFrame,
+          durationInFrames: scene.durationInFrames,
+          sceneProgress: frame / Math.max(scene.durationInFrames, 1),
+          timelineScene: scene,
+        };
 
         return (
           <Sequence
-            key={scene.node.id}
+            key={`${scene.node.id}-${scene.startFrame}`}
             from={scene.startFrame}
             durationInFrames={scene.durationInFrames}
           >
-            <Scene
-              story={story}
-              node={node}
-              history={history}
-              currentIndex={index}
-              progress={(index + 1) / Math.max(timeline.scenes.length, 1)}
-              isEnding={isStoryEnding(node)}
-              canGoBack={index > 0}
-              choose={() => {}}
-              goBack={() => {}}
-              restart={() => {}}
-              frame={sceneFrame}
-              absoluteFrame={frame}
-              durationInFrames={scene.durationInFrames}
-            />
+            {CustomScene ? (
+              <CustomScene {...sceneProps} />
+            ) : (
+              <StoryRemotionSceneFrame {...sceneProps} theme={theme} />
+            )}
           </Sequence>
         );
       })}

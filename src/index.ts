@@ -2,52 +2,64 @@
 
 export {
   buildStoryTimeline,
-  createInteractiveStory,
+  resolveStoryPath,
+  type BuildStoryTimelineOptions,
+  type ResolveStoryPathOptions,
+} from "./story-path";
+export {
+  createStoryRendererRegistry,
+  getStoryRendererKey,
+  getStoryStageProps,
+} from "./story-render-registry";
+export {
+  defineStory,
   getStoryChoices,
   getStoryNode,
   isStoryEnding,
-  resolveStoryPath,
-} from "./interactive-story";
+  validateStory,
+} from "./story-validation";
+export { defaultStoryTheme, type StoryTheme } from "./story-theme";
+export { StoryContent, type StoryContentProps } from "./story-content";
 export {
-  InteractiveStoryPlayer,
-  type InteractiveStoryPlayerProps,
-} from "./interactive-story-player";
+  StoryControls,
+  StoryPathTrail,
+  StoryPlayer,
+  type StoryControlsProps,
+  type StoryPathTrailProps,
+  type StoryPlayerProps,
+} from "./story-player";
+export { StoryProgress, type StoryProgressProps } from "./story-progress";
+export { StoryScroller, type StoryScrollerProps } from "./story-scroller";
 export {
-  StoryContainer,
-  type StoryContainerProps,
-} from "./story-container";
-export { StoryDefaultStage } from "./story-default-stage";
-export { StoryMinimap, type StoryMinimapProps } from "./story-minimap";
+  StoryStageFrame,
+  type StoryStageFrameProps,
+} from "./story-stage-frame";
 export {
-  StoryAudioFile,
-  StorySubtitleFile,
-  StoryVideoFile,
-  createAudioStoryScene,
-  createSubtitleStoryScene,
-  createVideoStoryScene,
-  type StoryAudioFileProps,
-  type StoryMediaTextTrack,
-  type StorySubtitleCue,
-  type StorySubtitleFileProps,
-  type StoryVideoFileProps,
-} from "./story-media";
-export { StoryScene } from "./story-scene";
-export { StorySeries, type StorySeriesProps } from "./story-series";
+  StoryMinimap,
+  type StoryMinimapItem,
+  type StoryMinimapProps,
+} from "./story-minimap";
 export type {
-  InteractiveStoryDefinition,
-  InteractiveStoryNode,
   ResolvedStoryPath,
-  StoryChoiceDefinition,
+  StoryChoice,
+  StoryContentBlock,
+  StoryContentRendererProps,
+  StoryDefaults,
+  StoryDocument,
   StoryHistoryEntry,
+  StoryLabels,
+  StoryMediaTextTrack,
+  StoryNode,
   StoryNodeData,
+  StoryRendererRegistry,
   StoryRenderProps,
   StoryRemotionSceneComponent,
   StoryRemotionSceneProps,
-  StorySceneDefinition,
-  StorySceneProps,
   StoryStageComponent,
+  StoryStageDescriptor,
   StoryThreeSceneComponent,
   StoryThreeSceneProps,
   StoryTimeline,
   StoryTimelineScene,
-} from "./story-types";
+  StoryTransition,
+} from "./story-model";
