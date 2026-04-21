@@ -1,5 +1,14 @@
 # @moritzbrantner/storytelling
 
+## 0.2.1
+
+### Patch Changes
+
+- Release every package in the workspace.
+
+- Updated dependencies []:
+  - @moritzbrantner/ui@0.3.1
+
 ## 0.2.0
 
 ### Minor Changes

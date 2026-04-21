@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/storytelling",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "type": "module",
   "repository": {
@@ -46,7 +46,7 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/ui": "^0.3.0",
+    "@moritzbrantner/ui": "^0.3.1",
     "motion": "^12.35.0"
   },
   "devDependencies": {
