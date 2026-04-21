@@ -1,5 +1,11 @@
 # @moritzbrantner/ui
 
+## 0.3.1
+
+### Patch Changes
+
+- Release every package in the workspace.
+
 ## 0.3.0
 
 ### Minor Changes

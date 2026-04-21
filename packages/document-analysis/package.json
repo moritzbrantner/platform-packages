@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/document-analysis",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "repository": {
@@ -20,15 +20,15 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/document-structure-extraction": "workspace:*",
-    "@moritzbrantner/information-extraction": "workspace:*",
-    "@moritzbrantner/linguistics-core": "workspace:*",
-    "@moritzbrantner/ocr": "workspace:*",
-    "@moritzbrantner/question-answering": "workspace:*",
-    "@moritzbrantner/sentiment-analysis": "workspace:*",
-    "@moritzbrantner/syntax-analysis": "workspace:*",
-    "@moritzbrantner/text-analysis": "workspace:*",
-    "@moritzbrantner/text-summarization": "workspace:*"
+    "@moritzbrantner/document-structure-extraction": "^0.1.1",
+    "@moritzbrantner/information-extraction": "^0.1.1",
+    "@moritzbrantner/linguistics-core": "^0.1.1",
+    "@moritzbrantner/ocr": "^0.1.1",
+    "@moritzbrantner/question-answering": "^0.1.1",
+    "@moritzbrantner/sentiment-analysis": "^0.1.1",
+    "@moritzbrantner/syntax-analysis": "^0.1.1",
+    "@moritzbrantner/text-analysis": "^0.1.1",
+    "@moritzbrantner/text-summarization": "^0.1.1"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/information-extraction",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "repository": {
@@ -20,9 +20,9 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/extraction-schema": "workspace:*",
-    "@moritzbrantner/text-analysis": "workspace:*",
-    "@moritzbrantner/text-inference": "workspace:*"
+    "@moritzbrantner/extraction-schema": "^0.1.1",
+    "@moritzbrantner/text-analysis": "^0.1.1",
+    "@moritzbrantner/text-inference": "^0.1.1"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

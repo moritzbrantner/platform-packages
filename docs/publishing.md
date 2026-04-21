@@ -4,28 +4,18 @@
 1. Commit and push this repository to `github.com/moritzbrantner/platform-packages`.
 2. Confirm your package scope matches the GitHub Packages owner. GitHub Packages only accepts npm scopes owned by the publishing user or organization.
 3. If you are not publishing from a `platform` GitHub owner, rename `@moritzbrantner/*` packages to your real GitHub scope before the first release.
-4. Prepare or publish `@moritzbrantner/ui`, `@moritzbrantner/storytelling`, `@moritzbrantner/eslint-config`, and `@moritzbrantner/typescript-config` first because they are the scaffold-critical package set.
-5. For the first standalone install wave, also publish `@moritzbrantner/data-density` and `@moritzbrantner/maps` because `electron-template` currently consumes maps from the shared package repository and maps depends on data-density.
-6. Open a pull request and merge it into `main`.
-7. Wait for the `Publish Private Packages` workflow to finish on `main`.
+4. Prepare or publish the full workspace package set.
+5. Open a pull request and merge it into `main`.
+6. Wait for the `Publish Private Packages` workflow to finish on `main`.
 
-The current workflow validates and publishes only the first scaffold release set:
-- `@moritzbrantner/ui`
-- `@moritzbrantner/storytelling`
-- `@moritzbrantner/eslint-config`
-- `@moritzbrantner/typescript-config`
-- `@moritzbrantner/data-density`
-- `@moritzbrantner/maps`
-
-It skips unrelated packages until the rest of the repository is release-ready.
+The current workflow validates and publishes every public package under `packages/*`.
 
 ## Later releases
 1. Make your package changes.
 2. Run `bun run changeset`.
 3. Select the packages that changed and choose the appropriate version bump.
 4. Commit the generated changeset file with your code changes.
-5. Merge to `main`.
-6. Expand the publish workflow from the scaffold release set to the broader package graph before relying on Changesets-driven automation for the whole repository.
+5. Merge to `main` and let the publish workflow publish packages whose current version is not already present in GitHub Packages.
 
 The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`.
 
@@ -38,13 +28,13 @@ The README package inventory is the local source of truth for package status:
 - `generated task wrapper`: generated around `@moritzbrantner/huggingface-universal`; publish only after the universal task type map and generated package contract are validated.
 - `experimental`: valid workspace packages that are not included in the first publish expansion.
 
-Before widening `.github/workflows/publish-packages.yml` beyond the scaffold release set:
+Before publishing new package families:
 
 1. Move each target package to `release-ready` in the README inventory.
 2. Confirm package metadata satisfies the requirements below.
 3. Confirm package tests cover empty inputs, representative data, and cross-package data flow when the package is an adapter.
 4. Add a Changeset for every package being published.
-5. Extend `release:build`, `release:lint`, `release:typecheck`, and `release:test` before adding the package to the publish script.
+5. Confirm `release:build`, `release:lint`, `release:typecheck`, and `release:test` cover the package.
 
 ## Package requirements
 Every publishable package under `packages/*` must have:

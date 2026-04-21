@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/zero-shot-object-detection",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "repository": {
@@ -31,6 +31,6 @@
     "test": "cd ../.. && vitest run packages/zero-shot-object-detection/tests"
   },
   "dependencies": {
-    "@moritzbrantner/huggingface-universal": "workspace:*"
+    "@moritzbrantner/huggingface-universal": "^0.1.1"
   }
 }

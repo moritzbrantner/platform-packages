@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/linguistics-learning",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "repository": {
@@ -20,8 +20,8 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/linguistics-core": "workspace:*",
-    "@moritzbrantner/linguistics-corpus": "workspace:*"
+    "@moritzbrantner/linguistics-core": "^0.1.1",
+    "@moritzbrantner/linguistics-corpus": "^0.1.1"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/question-answering",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "repository": {
@@ -20,9 +20,9 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/huggingface-universal": "workspace:*",
-    "@moritzbrantner/linguistics-core": "workspace:*",
-    "@moritzbrantner/text-inference": "workspace:*"
+    "@moritzbrantner/huggingface-universal": "^0.1.1",
+    "@moritzbrantner/linguistics-core": "^0.1.1",
+    "@moritzbrantner/text-inference": "^0.1.1"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

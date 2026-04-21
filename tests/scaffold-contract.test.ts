@@ -9,7 +9,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "ui",
     name: "@moritzbrantner/ui",
-    version: "0.3.0",
+    version: "0.3.1",
     files: ["dist", "styles.css"],
     exports: [".", "./styles.css"],
     scripts: ["build", "lint", "check-types", "test", "build-storybook"],
@@ -17,7 +17,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "storytelling",
     name: "@moritzbrantner/storytelling",
-    version: "0.2.0",
+    version: "0.2.1",
     files: ["dist"],
     exports: [".", "./remotion", "./three"],
     scripts: ["build", "lint", "check-types", "test"],
@@ -25,7 +25,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "eslint-config",
     name: "@moritzbrantner/eslint-config",
-    version: "0.1.0",
+    version: "0.1.1",
     files: ["index.js"],
     exports: ["."],
     scripts: [],
@@ -33,7 +33,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "typescript-config",
     name: "@moritzbrantner/typescript-config",
-    version: "0.1.0",
+    version: "0.1.1",
     files: ["base.json", "next-app.json", "node.json", "react-library.json"],
     exports: ["./base.json", "./next-app.json", "./node.json", "./react-library.json"],
     scripts: [],
@@ -41,9 +41,9 @@ const scaffoldCriticalPackages = [
 ] as const;
 const wrapperDependencyAllowlist: Record<string, Record<string, string>> = {
   "question-answering": {
-    "@moritzbrantner/huggingface-universal": "workspace:*",
-    "@moritzbrantner/linguistics-core": "workspace:*",
-    "@moritzbrantner/text-inference": "workspace:*",
+    "@moritzbrantner/huggingface-universal": "^0.1.1",
+    "@moritzbrantner/linguistics-core": "^0.1.1",
+    "@moritzbrantner/text-inference": "^0.1.1",
   },
 };
 
@@ -86,15 +86,16 @@ test("readme package inventory lists every workspace package", () => {
   );
 });
 
-test("publishing guide prioritizes the scaffold-critical packages for first release", () => {
+test("publishing guide describes the full workspace release path", () => {
   const publishingGuide = readFileSync(
     path.join(repoRoot, "docs/publishing.md"),
     "utf8",
   );
 
   expect(publishingGuide).toContain(
-    "Prepare or publish `@moritzbrantner/ui`, `@moritzbrantner/storytelling`, `@moritzbrantner/eslint-config`, and `@moritzbrantner/typescript-config` first",
+    "Prepare or publish the full workspace package set",
   );
+  expect(publishingGuide).toContain("validates and publishes every public package");
   expect(publishingGuide).toContain("consumer repos should adopt these first");
   expect(publishingGuide).toContain("Release-readiness categories");
 });
@@ -230,7 +231,7 @@ test("Hugging Face task wrappers follow the generated package contract", () => {
     expect(packageJson.name).toBe(`@moritzbrantner/${task}`);
     expect(packageJson.dependencies).toEqual(
       wrapperDependencyAllowlist[task] ?? {
-        "@moritzbrantner/huggingface-universal": "workspace:*",
+        "@moritzbrantner/huggingface-universal": "^0.1.1",
       },
     );
     expect(source).toContain(`getHuggingFaceTaskDescriptor("${task}")`);
