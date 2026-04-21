@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
@@ -19,10 +19,18 @@ import {
   CodeBlockHeader,
   CodeBlockTitle,
   cn,
+  CopyButton,
   DescriptionList,
   DescriptionListDetail,
   DescriptionListItem,
   DescriptionListTerm,
+  Dropzone,
+  DropzoneContent,
+  DropzoneDefaultIcon,
+  DropzoneDescription,
+  DropzoneIcon,
+  DropzoneInput,
+  DropzoneTitle,
   PlatformNavbar,
   type PlatformNavbarGroup,
   PageActions,
@@ -37,6 +45,13 @@ import {
   StatGroup,
   StatLabel,
   StatValue,
+  Stepper,
+  StepperConnector,
+  StepperContent,
+  StepperDescription,
+  StepperIndicator,
+  StepperItem,
+  StepperTitle,
   Surface,
   SurfaceContent,
   SurfaceDescription,
@@ -50,6 +65,10 @@ import {
   TimelineItem,
   TimelineTitle,
   Toggle,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSpacer,
+  ToolbarTitle,
 } from "../src";
 
 const calendarIcsData = [
@@ -278,6 +297,65 @@ describe("@moritzbrantner/ui", () => {
     expect(screen.getByText("Ready")).toBeTruthy();
     expect(screen.getByText("42ms")).toBeTruthy();
     expect(screen.getByText("Published")).toBeTruthy();
+  });
+
+  test("renders workflow and utility components", async () => {
+    const copy = vi.fn();
+    const onCopied = vi.fn();
+
+    const { container } = render(
+      <div>
+        <Toolbar aria-label="Editor toolbar">
+          <ToolbarGroup>
+            <ToolbarTitle>Release notes</ToolbarTitle>
+          </ToolbarGroup>
+          <ToolbarSpacer />
+          <ToolbarGroup>
+            <Button>Save</Button>
+          </ToolbarGroup>
+        </Toolbar>
+        <Stepper orientation="vertical">
+          <StepperItem status="complete">
+            <StepperIndicator />
+            <StepperContent>
+              <StepperTitle>Configured</StepperTitle>
+              <StepperDescription>Package metadata is ready.</StepperDescription>
+            </StepperContent>
+            <StepperConnector />
+          </StepperItem>
+          <StepperItem status="current">
+            <StepperIndicator>2</StepperIndicator>
+            <StepperContent>
+              <StepperTitle>Reviewing</StepperTitle>
+            </StepperContent>
+          </StepperItem>
+        </Stepper>
+        <Dropzone htmlFor="test-upload">
+          <DropzoneInput id="test-upload" />
+          <DropzoneIcon>
+            <DropzoneDefaultIcon />
+          </DropzoneIcon>
+          <DropzoneContent>
+            <DropzoneTitle>Upload artifact</DropzoneTitle>
+            <DropzoneDescription>Drop a package artifact here.</DropzoneDescription>
+          </DropzoneContent>
+        </Dropzone>
+        <CopyButton value="copy-value" copy={copy} onCopied={onCopied} />
+      </div>,
+    );
+
+    expect(screen.getByRole("toolbar", { name: "Editor toolbar" })).toBeTruthy();
+    expect(screen.getByText("Configured")).toBeTruthy();
+    expect(screen.getByLabelText(/Upload artifact/)).toBeTruthy();
+    expect(container.querySelector("[data-slot='dropzone']")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Copied" })).toBeTruthy();
+      expect(copy).toHaveBeenCalledWith("copy-value");
+      expect(onCopied).toHaveBeenCalledWith("copy-value");
+    });
   });
 
   test("uses squared toggle and switch controls", () => {
