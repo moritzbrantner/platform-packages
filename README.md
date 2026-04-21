@@ -32,13 +32,15 @@ Everything else in this repository remains valid, but is not required for `scaff
 - `@moritzbrantner/maps`: browser map component built on the shared data-density geo aggregation utilities for large clustered datasets.
 - `@moritzbrantner/question-answering`: chunk-aware extractive question answering pipeline with ranked answers across long contexts.
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
+- `@moritzbrantner/pipeline-core`: provider-neutral pipeline primitives, typed artifacts, ports, provenance, batching, mapping, tapping, and step composition.
 - `@moritzbrantner/sentiment-analysis`: label-normalized sentiment scoring on top of text-classification models, with chunk aggregation for longer texts.
 - `@moritzbrantner/speech`: microphone capture, chunked speech-to-text orchestration, and Whisper-compatible HTTP transcription adapters for live or batch transcription flows.
   Includes local Python and Bun websocket server examples for the default streaming protocol.
 - `@moritzbrantner/subtitles`: SRT/VTT/transcript timed-text parsing, editing, validation, overlap detection, and word-level timing preservation.
 - `@moritzbrantner/tables`: virtualized table-window helpers with density-aware row summaries, row lookup, and lightweight column descriptors.
 - `@moritzbrantner/text-analysis`: composable labels, entities, embeddings, and keyword extraction pipeline over raw text or `TextDocument`s.
-- `@moritzbrantner/text-inference`: shared chunking, task contracts, and Hugging Face HTTP wrappers used by the text-focused AI packages.
+- `@moritzbrantner/source-ingestion`: HTML, plain-text, JSON feed, and file-drop ingestion into segmented `TextDocument`s with source-offset preserving chunks.
+- `@moritzbrantner/text-inference`: text task contracts, re-exported core chunking helpers, and Hugging Face HTTP wrappers used by the text-focused AI packages.
 - `@moritzbrantner/text-summarization`: chunked summarization pipeline with optional multi-pass reduction for longer documents.
 - `@moritzbrantner/tree-structures`: parent-link tree indexing, traversal helpers, subtree queries, and aggregate tree statistics for hierarchy-heavy data.
 - `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
@@ -50,7 +52,10 @@ Everything else in this repository remains valid, but is not required for `scaff
 
 - `@moritzbrantner/linguistics-core` is the base document and segmentation layer.
 - `@moritzbrantner/linguistics-corpus` builds on core and owns corpus indexing, concordance, and term frequency logic.
-- `@moritzbrantner/text-inference` adds provider contracts, Hugging Face routing, and shared chunking on top of core documents.
+- `@moritzbrantner/linguistics-core` owns generic text chunking so ingestion and inference can share source-span preserving chunks without depending on each other.
+- `@moritzbrantner/source-ingestion` feeds `TextDocument`s into downstream text and document pipelines while staying below provider-specific inference packages.
+- `@moritzbrantner/text-inference` adds provider contracts, Hugging Face routing, and compatibility re-exports for core chunking.
+- `@moritzbrantner/pipeline-core` owns provider-neutral pipeline composition. Provider packages such as `@moritzbrantner/huggingface-universal` can expose task-specific pipelines without owning generic orchestration contracts.
 - `@moritzbrantner/question-answering`, `@moritzbrantner/text-analysis`, `@moritzbrantner/sentiment-analysis`, and `@moritzbrantner/text-summarization` all build on that shared text-inference layer so task packages stay consistent while providers remain swappable.
 - `@moritzbrantner/document-analysis` sits above OCR plus the text task packages to produce a single document report from raw text or scanned input.
 - `@moritzbrantner/word-vectors` builds on corpus-backed documents so similarity models are trained from an explicit corpus layer.
@@ -63,6 +68,11 @@ Everything else in this repository remains valid, but is not required for `scaff
 - `@moritzbrantner/maps` consumes data-density for clustering while keeping MapLibre rendering and map-specific interaction in the maps package.
 - `@moritzbrantner/tree-structures` is dependency-free hierarchy infrastructure for packages that need validated parent/child indexes or traversal without taking on graph semantics.
 - The playground is intended to validate those layers in order: core and corpus pages establish the text model, vectors and learning consume corpus data, and speech exercises prediction with vector-backed backoff.
+
+## Naming split
+
+- `@moritzbrantner/summarization`, `@moritzbrantner/automatic-speech-recognition`, and `@moritzbrantner/document-question-answering` are thin Hugging Face task wrappers.
+- `@moritzbrantner/text-summarization`, `@moritzbrantner/speech`, and `@moritzbrantner/question-answering` are provider-neutral or browser/domain packages with higher-level orchestration APIs.
 
 ## Repository scope
 

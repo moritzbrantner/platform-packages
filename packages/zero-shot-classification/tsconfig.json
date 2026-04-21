@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/zero-shot-classification": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

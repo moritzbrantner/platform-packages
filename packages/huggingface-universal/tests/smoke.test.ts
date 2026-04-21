@@ -87,5 +87,12 @@ describe("@moritzbrantner/huggingface-universal", () => {
       task: "translation",
       output: "translation:image-to-text:image-bytes",
     });
+
+    await expect(
+      first
+        .connect(second, (result) => ({ inputs: result.output }))
+        .map((result) => result.output)
+        .run("image-bytes"),
+    ).resolves.toBe("translation:[object Object]");
   });
 });

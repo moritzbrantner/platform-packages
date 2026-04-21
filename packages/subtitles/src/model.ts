@@ -1,4 +1,4 @@
-export type TimedTextFormat = "srt" | "transcript-json" | "vtt";
+export type TimedTextFormat = "ass" | "srt" | "transcript-json" | "vtt" | "youtube";
 
 export interface TimedTextWord {
   text: string;

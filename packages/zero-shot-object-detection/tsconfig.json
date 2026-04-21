@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/zero-shot-object-detection": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

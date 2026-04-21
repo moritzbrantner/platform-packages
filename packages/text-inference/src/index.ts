@@ -1,15 +1,14 @@
 import {
+  chunkTextDocument,
   createTextDocument,
   segmentTextDocument,
+  type ChunkTextDocumentOptions,
   type LanguageTag,
   type TextDocument,
-  type TextParagraph,
-  type TextSentence,
+  type TextChunk,
 } from "@moritzbrantner/linguistics-core";
 
 const DEFAULT_HUGGING_FACE_BASE_URL = "https://router.huggingface.co/hf-inference/models";
-const DEFAULT_CHUNK_SIZE = 1_200;
-const DEFAULT_CHUNK_OVERLAP = 120;
 
 export type HuggingFaceTextTask =
   | "feature-extraction"
@@ -39,26 +38,11 @@ export interface EnsureTextDocumentOptions<
   useIntlSegmenter?: boolean;
 }
 
-export interface TextChunk<
-  Metadata extends Record<string, unknown> = Record<string, unknown>,
-> {
-  id: string;
-  index: number;
-  text: string;
-  start: number;
-  end: number;
-  language?: LanguageTag;
-  documentId: string;
-  metadata?: Metadata;
-}
+export type { TextChunk } from "@moritzbrantner/linguistics-core";
 
 export interface ChunkTextOptions<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
-> extends EnsureTextDocumentOptions<Metadata> {
-  strategy?: "character" | "paragraph" | "sentence";
-  maxCharacters?: number;
-  overlapCharacters?: number;
-}
+> extends EnsureTextDocumentOptions<Metadata>, ChunkTextDocumentOptions {}
 
 export interface ScoredLabel {
   label: string;
@@ -184,12 +168,6 @@ export interface HuggingFaceTextInferenceProvider
     TextClassificationProvider,
     TokenClassificationProvider {}
 
-interface ChunkCandidate {
-  start: number;
-  end: number;
-  text: string;
-}
-
 interface HuggingFaceRequestOptions {
   model: HuggingFaceModelReference;
   payload: Record<string, unknown>;
@@ -226,29 +204,8 @@ export function chunkTextForInference<
   input: TextInferenceInput<Metadata>,
   options: ChunkTextOptions<Metadata> = {},
 ): TextChunk<Metadata>[] {
-  const strategy = options.strategy ?? "sentence";
-  const maxCharacters = Math.max(1, Math.floor(options.maxCharacters ?? DEFAULT_CHUNK_SIZE));
-  const defaultOverlap = strategy === "character" ? DEFAULT_CHUNK_OVERLAP : 0;
-  const overlapCharacters = Math.max(
-    0,
-    Math.floor(Math.min(options.overlapCharacters ?? defaultOverlap, maxCharacters - 1)),
-  );
   const document = ensureTextDocument(input, options);
-  const candidates =
-    strategy === "character"
-      ? createCharacterChunks(document.text, maxCharacters, overlapCharacters)
-      : collectSegmentChunks(document, strategy, maxCharacters, overlapCharacters);
-
-  return candidates.map((chunk, index) => ({
-    id: `${document.id}-chunk-${index}`,
-    index,
-    text: chunk.text,
-    start: chunk.start,
-    end: chunk.end,
-    language: document.language,
-    documentId: document.id,
-    metadata: document.metadata,
-  }));
+  return chunkTextDocument(document, options);
 }
 
 export function mergeScoredLabels(labelGroups: Iterable<ReadonlyArray<ScoredLabel>>): ScoredLabel[] {
@@ -456,135 +413,6 @@ export function createHuggingFaceTextInferenceProvider(
       };
     },
   };
-}
-
-function collectSegmentChunks(
-  document: TextDocument,
-  strategy: "paragraph" | "sentence",
-  maxCharacters: number,
-  overlapCharacters: number,
-): ChunkCandidate[] {
-  const items = strategy === "paragraph" ? document.paragraphs : document.sentences;
-
-  if (items.length === 0) {
-    return createCharacterChunks(document.text, maxCharacters, overlapCharacters);
-  }
-
-  const chunks: ChunkCandidate[] = [];
-  let currentStart = -1;
-  let currentEnd = -1;
-
-  for (const item of items) {
-    if (item.text.length > maxCharacters) {
-      flushCurrentChunk(document, chunks, currentStart, currentEnd);
-      currentStart = -1;
-      currentEnd = -1;
-      chunks.push(...splitOversizedSegment(item, maxCharacters, overlapCharacters));
-      continue;
-    }
-
-    if (currentStart < 0) {
-      currentStart = item.span.start;
-      currentEnd = item.span.end;
-      continue;
-    }
-
-    const nextStart = Math.max(0, currentStart);
-    const nextEnd = item.span.end;
-    const nextText = document.text.slice(nextStart, nextEnd);
-
-    if (nextText.length <= maxCharacters) {
-      currentEnd = nextEnd;
-      continue;
-    }
-
-    flushCurrentChunk(document, chunks, currentStart, currentEnd);
-    currentStart = item.span.start;
-    currentEnd = item.span.end;
-  }
-
-  flushCurrentChunk(document, chunks, currentStart, currentEnd);
-  return withCharacterOverlap(chunks, document.text, overlapCharacters);
-}
-
-function splitOversizedSegment(
-  item: TextParagraph | TextSentence,
-  maxCharacters: number,
-  overlapCharacters: number,
-): ChunkCandidate[] {
-  return createCharacterChunks(item.text, maxCharacters, overlapCharacters).map((chunk) => ({
-    start: item.span.start + chunk.start,
-    end: item.span.start + chunk.end,
-    text: chunk.text,
-  }));
-}
-
-function createCharacterChunks(
-  text: string,
-  maxCharacters: number,
-  overlapCharacters: number,
-): ChunkCandidate[] {
-  if (text.length === 0) {
-    return [{ start: 0, end: 0, text: "" }];
-  }
-
-  const step = Math.max(1, maxCharacters - overlapCharacters);
-  const chunks: ChunkCandidate[] = [];
-
-  for (let start = 0; start < text.length; start += step) {
-    const end = Math.min(text.length, start + maxCharacters);
-    chunks.push({
-      start,
-      end,
-      text: text.slice(start, end),
-    });
-
-    if (end >= text.length) {
-      break;
-    }
-  }
-
-  return chunks;
-}
-
-function withCharacterOverlap(
-  chunks: ChunkCandidate[],
-  text: string,
-  overlapCharacters: number,
-): ChunkCandidate[] {
-  if (overlapCharacters <= 0 || chunks.length <= 1) {
-    return chunks;
-  }
-
-  return chunks.map((chunk, index) => {
-    if (index === 0) {
-      return chunk;
-    }
-
-    const start = Math.max(0, chunk.start - overlapCharacters);
-    return {
-      start,
-      end: chunk.end,
-      text: text.slice(start, chunk.end),
-    };
-  });
-}
-
-function flushCurrentChunk(
-  document: TextDocument,
-  target: ChunkCandidate[],
-  start: number,
-  end: number,
-): void {
-  if (start < 0 || end < start) {
-    return;
-  }
-
-  target.push({
-    start,
-    end,
-    text: document.text.slice(start, end),
-  });
 }
 
 function collectFeatureVectors(

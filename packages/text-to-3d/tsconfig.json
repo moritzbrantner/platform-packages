@@ -11,6 +11,9 @@
       ],
       "@moritzbrantner/text-to-3d": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

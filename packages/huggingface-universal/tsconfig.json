@@ -8,6 +8,9 @@
     "paths": {
       "@moritzbrantner/huggingface-universal": [
         "./src/index.ts"
+      ],
+      "@moritzbrantner/pipeline-core": [
+        "../pipeline-core/src/index.ts"
       ]
     }
   },

@@ -36,6 +36,16 @@ describe("@moritzbrantner/document-analysis", () => {
           chunks: [],
         }),
       },
+      informationExtraction: {
+        extract: async () => ({
+          documentId: "ocr-1",
+          relations: [],
+          events: [],
+          chunks: [],
+          normalizedExtraction: { entities: [], relations: [] },
+          validation: { ok: true, issues: [] },
+        }),
+      },
       syntaxAnalysis: {
         analyzeSyntax: async (input: any) => ({
           document: typeof input === "string" ? (null as never) : input,
@@ -103,6 +113,7 @@ describe("@moritzbrantner/document-analysis", () => {
     expect(report.summary?.summary).toBe("Clara runs support from Berlin.");
     expect(report.sentiment?.sentiment).toBe("positive");
     expect(report.analysis?.entities[0]?.text).toBe("Berlin");
+    expect(report.informationExtraction?.validation?.ok).toBe(true);
     expect(report.syntaxSummary?.topLemmas[0]?.lemma).toBe("clara");
     expect(report.answers[0]?.answer?.answer).toBe("Berlin");
     expect(report.structure?.headerValuePairs[0]?.key).toBe("Amount");

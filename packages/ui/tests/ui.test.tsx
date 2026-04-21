@@ -12,6 +12,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ActionBar,
   CodeBlock,
   CodeBlockCode,
   CodeBlockContent,
@@ -24,11 +25,23 @@ import {
   DescriptionListTerm,
   PlatformNavbar,
   type PlatformNavbarGroup,
+  PageActions,
+  PageContent,
+  PageDescription,
+  PageHeader,
+  PageShell,
+  PageTitle,
+  SectionGrid,
   Stat,
   StatDelta,
   StatGroup,
   StatLabel,
   StatValue,
+  Surface,
+  SurfaceContent,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceTitle,
   Switch,
   Timeline,
   TimelineConnector,
@@ -124,6 +137,90 @@ describe("@moritzbrantner/ui", () => {
 
     expect(screen.getByRole("button", { name: "Press" })).toBeTruthy();
     expect(screen.getByText("Shared UI")).toBeTruthy();
+  });
+
+  test("renders an app layout page shell with semantic content", () => {
+    const { container } = render(
+      <PageShell>
+        <PageHeader>
+          <PageTitle>Operations dashboard</PageTitle>
+        </PageHeader>
+        <PageContent>Release queue</PageContent>
+      </PageShell>,
+    );
+
+    expect(screen.getByRole("heading", { level: 1, name: "Operations dashboard" })).toBeTruthy();
+    expect(screen.getByRole("main").textContent).toContain("Release queue");
+    expect(container.querySelector("[data-slot='page-shell']")?.className).toContain(
+      "min-h-screen",
+    );
+  });
+
+  test("renders page header title, description, and actions", () => {
+    render(
+      <PageHeader>
+        <div>
+          <PageTitle>Package review</PageTitle>
+          <PageDescription>Track shared component readiness.</PageDescription>
+        </div>
+        <PageActions>
+          <Button>Refresh</Button>
+        </PageActions>
+      </PageHeader>,
+    );
+
+    expect(screen.getByText("Package review")).toBeTruthy();
+    expect(screen.getByText("Track shared component readiness.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeTruthy();
+  });
+
+  test("renders surface variants with data slots", () => {
+    const { container } = render(
+      <Surface variant="muted">
+        <SurfaceHeader>
+          <SurfaceTitle>Review focus</SurfaceTitle>
+          <SurfaceDescription>Interactive package examples.</SurfaceDescription>
+        </SurfaceHeader>
+        <SurfaceContent>Storybook and tests</SurfaceContent>
+      </Surface>,
+    );
+
+    const surface = container.querySelector("[data-slot='surface']");
+
+    expect(surface).toBeTruthy();
+    expect(surface?.getAttribute("data-variant")).toBe("muted");
+    expect(surface?.className).toContain("bg-muted/35");
+    expect(screen.getByText("Review focus")).toBeTruthy();
+  });
+
+  test("renders sidebar-right section grids", () => {
+    const { container } = render(
+      <SectionGrid columns="sidebar-right">
+        <div>Main</div>
+        <div>Aside</div>
+      </SectionGrid>,
+    );
+
+    const grid = container.querySelector("[data-slot='section-grid']");
+
+    expect(grid?.getAttribute("data-columns")).toBe("sidebar-right");
+    expect(grid?.className).toContain("xl:grid-cols-[1.18fr_0.82fr]");
+  });
+
+  test("renders sticky action bars with child buttons", () => {
+    const { container } = render(
+      <ActionBar sticky>
+        <Button variant="outline">Cancel</Button>
+        <Button>Save</Button>
+      </ActionBar>,
+    );
+
+    const actionBar = container.querySelector("[data-slot='action-bar']");
+
+    expect(actionBar?.getAttribute("data-sticky")).toBe("true");
+    expect(actionBar?.className).toContain("sticky");
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
   });
 
   test("uses a 150ms lit pressed state for buttons", () => {

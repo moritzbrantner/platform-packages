@@ -6,7 +6,9 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
+      "@moritzbrantner/extraction-schema": ["../extraction-schema/src/index.ts"],
       "@moritzbrantner/information-extraction": ["./src/index.ts"],
+      "@moritzbrantner/linguistics-core": ["../linguistics-core/src/index.ts"],
       "@moritzbrantner/text-analysis": ["../text-analysis/src/index.ts"],
       "@moritzbrantner/text-inference": ["../text-inference/src/index.ts"]
     }

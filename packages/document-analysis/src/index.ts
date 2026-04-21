@@ -9,6 +9,10 @@ import {
   type DocumentStructureResult,
 } from "@moritzbrantner/document-structure-extraction";
 import { ocrToTextDocument, type OcrDocument } from "@moritzbrantner/ocr";
+import type {
+  InformationExtractionPipeline,
+  InformationExtractionResult,
+} from "@moritzbrantner/information-extraction";
 import type { QuestionAnswer, QuestionAnsweringPipeline } from "@moritzbrantner/question-answering";
 import type {
   SentimentAnalysisPipeline,
@@ -37,6 +41,7 @@ export interface DocumentAnalysisReport<
   summary?: TextSummaryResult;
   sentiment?: SentimentAnalysisResult;
   analysis?: TextAnalysisResult<Metadata>;
+  informationExtraction?: InformationExtractionResult<Metadata>;
   syntax?: SyntaxAnalysisResult<Metadata>;
   syntaxSummary?: SyntaxDocumentSummary;
   structure?: DocumentStructureResult;
@@ -52,6 +57,7 @@ export interface CreateDocumentAnalysisPipelineOptions<
 > {
   questionAnswering?: QuestionAnsweringPipeline<Metadata>;
   textAnalysis?: TextAnalysisPipeline<Metadata>;
+  informationExtraction?: InformationExtractionPipeline<Metadata>;
   syntaxAnalysis?: SyntaxPipeline<Metadata>;
   sentimentAnalysis?: SentimentAnalysisPipeline<Metadata>;
   summarization?: TextSummarizationPipeline<Metadata>;
@@ -68,6 +74,7 @@ export interface AnalyzeDocumentOptions {
   includeSummary?: boolean;
   includeSentiment?: boolean;
   includeTextAnalysis?: boolean;
+  includeInformationExtraction?: boolean;
   includeSyntax?: boolean;
   includeStructure?: boolean;
 }
@@ -116,6 +123,10 @@ export function createDocumentAnalysisPipeline<
           ? extractStructure(normalized.ocrDocument, options.structureExtraction)
           : Promise.resolve(undefined),
       ]);
+      const informationExtraction =
+        analysisOptions.includeInformationExtraction !== false && options.informationExtraction
+          ? await options.informationExtraction.extract(normalized.document, { analysis })
+          : undefined;
 
       return {
         sourceType: normalized.sourceType,
@@ -123,6 +134,7 @@ export function createDocumentAnalysisPipeline<
         summary,
         sentiment,
         analysis,
+        informationExtraction,
         syntax,
         syntaxSummary: syntax?.summary,
         structure,

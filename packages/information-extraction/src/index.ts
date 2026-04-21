@@ -1,4 +1,18 @@
 import {
+  adaptInformationExtractionOutput,
+  applyRuleBasedPostprocessors,
+  filterExtractionByPolicy,
+  validateExtractionOutput,
+  type CanonicalizationOptions,
+  type ConfidenceThresholdPolicy,
+  type ExtractionSchema,
+  type FilterExtractionByPolicyOptions,
+  type InformationExtractionOutput as SchemaInformationExtractionOutput,
+  type NormalizedExtraction,
+  type PostprocessOptions,
+  type ValidationResult,
+} from "@moritzbrantner/extraction-schema";
+import {
   chunkTextForInference,
   ensureTextDocument,
   type ChunkTextOptions,
@@ -137,6 +151,8 @@ export interface InformationExtractionResult<
   chunks: InformationExtractionChunkResult[];
   graph?: GraphReadyJson;
   analysis?: TextAnalysisResult<Metadata>;
+  normalizedExtraction?: NormalizedExtraction;
+  validation?: ValidationResult;
 }
 
 export interface ExtractionSpan {
@@ -210,6 +226,7 @@ export interface CreateInformationExtractionPipelineOptions<
     minimumConfidence?: number;
     relationSimilarityWindow?: number;
   };
+  schema?: SchemaAwareInformationExtractionOptions;
 }
 
 export interface ExtractInformationOptions<
@@ -219,6 +236,18 @@ export interface ExtractInformationOptions<
   chunking?: ChunkTextOptions<Metadata>;
   emitGraph?: boolean;
   minimumConfidence?: number;
+  schema?: SchemaAwareInformationExtractionOptions;
+}
+
+export interface SchemaAwareInformationExtractionOptions {
+  schema: ExtractionSchema;
+  confidencePolicy?: ConfidenceThresholdPolicy;
+  canonicalization?: CanonicalizationOptions;
+  postprocess?: PostprocessOptions;
+  filter?: FilterExtractionByPolicyOptions;
+  defaultEntityType?: string;
+  eventEntityType?: string;
+  valueFieldName?: string;
 }
 
 export interface InformationExtractionPipeline<
@@ -314,6 +343,11 @@ export function createInformationExtractionPipeline<
         options.merge?.relationSimilarityWindow ?? 24,
       );
       const mergedEvents = mergeEvents(chunkResults.flatMap((chunk) => chunk.events));
+      const schemaResult = normalizeForSchema(
+        mergedRelations,
+        mergedEvents,
+        extractionOptions.schema ?? options.schema,
+      );
 
       return {
         documentId: document.id,
@@ -321,6 +355,8 @@ export function createInformationExtractionPipeline<
         events: mergedEvents,
         chunks: chunkResults,
         analysis: extractionOptions.analysis,
+        normalizedExtraction: schemaResult?.normalizedExtraction,
+        validation: schemaResult?.validation,
         graph: extractionOptions.emitGraph ? toGraphJson({
           documentId: document.id,
           relations: mergedRelations,
@@ -329,6 +365,147 @@ export function createInformationExtractionPipeline<
       };
     },
   };
+}
+
+export function normalizeInformationExtractionForSchema(
+  relations: readonly ExtractedRelation[],
+  events: readonly ExtractedEventFrame[],
+  options: SchemaAwareInformationExtractionOptions,
+): {
+  normalizedExtraction: NormalizedExtraction;
+  validation: ValidationResult;
+} {
+  let normalizedExtraction = adaptInformationExtractionOutput(
+    toSchemaInformationExtractionOutput(relations, events, {
+      ...options,
+      includeEvents: hasSchemaEntityType(
+        options.schema,
+        options.eventEntityType ?? "event",
+      ),
+    }),
+    options.canonicalization,
+  );
+
+  normalizedExtraction = applyRuleBasedPostprocessors(normalizedExtraction, options.postprocess);
+
+  if (options.confidencePolicy) {
+    normalizedExtraction = filterExtractionByPolicy(
+      normalizedExtraction,
+      options.confidencePolicy,
+      options.filter,
+    );
+  }
+
+  return {
+    normalizedExtraction,
+    validation: validateExtractionOutput(
+      normalizedExtraction,
+      options.schema,
+      options.confidencePolicy,
+    ),
+  };
+}
+
+export function toSchemaInformationExtractionOutput(
+  relations: readonly ExtractedRelation[],
+  events: readonly ExtractedEventFrame[],
+  options: Pick<
+    SchemaAwareInformationExtractionOptions,
+    "defaultEntityType" | "eventEntityType" | "valueFieldName"
+  > & { includeEvents?: boolean } = {},
+): SchemaInformationExtractionOutput {
+  const valueFieldName = options.valueFieldName ?? "value";
+  const defaultEntityType = options.defaultEntityType ?? "entity";
+  const eventEntityType = options.eventEntityType ?? "event";
+  const includeEvents = options.includeEvents ?? true;
+  const entities = new Map<string, NonNullable<SchemaInformationExtractionOutput["entities"]>[number]>();
+  const outputRelations: NonNullable<SchemaInformationExtractionOutput["relations"]> = [];
+
+  for (const relation of relations) {
+    const subjectId = toSchemaEntityId(defaultEntityType, relation.subject);
+    const objectId = toSchemaEntityId(defaultEntityType, relation.object);
+
+    entities.set(subjectId, {
+      id: subjectId,
+      type: defaultEntityType,
+      confidence: relation.confidence,
+      fields: [{ name: valueFieldName, value: relation.subject, confidence: relation.confidence }],
+    });
+    entities.set(objectId, {
+      id: objectId,
+      type: defaultEntityType,
+      confidence: relation.confidence,
+      fields: [{ name: valueFieldName, value: relation.object, confidence: relation.confidence }],
+    });
+    outputRelations.push({
+      type: relation.relation,
+      from: subjectId,
+      to: objectId,
+      confidence: relation.confidence,
+    });
+  }
+
+  for (const [eventIndex, event] of includeEvents ? events.entries() : []) {
+    const eventId = `${eventEntityType}-${normalizeKey(event.trigger)}-${eventIndex}`;
+    entities.set(eventId, {
+      id: eventId,
+      type: eventEntityType,
+      confidence: event.confidence,
+      fields: [
+        { name: "trigger", value: event.trigger, confidence: event.confidence },
+        ...(event.time
+          ? [{ name: "time", value: event.time, confidence: event.confidence }]
+          : []),
+      ],
+    });
+
+    for (const argument of event.arguments) {
+      const argumentId = toSchemaEntityId(defaultEntityType, argument.value);
+      entities.set(argumentId, {
+        id: argumentId,
+        type: defaultEntityType,
+        confidence: argument.confidence,
+        fields: [{ name: valueFieldName, value: argument.value, confidence: argument.confidence }],
+      });
+      outputRelations.push({
+        type: argument.role,
+        from: eventId,
+        to: argumentId,
+        confidence: Math.min(event.confidence, argument.confidence),
+      });
+    }
+  }
+
+  return {
+    entities: Array.from(entities.values()),
+    relations: outputRelations,
+  };
+}
+
+function normalizeForSchema(
+  relations: readonly ExtractedRelation[],
+  events: readonly ExtractedEventFrame[],
+  options: SchemaAwareInformationExtractionOptions | undefined,
+):
+  | {
+      normalizedExtraction: NormalizedExtraction;
+      validation: ValidationResult;
+    }
+  | undefined {
+  if (!options) {
+    return undefined;
+  }
+
+  return normalizeInformationExtractionForSchema(relations, events, options);
+}
+
+function toSchemaEntityId(type: string, value: string): string {
+  return `${normalizeKey(type)}:${normalizeKey(value)}`;
+}
+
+function hasSchemaEntityType(schema: ExtractionSchema, entityType: string): boolean {
+  const normalizedEntityType = normalizeKey(entityType);
+  return schema.entities.some((entity) => normalizeKey(entity.type) === normalizedEntityType);
 }
 
 export function toGraphJson<Metadata extends Record<string, unknown> = Record<string, unknown>>(

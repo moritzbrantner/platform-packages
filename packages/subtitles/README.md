@@ -1,6 +1,6 @@
 # @moritzbrantner/subtitles
 
-Timed-text parsing, editing, validation, overlap detection, and roundtripping for SRT, WebVTT, and transcript JSON.
+Timed-text parsing, editing, validation, overlap detection, and roundtripping for ASS/SSA, SRT, WebVTT, YouTube SBV/XML, and transcript JSON.
 
 ## Main APIs
 
@@ -14,17 +14,18 @@ Timed-text parsing, editing, validation, overlap detection, and roundtripping fo
 ```ts
 import {
   detectCueOverlaps,
-  parseVtt,
+  parseAss,
   serializeTimedText,
 } from "@moritzbrantner/subtitles";
 
-const document = parseVtt(`WEBVTT
+const document = parseAss(`[Script Info]
+ScriptType: v4.00+
 
-intro
-00:00:01.000 --> 00:00:02.000 align:start
-Hello there
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:01.00,0:00:02.00,Default,,0000,0000,0000,,Hello there
 `);
 
 detectCueOverlaps(document);
-serializeTimedText(document, { format: "vtt" });
+serializeTimedText(document, { format: "ass" });
 ```
