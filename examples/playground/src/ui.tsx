@@ -71,6 +71,7 @@ import {
   InputGroupInput,
   InputGroupText,
   Kbd,
+  LanguageSwitcher,
   LoadingBar,
   NativeSelect,
   NativeSelectOption,
@@ -98,6 +99,7 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
+  ThemeModeSwitch,
   ToggleGroup,
   ToggleGroupItem,
   Tooltip,
@@ -106,6 +108,7 @@ import {
   TooltipTrigger,
   UiTheme,
   type CalendarCellComponentProps,
+  type ThemeMode,
   type CalendarIcsData,
   type UiThemeName,
 } from "@moritzbrantner/ui/bobba";
@@ -181,6 +184,14 @@ function getInitialUiStyle(): UiThemeName {
 
   const storedStyle = window.localStorage.getItem(uiStyleStorageKey);
   return isUiThemeName(storedStyle) ? storedStyle : "bobba";
+}
+
+function getInitialThemeMode(): ThemeMode {
+  if (typeof document === "undefined") {
+    return "light";
+  }
+
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
 function usePlaygroundUiStyle(style: UiThemeName) {
@@ -439,6 +450,8 @@ function UiPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(64);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(getInitialThemeMode);
+  const [language, setLanguage] = useState("en");
   const [qaRequired, setQaRequired] = useState(true);
   const [runVisualReview, setRunVisualReview] = useState(true);
   const [shareWithOps, setShareWithOps] = useState(false);
@@ -448,6 +461,17 @@ function UiPage() {
     new Date(2026, 3, 14),
   );
   usePlaygroundUiStyle(uiStyle);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const hadDarkMode = root.classList.contains("dark");
+
+    root.classList.toggle("dark", themeMode === "dark");
+
+    return () => {
+      root.classList.toggle("dark", hadDarkMode);
+    };
+  }, [themeMode]);
 
   const chartConfig = useMemo(
     () => ({
@@ -625,6 +649,19 @@ function UiPage() {
                 <Field orientation="horizontal">
                   <FieldLabel htmlFor="alerts">Notifications</FieldLabel>
                   <Switch id="alerts" checked={alertsEnabled} onCheckedChange={setAlertsEnabled} />
+                </Field>
+
+                <Field orientation="horizontal">
+                  <FieldLabel>Appearance</FieldLabel>
+                  <ThemeModeSwitch mode={themeMode} onModeChange={setThemeMode} />
+                </Field>
+
+                <Field orientation="horizontal">
+                  <FieldLabel>Language</FieldLabel>
+                  <LanguageSwitcher
+                    value={language}
+                    onValueChange={(nextLanguage) => setLanguage(nextLanguage)}
+                  />
                 </Field>
 
                 <Field orientation="horizontal">
