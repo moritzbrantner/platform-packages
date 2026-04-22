@@ -1,9 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type * as React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import * as React from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
+  AnnotationCanvas,
+  type AnnotationCanvasAnnotation,
+  type AnnotationCanvasTool,
+  AssetBrowser,
+  type AssetBrowserItem,
   Button,
   ButtonGroup,
   ButtonGroupText,
@@ -41,6 +47,8 @@ import {
   ContextMenuTrigger,
   cn,
   CopyButton,
+  DataGrid,
+  DataGridColumnHeader,
   DescriptionList,
   DescriptionListDetail,
   DescriptionListItem,
@@ -105,9 +113,13 @@ import {
   Timeline,
   TimelineConnector,
   TimelineContent,
+  TimelineEditor,
   TimelineIndicator,
   TimelineItem,
   TimelineTitle,
+  moveTimelineEditorClip,
+  resizeTimelineEditorClip,
+  type TimelineEditorTrack,
   Toggle,
   ToggleSetting,
   Toolbar,
@@ -1047,5 +1059,334 @@ describe("@moritzbrantner/ui", () => {
       expect.objectContaining({ id: "story" }),
       expect.objectContaining({ id: "discover" }),
     );
+  });
+
+  test("renders DataGrid workflows for filtering, sorting, selection, columns, and pagination", async () => {
+    type Row = {
+      id: string;
+      name: string;
+      status: string;
+    };
+    const rows: Row[] = [
+      { id: "1", name: "Charlie", status: "pending" },
+      { id: "2", name: "Alpha", status: "paid" },
+      { id: "3", name: "Beta", status: "overdue" },
+    ];
+    const columns: ColumnDef<Row>[] = [
+      {
+        accessorKey: "name",
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Name" />,
+      },
+      {
+        accessorKey: "status",
+        header: "status",
+      },
+    ];
+    const onSelectedRowsChange = vi.fn();
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={rows}
+        enableRowSelection
+        pageSize={2}
+        onSelectedRowsChange={onSelectedRowsChange}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Search rows"), { target: { value: "Beta" } });
+    expect(screen.getByText("Beta")).toBeTruthy();
+    expect(screen.queryByText("Charlie")).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Search rows"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: /Name/ }));
+    expect(screen.getByText("Alpha")).toBeTruthy();
+
+    fireEvent.click(screen.getAllByRole("checkbox", { name: "Select row" })[0]);
+    await waitFor(() => {
+      expect(onSelectedRowsChange).toHaveBeenCalledWith([expect.objectContaining({ name: "Alpha" })]);
+    });
+
+    expect(screen.getByRole("button", { name: /View/ })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Charlie")).toBeTruthy();
+  });
+
+  test("toggles DataGrid column visibility through the table toolbar API", () => {
+    type Row = { name: string; status: string };
+    const columns: ColumnDef<Row>[] = [
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "status", header: "Status" },
+    ];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[{ name: "Alpha", status: "paid" }]}
+        toolbar={(table) => (
+          <button type="button" onClick={() => table.getColumn("status")?.toggleVisibility(false)}>
+            Hide status
+          </button>
+        )}
+      />,
+    );
+
+    expect(screen.getByText("paid")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Hide status" }));
+    expect(screen.queryByText("paid")).toBeNull();
+  });
+
+  test("renders DataGrid loading, empty, and error states", () => {
+    const columns: ColumnDef<{ name: string }>[] = [{ accessorKey: "name", header: "Name" }];
+    const { rerender } = render(<DataGrid columns={columns} data={[]} loading />);
+
+    expect(screen.getByRole("status").textContent).toContain("Loading rows");
+
+    rerender(<DataGrid columns={columns} data={[]} />);
+    expect(screen.getByText("No results.")).toBeTruthy();
+
+    rerender(<DataGrid columns={columns} data={[]} error="Load failed" />);
+    expect(screen.getByText("Load failed")).toBeTruthy();
+  });
+
+  test("renders AssetBrowser grid/list selection, search, upload, preview, and open callbacks", () => {
+    const items: AssetBrowserItem[] = [
+      { id: "folder", name: "Projects", type: "folder" },
+      { id: "hero", name: "hero.jpg", type: "image", size: 2048, description: "Hero visual" },
+      { id: "brief", name: "brief.pdf", type: "document", size: 1024 },
+    ];
+    const onSelectionChange = vi.fn();
+    const onOpenItem = vi.fn();
+    const onUpload = vi.fn();
+    const { rerender } = render(
+      <AssetBrowser
+        items={items}
+        onSelectionChange={onSelectionChange}
+        onOpenItem={onOpenItem}
+        onUpload={onUpload}
+      />,
+    );
+
+    expect(screen.getByText("Projects")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Search assets"), { target: { value: "hero" } });
+    expect(screen.getByText("hero.jpg")).toBeTruthy();
+    expect(screen.queryByText("brief.pdf")).toBeNull();
+
+    const heroButton = screen.getByText("hero.jpg").closest("button")!;
+    fireEvent.click(heroButton);
+    expect(onSelectionChange).toHaveBeenCalledWith(["hero"], [
+      expect.objectContaining({ id: "hero" }),
+    ]);
+    expect(screen.getByText("Hero visual")).toBeTruthy();
+
+    fireEvent.doubleClick(heroButton);
+    expect(onOpenItem).toHaveBeenCalledWith(expect.objectContaining({ id: "hero" }));
+
+    const file = new File(["file"], "upload.txt", { type: "text/plain" });
+    fireEvent.change(screen.getByLabelText("Upload files"), { target: { files: [file] } });
+    expect(onUpload).toHaveBeenCalledWith([file]);
+
+    rerender(
+      <AssetBrowser
+        key="list"
+        items={items}
+        defaultView="list"
+        selectionMode="multiple"
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    fireEvent.click(screen.getByText("Projects").closest("button")!);
+    fireEvent.click(screen.getByText("hero.jpg").closest("button")!);
+    expect(onSelectionChange).toHaveBeenLastCalledWith(
+      ["folder", "hero"],
+      expect.arrayContaining([expect.objectContaining({ id: "folder" }), expect.objectContaining({ id: "hero" })]),
+    );
+  });
+
+  test("renders TimelineEditor and reports scrubbing, moving, resizing, nudge, and delete", () => {
+    const tracks: TimelineEditorTrack[] = [
+      {
+        id: "main",
+        label: "Main",
+        clips: [{ id: "intro", label: "Intro", start: 1, end: 3, color: "#2563eb" }],
+      },
+    ];
+    const onCurrentTimeChange = vi.fn();
+    const onTracksChange = vi.fn();
+    const onSelectedClipChange = vi.fn();
+    const onClipDelete = vi.fn();
+    const moved = moveTimelineEditorClip(tracks, "intro", 2, { duration: 10, snapInterval: 1 });
+    const resized = resizeTimelineEditorClip(tracks, "intro", "end", 4, {
+      duration: 10,
+      snapInterval: 1,
+    });
+
+    expect(moved[0].clips[0].start).toBe(2);
+    expect(resized[0].clips[0].end).toBe(4);
+
+    const { container, rerender } = render(
+      <TimelineEditor
+        tracks={tracks}
+        duration={10}
+        currentTime={2}
+        markers={[{ id: "marker", time: 5, label: "Middle" }]}
+        onCurrentTimeChange={onCurrentTimeChange}
+        onTracksChange={onTracksChange}
+        onSelectedClipChange={onSelectedClipChange}
+        onClipDelete={onClipDelete}
+        snapInterval={1}
+        pixelsPerSecond={72}
+      />,
+    );
+
+    expect(screen.getByText("Main")).toBeTruthy();
+    expect(screen.getByText("Intro")).toBeTruthy();
+    expect(container.querySelector("[data-slot='timeline-editor-marker']")).toBeTruthy();
+    expect(container.querySelector("[data-slot='timeline-editor-playhead']")).toBeTruthy();
+
+    fireEvent.pointerDown(container.querySelector("[data-slot='timeline-editor-ruler']")!, {
+      clientX: 360,
+    });
+    expect(onCurrentTimeChange).toHaveBeenCalled();
+
+    const clip = screen.getByRole("button", { name: "Intro" });
+    fireEvent.pointerDown(clip, { clientX: 0 });
+    expect(onSelectedClipChange).toHaveBeenCalledWith("intro", expect.objectContaining({ id: "intro" }));
+    fireEvent.pointerMove(container.querySelector("[data-slot='timeline-editor']")!, { clientX: 72 });
+    expect(onTracksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          clips: [expect.objectContaining({ id: "intro" })],
+        }),
+      ]),
+    );
+
+    const resizeHandle = container.querySelector("[data-slot='timeline-editor-resize-end']")!;
+    fireEvent.pointerDown(resizeHandle, { clientX: 0 });
+    fireEvent.pointerMove(container.querySelector("[data-slot='timeline-editor']")!, { clientX: 72 });
+    expect(onTracksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          clips: [expect.objectContaining({ id: "intro" })],
+        }),
+      ]),
+    );
+
+    fireEvent.keyDown(container.querySelector("[data-slot='timeline-editor']")!, { key: "ArrowRight" });
+    fireEvent.keyDown(container.querySelector("[data-slot='timeline-editor']")!, { key: "Delete" });
+    expect(onClipDelete).toHaveBeenCalledWith("intro");
+
+    onTracksChange.mockClear();
+    rerender(
+      <TimelineEditor
+        tracks={tracks}
+        duration={10}
+        readOnly
+        onTracksChange={onTracksChange}
+        pixelsPerSecond={72}
+      />,
+    );
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Intro" }), { clientX: 0 });
+    fireEvent.pointerMove(container.querySelector("[data-slot='timeline-editor']")!, { clientX: 72 });
+    expect(onTracksChange).not.toHaveBeenCalled();
+  });
+
+  test("renders AnnotationCanvas and supports select, draw, polygon, move, delete, and read-only", () => {
+    const initialAnnotations: AnnotationCanvasAnnotation[] = [
+      {
+        id: "box",
+        shape: "rectangle",
+        label: "Box",
+        color: "#2563eb",
+        points: [
+          { x: 10, y: 10 },
+          { x: 40, y: 40 },
+        ],
+      },
+    ];
+    const onAnnotationsChange = vi.fn();
+    const onSelectedAnnotationChange = vi.fn();
+
+    function Harness({ readOnly = false }: { readOnly?: boolean }) {
+      const [annotations, setAnnotations] = React.useState(initialAnnotations);
+      const [selectedAnnotationId, setSelectedAnnotationId] = React.useState<string | null>(null);
+      const [tool, setTool] = React.useState<AnnotationCanvasTool>("select");
+
+      return (
+        <AnnotationCanvas
+          annotations={annotations}
+          selectedAnnotationId={selectedAnnotationId}
+          tool={tool}
+          width={100}
+          height={100}
+          readOnly={readOnly}
+          onToolChange={setTool}
+          onSelectedAnnotationChange={(annotationId, annotation) => {
+            setSelectedAnnotationId(annotationId);
+            onSelectedAnnotationChange(annotationId, annotation);
+          }}
+          onAnnotationsChange={(nextAnnotations) => {
+            setAnnotations(nextAnnotations);
+            onAnnotationsChange(nextAnnotations);
+          }}
+        />
+      );
+    }
+
+    const { container, rerender } = render(<Harness />);
+    const surface = screen.getByRole("img", { name: "Annotation canvas" });
+    const canvas = container.querySelector("[data-slot='annotation-canvas']")!;
+
+    fireEvent.pointerDown(container.querySelector("[data-slot='annotation-canvas-annotation']")!, {
+      clientX: 10,
+      clientY: 10,
+    });
+    expect(onSelectedAnnotationChange).toHaveBeenCalledWith("box", expect.objectContaining({ id: "box" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Rectangle" }));
+    fireEvent.pointerDown(surface, { clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(surface, { clientX: 60, clientY: 60 });
+    fireEvent.pointerUp(surface);
+    expect(onAnnotationsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ shape: "rectangle" })]),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Point" }));
+    fireEvent.pointerDown(surface, { clientX: 70, clientY: 70 });
+    expect(onAnnotationsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ shape: "point" })]),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Polygon" }));
+    fireEvent.pointerDown(surface, { clientX: 10, clientY: 80 });
+    fireEvent.pointerDown(surface, { clientX: 30, clientY: 80 });
+    fireEvent.pointerDown(surface, { clientX: 20, clientY: 95 });
+    fireEvent.doubleClick(surface);
+    expect(onAnnotationsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ shape: "polygon" })]),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Select" }));
+    fireEvent.pointerDown(container.querySelector("[data-slot='annotation-canvas-annotation']")!, {
+      clientX: 10,
+      clientY: 10,
+    });
+    fireEvent.pointerMove(surface, { clientX: 20, clientY: 20 });
+    fireEvent.pointerUp(surface);
+    expect(onAnnotationsChange).toHaveBeenCalled();
+
+    fireEvent.keyDown(canvas, { key: "Delete" });
+    expect(onAnnotationsChange).toHaveBeenCalledWith(
+      expect.not.arrayContaining([expect.objectContaining({ id: "box" })]),
+    );
+
+    onAnnotationsChange.mockClear();
+    rerender(<Harness readOnly />);
+    fireEvent.click(screen.getByRole("button", { name: "Rectangle" }));
+    fireEvent.pointerDown(surface, { clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(surface, { clientX: 60, clientY: 60 });
+    fireEvent.pointerUp(surface);
+    expect(onAnnotationsChange).not.toHaveBeenCalled();
   });
 });
