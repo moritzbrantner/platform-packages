@@ -46,7 +46,7 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/ui": "^0.4.0",
+    "@moritzbrantner/ui": "^0.5.0",
     "motion": "^12.35.0"
   },
   "devDependencies": {
