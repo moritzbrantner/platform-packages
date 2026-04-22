@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 import {
   ActivityIcon,
   ArrowRightIcon,
@@ -20,9 +21,15 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/card";
+import { Checkbox } from "./components/checkbox";
 import { Input } from "./components/input";
+import { Label } from "./components/label";
+import { NativeSelect, NativeSelectOption } from "./components/native-select";
 import { Progress } from "./components/progress";
+import { RadioGroup, RadioGroupItem } from "./components/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/select";
 import { Separator } from "./components/separator";
+import { Slider } from "./components/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/tabs";
 import { UiTheme, type UiThemeName } from "./themes";
@@ -223,11 +230,22 @@ function TokenSwatches() {
 }
 
 function ComponentPreview() {
+  const [confidence, setConfidence] = useState([72]);
+  const [contrast, setContrast] = useState([36, 84]);
+  const [density, setDensity] = useState("comfortable");
+  const [shipChannel, setShipChannel] = useState("preview");
+  const [nativeChannel, setNativeChannel] = useState("canary");
+  const [includeIcons, setIncludeIcons] = useState(true);
+  const [includeForms, setIncludeForms] = useState(true);
+  const [includeTables, setIncludeTables] = useState(false);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Controls and surfaces</CardTitle>
-        <CardDescription>Buttons, inputs, tabs, badges, and interactive states.</CardDescription>
+        <CardTitle>Controls and status</CardTitle>
+        <CardDescription>
+          Buttons, sliders, radio groups, checkbox selects, and menu selects.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="overview" className="grid gap-5">
@@ -244,18 +262,140 @@ function ComponentPreview() {
                 Search
               </Button>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button>Default</Button>
-              <Button variant="secondary">Secondary</Button>
-              <Button variant="outline">Outline</Button>
-              <Button variant="ghost">Ghost</Button>
+            <div className="grid gap-3">
+              <div className="flex flex-wrap gap-3">
+                <Button>Default</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="outline">Outline</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="destructive">Destructive</Button>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button size="xs">Extra small</Button>
+                <Button size="sm" variant="secondary">
+                  Small
+                </Button>
+                <Button size="lg" variant="outline">
+                  Large
+                </Button>
+                <Button size="icon-sm" variant="ghost" aria-label="Search status">
+                  <SearchIcon />
+                </Button>
+                <Button disabled>Disabled</Button>
+              </div>
             </div>
           </TabsContent>
-          <TabsContent value="controls" className="grid gap-4">
+          <TabsContent value="controls" className="grid gap-5">
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric label="Active jobs" value="24" />
               <Metric label="Review queue" value="8" />
               <Metric label="Passed" value="96%" />
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-4 rounded-md border bg-card p-4 text-card-foreground">
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <Label htmlFor="system-confidence">Confidence</Label>
+                    <span className="font-medium">{confidence[0]}%</span>
+                  </div>
+                  <Slider
+                    id="system-confidence"
+                    value={confidence}
+                    max={100}
+                    step={1}
+                    onValueChange={setConfidence}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <Label htmlFor="contrast-range">Contrast range</Label>
+                    <span className="font-medium">
+                      {contrast[0]}-{contrast[1]}%
+                    </span>
+                  </div>
+                  <Slider
+                    id="contrast-range"
+                    value={contrast}
+                    min={0}
+                    max={100}
+                    step={2}
+                    onValueChange={setContrast}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 rounded-md border bg-card p-4 text-card-foreground">
+                <Label>Review density</Label>
+                <RadioGroup
+                  value={density}
+                  onValueChange={setDensity}
+                  className="grid gap-2 sm:grid-cols-3"
+                >
+                  {["compact", "comfortable", "spacious"].map((value) => (
+                    <label
+                      key={value}
+                      className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm"
+                    >
+                      <RadioGroupItem value={value} />
+                      <span className="capitalize">{value}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-3 rounded-md border bg-card p-4 text-card-foreground">
+                <Label>Status checks</Label>
+                {[
+                  ["icons", "Icon buttons", includeIcons, setIncludeIcons],
+                  ["forms", "Form states", includeForms, setIncludeForms],
+                  ["tables", "Table density", includeTables, setIncludeTables],
+                ].map(([id, label, checked, setChecked]) => (
+                  <label
+                    key={id as string}
+                    className="flex items-center justify-between gap-4 rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                    <span>{label as string}</span>
+                    <Checkbox
+                      checked={checked as boolean}
+                      onCheckedChange={(nextChecked) =>
+                        (setChecked as (value: boolean) => void)(nextChecked === true)
+                      }
+                    />
+                  </label>
+                ))}
+              </div>
+
+              <div className="grid gap-3 rounded-md border bg-card p-4 text-card-foreground">
+                <div className="grid gap-2">
+                  <Label htmlFor="ship-channel">Ship channel</Label>
+                  <Select value={shipChannel} onValueChange={setShipChannel}>
+                    <SelectTrigger id="ship-channel" className="w-full">
+                      <SelectValue placeholder="Select a channel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="local">Local</SelectItem>
+                      <SelectItem value="preview">Preview</SelectItem>
+                      <SelectItem value="stable">Stable</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="native-channel">Native select</Label>
+                  <NativeSelect
+                    id="native-channel"
+                    className="w-full"
+                    value={nativeChannel}
+                    onChange={(event) => setNativeChannel(event.currentTarget.value)}
+                  >
+                    <NativeSelectOption value="alpha">Alpha</NativeSelectOption>
+                    <NativeSelectOption value="beta">Beta</NativeSelectOption>
+                    <NativeSelectOption value="canary">Canary</NativeSelectOption>
+                    <NativeSelectOption value="stable">Stable</NativeSelectOption>
+                  </NativeSelect>
+                </div>
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="states" className="flex flex-wrap gap-3">
