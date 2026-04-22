@@ -8,7 +8,7 @@ import { mergeConfig } from "vite";
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
+  stories: ["../src/**/*.stories.@(ts|tsx)"],
   addons: ["@storybook/addon-docs", "@storybook/addon-a11y", "@storybook/addon-vitest"],
   framework: {
     name: "@storybook/react-vite",
@@ -62,6 +62,14 @@ const config: StorybookConfig = {
           "tailwind-merge",
           "vaul",
         ],
+      },
+      build: {
+        chunkSizeWarningLimit: 2200,
+        rolldownOptions: {
+          checks: {
+            pluginTimings: false,
+          },
+        },
       },
     });
   },

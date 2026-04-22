@@ -1,0 +1,52 @@
+{
+  "results": {
+    "logic.cnMerge": {
+      "kind": "logic",
+      "name": "logic.cnMerge",
+      "median": 0.00220400000000609,
+      "p95": 0.008577000000059343
+    },
+    "logic.queryBuilderEvaluate1000": {
+      "kind": "logic",
+      "name": "logic.queryBuilderEvaluate1000",
+      "median": 0.5021759999999631,
+      "p95": 1.1933689999999615
+    },
+    "logic.workflowConnectionValidation": {
+      "kind": "logic",
+      "name": "logic.workflowConnectionValidation",
+      "median": 0.07816800000000512,
+      "p95": 0.09601099999997587
+    },
+    "logic.timelineHelpers1000": {
+      "kind": "logic",
+      "name": "logic.timelineHelpers1000",
+      "median": 0.12597699999992074,
+      "p95": 0.23042399999997087
+    },
+    "render.dataGrid100": {
+      "kind": "render",
+      "name": "render.dataGrid100",
+      "median": 6.155462999999941,
+      "p95": 9.055098000000044
+    },
+    "render.dataGrid1000": {
+      "kind": "render",
+      "name": "render.dataGrid1000",
+      "median": 9.00331099999994,
+      "p95": 15.620844000000034
+    },
+    "render.calendar100Events": {
+      "kind": "render",
+      "name": "render.calendar100Events",
+      "median": 10.89917400000013,
+      "p95": 21.117784999999913
+    },
+    "render.documentViewer100Pages": {
+      "kind": "render",
+      "name": "render.documentViewer100Pages",
+      "median": 10.372451000000183,
+      "p95": 11.749065999999857
+    }
+  }
+}

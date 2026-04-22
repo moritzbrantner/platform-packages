@@ -102,7 +102,9 @@
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "@playwright/test": "^1.59.1",
     "@vitest/browser-playwright": "^4.1.4",
+    "@vitest/coverage-v8": "4.1.4",
     "playwright": "^1.59.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -117,13 +119,22 @@
   "scripts": {
     "build": "tsup --config tsup.config.ts",
     "build-storybook": "storybook build --output-dir storybook-static",
-    "lint": "node ./scripts/verify-design-system.mjs && node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
+    "bench": "node ./scripts/benchmark-ui.mjs",
+    "bench:update": "node ./scripts/benchmark-ui.mjs --update",
+    "check-types": "tsc --noEmit",
+    "lint": "node ./scripts/verify-design-system.mjs && node ./scripts/verify-tokens.mjs && node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "pack:dry": "npm pack --dry-run --ignore-scripts --json",
     "prepack": "bun run build",
-    "check-types": "tsc --noEmit",
     "storybook": "storybook dev -p 6006 --no-open",
-    "test": "cd ../.. && vitest run packages/ui/tests/ui.test.tsx",
+    "test": "bun run test:unit",
+    "test:coverage": "node ./scripts/run-coverage.mjs",
     "test:package": "node ./scripts/verify-package.mjs",
-    "test:storybook": "vitest --config vitest.storybook.config.ts --project=storybook --run"
+    "test:storybook": "vitest --config vitest.storybook.config.ts --project=storybook --run",
+    "test:unit": "cd ../.. && vitest run packages/ui/tests",
+    "test:visual": "cd ../.. && ./node_modules/.bin/playwright test --config packages/ui/playwright.visual.config.ts",
+    "verify:build-size": "node ./scripts/verify-build-size.mjs",
+    "verify:consumer": "node ./scripts/verify-consumer-build.mjs",
+    "verify:release": "bun run check-types && bun run lint && bun run test:unit && bun run build && bun run test:package && bun run test:storybook && bun run test:coverage && bun run test:visual && bun run verify:consumer && bun run verify:build-size && bun run bench && bun run pack:dry",
+    "verify:tokens": "node ./scripts/verify-tokens.mjs"
   }
 }

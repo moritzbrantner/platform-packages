@@ -4,9 +4,31 @@ import { fileURLToPath } from "node:url";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const componentsDir = path.join(packageRoot, "src", "components");
+const srcDir = path.join(packageRoot, "src");
 const packageJsonPath = path.join(packageRoot, "package.json");
 const indexPath = path.join(packageRoot, "src", "index.ts");
 const errors = [];
+const interactiveStoryComponents = [
+  "annotation-canvas",
+  "asset-browser",
+  "button",
+  "calendar",
+  "data-grid",
+  "dialog",
+  "document-viewer",
+  "dropzone",
+  "inspector-panel",
+  "platform-navbar",
+  "query-builder",
+  "timeline-editor",
+  "workflow-builder",
+];
+const clientComponentPatterns = [
+  /\bReact\.use[A-Z]/,
+  /\buse(State|Effect|LayoutEffect|Memo|Callback|Ref|Id|Reducer)\b/,
+  /from\s+["'](?:@base-ui\/react|cmdk|embla-carousel-react|input-otp|motion\/react|radix-ui|react-day-picker|react-resizable-panels|sonner|vaul)/,
+  /\b(window|document|navigator)\b/,
+];
 
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 const indexSource = readFileSync(indexPath, "utf8");
@@ -18,6 +40,8 @@ const componentNames = readdirSync(componentsDir)
 verifyPackageMetadata();
 verifyComponentExports();
 verifyStoryCoverage();
+verifyStoryContracts();
+verifyClientDirectives();
 verifyConsumerExample();
 
 if (errors.length > 0) {
@@ -146,6 +170,48 @@ function verifyStoryCoverage() {
   }
 }
 
+function verifyStoryContracts() {
+  const storyFiles = listFiles(srcDir).filter((filePath) => filePath.endsWith(".stories.tsx"));
+
+  for (const storyFile of storyFiles) {
+    const relativeStoryFile = path.relative(packageRoot, storyFile);
+    const storySource = readFileSync(storyFile, "utf8");
+
+    if (!/tags:\s*\[[^\]]*["']autodocs["'][^\]]*["']test["'][^\]]*\]/s.test(storySource)) {
+      errors.push(`${relativeStoryFile}: story meta must include tags ["autodocs", "test"]`);
+    }
+  }
+
+  for (const componentName of interactiveStoryComponents) {
+    const storyPath = path.join(componentsDir, `${componentName}.stories.tsx`);
+
+    if (!existsSync(storyPath)) {
+      errors.push(`${componentName}: interactive component must have a dedicated story file`);
+      continue;
+    }
+
+    const storySource = readFileSync(storyPath, "utf8");
+
+    if (!/\bplay\s*:\s*async\b/.test(storySource)) {
+      errors.push(`${componentName}: interactive story must include at least one play function`);
+    }
+  }
+}
+
+function verifyClientDirectives() {
+  for (const componentName of componentNames) {
+    const componentPath = path.join(componentsDir, `${componentName}.tsx`);
+    const componentSource = readFileSync(componentPath, "utf8");
+
+    if (
+      !componentSource.startsWith('"use client";') &&
+      clientComponentPatterns.some((pattern) => pattern.test(componentSource))
+    ) {
+      errors.push(`${componentName}: browser or hook-based components must start with "use client";`);
+    }
+  }
+}
+
 function verifyConsumerExample() {
   const appPath = path.join(packageRoot, "examples", "consumer", "src", "App.tsx");
 
@@ -206,4 +272,16 @@ function expectObjectPath(source, keys, message) {
   if (!current) {
     errors.push(message);
   }
+}
+
+function listFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const filePath = path.join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      return listFiles(filePath);
+    }
+
+    return filePath;
+  });
 }

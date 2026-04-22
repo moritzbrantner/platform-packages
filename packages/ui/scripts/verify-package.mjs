@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 
 const root = await import("@moritzbrantner/ui");
 assert.equal(typeof root.Button, "function", "root export should include Button");
@@ -38,4 +39,48 @@ assert.equal(themes.themeConfig.atlas.name, "atlas", "themes subpath should expo
 assert.equal(themes.themeConfig.studio.name, "studio", "themes subpath should expose themeConfig");
 assert.equal(themes.themeConfig.paper.name, "paper", "themes subpath should expose themeConfig");
 
-console.log("@moritzbrantner/ui package exports verified");
+const pack = spawnSync("npm", ["pack", "--dry-run", "--ignore-scripts", "--json"], {
+  encoding: "utf8",
+});
+
+if (pack.error) {
+  throw pack.error;
+}
+
+assert.equal(pack.status, 0, pack.stderr);
+
+const [packageMetadata] = JSON.parse(pack.stdout);
+const packageFiles = new Set(packageMetadata.files.map((file) => file.path));
+const requiredPackageFiles = [
+  "dist/index.js",
+  "dist/index.d.ts",
+  "dist/components/button.js",
+  "dist/components/button.d.ts",
+  "dist/lib/cn.js",
+  "dist/themes.js",
+  "styles.css",
+  "bobba/styles.css",
+  "zleek/styles.css",
+  "atlas/styles.css",
+  "studio/styles.css",
+  "paper/styles.css",
+];
+
+for (const requiredFile of requiredPackageFiles) {
+  assert.equal(packageFiles.has(requiredFile), true, `package must include ${requiredFile}`);
+}
+
+for (const filePath of packageFiles) {
+  assert.equal(
+    /(^|\/)(src|tests|\.storybook|storybook-static|coverage|visual|bench)\//.test(filePath),
+    false,
+    `package must not include development-only file ${filePath}`,
+  );
+  assert.equal(
+    filePath.endsWith(".stories.tsx"),
+    false,
+    `package must not include story source ${filePath}`,
+  );
+}
+
+console.log("@moritzbrantner/ui package exports and npm package contents verified");
