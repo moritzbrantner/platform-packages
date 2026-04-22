@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useState, type ComponentPropsWithoutRef, type ReactNode } from "react";
 
 import { cn } from "@moritzbrantner/ui";
 
@@ -42,10 +36,7 @@ export type StorySubtitleFileProps = {
   errorLabel?: ReactNode;
 };
 
-export type StoryAudioFileProps = Omit<
-  ComponentPropsWithoutRef<"audio">,
-  "children"
-> & {
+export type StoryAudioFileProps = Omit<ComponentPropsWithoutRef<"audio">, "children"> & {
   title?: ReactNode;
   description?: ReactNode;
   artworkSrc?: string;
@@ -54,10 +45,7 @@ export type StoryAudioFileProps = Omit<
   tracks?: StoryMediaTextTrack[];
 };
 
-export type StoryVideoFileProps = Omit<
-  ComponentPropsWithoutRef<"video">,
-  "children"
-> & {
+export type StoryVideoFileProps = Omit<ComponentPropsWithoutRef<"video">, "children"> & {
   title?: ReactNode;
   description?: ReactNode;
   className?: string;
@@ -76,10 +64,7 @@ function extractFileName(src?: string) {
   return segments[segments.length - 1] ?? src;
 }
 
-function inferSubtitleFormat(
-  input: string,
-  format: StorySubtitleFileProps["format"],
-) {
+function inferSubtitleFormat(input: string, format: StorySubtitleFileProps["format"]) {
   if (format && format !== "auto") {
     return format;
   }
@@ -105,21 +90,14 @@ function parseSubtitleTimestamp(input: string) {
   const minutes = Number(segments[segments.length - 2]);
   const hours = segments.length === 3 ? Number(segments[0]) : 0;
 
-  if (
-    Number.isNaN(secondsWithMillis) ||
-    Number.isNaN(minutes) ||
-    Number.isNaN(hours)
-  ) {
+  if (Number.isNaN(secondsWithMillis) || Number.isNaN(minutes) || Number.isNaN(hours)) {
     return null;
   }
 
   return hours * 3600 + minutes * 60 + secondsWithMillis;
 }
 
-function parseSubtitleText(
-  input: string,
-  format: StorySubtitleFileProps["format"] = "auto",
-) {
+function parseSubtitleText(input: string, format: StorySubtitleFileProps["format"] = "auto") {
   const normalized = input.replace(/\r\n?/g, "\n").trim();
 
   if (!normalized) {
@@ -128,9 +106,7 @@ function parseSubtitleText(
 
   const resolvedFormat = inferSubtitleFormat(normalized, format);
   const withoutHeader =
-    resolvedFormat === "vtt"
-      ? normalized.replace(/^WEBVTT[^\n]*\n+/, "")
-      : normalized;
+    resolvedFormat === "vtt" ? normalized.replace(/^WEBVTT[^\n]*\n+/, "") : normalized;
   const blocks = withoutHeader
     .split(/\n{2,}/)
     .map((block) => block.trim())
@@ -177,7 +153,10 @@ function parseSubtitleText(
       continue;
     }
 
-    const text = lines.slice(timingLineIndex + 1).join("\n").trim();
+    const text = lines
+      .slice(timingLineIndex + 1)
+      .join("\n")
+      .trim();
 
     if (!text) {
       continue;
@@ -202,10 +181,7 @@ function formatSubtitleTime(seconds: number) {
   const secondsLabel = remainingSeconds.toFixed(3).padStart(6, "0");
 
   if (hours > 0) {
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-      2,
-      "0",
-    )}:${secondsLabel}`;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${secondsLabel}`;
   }
 
   return `${String(minutes).padStart(2, "0")}:${secondsLabel}`;
@@ -225,14 +201,10 @@ function StoryMediaHeader({
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="max-w-2xl">
-        <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-          {label}
-        </p>
+        <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">{label}</p>
         <h4 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h4>
         {description ? (
-          <div className="mt-3 text-sm leading-6 text-muted-foreground">
-            {description}
-          </div>
+          <div className="mt-3 text-sm leading-6 text-muted-foreground">{description}</div>
         ) : null}
       </div>
       {badge ? (
@@ -272,9 +244,9 @@ export function StorySubtitleFile({
   errorLabel = "Unable to load subtitle file.",
 }: StorySubtitleFileProps) {
   const [resolvedContent, setResolvedContent] = useState(content ?? "");
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "ready" | "error"
-  >(content ? "ready" : src ? "loading" : "idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">(
+    content ? "ready" : src ? "loading" : "idle",
+  );
 
   useEffect(() => {
     if (content !== undefined) {
@@ -323,10 +295,7 @@ export function StorySubtitleFile({
     };
   }, [content, src]);
 
-  const cues = useMemo(
-    () => parseSubtitleText(resolvedContent, format),
-    [format, resolvedContent],
-  );
+  const cues = useMemo(() => parseSubtitleText(resolvedContent, format), [format, resolvedContent]);
   const fileName = title ?? extractFileName(src) ?? "Inline subtitles";
   const badge = src
     ? inferSubtitleFormat(src, format).toUpperCase()
@@ -353,12 +322,8 @@ export function StorySubtitleFile({
             listClassName,
           )}
         >
-          {status === "loading" ? (
-            <p className="text-sm text-white/72">{loadingLabel}</p>
-          ) : null}
-          {status === "error" ? (
-            <p className="text-sm text-white/72">{errorLabel}</p>
-          ) : null}
+          {status === "loading" ? <p className="text-sm text-white/72">{loadingLabel}</p> : null}
+          {status === "error" ? <p className="text-sm text-white/72">{errorLabel}</p> : null}
           {status !== "loading" && status !== "error" && cues.length === 0 ? (
             <p className="text-sm text-white/72">{emptyLabel}</p>
           ) : null}
@@ -420,11 +385,7 @@ export function StoryAudioFile({
         <div className="grid gap-6 md:grid-cols-[180px_1fr] md:items-end">
           <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5">
             {artworkSrc ? (
-              <img
-                src={artworkSrc}
-                alt=""
-                className="h-full min-h-[180px] w-full object-cover"
-              />
+              <img src={artworkSrc} alt="" className="h-full min-h-[180px] w-full object-cover" />
             ) : (
               <div className="flex min-h-[180px] items-center justify-center bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] px-6 text-center text-sm uppercase tracking-[0.28em] text-white/65">
                 Audio
@@ -482,10 +443,7 @@ export function StoryVideoFile({
             preload={preload}
             playsInline={playsInline}
             src={src}
-            className={cn(
-              "aspect-video w-full bg-black object-cover",
-              playerClassName,
-            )}
+            className={cn("aspect-video w-full bg-black object-cover", playerClassName)}
           >
             <StoryMediaTrackElements tracks={tracks} />
           </video>
@@ -495,9 +453,9 @@ export function StoryVideoFile({
   );
 }
 
-export function createSubtitleStoryScene<
-  TData extends StoryNodeData = StoryNodeData,
->(props: StorySubtitleFileProps): StoryStageComponent<TData> {
+export function createSubtitleStoryScene<TData extends StoryNodeData = StoryNodeData>(
+  props: StorySubtitleFileProps,
+): StoryStageComponent<TData> {
   function SubtitleStoryScene(_renderProps: StoryRenderProps<TData>) {
     return <StorySubtitleFile {...props} />;
   }
@@ -507,9 +465,9 @@ export function createSubtitleStoryScene<
   return SubtitleStoryScene;
 }
 
-export function createAudioStoryScene<
-  TData extends StoryNodeData = StoryNodeData,
->(props: StoryAudioFileProps): StoryStageComponent<TData> {
+export function createAudioStoryScene<TData extends StoryNodeData = StoryNodeData>(
+  props: StoryAudioFileProps,
+): StoryStageComponent<TData> {
   function AudioStoryScene(_renderProps: StoryRenderProps<TData>) {
     return <StoryAudioFile {...props} />;
   }
@@ -519,9 +477,9 @@ export function createAudioStoryScene<
   return AudioStoryScene;
 }
 
-export function createVideoStoryScene<
-  TData extends StoryNodeData = StoryNodeData,
->(props: StoryVideoFileProps): StoryStageComponent<TData> {
+export function createVideoStoryScene<TData extends StoryNodeData = StoryNodeData>(
+  props: StoryVideoFileProps,
+): StoryStageComponent<TData> {
   function VideoStoryScene(_renderProps: StoryRenderProps<TData>) {
     return <StoryVideoFile {...props} />;
   }

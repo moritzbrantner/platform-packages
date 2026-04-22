@@ -32,9 +32,7 @@ export function StoryProvider({
   children: ReactNode;
   value: StoryContextValue;
 }) {
-  return (
-    <StoryContext.Provider value={value}>{children}</StoryContext.Provider>
-  );
+  return <StoryContext.Provider value={value}>{children}</StoryContext.Provider>;
 }
 
 export function useStoryContext(componentName: string) {

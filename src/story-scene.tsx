@@ -9,13 +9,7 @@ import type { StorySceneProps } from "./story-types";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-function StorySceneComponent({
-  id,
-  title,
-  eyebrow,
-  children,
-  className,
-}: StorySceneProps) {
+function StorySceneComponent({ id, title, eyebrow, children, className }: StorySceneProps) {
   const { sceneMeta, sceneProgress, activeIndex } = useStoryContext("StoryScene");
   const reducedMotion = useReducedMotion();
   const index = sceneMeta.findIndex((scene) => scene.id === id);
@@ -29,18 +23,12 @@ function StorySceneComponent({
   }
 
   const isActive = activeIndex === index;
-  const opacity = useTransform(
-    sceneProgress,
-    [index - 0.45, index, index + 0.45],
-    [0, 1, 0],
-    { clamp: true },
-  );
-  const y = useTransform(
-    sceneProgress,
-    [index - 0.45, index, index + 0.45],
-    [24, 0, -24],
-    { clamp: true },
-  );
+  const opacity = useTransform(sceneProgress, [index - 0.45, index, index + 0.45], [0, 1, 0], {
+    clamp: true,
+  });
+  const y = useTransform(sceneProgress, [index - 0.45, index, index + 0.45], [24, 0, -24], {
+    clamp: true,
+  });
   const scale = useTransform(
     sceneProgress,
     [index - 0.45, index, index + 0.45],
@@ -69,14 +57,10 @@ function StorySceneComponent({
       aria-hidden={!isActive}
     >
       {eyebrow ? (
-        <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-          {eyebrow}
-        </p>
+        <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{eyebrow}</p>
       ) : null}
       <h2 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h2>
-      <div className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        {children}
-      </div>
+      <div className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{children}</div>
     </motion.article>
   );
 }

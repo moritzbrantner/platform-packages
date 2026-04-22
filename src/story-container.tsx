@@ -30,8 +30,7 @@ export type StoryContainerProps = {
 const DEFAULT_INSTRUCTIONS =
   "Use the story panel scroll, minimap, reset button, or arrow keys to move through the story.";
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 function isTextInputTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -83,8 +82,7 @@ export function StoryContainer({
     scrollToScene(0);
   }, [sceneProgress, scrollToScene]);
 
-  const progressLabel =
-    sceneCount > 0 ? `${activeIndex + 1} / ${sceneCount}` : "0 / 0";
+  const progressLabel = sceneCount > 0 ? `${activeIndex + 1} / ${sceneCount}` : "0 / 0";
   const showMenu = sceneCount > 1;
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -143,22 +141,15 @@ export function StoryContainer({
   return (
     <StoryProvider value={contextValue}>
       <section
-        className={cn(
-          "min-h-[70vh] rounded-2xl border bg-card/40 p-6 md:p-10",
-          className,
-        )}
+        className={cn("min-h-[70vh] rounded-2xl border bg-card/40 p-6 md:p-10", className)}
         onKeyDown={handleKeyDown}
         tabIndex={0}
         role="region"
         aria-label={ariaLabel ?? title}
       >
         <header className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
-            {title}
-          </h1>
-          {subtitle ? (
-            <p className="mt-4 text-muted-foreground">{subtitle}</p>
-          ) : null}
+          <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">{title}</h1>
+          {subtitle ? <p className="mt-4 text-muted-foreground">{subtitle}</p> : null}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
               Step {progressLabel}
@@ -180,23 +171,15 @@ export function StoryContainer({
         <div
           className={cn(
             "mx-auto mt-10 max-w-5xl",
-            showMenu
-              ? "grid gap-6 md:grid-cols-[220px_1fr] md:items-stretch"
-              : "",
+            showMenu ? "grid gap-6 md:grid-cols-[220px_1fr] md:items-stretch" : "",
           )}
         >
-          {showMenu ? (
-            <StoryMinimap className="order-2 md:order-1" />
-          ) : null}
+          {showMenu ? <StoryMinimap className="order-2 md:order-1" /> : null}
 
-          <div className={cn(showMenu ? "order-1 md:order-2" : "")}>
-            {children}
-          </div>
+          <div className={cn(showMenu ? "order-1 md:order-2" : "")}>{children}</div>
         </div>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          {instructions}
-        </p>
+        <p className="mt-8 text-center text-sm text-muted-foreground">{instructions}</p>
       </section>
     </StoryProvider>
   );

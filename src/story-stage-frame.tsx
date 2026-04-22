@@ -3,9 +3,7 @@
 import { cn } from "@moritzbrantner/ui";
 
 import { StoryContent } from "./story-content";
-import {
-  getStoryRendererKey,
-} from "./story-render-registry";
+import { getStoryRendererKey } from "./story-render-registry";
 import type {
   StoryNodeData,
   StoryRenderProps,
@@ -13,21 +11,18 @@ import type {
   StoryStageComponent,
 } from "./story-model";
 
-export type StoryStageFrameProps<
-  TData extends StoryNodeData = StoryNodeData,
-> = StoryRenderProps<TData> & {
-  registry?: StoryRendererRegistry<TData>;
-  className?: string;
-};
+export type StoryStageFrameProps<TData extends StoryNodeData = StoryNodeData> =
+  StoryRenderProps<TData> & {
+    registry?: StoryRendererRegistry<TData>;
+    className?: string;
+  };
 
 export function StoryStageFrame<TData extends StoryNodeData = StoryNodeData>(
   props: StoryStageFrameProps<TData>,
 ) {
   const { node, registry, className } = props;
   const rendererKey = getStoryRendererKey(node);
-  const CustomStage = registry?.web?.[rendererKey] as
-    | StoryStageComponent<TData>
-    | undefined;
+  const CustomStage = registry?.web?.[rendererKey] as StoryStageComponent<TData> | undefined;
 
   if (CustomStage) {
     return <CustomStage {...props} />;

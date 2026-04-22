@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
@@ -15,12 +9,7 @@ import { Button, cn } from "@moritzbrantner/ui";
 import { resolveStoryPath } from "./story-path";
 import { StoryProgress } from "./story-progress";
 import { StoryStageFrame } from "./story-stage-frame";
-import {
-  defineStory,
-  getStoryChoices,
-  getStoryNode,
-  isStoryEnding,
-} from "./story-validation";
+import { defineStory, getStoryChoices, getStoryNode, isStoryEnding } from "./story-validation";
 import type {
   ResolvedStoryPath,
   StoryChoice,
@@ -37,10 +26,7 @@ export type StoryPlayerProps<TData extends StoryNodeData = StoryNodeData> = {
   initialChoiceIds?: string[];
   className?: string;
   ariaLabel?: string;
-  onChoice?: (
-    choice: StoryChoice,
-    history: StoryHistoryEntry<TData>[],
-  ) => void;
+  onChoice?: (choice: StoryChoice, history: StoryHistoryEntry<TData>[]) => void;
   onPathChange?: (history: StoryHistoryEntry<TData>[]) => void;
 };
 
@@ -204,8 +190,8 @@ export function StoryPlayer<TData extends StoryNodeData = StoryNodeData>({
               prompt={
                 currentNode.prompt ??
                 (ending
-                  ? story.labels?.endingPrompt ?? "This branch is complete."
-                  : story.labels?.choosePrompt ?? "Choose what happens next.")
+                  ? (story.labels?.endingPrompt ?? "This branch is complete.")
+                  : (story.labels?.choosePrompt ?? "Choose what happens next."))
               }
               completedLabel={
                 story.labels?.completedBranch ??
@@ -215,22 +201,14 @@ export function StoryPlayer<TData extends StoryNodeData = StoryNodeData>({
 
             <div className="mt-auto space-y-5">
               <div className="flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={goBack}
-                  disabled={!canGoBack}
-                >
+                <Button type="button" variant="outline" onClick={goBack} disabled={!canGoBack}>
                   {story.labels?.back ?? "Go back"}
                 </Button>
                 <Button type="button" variant="secondary" onClick={restart}>
                   {story.labels?.restart ?? "Restart"}
                 </Button>
               </div>
-              <StoryProgress
-                value={progress}
-                label={`Scene ${history.length} / ${story.nodes.length}`}
-              />
+              <StoryProgress value={progress} />
               <StoryPathTrail story={story} history={history} />
             </div>
           </div>
@@ -306,9 +284,7 @@ export function StoryPathTrail<TData extends StoryNodeData = StoryNodeData>({
             key={`${entry.nodeId}-${index}`}
             className={cn(
               "rounded-md border px-2.5 py-1",
-              index === history.length - 1
-                ? "border-foreground text-foreground"
-                : "border-border",
+              index === history.length - 1 ? "border-foreground text-foreground" : "border-border",
             )}
             aria-current={index === history.length - 1 ? "step" : undefined}
           >

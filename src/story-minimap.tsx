@@ -29,10 +29,7 @@ export function StoryMinimap({
   }
 
   return (
-    <nav
-      className={cn("rounded-lg border bg-background p-3", className)}
-      aria-label={ariaLabel}
-    >
+    <nav className={cn("rounded-lg border bg-background p-3", className)} aria-label={ariaLabel}>
       <div className="mb-3 flex items-center justify-between gap-3 px-1">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           Minimap
@@ -84,9 +81,7 @@ export function StoryMinimap({
                   >
                     {item.menuLabel ?? item.eyebrow ?? `Scene ${index + 1}`}
                   </span>
-                  <span className="mt-1 block text-sm font-medium leading-5">
-                    {item.title}
-                  </span>
+                  <span className="mt-1 block text-sm font-medium leading-5">{item.title}</span>
                 </span>
               </Button>
             </li>

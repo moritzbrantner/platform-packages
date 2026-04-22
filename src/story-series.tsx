@@ -22,8 +22,7 @@ export type StorySeriesProps = {
   ariaLabel?: string;
 };
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 function StorySeriesComponent({
   children,
@@ -31,12 +30,8 @@ function StorySeriesComponent({
   viewportClassName = "h-[26rem] md:h-[70vh]",
   ariaLabel,
 }: StorySeriesProps) {
-  const {
-    sceneCount,
-    setActiveIndex,
-    sceneProgress,
-    registerScrollToScene,
-  } = useStoryContext("StorySeries");
+  const { sceneCount, setActiveIndex, sceneProgress, registerScrollToScene } =
+    useStoryContext("StorySeries");
   const seriesRef = useRef<HTMLDivElement | null>(null);
   const reducedMotion = useReducedMotion();
   const sceneElements = useMemo(() => getStorySceneElements(children), [children]);
@@ -47,13 +42,9 @@ function StorySeriesComponent({
     damping: 28,
     mass: 0.2,
   });
-  const smoothSceneProgress = useTransform(
-    springProgress,
-    (value) => value * maxSceneIndex,
-  );
-  const reducedMotionProgress = useTransform(
-    scrollYProgress,
-    (value) => Math.round(value * maxSceneIndex),
+  const smoothSceneProgress = useTransform(springProgress, (value) => value * maxSceneIndex);
+  const reducedMotionProgress = useTransform(scrollYProgress, (value) =>
+    Math.round(value * maxSceneIndex),
   );
 
   useMotionValueEvent(
@@ -64,9 +55,7 @@ function StorySeriesComponent({
       const nextActiveIndex = clamp(Math.round(nextProgress), 0, maxSceneIndex);
 
       sceneProgress.set(nextProgress);
-      setActiveIndex((current) =>
-        current === nextActiveIndex ? current : nextActiveIndex,
-      );
+      setActiveIndex((current) => (current === nextActiveIndex ? current : nextActiveIndex));
     },
   );
 
@@ -77,8 +66,7 @@ function StorySeriesComponent({
 
       const nextIndex = clamp(index, 0, maxSceneIndex);
       const maxScroll = Math.max(element.scrollHeight - element.clientHeight, 0);
-      const target =
-        maxSceneIndex === 0 ? 0 : (nextIndex / maxSceneIndex) * maxScroll;
+      const target = maxSceneIndex === 0 ? 0 : (nextIndex / maxSceneIndex) * maxScroll;
 
       element.scrollTo({
         top: target,
@@ -107,10 +95,7 @@ function StorySeriesComponent({
         className,
       )}
     >
-      <div
-        className="relative"
-        style={{ height: `${Math.max(sceneCount, 1) * 100}%` }}
-      >
+      <div className="relative" style={{ height: `${Math.max(sceneCount, 1) * 100}%` }}>
         <div
           className={cn(
             "sticky top-0 z-10 overflow-hidden rounded-xl border bg-background",

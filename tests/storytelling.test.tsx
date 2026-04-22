@@ -173,13 +173,29 @@ describe("@moritzbrantner/storytelling", () => {
           { id: "b", title: "B", next: "a" },
         ],
       }),
-    ).toThrow("unconditional cycle");
+    ).toThrow("contains a cycle");
+
+    expect(() =>
+      validateStory({
+        id: "choice-cycle",
+        title: "Choice cycle",
+        openingNodeId: "a",
+        nodes: [
+          {
+            id: "a",
+            title: "A",
+            choices: [{ id: "loop", label: "Loop", target: "a" }],
+          },
+        ],
+      }),
+    ).toThrow("contains a cycle");
   });
 
   test("resolves branching, linear auto-advance, disabled choices, stopAt, and maxSteps", () => {
-    expect(
-      resolveStoryPath(story, { choiceIds: ["trace"] }).nodes.map((node) => node.id),
-    ).toEqual(["wake", "trace-node"]);
+    expect(resolveStoryPath(story, { choiceIds: ["trace"] }).nodes.map((node) => node.id)).toEqual([
+      "wake",
+      "trace-node",
+    ]);
 
     expect(
       resolveStoryPath(story, {
@@ -200,22 +216,9 @@ describe("@moritzbrantner/storytelling", () => {
     expect(stopped.stoppedAt).toBe("answer-node");
     expect(stopped.nodes.map((node) => node.id)).toEqual(["wake", "answer-node"]);
 
-    const cyclicChoiceStory = defineStory({
-      id: "choice-cycle",
-      title: "Choice cycle",
-      openingNodeId: "a",
-      nodes: [
-        {
-          id: "a",
-          title: "A",
-          choices: [{ id: "loop", label: "Loop", target: "a" }],
-        },
-      ],
-    });
-
     expect(() =>
-      resolveStoryPath(cyclicChoiceStory, {
-        choiceIds: ["loop"],
+      resolveStoryPath(story, {
+        choiceIds: ["answer"],
         autoAdvanceLinearNodes: true,
         maxSteps: 1,
       }),
@@ -232,11 +235,7 @@ describe("@moritzbrantner/storytelling", () => {
     expect(timeline.totalFrames).toBe(290);
     expect(timeline.scenes.map((scene) => scene.startFrame)).toEqual([0, 100, 200]);
     expect(timeline.scenes.map((scene) => scene.endFrame)).toEqual([100, 200, 290]);
-    expect(timeline.scenes.map((scene) => scene.transitionInFrames)).toEqual([
-      10,
-      10,
-      10,
-    ]);
+    expect(timeline.scenes.map((scene) => scene.transitionInFrames)).toEqual([10, 10, 10]);
     expect(timeline.scenes[2]?.history.map((entry) => entry.nodeId)).toEqual([
       "wake",
       "answer-node",
@@ -248,26 +247,20 @@ describe("@moritzbrantner/storytelling", () => {
     const onChoice = vi.fn();
     const onPathChange = vi.fn();
 
-    render(
-      <StoryPlayer story={story} onChoice={onChoice} onPathChange={onPathChange} />,
-    );
+    render(<StoryPlayer story={story} onChoice={onChoice} onPathChange={onPathChange} />);
 
     expect(screen.getByText("A low signal reaches the tower.")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Trace the source/ }));
 
     expect(
-      await screen.findByText(
-        "The signal comes from a cove nobody has charted in decades.",
-      ),
+      await screen.findByText("The signal comes from a cove nobody has charted in decades."),
     ).toBeTruthy();
     expect(onChoice).toHaveBeenCalledWith(
       expect.objectContaining({ id: "trace" }),
       expect.arrayContaining([expect.objectContaining({ nodeId: "trace-node" })]),
     );
-    expect(document.activeElement?.textContent).toContain(
-      "The map reveals a hidden harbor",
-    );
+    expect(document.activeElement?.textContent).toContain("The map reveals a hidden harbor");
 
     fireEvent.keyDown(screen.getByRole("region", { name: "Signal in the fog" }), {
       key: "Escape",
@@ -280,18 +273,25 @@ describe("@moritzbrantner/storytelling", () => {
     expect(onPathChange).toHaveBeenCalled();
   });
 
-  test("renders StoryScroller with shared minimap navigation", async () => {
-    render(<StoryScroller story={story} pathChoiceIds={["answer"]} />);
+  test("renders StoryScroller with overlaid choices and a progressively revealed graph", async () => {
+    render(<StoryScroller story={story} />);
 
-    expect(screen.getByRole("navigation", { name: "Story minimap" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Go to scene 2: A distant pilot responds" }));
+    expect(screen.getByRole("navigation", { name: "Story graph" })).toBeTruthy();
+    expect(screen.queryByText("The city hears the pilot")).toBeNull();
+    expect(screen.queryByText(/Scene 1 \//)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Answer immediately/ }));
 
     expect(await screen.findByText("The message is fragmented.")).toBeTruthy();
+    expect(await screen.findByText("The city hears the pilot")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByText("Contact changes the route.")).toBeTruthy();
 
     fireEvent.keyDown(screen.getByRole("region", { name: "Signal in the fog" }), {
-      key: "End",
+      key: "Home",
     });
-    expect(await screen.findByText("Contact changes the route.")).toBeTruthy();
+    expect(await screen.findByText("A low signal reaches the tower.")).toBeTruthy();
   });
 
   test("uses registry stages and falls back to the default stage", () => {
@@ -321,19 +321,17 @@ describe("@moritzbrantner/storytelling", () => {
       restart: () => {},
     };
 
-    const { rerender } = render(
-      <StoryStageFrame {...renderProps} registry={registry} />,
-    );
+    const { rerender } = render(<StoryStageFrame {...renderProps} registry={registry} />);
     expect(screen.getByText("Custom stage for The map reveals a hidden harbor")).toBeTruthy();
 
     rerender(<StoryStageFrame {...renderProps} registry={createStoryRendererRegistry()} />);
-    expect(screen.getByText("The signal comes from a cove nobody has charted in decades.")).toBeTruthy();
+    expect(
+      screen.getByText("The signal comes from a cove nobody has charted in decades."),
+    ).toBeTruthy();
   });
 
   test("imports remotion and three entrypoints without browser-only setup", async () => {
-    await expect(import("../src/remotion")).resolves.toHaveProperty(
-      "StoryRemotionComposition",
-    );
+    await expect(import("../src/remotion")).resolves.toHaveProperty("StoryRemotionComposition");
     await expect(import("../src/three")).resolves.toHaveProperty("StoryCanvasStage");
   });
 
@@ -359,9 +357,7 @@ describe("@moritzbrantner/storytelling", () => {
 
   test("passes Remotion frame, progress, history, and node data into custom renderers", async () => {
     vi.doMock("remotion", () => ({
-      AbsoluteFill: ({ children }: { children?: ReactNode }) => (
-        <div>{children}</div>
-      ),
+      AbsoluteFill: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
       Sequence: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
       interpolate: () => 1,
       useCurrentFrame: () => 130,
@@ -372,9 +368,7 @@ describe("@moritzbrantner/storytelling", () => {
     const remotionStory: StoryDocument<FixtureData> = {
       ...story,
       nodes: story.nodes.map((node) =>
-        node.id === "trace-node"
-          ? { ...node, stage: { renderer: "capture" } }
-          : node,
+        node.id === "trace-node" ? { ...node, stage: { renderer: "capture" } } : node,
       ),
     };
     const registry = createStoryRendererRegistry<FixtureData>({
@@ -387,11 +381,7 @@ describe("@moritzbrantner/storytelling", () => {
     });
 
     render(
-      <StoryRemotionComposition
-        story={remotionStory}
-        choiceIds={["trace"]}
-        registry={registry}
-      />,
+      <StoryRemotionComposition story={remotionStory} choiceIds={["trace"]} registry={registry} />,
     );
 
     expect(screen.getByText("Captured The map reveals a hidden harbor")).toBeTruthy();

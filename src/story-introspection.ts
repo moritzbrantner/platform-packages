@@ -1,9 +1,4 @@
-import {
-  Children,
-  isValidElement,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
 
 import type { StorySceneMeta, StorySceneProps } from "./story-types";
 
@@ -45,10 +40,7 @@ export function getStorySceneElements(children: ReactNode) {
       typeof (child.props as StorySceneProps).id === "string" &&
       typeof (child.props as StorySceneProps).title === "string";
 
-    invariant(
-      isScene,
-      "StorySeries only accepts direct StoryScene children.",
-    );
+    invariant(isScene, "StorySeries only accepts direct StoryScene children.");
 
     if (isScene) {
       sceneElements.push(child as ReactElement<StorySceneProps>);
@@ -70,10 +62,7 @@ export function buildSceneMeta(children: ReactNode) {
   return sceneElements.map((sceneElement): StorySceneMeta => {
     const { id, title, menuLabel, eyebrow } = sceneElement.props;
 
-    invariant(
-      !sceneIds.has(id),
-      `StoryScene ids must be unique. Duplicate id "${id}" found.`,
-    );
+    invariant(!sceneIds.has(id), `StoryScene ids must be unique. Duplicate id "${id}" found.`);
     sceneIds.add(id);
 
     return {

@@ -1,22 +1,9 @@
-import {
-  AbsoluteFill,
-  Sequence,
-  interpolate,
-  useCurrentFrame,
-} from "remotion";
+import { AbsoluteFill, Sequence, interpolate, useCurrentFrame } from "remotion";
 import type { ReactNode } from "react";
 
 import { buildStoryTimeline } from "./story-path";
-import {
-  getStoryChoices,
-  getStoryNode,
-  isStoryEnding,
-  validateStory,
-} from "./story-validation";
-import {
-  defaultStoryTheme,
-  type StoryTheme,
-} from "./story-theme";
+import { getStoryChoices, getStoryNode, isStoryEnding, validateStory } from "./story-validation";
+import { defaultStoryTheme, type StoryTheme } from "./story-theme";
 import { getStoryRendererKey } from "./story-render-registry";
 import type {
   ResolvedStoryPath,
@@ -37,9 +24,7 @@ export type StoryRemotionLayout = {
   fps?: number;
 };
 
-export type StoryRemotionCompositionProps<
-  TData extends StoryNodeData = StoryNodeData,
-> = {
+export type StoryRemotionCompositionProps<TData extends StoryNodeData = StoryNodeData> = {
   story: StoryDocument<TData>;
   choiceIds?: string[];
   registry?: StoryRendererRegistry<TData>;
@@ -139,9 +124,7 @@ export function StoryRemotionContent({
               >
                 <p style={{ margin: 0 }}>{block.text}</p>
                 {block.cite ? (
-                  <p style={{ margin: "12px 0 0", fontSize: 20, opacity: 0.72 }}>
-                    {block.cite}
-                  </p>
+                  <p style={{ margin: "12px 0 0", fontSize: 20, opacity: 0.72 }}>{block.cite}</p>
                 ) : null}
               </div>
             );
@@ -169,9 +152,7 @@ export function StoryRemotionContent({
                   }}
                 />
                 {block.caption ? (
-                  <p style={{ margin: 0, fontSize: 18, opacity: 0.7 }}>
-                    {block.caption}
-                  </p>
+                  <p style={{ margin: 0, fontSize: 18, opacity: 0.7 }}>{block.caption}</p>
                 ) : null}
               </div>
             );
@@ -198,13 +179,7 @@ export function StoryRemotionContent({
   );
 }
 
-export function StoryRemotionProgress({
-  progress,
-  label,
-}: {
-  progress: number;
-  label: string;
-}) {
+export function StoryRemotionProgress({ progress, label }: { progress: number; label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
       <div
@@ -256,12 +231,10 @@ export function StoryRemotionTransition({
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const translateY = interpolate(
-    frame,
-    [0, transitionFrames, durationInFrames],
-    [36, 0, -24],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
+  const translateY = interpolate(frame, [0, transitionFrames, durationInFrames], [36, 0, -24], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <AbsoluteFill style={{ opacity, transform: `translateY(${translateY}px)` }}>
@@ -270,9 +243,9 @@ export function StoryRemotionTransition({
   );
 }
 
-export function StoryRemotionSceneFrame<
-  TData extends StoryNodeData = StoryNodeData,
->(props: StoryRemotionSceneProps<TData> & { theme?: StoryTheme }) {
+export function StoryRemotionSceneFrame<TData extends StoryNodeData = StoryNodeData>(
+  props: StoryRemotionSceneProps<TData> & { theme?: StoryTheme },
+) {
   const { node, currentIndex, progress, theme } = props;
   const resolvedTheme = { ...defaultStoryTheme, ...theme };
   const accent = node.stage?.props?.accent;
@@ -326,18 +299,13 @@ export function StoryRemotionSceneFrame<
           </div>
         </div>
 
-        <StoryRemotionProgress
-          progress={progress}
-          label={`Scene ${currentIndex + 1}`}
-        />
+        <StoryRemotionProgress progress={progress} label={`Scene ${currentIndex + 1}`} />
       </AbsoluteFill>
     </StoryRemotionTransition>
   );
 }
 
-export function StoryRemotionComposition<
-  TData extends StoryNodeData = StoryNodeData,
->({
+export function StoryRemotionComposition<TData extends StoryNodeData = StoryNodeData>({
   story: input,
   choiceIds = [],
   registry,
