@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type * as React from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
@@ -16,6 +17,18 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Chat,
+  ChatBubble,
+  ChatComposer,
+  ChatComposerInput,
+  ChatHeader,
+  ChatMessage,
+  ChatMessageAvatar,
+  ChatMessageContent,
+  ChatMessageMeta,
+  ChatSendButton,
+  ChatThread,
+  ChatTitle,
   ActionBar,
   CodeBlock,
   CodeBlockCode,
@@ -51,6 +64,15 @@ import {
   EmptyTitle,
   Kbd,
   LoadingBar,
+  MobileSlide,
+  MobileSlideBody,
+  MobileSlideClose,
+  MobileSlideContent,
+  MobileSlideDescription,
+  MobileSlideFooter,
+  MobileSlideHeader,
+  MobileSlideTitle,
+  MobileSlideTrigger,
   PlatformNavbar,
   type PlatformNavbarGroup,
   PageActions,
@@ -87,6 +109,7 @@ import {
   TimelineItem,
   TimelineTitle,
   Toggle,
+  ToggleSetting,
   Toolbar,
   ToolbarGroup,
   ToolbarSpacer,
@@ -710,6 +733,110 @@ describe("@moritzbrantner/ui", () => {
 
     expect(screen.getByRole("button", { name: "Grid" }).className).toContain("rounded-md");
     expect(screen.getByRole("switch", { name: "Notifications" }).className).toContain("rounded-md");
+  });
+
+  test("renders a labeled toggle setting and reports checked changes", () => {
+    const onCheckedChange = vi.fn();
+
+    render(
+      <ToggleSetting
+        title="Push notifications"
+        description="Notify reviewers when package status changes."
+        defaultChecked={false}
+        onCheckedChange={onCheckedChange}
+      />,
+    );
+
+    const toggle = screen.getByRole("switch", { name: "Push notifications" });
+
+    expect(toggle.getAttribute("aria-describedby")).toBeTruthy();
+    fireEvent.click(toggle);
+    expect(onCheckedChange).toHaveBeenCalledWith(true);
+  });
+
+  test("opens a mobile slide with accessible drawer content", async () => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
+    render(
+      <MobileSlide>
+        <MobileSlideTrigger asChild>
+          <Button>Open filters</Button>
+        </MobileSlideTrigger>
+        <MobileSlideContent showCloseButton>
+          <MobileSlideHeader>
+            <MobileSlideTitle>Filters</MobileSlideTitle>
+            <MobileSlideDescription>Review queue controls.</MobileSlideDescription>
+          </MobileSlideHeader>
+          <MobileSlideBody>Only show blockers.</MobileSlideBody>
+          <MobileSlideFooter>
+            <MobileSlideClose asChild>
+              <Button>Apply</Button>
+            </MobileSlideClose>
+          </MobileSlideFooter>
+        </MobileSlideContent>
+      </MobileSlide>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open filters" }));
+
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+    expect(screen.getByText("Filters")).toBeTruthy();
+    expect(screen.getByText("Only show blockers.")).toBeTruthy();
+  });
+
+  test("renders chat thread, message bubbles, and composer controls", () => {
+    const onSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
+
+    render(
+      <Chat>
+        <ChatHeader>
+          <ChatTitle>Release chat</ChatTitle>
+        </ChatHeader>
+        <ChatThread aria-label="Release conversation">
+          <ChatMessage>
+            <ChatMessageAvatar>MB</ChatMessageAvatar>
+            <ChatMessageContent>
+              <ChatMessageMeta>Moritz</ChatMessageMeta>
+              <ChatBubble>Ready for review.</ChatBubble>
+            </ChatMessageContent>
+          </ChatMessage>
+          <ChatMessage align="end">
+            <ChatMessageContent>
+              <ChatMessageMeta>You</ChatMessageMeta>
+              <ChatBubble>Running tests now.</ChatBubble>
+            </ChatMessageContent>
+          </ChatMessage>
+        </ChatThread>
+        <ChatComposer onSubmit={onSubmit}>
+          <ChatComposerInput aria-label="Message" defaultValue="Looks good" />
+          <ChatSendButton />
+        </ChatComposer>
+      </Chat>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Release chat" })).toBeTruthy();
+    expect(screen.getByRole("log", { name: "Release conversation" })).toBeTruthy();
+    expect(screen.getByText("Ready for review.")).toBeTruthy();
+    expect((screen.getByRole("textbox", { name: "Message" }) as HTMLTextAreaElement).value).toBe(
+      "Looks good",
+    );
+
+    fireEvent.submit(screen.getByRole("textbox", { name: "Message" }).closest("form")!);
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
   test("renders a custom calendar cell component", () => {
