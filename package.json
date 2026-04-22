@@ -7,7 +7,6 @@
     "packages/*",
     "packages/auth-contract",
     "packages/foundation-contract",
-    "packages/foundation-ui",
     "packages/upload-playbook"
   ],
   "scripts": {

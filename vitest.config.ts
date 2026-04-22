@@ -59,10 +59,6 @@ export default defineConfig({
         rootDir,
         "packages/foundation-contract/src/index.ts",
       ),
-      "@moritzbrantner/foundation-ui": path.resolve(
-        rootDir,
-        "packages/foundation-ui/src/index.tsx",
-      ),
       "@moritzbrantner/graphs": path.resolve(rootDir, "packages/graphs/src/index.ts"),
       "@moritzbrantner/hexagon-grids": path.resolve(rootDir, "packages/hexagon-grids/src/index.ts"),
       "@moritzbrantner/huggingface-universal": path.resolve(

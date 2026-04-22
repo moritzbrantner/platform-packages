@@ -9,7 +9,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "ui",
     name: "@moritzbrantner/ui",
-    version: "0.3.1",
+    version: "0.4.0",
     files: ["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"],
     exports: [
       ".",
@@ -33,7 +33,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "storytelling",
     name: "@moritzbrantner/storytelling",
-    version: "0.3.0",
+    version: "0.3.1",
     files: ["dist"],
     exports: [".", "./remotion", "./three"],
     scripts: ["build", "lint", "check-types", "test"],

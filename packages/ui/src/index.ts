@@ -1,6 +1,7 @@
 "use client";
 
 export * from "./components/accordion";
+export * from "./components/account-menu";
 export * from "./components/alert";
 export * from "./components/alert-dialog";
 export * from "./components/annotation-canvas";
@@ -51,6 +52,7 @@ export * from "./components/menubar";
 export * from "./components/mobile-slide";
 export * from "./components/native-select";
 export * from "./components/navigation-menu";
+export * from "./components/notification-menu";
 export * from "./components/pagination";
 export * from "./components/popover";
 export * from "./components/progress";

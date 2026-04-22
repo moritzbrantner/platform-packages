@@ -6,7 +6,9 @@ Shared Tailwind 4 React UI primitives, layout components, and global theme style
 
 `@moritzbrantner/ui` is the low-level design-system package. It owns shared tokens, primitives, composed components, theme metadata, Storybook coverage, and package-consumption guarantees.
 
-Keep product workflows in higher-level packages such as `@moritzbrantner/foundation-ui`. Auth, profiles, uploads, settings, report-problem flows, and other app-specific behavior should compose `@moritzbrantner/ui` instead of living in it.
+Keep product workflows in higher-level packages such as `@moritzbrantner/frontend-ui`. Complete frontend surfaces, pages, navigation composition, roles, auth/session state, admin/account/settings/profile workflows, and other app-specific behavior should compose `@moritzbrantner/ui` instead of living in it.
+
+Generic visual affordances such as `AccountMenu` and `NotificationMenu` live in this package only when they stay state-free and contract-free. Apps and `@moritzbrantner/frontend-ui` own the menu content, routing, auth/session state, notification state, and backend behavior.
 
 ## Install
 

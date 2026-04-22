@@ -14,6 +14,7 @@ The maintained template family should converge on these packages first:
 These four packages are the current scaffold-facing contract for `monorepo`, `next-template`, `expo-template`, and `electron-template`.
 
 Everything else in this repository remains valid, but is not required for `scaffold-v2` alignment.
+Complete frontend composition for pages, roles, auth/session state, and account/settings/profile workflows belongs in the sibling `@moritzbrantner/frontend-ui` repository. This repository keeps `@moritzbrantner/ui` focused on reusable components and design-system primitives.
 
 ## Package Inventory
 
@@ -46,7 +47,6 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/fill-mask`                      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/flat-design`                    | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/foundation-contract`            | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/foundation-ui`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/graphs`                         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/hexagon-grids`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/huggingface-universal`          | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
