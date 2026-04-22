@@ -226,9 +226,7 @@ export function PlatformNavbar({
       return false;
     }
 
-    return Boolean(
-      containerRef.current?.contains(target) || submenuRef.current?.contains(target),
-    );
+    return Boolean(containerRef.current?.contains(target) || submenuRef.current?.contains(target));
   }, []);
 
   const handleBlurCapture = React.useCallback(
@@ -270,8 +268,7 @@ export function PlatformNavbar({
       triggerRect && triggerRect.width > 0
         ? triggerRect.left + triggerRect.width / 2
         : containerRect.left + containerWidth / 2;
-    const rawLeft =
-      variant === "mobile" ? containerRect.left + margin : triggerCenter - width / 2;
+    const rawLeft = variant === "mobile" ? containerRect.left + margin : triggerCenter - width / 2;
     const left = clamp(rawLeft, margin, viewportWidth - width - margin);
     const belowTop = containerRect.bottom + gap;
     const availableBelow = viewportHeight - belowTop - margin;
@@ -545,7 +542,9 @@ export function PlatformNavbar({
                         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                       />
                     ) : null}
-                    {group.icon ? <span className="shrink-0 text-current">{group.icon}</span> : null}
+                    {group.icon ? (
+                      <span className="shrink-0 text-current">{group.icon}</span>
+                    ) : null}
                     <span className="min-w-0 truncate">{group.label}</span>
                     <ChevronIcon
                       className={cn(

@@ -33,10 +33,7 @@ export type CreateTextToSpeechPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createTextToSpeechPipeline<
-  Input = TextToSpeechInput,
-  Output = TextToSpeechOutput,
->(
+export function createTextToSpeechPipeline<Input = TextToSpeechInput, Output = TextToSpeechOutput>(
   options: CreateTextToSpeechPipelineOptions,
 ): TextToSpeechPipeline<Input, Output> {
   return createUniversalTaskPipeline({

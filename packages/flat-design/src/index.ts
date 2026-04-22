@@ -29,18 +29,9 @@ export {
   type FlatSparkleFigureOptions,
   type FlatSunFigureOptions,
 } from "./figures";
-export {
-  createFlatDesignPalette,
-  defaultFlatDesignPalette,
-} from "./palette";
-export {
-  createFlatShowcaseScene,
-  type FlatShowcaseSceneOptions,
-} from "./presets";
-export {
-  renderFlatSceneToSvg,
-  type RenderFlatSceneOptions,
-} from "./render-svg";
+export { createFlatDesignPalette, defaultFlatDesignPalette } from "./palette";
+export { createFlatShowcaseScene, type FlatShowcaseSceneOptions } from "./presets";
+export { renderFlatSceneToSvg, type RenderFlatSceneOptions } from "./render-svg";
 export type {
   FlatAnimation,
   FlatAnimationTiming,

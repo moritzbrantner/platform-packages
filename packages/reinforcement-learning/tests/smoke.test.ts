@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/reinforcement-learning", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("reinforcement-learning");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=reinforcement-learning");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=reinforcement-learning",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

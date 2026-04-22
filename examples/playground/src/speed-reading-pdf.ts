@@ -140,8 +140,7 @@ export async function extractTextFromPdf(
           ocrWorker ??= await createBrowserOcrWorker((message) => {
             const progress = Math.min(
               0.99,
-              (activeOcrPage + Math.max(0, Math.min(1, message.progress))) /
-                pdfDocument.numPages,
+              (activeOcrPage + Math.max(0, Math.min(1, message.progress))) / pdfDocument.numPages,
             );
 
             options.onProgress?.({

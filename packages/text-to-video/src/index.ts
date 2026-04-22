@@ -33,10 +33,7 @@ export type CreateTextToVideoPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createTextToVideoPipeline<
-  Input = TextToVideoInput,
-  Output = TextToVideoOutput,
->(
+export function createTextToVideoPipeline<Input = TextToVideoInput, Output = TextToVideoOutput>(
   options: CreateTextToVideoPipelineOptions,
 ): TextToVideoPipeline<Input, Output> {
   return createUniversalTaskPipeline({

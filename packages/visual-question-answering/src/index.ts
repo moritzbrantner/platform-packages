@@ -15,14 +15,10 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("visual-question-ans
 
 export type VisualQuestionAnsweringInput = UniversalTaskInput<"visual-question-answering">;
 export type VisualQuestionAnsweringOutput = UniversalTaskOutput<"visual-question-answering">;
-export type VisualQuestionAnsweringRequest<Input = VisualQuestionAnsweringInput> = UniversalTaskRequest<
-  "visual-question-answering",
-  Input
->;
-export type VisualQuestionAnsweringResult<Output = VisualQuestionAnsweringOutput> = UniversalTaskResult<
-  "visual-question-answering",
-  Output
->;
+export type VisualQuestionAnsweringRequest<Input = VisualQuestionAnsweringInput> =
+  UniversalTaskRequest<"visual-question-answering", Input>;
+export type VisualQuestionAnsweringResult<Output = VisualQuestionAnsweringOutput> =
+  UniversalTaskResult<"visual-question-answering", Output>;
 export type VisualQuestionAnsweringPipeline<
   Input = VisualQuestionAnsweringInput,
   Output = VisualQuestionAnsweringOutput,

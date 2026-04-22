@@ -55,13 +55,20 @@ function LinguisticsCorePage() {
             </Badge>
             <CardTitle>What this page validates</CardTitle>
             <CardDescription>
-              The examples mirror the package tests so manual inspection stays aligned with the public API.
+              The examples mirror the package tests so manual inspection stays aligned with the
+              public API.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>Paragraphs, sentences, and tokens all come from the same document object.</p>
-            <p>Normalization preserves browser-safe Unicode handling without pulling in an NLP dependency.</p>
-            <p>Span anchors store enough local context to recover offsets after earlier edits shift the text.</p>
+            <p>
+              Normalization preserves browser-safe Unicode handling without pulling in an NLP
+              dependency.
+            </p>
+            <p>
+              Span anchors store enough local context to recover offsets after earlier edits shift
+              the text.
+            </p>
           </CardContent>
         </Card>
 
@@ -74,11 +81,31 @@ function LinguisticsCorePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-              <p><strong>Original:</strong> {sourceText}</p>
-              <p><strong>NFKC + stripped diacritics:</strong> {normalizeText(sourceText, { form: "NFKC", lowercase: true, stripDiacritics: true })}</p>
-              <p><strong>Paragraphs:</strong> {segmented.paragraphs.length}</p>
-              <p><strong>Sentences:</strong> {segmented.sentences.map((sentence) => sentence.text).join(" | ")}</p>
-              <p><strong>Word tokens:</strong> {segmented.tokens.filter((token) => token.isWordLike).map((token) => token.text).join(" · ")}</p>
+              <p>
+                <strong>Original:</strong> {sourceText}
+              </p>
+              <p>
+                <strong>NFKC + stripped diacritics:</strong>{" "}
+                {normalizeText(sourceText, {
+                  form: "NFKC",
+                  lowercase: true,
+                  stripDiacritics: true,
+                })}
+              </p>
+              <p>
+                <strong>Paragraphs:</strong> {segmented.paragraphs.length}
+              </p>
+              <p>
+                <strong>Sentences:</strong>{" "}
+                {segmented.sentences.map((sentence) => sentence.text).join(" | ")}
+              </p>
+              <p>
+                <strong>Word tokens:</strong>{" "}
+                {segmented.tokens
+                  .filter((token) => token.isWordLike)
+                  .map((token) => token.text)
+                  .join(" · ")}
+              </p>
             </CardContent>
           </Card>
 
@@ -90,10 +117,18 @@ function LinguisticsCorePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <p><strong>Anchor text:</strong> {anchor.text}</p>
-              <p><strong>Original range:</strong> {anchor.start}-{anchor.end}</p>
-              <p><strong>Reanchored range:</strong> {reanchored?.start}-{reanchored?.end}</p>
-              <p><strong>Reanchored text:</strong> {reanchored?.text}</p>
+              <p>
+                <strong>Anchor text:</strong> {anchor.text}
+              </p>
+              <p>
+                <strong>Original range:</strong> {anchor.start}-{anchor.end}
+              </p>
+              <p>
+                <strong>Reanchored range:</strong> {reanchored?.start}-{reanchored?.end}
+              </p>
+              <p>
+                <strong>Reanchored text:</strong> {reanchored?.text}
+              </p>
             </CardContent>
           </Card>
         </div>

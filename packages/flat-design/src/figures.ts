@@ -12,11 +12,7 @@ import {
   type FlatTimelineAnimationOptions,
 } from "./animation-presets";
 import { defaultFlatDesignPalette } from "./palette";
-import type {
-  FlatAnimation,
-  FlatAnimationTiming,
-  FlatGroup,
-} from "./scene-types";
+import type { FlatAnimation, FlatAnimationTiming, FlatGroup } from "./scene-types";
 
 type Axis = "x" | "y";
 
@@ -30,9 +26,7 @@ export type FlatBuiltInFigureAnimationPreset =
   | "spin"
   | "blink";
 
-export type FlatFigureAnimationPreset =
-  | FlatBuiltInFigureAnimationPreset
-  | "timeline";
+export type FlatFigureAnimationPreset = FlatBuiltInFigureAnimationPreset | "timeline";
 
 export type FlatFigureAnimationOptions = FlatAnimationTiming & {
   axis?: Axis;
@@ -102,9 +96,7 @@ export type FlatSunFigureOptions = FlatFigureBaseOptions & {
   radius?: number;
 };
 
-export function createFlatFigureAnimations(
-  motion?: FlatFigureMotion,
-): FlatAnimation[] | undefined {
+export function createFlatFigureAnimations(motion?: FlatFigureMotion): FlatAnimation[] | undefined {
   if (!motion) {
     return undefined;
   }
@@ -115,7 +107,7 @@ export function createFlatFigureAnimations(
 
   const preset = typeof motion === "string" ? motion : motion.preset;
   const options: FlatFigureAnimationOptions =
-    typeof motion === "string" ? {} : motion.options ?? {};
+    typeof motion === "string" ? {} : (motion.options ?? {});
 
   switch (preset) {
     case "bobbing":
@@ -277,9 +269,7 @@ function createGroupBase(options: FlatFigureBaseOptions) {
   };
 }
 
-export function createFlatCloudFigure(
-  options: FlatCloudFigureOptions = {},
-): FlatGroup {
+export function createFlatCloudFigure(options: FlatCloudFigureOptions = {}): FlatGroup {
   const { color = defaultFlatDesignPalette.highlight } = options;
 
   return {
@@ -294,14 +284,8 @@ export function createFlatCloudFigure(
   };
 }
 
-export function createFlatSparkleFigure(
-  options: FlatSparkleFigureOptions = {},
-): FlatGroup {
-  const {
-    color = defaultFlatDesignPalette.highlight,
-    size = 12,
-    strokeWidth = 4,
-  } = options;
+export function createFlatSparkleFigure(options: FlatSparkleFigureOptions = {}): FlatGroup {
+  const { color = defaultFlatDesignPalette.highlight, size = 12, strokeWidth = 4 } = options;
 
   return {
     kind: "group",
@@ -331,9 +315,7 @@ export function createFlatSparkleFigure(
   };
 }
 
-export function createFlatBadgeFigure(
-  options: FlatBadgeFigureOptions = {},
-): FlatGroup {
+export function createFlatBadgeFigure(options: FlatBadgeFigureOptions = {}): FlatGroup {
   const {
     color = defaultFlatDesignPalette.accentAlt,
     highlight = defaultFlatDesignPalette.highlight,
@@ -368,9 +350,7 @@ export function createFlatBadgeFigure(
   };
 }
 
-export function createFlatCardFigure(
-  options: FlatCardFigureOptions = {},
-): FlatGroup {
+export function createFlatCardFigure(options: FlatCardFigureOptions = {}): FlatGroup {
   const {
     surface = defaultFlatDesignPalette.highlight,
     accent = defaultFlatDesignPalette.accent,
@@ -417,9 +397,7 @@ export function createFlatCardFigure(
   };
 }
 
-export function createFlatSunFigure(
-  options: FlatSunFigureOptions = {},
-): FlatGroup {
+export function createFlatSunFigure(options: FlatSunFigureOptions = {}): FlatGroup {
   const {
     color = defaultFlatDesignPalette.accent,
     haloColor = defaultFlatDesignPalette.accent,

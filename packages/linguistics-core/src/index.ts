@@ -49,9 +49,7 @@ export interface TextParagraph {
   sentences: TextSentence[];
 }
 
-export interface TextDocument<
-  Metadata extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface TextDocument<Metadata extends Record<string, unknown> = Record<string, unknown>> {
   id: string;
   text: string;
   language?: LanguageTag;
@@ -88,15 +86,10 @@ export interface Analyzer {
     options?: SegmentTextDocumentOptions,
   ): TextDocument | Promise<TextDocument>;
   tag?(document: TextDocument): unknown | Promise<unknown>;
-  align?(
-    source: TextDocument,
-    target: TextDocument,
-  ): unknown | Promise<unknown>;
+  align?(source: TextDocument, target: TextDocument): unknown | Promise<unknown>;
 }
 
-export interface TextChunk<
-  Metadata extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface TextChunk<Metadata extends Record<string, unknown> = Record<string, unknown>> {
   id: string;
   index: number;
   text: string;
@@ -130,17 +123,11 @@ const DEFAULT_CONTEXT_WINDOW = 24;
 const DEFAULT_CHUNK_SIZE = 1_200;
 const DEFAULT_CHUNK_OVERLAP = 120;
 const FALLBACK_SENTENCE_PATTERN = /[^.!?…。！？؟\n]+[.!?…。！？؟]*|[^\n]+/gu;
-const FALLBACK_TOKEN_PATTERN =
-  /\p{L}[\p{L}\p{M}\p{N}'’-]*|\p{N}+|[^\s]/gu;
+const FALLBACK_TOKEN_PATTERN = /\p{L}[\p{L}\p{M}\p{N}'’-]*|\p{N}+|[^\s]/gu;
 
 export function createTextDocument<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->({
-  id,
-  text,
-  language,
-  metadata,
-}: CreateTextDocumentOptions<Metadata>): TextDocument<Metadata> {
+>({ id, text, language, metadata }: CreateTextDocumentOptions<Metadata>): TextDocument<Metadata> {
   return {
     id: id?.trim() || DEFAULT_DOCUMENT_ID,
     text,
@@ -154,10 +141,7 @@ export function createTextDocument<
 
 export function segmentTextDocument<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  document: TextDocument<Metadata>,
-  options: SegmentTextDocumentOptions,
-): TextDocument<Metadata> {
+>(document: TextDocument<Metadata>, options: SegmentTextDocumentOptions): TextDocument<Metadata> {
   const paragraphs =
     document.paragraphs.length > 0
       ? cloneParagraphs(document.paragraphs)
@@ -181,49 +165,47 @@ export function segmentTextDocument<
       options.useIntlSegmenter !== false,
     );
 
-    const nextSentences = (segments.length > 0 ? segments : [{ index: 0, segment: paragraph.text }]).map(
-      (slice) => {
-        const span = createSpan(
-          document.text,
-          paragraph.span.start + slice.index,
-          paragraph.span.start + slice.index + slice.segment.length,
-        );
-        const sentenceId = `${document.id}-sentence-${sentences.length}`;
-        const nextTokens =
-          options.granularity === "word"
-            ? createSentenceTokens(
-                document,
-                paragraph,
-                paragraphIndex,
-                sentenceId,
-                sentences.length,
-                span,
-                slice.segment,
-                options.useIntlSegmenter !== false,
-              )
-            : [];
+    const nextSentences = (
+      segments.length > 0 ? segments : [{ index: 0, segment: paragraph.text }]
+    ).map((slice) => {
+      const span = createSpan(
+        document.text,
+        paragraph.span.start + slice.index,
+        paragraph.span.start + slice.index + slice.segment.length,
+      );
+      const sentenceId = `${document.id}-sentence-${sentences.length}`;
+      const nextTokens =
+        options.granularity === "word"
+          ? createSentenceTokens(
+              document,
+              paragraph,
+              paragraphIndex,
+              sentenceId,
+              sentences.length,
+              span,
+              slice.segment,
+              options.useIntlSegmenter !== false,
+            )
+          : [];
 
-        const sentence: TextSentence = {
-          id: sentenceId,
-          index: sentences.length,
-          paragraphId: paragraph.id,
-          paragraphIndex,
-          span,
-          text: slice.segment,
-          tokens: nextTokens,
-          trailingText:
-            nextTokens.length > 0
-              ? slice.segment.slice(
-                  (nextTokens.at(-1)?.span.end ?? span.start) - span.start,
-                )
-              : "",
-        };
+      const sentence: TextSentence = {
+        id: sentenceId,
+        index: sentences.length,
+        paragraphId: paragraph.id,
+        paragraphIndex,
+        span,
+        text: slice.segment,
+        tokens: nextTokens,
+        trailingText:
+          nextTokens.length > 0
+            ? slice.segment.slice((nextTokens.at(-1)?.span.end ?? span.start) - span.start)
+            : "",
+      };
 
-        sentences.push(sentence);
-        tokens.push(...nextTokens);
-        return sentence;
-      },
-    );
+      sentences.push(sentence);
+      tokens.push(...nextTokens);
+      return sentence;
+    });
 
     return {
       ...paragraph,
@@ -247,16 +229,16 @@ export function normalizeText(text: string, options: NormalizeTextOptions): stri
   }
 
   if (options.stripDiacritics) {
-    normalized = normalized
-      .normalize("NFKD")
-      .replace(/\p{M}/gu, "")
-      .normalize(options.form);
+    normalized = normalized.normalize("NFKD").replace(/\p{M}/gu, "").normalize(options.form);
   }
 
   return normalized;
 }
 
-export function anchorSpan(document: TextDocument, span: Pick<TextSpan, "end" | "start">): TextAnchor {
+export function anchorSpan(
+  document: TextDocument,
+  span: Pick<TextSpan, "end" | "start">,
+): TextAnchor {
   const resolved = createSpan(document.text, span.start, span.end);
 
   return {
@@ -306,10 +288,7 @@ export function reanchorSpan(document: TextDocument, anchor: TextAnchor): TextSp
 
 export function chunkTextDocument<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  input: TextDocument<Metadata>,
-  options: ChunkTextDocumentOptions = {},
-): TextChunk<Metadata>[] {
+>(input: TextDocument<Metadata>, options: ChunkTextDocumentOptions = {}): TextChunk<Metadata>[] {
   const strategy = options.strategy ?? "sentence";
   const maxCharacters = Math.max(1, Math.floor(options.maxCharacters ?? DEFAULT_CHUNK_SIZE));
   const defaultOverlap = strategy === "character" ? DEFAULT_CHUNK_OVERLAP : 0;
@@ -713,7 +692,7 @@ function findNormalizedMatches(
     }
 
     matches.push({
-      start: startIndex === 0 ? 0 : offsets[startIndex - 1] ?? 0,
+      start: startIndex === 0 ? 0 : (offsets[startIndex - 1] ?? 0),
       end: offsets[endIndex - 1] ?? text.length,
     });
 
@@ -732,8 +711,14 @@ function scoreAnchorMatches(
     .map((candidate) => ({
       ...candidate,
       score:
-        overlapScore(anchor.prefix, text.slice(Math.max(0, candidate.start - anchor.prefix.length), candidate.start)) +
-        overlapScore(anchor.suffix, text.slice(candidate.end, candidate.end + anchor.suffix.length)) -
+        overlapScore(
+          anchor.prefix,
+          text.slice(Math.max(0, candidate.start - anchor.prefix.length), candidate.start),
+        ) +
+        overlapScore(
+          anchor.suffix,
+          text.slice(candidate.end, candidate.end + anchor.suffix.length),
+        ) -
         Math.abs(anchor.start - candidate.start) / 1000,
     }))
     .sort(

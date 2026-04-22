@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/automatic-speech-recognition", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("automatic-speech-recognition");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=automatic-speech-recognition");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=automatic-speech-recognition",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

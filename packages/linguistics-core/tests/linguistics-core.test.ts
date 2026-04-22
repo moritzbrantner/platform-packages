@@ -26,9 +26,14 @@ describe("@moritzbrantner/linguistics-core", () => {
       "مرحبا بالعالم.",
       "Another line.",
     ]);
-    expect(
-      document.tokens.filter((token) => token.isWordLike).map((token) => token.text),
-    ).toEqual(["Hello", "世界", "مرحبا", "بالعالم", "Another", "line"]);
+    expect(document.tokens.filter((token) => token.isWordLike).map((token) => token.text)).toEqual([
+      "Hello",
+      "世界",
+      "مرحبا",
+      "بالعالم",
+      "Another",
+      "line",
+    ]);
   });
 
   test("normalizes composed and decomposed Unicode consistently", () => {
@@ -81,9 +86,12 @@ describe("@moritzbrantner/linguistics-core", () => {
     );
 
     expect(document.sentences).toHaveLength(2);
-    expect(document.tokens.filter((token) => token.isWordLike).map((token) => token.text)).toEqual(
-      ["One", "sentence", "Two", "more"],
-    );
+    expect(document.tokens.filter((token) => token.isWordLike).map((token) => token.text)).toEqual([
+      "One",
+      "sentence",
+      "Two",
+      "more",
+    ]);
   });
 
   test("chunks text documents with source spans", () => {
@@ -98,11 +106,7 @@ describe("@moritzbrantner/linguistics-core", () => {
       maxCharacters: 16,
     });
 
-    expect(chunks.map((chunk) => chunk.text)).toEqual([
-      "Alpha one.",
-      "Beta two.",
-      "Gamma three.",
-    ]);
+    expect(chunks.map((chunk) => chunk.text)).toEqual(["Alpha one.", "Beta two.", "Gamma three."]);
     expect(chunks[1]).toMatchObject({
       documentId: "chunked",
       start: 11,
@@ -112,10 +116,10 @@ describe("@moritzbrantner/linguistics-core", () => {
   });
 
   test("handles empty documents and clamps boundary anchors", () => {
-    const empty = segmentTextDocument(
-      createTextDocument({ id: "empty", text: "" }),
-      { granularity: "word", useIntlSegmenter: false },
-    );
+    const empty = segmentTextDocument(createTextDocument({ id: "empty", text: "" }), {
+      granularity: "word",
+      useIntlSegmenter: false,
+    });
 
     expect(empty.paragraphs).toEqual([]);
     expect(empty.sentences).toEqual([]);

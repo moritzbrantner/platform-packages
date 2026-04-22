@@ -86,9 +86,7 @@ describe("@moritzbrantner/pipeline-core", () => {
     });
 
     await expect(batch(pipeline, [1, 2, 3], { metadata: { count: 0 } })).resolves.toEqual([
-      2,
-      4,
-      6,
+      2, 4, 6,
     ]);
     expect(seenContexts.size).toBe(1);
 

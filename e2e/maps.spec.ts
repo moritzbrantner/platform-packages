@@ -22,10 +22,7 @@ test("keeps a single map instance alive while zooming", async ({ page }) => {
 
   await expect.poll(() => getReadyCount(page)).toBe(1);
 
-  await page
-    .getByLabel(MAP_CANVAS_LABEL)
-    .getByRole("button", { name: "Zoom in" })
-    .click();
+  await page.getByLabel(MAP_CANVAS_LABEL).getByRole("button", { name: "Zoom in" }).click();
 
   await expect.poll(() => getZoom(page)).toBeGreaterThan(initialZoom + 0.4);
   await expect.poll(() => getReadyCount(page)).toBe(1);
@@ -95,34 +92,35 @@ async function getMetricValue(page: Page, testId: string) {
 }
 
 async function getFeatureTarget(page: Page, selector: string) {
-  return page.evaluate(({ mapLabel, targetSelector }) => {
-    const mapRegion = document.querySelector(`[aria-label="${mapLabel}"]`);
-    const markers = Array.from(
-      mapRegion?.querySelectorAll<SVGElement>(targetSelector) ?? [],
-    );
+  return page.evaluate(
+    ({ mapLabel, targetSelector }) => {
+      const mapRegion = document.querySelector(`[aria-label="${mapLabel}"]`);
+      const markers = Array.from(mapRegion?.querySelectorAll<SVGElement>(targetSelector) ?? []);
 
-    for (const marker of markers) {
-      const rect = marker.getBoundingClientRect();
+      for (const marker of markers) {
+        const rect = marker.getBoundingClientRect();
 
-      if (rect.width <= 0 || rect.height <= 0) {
-        continue;
+        if (rect.width <= 0 || rect.height <= 0) {
+          continue;
+        }
+
+        if (
+          rect.left > 48 &&
+          rect.top > 48 &&
+          rect.right < window.innerWidth - 48 &&
+          rect.bottom < window.innerHeight - 48
+        ) {
+          return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+          };
+        }
       }
 
-      if (
-        rect.left > 48 &&
-        rect.top > 48 &&
-        rect.right < window.innerWidth - 48 &&
-        rect.bottom < window.innerHeight - 48
-      ) {
-        return {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        };
-      }
-    }
-
-    return null;
-  }, { mapLabel: MAP_CANVAS_LABEL, targetSelector: selector });
+      return null;
+    },
+    { mapLabel: MAP_CANVAS_LABEL, targetSelector: selector },
+  );
 }
 
 type WindowWithMapHandle = Window & {

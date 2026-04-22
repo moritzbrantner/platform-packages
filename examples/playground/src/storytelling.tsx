@@ -1,13 +1,6 @@
 import { startTransition, useMemo, useState } from "react";
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@moritzbrantner/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@moritzbrantner/ui";
 import {
   StoryPlayer,
   StoryScroller,
@@ -47,7 +40,7 @@ const story = defineStory<StoryVisualData>({
   nodes: [
     {
       id: "signal",
-      eyebrow: "Chapter 1",
+      eyebrow: "Opening",
       title: "A pulse reaches the observatory",
       content: [
         {
@@ -241,10 +234,7 @@ function StorytellingPage() {
     useState<StoryRendererRegistry<StoryVisualData>>(fallbackRegistry);
   const [useThreeStage, setUseThreeStage] = useState(false);
   const [isLoadingThreeStage, setIsLoadingThreeStage] = useState(false);
-  const timeline = useMemo(
-    () => buildStoryTimeline(story, { choiceIds: cinematicChoiceIds }),
-    [],
-  );
+  const timeline = useMemo(() => buildStoryTimeline(story, { choiceIds: cinematicChoiceIds }), []);
   const composition = useMemo(
     () =>
       getStoryCompositionProps(story, {
@@ -297,8 +287,8 @@ function StorytellingPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
               <p>
-                The same serializable <code>StoryDocument</code> drives interactive choices,
-                scroll preview, and Remotion composition metadata.
+                The same serializable <code>StoryDocument</code> drives interactive choices, scroll
+                preview, and Remotion composition metadata.
               </p>
               <p>
                 Custom stage renderers are supplied through a registry, so story data stays
@@ -344,13 +334,14 @@ function StorytellingPage() {
             <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
               <p>
                 The cinematic path has{" "}
-                <strong className="text-foreground">{timeline.totalFrames}</strong> frames
-                across <strong className="text-foreground">{timeline.scenes.length}</strong>{" "}
-                scenes.
+                <strong className="text-foreground">{timeline.totalFrames}</strong> frames across{" "}
+                <strong className="text-foreground">{timeline.scenes.length}</strong> scenes.
               </p>
               <p>
                 <code>{composition.id}</code> renders at{" "}
-                <strong className="text-foreground">{composition.width}x{composition.height}</strong>{" "}
+                <strong className="text-foreground">
+                  {composition.width}x{composition.height}
+                </strong>{" "}
                 and <strong className="text-foreground">{composition.fps}</strong> fps.
               </p>
             </CardContent>
@@ -364,8 +355,7 @@ function StorytellingPage() {
         <StoryScroller
           story={story as StoryDocument<StoryVisualData>}
           registry={registry}
-          pathChoiceIds={cinematicChoiceIds}
-          ariaLabel="Cinematic path preview"
+          ariaLabel="Interactive story graph preview"
         />
       </section>
     </PlaygroundPage>

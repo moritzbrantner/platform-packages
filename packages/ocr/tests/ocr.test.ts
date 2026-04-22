@@ -57,13 +57,9 @@ describe("@moritzbrantner/ocr", () => {
       "Hello world.",
       "How are you?",
     ]);
-    expect(textDocument.tokens.filter((token) => token.isWordLike).map((token) => token.text)).toEqual([
-      "Hello",
-      "world",
-      "How",
-      "are",
-      "you",
-    ]);
+    expect(
+      textDocument.tokens.filter((token) => token.isWordLike).map((token) => token.text),
+    ).toEqual(["Hello", "world", "How", "are", "you"]);
   });
 
   test("runs OCR extractors through a provider-agnostic pipeline", async () => {

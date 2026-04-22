@@ -72,7 +72,8 @@ function LinguisticsLearningPage() {
             </Badge>
             <CardTitle>Glossed tokens</CardTitle>
             <CardDescription>
-              The alignment rows preserve the source token index and span, so later tools can anchor back into the original document.
+              The alignment rows preserve the source token index and span, so later tools can anchor
+              back into the original document.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
@@ -92,7 +93,8 @@ function LinguisticsLearningPage() {
             <CardHeader>
               <CardTitle>Derived study terms</CardTitle>
               <CardDescription>
-                Inflection-heavy forms collapse into a shared lemma and stay aggregated across the corpus before flashcards are generated.
+                Inflection-heavy forms collapse into a shared lemma and stay aggregated across the
+                corpus before flashcards are generated.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 text-sm">

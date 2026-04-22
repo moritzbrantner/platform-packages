@@ -36,9 +36,7 @@ export type CreateImageSegmentationPipelineOptions = Omit<
 export function createImageSegmentationPipeline<
   Input = ImageSegmentationInput,
   Output = ImageSegmentationOutput,
->(
-  options: CreateImageSegmentationPipelineOptions,
-): ImageSegmentationPipeline<Input, Output> {
+>(options: CreateImageSegmentationPipelineOptions): ImageSegmentationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

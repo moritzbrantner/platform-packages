@@ -7,11 +7,7 @@ import type {
   StoryTimeline,
   StoryTimelineScene,
 } from "./story-model";
-import {
-  createStoryNodeLookup,
-  getStoryChoices,
-  maybeValidateStory,
-} from "./story-validation";
+import { createStoryNodeLookup, getStoryChoices, maybeValidateStory } from "./story-validation";
 
 const DEFAULT_DURATION_IN_FRAMES = 120;
 const DEFAULT_TRANSITION_IN_FRAMES = 18;
@@ -70,9 +66,7 @@ export function resolveStoryPath<TData extends StoryNodeData>(
     }
 
     let selectedChoice = choiceIds[choiceIndex]
-      ? choices.find(
-          (choice) => choice.id === choiceIds[choiceIndex] && !choice.disabled,
-        )
+      ? choices.find((choice) => choice.id === choiceIds[choiceIndex] && !choice.disabled)
       : undefined;
 
     if (!selectedChoice && autoAdvanceLinearNodes && !currentNode.choices?.length) {
@@ -111,9 +105,7 @@ export function resolveStoryPath<TData extends StoryNodeData>(
     });
   }
 
-  throw new Error(
-    `Story "${story.id}" exceeded ${maxSteps} steps while resolving a path.`,
-  );
+  throw new Error(`Story "${story.id}" exceeded ${maxSteps} steps while resolving a path.`);
 }
 
 export function buildStoryTimeline<TData extends StoryNodeData>(
@@ -137,8 +129,7 @@ export function buildStoryTimeline<TData extends StoryNodeData>(
 
   const scenes: StoryTimelineScene<TData>[] = path.nodes.map((node, index) => {
     const durationInFrames = node.durationInFrames ?? defaultDurationInFrames;
-    const transitionInFrames =
-      node.transition?.durationInFrames ?? defaultTransitionInFrames;
+    const transitionInFrames = node.transition?.durationInFrames ?? defaultTransitionInFrames;
     const scene = {
       node,
       startFrame: cursor,

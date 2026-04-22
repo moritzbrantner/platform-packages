@@ -7,7 +7,10 @@ const DEFAULT_LIMIT = 5;
 const DEFAULT_MIN_WORD_COUNT = 1;
 const DEFAULT_MAX_VOCABULARY_SIZE = Number.POSITIVE_INFINITY;
 
-const modelInternals = new WeakMap<WordVectorModel, { options: ModelOptions; trainingData: TrainingData }>();
+const modelInternals = new WeakMap<
+  WordVectorModel,
+  { options: ModelOptions; trainingData: TrainingData }
+>();
 
 export interface CreateWordVectorModelOptions {
   texts?: Iterable<string> | string;
@@ -99,9 +102,7 @@ interface SimilarityScore {
   sharedContexts: number;
 }
 
-export function createWordVectorModel(
-  options: CreateWordVectorModelOptions = {},
-): WordVectorModel {
+export function createWordVectorModel(options: CreateWordVectorModelOptions = {}): WordVectorModel {
   const modelOptions = normalizeOptions(options);
   const trainingData = createTrainingData();
   const vectorCache = new Map<string, WeightedVector>();
@@ -449,10 +450,7 @@ function trainText(trainingData: TrainingData, text: string, options: ModelOptio
   }
 }
 
-function extractWords(
-  text: string,
-  options: ModelOptions,
-): Array<{ normalized: string }> {
+function extractWords(text: string, options: ModelOptions): Array<{ normalized: string }> {
   const matches = text.match(WORD_PATTERN) ?? [];
 
   return matches.map((word) => ({
@@ -513,7 +511,12 @@ function getWeightedVector(
       }
 
       const contextTotal = trainingData.cooccurrenceTotals.get(contextWord) ?? 0;
-      const weight = computePpmi(count, wordTotal, contextTotal, trainingData.totalCooccurrenceWeight);
+      const weight = computePpmi(
+        count,
+        wordTotal,
+        contextTotal,
+        trainingData.totalCooccurrenceWeight,
+      );
 
       if (weight <= 0) {
         continue;

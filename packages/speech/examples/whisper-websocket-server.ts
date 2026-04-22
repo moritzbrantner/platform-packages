@@ -32,8 +32,7 @@ type IncomingMessage = StartMessage | AudioChunkMessage | StopMessage;
 
 const port = Number.parseInt(process.env.SPEECH_SERVER_PORT ?? "8787", 10);
 const endpoint =
-  process.env.OPENAI_TRANSCRIPTION_ENDPOINT ??
-  "https://api.openai.com/v1/audio/transcriptions";
+  process.env.OPENAI_TRANSCRIPTION_ENDPOINT ?? "https://api.openai.com/v1/audio/transcriptions";
 const defaultModel = process.env.OPENAI_TRANSCRIPTION_MODEL ?? "whisper-1";
 const apiKey = process.env.OPENAI_API_KEY;
 
@@ -124,9 +123,13 @@ async function transcribeChunk(input: {
 
   formData.append(
     "file",
-    new File([input.audio], `audio-chunk-${input.chunkIndex}.${extensionFromMimeType(input.mimeType)}`, {
-      type: input.mimeType,
-    }),
+    new File(
+      [input.audio],
+      `audio-chunk-${input.chunkIndex}.${extensionFromMimeType(input.mimeType)}`,
+      {
+        type: input.mimeType,
+      },
+    ),
   );
   formData.append("model", input.model);
 
@@ -147,7 +150,9 @@ async function transcribeChunk(input: {
   });
 
   if (!response.ok) {
-    throw new Error(`Transcription request failed with ${response.status}: ${await response.text()}`);
+    throw new Error(
+      `Transcription request failed with ${response.status}: ${await response.text()}`,
+    );
   }
 
   const payload = (await response.json()) as Record<string, unknown>;
@@ -157,10 +162,7 @@ async function transcribeChunk(input: {
       : typeof payload.transcript === "string"
         ? payload.transcript.trim()
         : "";
-  const language =
-    typeof payload.language === "string"
-      ? payload.language
-      : input.language;
+  const language = typeof payload.language === "string" ? payload.language : input.language;
   const durationSeconds =
     typeof payload.duration === "number" && Number.isFinite(payload.duration)
       ? payload.duration
@@ -175,16 +177,16 @@ async function transcribeChunk(input: {
         id: `chunk-${input.chunkIndex}`,
         text,
         start: input.startedAt / 1000,
-        end:
-          input.startedAt / 1000 +
-          durationSeconds,
+        end: input.startedAt / 1000 + durationSeconds,
         final: true,
       },
     ],
   };
 }
 
-function parseIncomingMessage(rawMessage: string | Buffer | Uint8Array | ArrayBuffer): IncomingMessage {
+function parseIncomingMessage(
+  rawMessage: string | Buffer | Uint8Array | ArrayBuffer,
+): IncomingMessage {
   const text =
     typeof rawMessage === "string"
       ? rawMessage

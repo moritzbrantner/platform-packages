@@ -1,46 +1,39 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-import type { DateRange } from "react-day-picker"
+import * as React from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
-import { Button } from "./button"
-import { Calendar } from "./calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./popover"
-import { cn } from "../lib/cn"
+import { Button } from "./button";
+import { Calendar } from "./calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { cn } from "../lib/cn";
 
 type SharedDatePickerProps = {
-  className?: string
-  placeholder?: React.ReactNode
-  formatString?: string
-  align?: React.ComponentProps<typeof PopoverContent>["align"]
-  disabled?: boolean
-}
+  className?: string;
+  placeholder?: React.ReactNode;
+  formatString?: string;
+  align?: React.ComponentProps<typeof PopoverContent>["align"];
+  disabled?: boolean;
+};
 
 type DatePickerProps = SharedDatePickerProps &
-  Omit<
-    React.ComponentProps<typeof Calendar>,
-    "mode" | "selected" | "onSelect" | "disabled"
-  > & {
-    value?: Date
-    defaultValue?: Date
-    onChange?: (value: Date | undefined) => void
-  }
+  Omit<React.ComponentProps<typeof Calendar>, "mode" | "selected" | "onSelect" | "disabled"> & {
+    value?: Date;
+    defaultValue?: Date;
+    onChange?: (value: Date | undefined) => void;
+  };
 
 type DateRangePickerProps = SharedDatePickerProps &
   Omit<
     React.ComponentProps<typeof Calendar>,
     "mode" | "selected" | "onSelect" | "numberOfMonths" | "disabled"
   > & {
-    value?: DateRange
-    defaultValue?: DateRange
-    onChange?: (value: DateRange | undefined) => void
-  }
+    value?: DateRange;
+    defaultValue?: DateRange;
+    onChange?: (value: DateRange | undefined) => void;
+  };
 
 function DatePicker({
   value,
@@ -53,21 +46,19 @@ function DatePicker({
   disabled,
   ...calendarProps
 }: DatePickerProps) {
-  const [internalValue, setInternalValue] = React.useState<Date | undefined>(
-    defaultValue
-  )
-  const selected = value ?? internalValue
+  const [internalValue, setInternalValue] = React.useState<Date | undefined>(defaultValue);
+  const selected = value ?? internalValue;
 
   const handleSelect = React.useCallback(
     (nextValue: Date | undefined) => {
       if (value === undefined) {
-        setInternalValue(nextValue)
+        setInternalValue(nextValue);
       }
 
-      onChange?.(nextValue)
+      onChange?.(nextValue);
     },
-    [onChange, value]
-  )
+    [onChange, value],
+  );
 
   return (
     <Popover>
@@ -78,7 +69,7 @@ function DatePicker({
           disabled={disabled}
           className={cn(
             "w-[280px] justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
-            className
+            className,
           )}
         >
           <CalendarIcon />
@@ -95,7 +86,7 @@ function DatePicker({
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 function DateRangePicker({
@@ -109,28 +100,26 @@ function DateRangePicker({
   disabled,
   ...calendarProps
 }: DateRangePickerProps) {
-  const [internalValue, setInternalValue] = React.useState<DateRange | undefined>(
-    defaultValue
-  )
-  const selected = value ?? internalValue
+  const [internalValue, setInternalValue] = React.useState<DateRange | undefined>(defaultValue);
+  const selected = value ?? internalValue;
 
   const handleSelect = React.useCallback(
     (nextValue: DateRange | undefined) => {
       if (value === undefined) {
-        setInternalValue(nextValue)
+        setInternalValue(nextValue);
       }
 
-      onChange?.(nextValue)
+      onChange?.(nextValue);
     },
-    [onChange, value]
-  )
+    [onChange, value],
+  );
 
   const label =
     selected?.from && selected?.to
       ? `${format(selected.from, formatString)} - ${format(selected.to, formatString)}`
       : selected?.from
         ? format(selected.from, formatString)
-        : null
+        : null;
 
   return (
     <Popover>
@@ -141,7 +130,7 @@ function DateRangePicker({
           disabled={disabled}
           className={cn(
             "w-[300px] justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
-            className
+            className,
           )}
         >
           <CalendarIcon />
@@ -159,8 +148,8 @@ function DateRangePicker({
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
-export { DatePicker, DateRangePicker }
-export type { DatePickerProps, DateRangePickerProps }
+export { DatePicker, DateRangePicker };
+export type { DatePickerProps, DateRangePickerProps };

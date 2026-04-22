@@ -1,10 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import {
-  createTreeIndex,
-  flattenTree,
-  getTreeStats,
-} from "@moritzbrantner/tree-structures";
+import { createTreeIndex, flattenTree, getTreeStats } from "@moritzbrantner/tree-structures";
 
 describe("@moritzbrantner/tree-structures", () => {
   test("builds indexed trees from parent references", () => {
@@ -22,21 +18,9 @@ describe("@moritzbrantner/tree-structures", () => {
     expect(index.getChildren("root").map((node) => node.id)).toEqual(["a", "b"]);
     expect(index.getNodeById("leaf")?.depth).toBe(2);
     expect(index.getNodeById("leaf")?.path).toEqual(["root", "a", "leaf"]);
-    expect(index.getAncestors("leaf").map((node) => node.id)).toEqual([
-      "root",
-      "a",
-    ]);
-    expect(index.getPath("leaf").map((node) => node.id)).toEqual([
-      "root",
-      "a",
-      "leaf",
-    ]);
-    expect(index.flatten().map((node) => node.id)).toEqual([
-      "root",
-      "a",
-      "leaf",
-      "b",
-    ]);
+    expect(index.getAncestors("leaf").map((node) => node.id)).toEqual(["root", "a"]);
+    expect(index.getPath("leaf").map((node) => node.id)).toEqual(["root", "a", "leaf"]);
+    expect(index.flatten().map((node) => node.id)).toEqual(["root", "a", "leaf", "b"]);
   });
 
   test("supports depth-first and breadth-first traversal helpers", () => {
@@ -50,18 +34,19 @@ describe("@moritzbrantner/tree-structures", () => {
       },
     ];
 
-    expect(flattenTree(tree).map((node) => node.id)).toEqual([
+    expect(flattenTree(tree).map((node) => node.id)).toEqual(["root", "a", "a-1", "b"]);
+    expect(flattenTree(tree, { order: "breadth-first" }).map((node) => node.id)).toEqual([
       "root",
       "a",
-      "a-1",
       "b",
+      "a-1",
     ]);
-    expect(
-      flattenTree(tree, { order: "breadth-first" }).map((node) => node.id),
-    ).toEqual(["root", "a", "b", "a-1"]);
-    expect(
-      flattenTree(tree, { order: "postorder" }).map((node) => node.id),
-    ).toEqual(["a-1", "a", "b", "root"]);
+    expect(flattenTree(tree, { order: "postorder" }).map((node) => node.id)).toEqual([
+      "a-1",
+      "a",
+      "b",
+      "root",
+    ]);
   });
 
   test("returns subtree descendants and aggregate tree stats", () => {
@@ -74,11 +59,7 @@ describe("@moritzbrantner/tree-structures", () => {
     ]);
 
     expect(index.roots.map((node) => node.id)).toEqual(["root", "orphan"]);
-    expect(index.getDescendants("root").map((node) => node.id)).toEqual([
-      "a",
-      "a-1",
-      "b",
-    ]);
+    expect(index.getDescendants("root").map((node) => node.id)).toEqual(["a", "a-1", "b"]);
     expect(getTreeStats(index.roots)).toEqual({
       leafCount: 3,
       maxDepth: 2,
@@ -88,9 +69,7 @@ describe("@moritzbrantner/tree-structures", () => {
   });
 
   test("validates duplicate ids, missing parents, and parent cycles", () => {
-    expect(() => createTreeIndex([{ id: "a" }, { id: "a" }])).toThrow(
-      "Duplicate tree node id: a",
-    );
+    expect(() => createTreeIndex([{ id: "a" }, { id: "a" }])).toThrow("Duplicate tree node id: a");
     expect(() =>
       createTreeIndex([{ id: "a", parentId: "missing" }], {
         missingParent: "error",

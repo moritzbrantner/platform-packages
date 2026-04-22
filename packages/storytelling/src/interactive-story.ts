@@ -18,19 +18,14 @@ function invariant(condition: boolean, message: string) {
   }
 }
 
-function createNodeLookup<TData extends StoryNodeData>(
-  story: InteractiveStoryDefinition<TData>,
-) {
+function createNodeLookup<TData extends StoryNodeData>(story: InteractiveStoryDefinition<TData>) {
   return new Map(story.nodes.map((node) => [node.id, node] as const));
 }
 
 export function createInteractiveStory<TData extends StoryNodeData>(
   story: InteractiveStoryDefinition<TData>,
 ) {
-  invariant(
-    story.nodes.length > 0,
-    `Story "${story.id}" must declare at least one node.`,
-  );
+  invariant(story.nodes.length > 0, `Story "${story.id}" must declare at least one node.`);
 
   const nodeIds = new Set<string>();
 
@@ -109,9 +104,7 @@ export function getStoryChoices<TData extends StoryNodeData>(
   ];
 }
 
-export function isStoryEnding<TData extends StoryNodeData>(
-  node: InteractiveStoryNode<TData>,
-) {
+export function isStoryEnding<TData extends StoryNodeData>(node: InteractiveStoryNode<TData>) {
   return getStoryChoices(node).length === 0;
 }
 
@@ -198,9 +191,7 @@ export function resolveStoryPath<TData extends StoryNodeData>(
     nodes.push(nextNode);
   }
 
-  throw new Error(
-    `Story "${story.id}" exceeded ${maxSteps} steps while resolving a path.`,
-  );
+  throw new Error(`Story "${story.id}" exceeded ${maxSteps} steps while resolving a path.`);
 }
 
 export function buildStoryTimeline<TData extends StoryNodeData>(
@@ -216,8 +207,7 @@ export function buildStoryTimeline<TData extends StoryNodeData>(
     const scene = {
       node,
       startFrame: cursor,
-      durationInFrames:
-        node.durationInFrames ?? DEFAULT_REMOTION_DURATION_IN_FRAMES,
+      durationInFrames: node.durationInFrames ?? DEFAULT_REMOTION_DURATION_IN_FRAMES,
     };
 
     cursor += scene.durationInFrames;

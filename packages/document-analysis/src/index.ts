@@ -90,9 +90,7 @@ export interface DocumentAnalysisPipeline<
 
 export function createDocumentAnalysisPipeline<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  options: CreateDocumentAnalysisPipelineOptions<Metadata>,
-): DocumentAnalysisPipeline<Metadata> {
+>(options: CreateDocumentAnalysisPipelineOptions<Metadata>): DocumentAnalysisPipeline<Metadata> {
   return {
     async analyze(input, analysisOptions = {}) {
       const normalized = normalizeDocumentInput(input);
@@ -115,7 +113,10 @@ export function createDocumentAnalysisPipeline<
           ? Promise.all(
               questions.map(async (question) => ({
                 question,
-                answer: await options.questionAnswering!.findBestAnswer(question, normalized.document),
+                answer: await options.questionAnswering!.findBestAnswer(
+                  question,
+                  normalized.document,
+                ),
               })),
             )
           : Promise.resolve([]),
@@ -144,9 +145,7 @@ export function createDocumentAnalysisPipeline<
   };
 }
 
-function normalizeDocumentInput<
-  Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
+function normalizeDocumentInput<Metadata extends Record<string, unknown> = Record<string, unknown>>(
   input: DocumentAnalysisInput<Metadata>,
 ): {
   sourceType: "ocr" | "text";
@@ -197,9 +196,9 @@ async function extractStructure(
 function isOcrDocument(value: unknown): value is OcrDocument {
   return Boolean(
     value &&
-      typeof value === "object" &&
-      "pages" in value &&
-      Array.isArray((value as OcrDocument).pages) &&
-      "sourceType" in value,
+    typeof value === "object" &&
+    "pages" in value &&
+    Array.isArray((value as OcrDocument).pages) &&
+    "sourceType" in value,
   );
 }

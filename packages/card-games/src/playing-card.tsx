@@ -72,14 +72,12 @@ const SUIT_PALETTE: Record<CardSuit, SuitPalette> = {
 const TONE_SURFACES: Record<PlayingCardTone, { surface: string; border: string; text: string }> = {
   classic: {
     surface: "linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 246, 253, 0.96))",
-    border:
-      "color-mix(in srgb, white 85%, oklch(0.82 0.02 250) 15%)",
+    border: "color-mix(in srgb, white 85%, oklch(0.82 0.02 250) 15%)",
     text: "#10141f",
   },
   emerald: {
     surface: "linear-gradient(180deg, rgba(231, 247, 238, 0.98), rgba(213, 241, 226, 0.98))",
-    border:
-      "color-mix(in srgb, white 85%, oklch(0.82 0.02 250) 15%)",
+    border: "color-mix(in srgb, white 85%, oklch(0.82 0.02 250) 15%)",
     text: "#10141f",
   },
   midnight: {
@@ -89,8 +87,7 @@ const TONE_SURFACES: Record<PlayingCardTone, { surface: string; border: string; 
   },
   rose: {
     surface: "linear-gradient(180deg, rgba(253, 241, 244, 0.98), rgba(249, 228, 232, 0.98))",
-    border:
-      "color-mix(in srgb, white 85%, oklch(0.82 0.02 250) 15%)",
+    border: "color-mix(in srgb, white 85%, oklch(0.82 0.02 250) 15%)",
     text: "#10141f",
   },
 };
@@ -153,17 +150,14 @@ function getGlassOverlay() {
   ].join(", ");
 }
 
-function updateTilt(
-  element: HTMLDivElement,
-  event: PointerEvent<HTMLDivElement>,
-) {
+function updateTilt(element: HTMLDivElement, event: PointerEvent<HTMLDivElement>) {
   const rect = element.getBoundingClientRect();
 
   if (!rect.width || !rect.height) return;
 
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
-  const rotateY = ((x / rect.width) - 0.5) * 18;
+  const rotateY = (x / rect.width - 0.5) * 18;
   const rotateX = (0.5 - y / rect.height) * 18;
 
   element.style.setProperty("--mb-card-rotate-x", `${rotateX.toFixed(2)}deg`);
@@ -201,7 +195,8 @@ export function PlayingCard({
 }: PlayingCardProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const symbol = suit ? getSuitSymbol(suit) : "✦";
-  const label = divProps["aria-label"] ?? (face === "back" ? "Card back" : formatCardLabel(rank, suit));
+  const label =
+    divProps["aria-label"] ?? (face === "back" ? "Card back" : formatCardLabel(rank, suit));
   const suitPalette = (suit ? SUIT_PALETTE[suit] : undefined) ?? DEFAULT_SUIT_PALETTE;
   const tonePalette = TONE_SURFACES[tone];
 
@@ -257,8 +252,7 @@ export function PlayingCard({
           "--mb-card-rotate-y": "0deg",
           "--mb-card-scale": selected ? 1.01 : 1,
           "--mb-card-suit-color": suitPalette.suitColor,
-          "--mb-card-width":
-            size === "sm" ? "12rem" : size === "lg" ? "20rem" : "17rem",
+          "--mb-card-width": size === "sm" ? "12rem" : size === "lg" ? "20rem" : "17rem",
         } as PlayingCardStyle
       }
     >

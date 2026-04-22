@@ -36,9 +36,7 @@ export type CreateSummarizationPipelineOptions = Omit<
 export function createSummarizationPipeline<
   Input = SummarizationInput,
   Output = SummarizationOutput,
->(
-  options: CreateSummarizationPipelineOptions,
-): SummarizationPipeline<Input, Output> {
+>(options: CreateSummarizationPipelineOptions): SummarizationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

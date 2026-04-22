@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/unconditional-image-generation", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("unconditional-image-generation");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=unconditional-image-generation");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=unconditional-image-generation",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

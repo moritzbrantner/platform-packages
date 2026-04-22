@@ -25,11 +25,7 @@ function renderTrack(track: StoryMediaTextTrack) {
   );
 }
 
-export function StoryContent({
-  content,
-  emptyContent,
-  className,
-}: StoryContentProps) {
+export function StoryContent({ content, emptyContent, className }: StoryContentProps) {
   if (!content?.length) {
     return emptyContent ? <div className={className}>{emptyContent}</div> : null;
   }
@@ -46,10 +42,7 @@ export function StoryContent({
             const Heading = `h${block.level ?? 3}` as "h2" | "h3" | "h4";
 
             return (
-              <Heading
-                key={key}
-                className="text-xl font-semibold tracking-tight text-foreground"
-              >
+              <Heading key={key} className="text-xl font-semibold tracking-tight text-foreground">
                 {block.text}
               </Heading>
             );
@@ -85,9 +78,7 @@ export function StoryContent({
                   className="aspect-video w-full rounded-md object-cover"
                 />
                 {block.caption ? (
-                  <figcaption className="text-sm text-muted-foreground">
-                    {block.caption}
-                  </figcaption>
+                  <figcaption className="text-sm text-muted-foreground">{block.caption}</figcaption>
                 ) : null}
               </figure>
             );

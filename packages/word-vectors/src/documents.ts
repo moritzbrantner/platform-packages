@@ -1,5 +1,1 @@
-export {
-  trainFromCorpus,
-  trainFromDocuments,
-  type TrainFromCorpusSource,
-} from "./index";
+export { trainFromCorpus, trainFromDocuments, type TrainFromCorpusSource } from "./index";

@@ -36,9 +36,7 @@ export type CreateSentenceSimilarityPipelineOptions = Omit<
 export function createSentenceSimilarityPipeline<
   Input = SentenceSimilarityInput,
   Output = SentenceSimilarityOutput,
->(
-  options: CreateSentenceSimilarityPipelineOptions,
-): SentenceSimilarityPipeline<Input, Output> {
+>(options: CreateSentenceSimilarityPipelineOptions): SentenceSimilarityPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

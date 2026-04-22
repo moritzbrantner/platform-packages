@@ -115,9 +115,7 @@ describe("@moritzbrantner/huggingface-universal", () => {
       normalizeObjectDetectionOutput([
         { box: { xmax: 3, xmin: 1, ymax: 4, ymin: 2 }, label: "box", score: 0.8 },
       ]),
-    ).toEqual([
-      { box: { xmax: 3, xmin: 1, ymax: 4, ymin: 2 }, label: "box", score: 0.8 },
-    ]);
+    ).toEqual([{ box: { xmax: 3, xmin: 1, ymax: 4, ymin: 2 }, label: "box", score: 0.8 }]);
     expect(
       normalizeAutomaticSpeechRecognitionOutput({
         chunks: [{ text: "hi", timestamp: [0, 1] }],
@@ -136,9 +134,7 @@ describe("@moritzbrantner/huggingface-universal", () => {
 
   test("exposes task-specific input and output defaults", () => {
     const textInput: UniversalTaskInput<"text-generation"> = "Prompt";
-    const labels: UniversalTaskOutput<"image-classification"> = [
-      { label: "invoice", score: 0.98 },
-    ];
+    const labels: UniversalTaskOutput<"image-classification"> = [{ label: "invoice", score: 0.98 }];
 
     expect(textInput).toBe("Prompt");
     expect(labels[0]?.label).toBe("invoice");

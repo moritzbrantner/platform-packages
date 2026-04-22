@@ -33,10 +33,7 @@ export type CreateAudioToAudioPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createAudioToAudioPipeline<
-  Input = AudioToAudioInput,
-  Output = AudioToAudioOutput,
->(
+export function createAudioToAudioPipeline<Input = AudioToAudioInput, Output = AudioToAudioOutput>(
   options: CreateAudioToAudioPipelineOptions,
 ): AudioToAudioPipeline<Input, Output> {
   return createUniversalTaskPipeline({

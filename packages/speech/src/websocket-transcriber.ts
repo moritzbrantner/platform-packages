@@ -8,11 +8,7 @@ import { normalizeProviderResponse } from "./provider-response";
 
 type Awaitable<T> = T | Promise<T>;
 
-export type WebSocketPayload =
-  | string
-  | Blob
-  | ArrayBuffer
-  | ArrayBufferView;
+export type WebSocketPayload = string | Blob | ArrayBuffer | ArrayBufferView;
 
 export interface WebSocketLike {
   readonly readyState: number;
@@ -30,9 +26,7 @@ export interface WebSocketLike {
 }
 
 export interface WebSocketTranscriberOptions {
-  url:
-    | string
-    | ((sessionOptions: SpeechStreamingSessionOptions) => Awaitable<string>);
+  url: string | ((sessionOptions: SpeechStreamingSessionOptions) => Awaitable<string>);
   protocols?: string | string[];
   model?: string;
   webSocketFactory?: (url: string, protocols?: string | string[]) => WebSocketLike;
@@ -62,9 +56,7 @@ export function createWebSocketTranscriber(
     async openSession(sessionOptions) {
       const webSocketFactory = options.webSocketFactory ?? defaultWebSocketFactory;
       const url =
-        typeof options.url === "function"
-          ? await options.url(sessionOptions)
-          : options.url;
+        typeof options.url === "function" ? await options.url(sessionOptions) : options.url;
       const socket = webSocketFactory(url, options.protocols);
       socket.binaryType = "arraybuffer";
 
@@ -92,7 +84,9 @@ export function createWebSocketTranscriber(
           sessionOptions.onClose?.();
 
           if (!intentionalClose) {
-            sessionOptions.onError?.(new Error("WebSocket transcription connection closed unexpectedly."));
+            sessionOptions.onError?.(
+              new Error("WebSocket transcription connection closed unexpectedly."),
+            );
           }
         };
 
@@ -126,10 +120,9 @@ export function createWebSocketTranscriber(
 
       await openPromise;
 
-      const connectionMessage =
-        options.createConnectionMessage
-          ? await options.createConnectionMessage(sessionOptions)
-          : buildDefaultConnectionMessage(options, sessionOptions);
+      const connectionMessage = options.createConnectionMessage
+        ? await options.createConnectionMessage(sessionOptions)
+        : buildDefaultConnectionMessage(options, sessionOptions);
 
       if (connectionMessage !== undefined) {
         socket.send(await serializePayload(connectionMessage));
@@ -141,10 +134,9 @@ export function createWebSocketTranscriber(
             throw new Error("WebSocket transcription connection is not open.");
           }
 
-          const payload =
-            options.buildChunkMessage
-              ? await options.buildChunkMessage(request)
-              : await buildDefaultChunkMessage(options, request);
+          const payload = options.buildChunkMessage
+            ? await options.buildChunkMessage(request)
+            : await buildDefaultChunkMessage(options, request);
 
           if (payload !== undefined) {
             socket.send(await serializePayload(payload));
@@ -165,7 +157,10 @@ export function createWebSocketTranscriber(
             socket.send(await serializePayload(closeMessage));
           }
 
-          if (socket.readyState === READY_STATE_OPEN || socket.readyState === READY_STATE_CONNECTING) {
+          if (
+            socket.readyState === READY_STATE_OPEN ||
+            socket.readyState === READY_STATE_CONNECTING
+          ) {
             socket.close();
           }
 
@@ -188,7 +183,12 @@ function buildDefaultConnectionMessage(
   options: WebSocketTranscriberOptions,
   sessionOptions: SpeechStreamingSessionOptions,
 ): Record<string, unknown> | undefined {
-  if (!options.model && !sessionOptions.language && !sessionOptions.prompt && !sessionOptions.metadata) {
+  if (
+    !options.model &&
+    !sessionOptions.language &&
+    !sessionOptions.prompt &&
+    !sessionOptions.metadata
+  ) {
     return undefined;
   }
 
@@ -255,11 +255,15 @@ async function mapMessage(
     return null;
   }
 
-  return normalizeProviderResponse(payload, {
-    audio: new Blob(),
-    language: sessionOptions.language,
-    prompt: sessionOptions.prompt,
-  }, "live-stream");
+  return normalizeProviderResponse(
+    payload,
+    {
+      audio: new Blob(),
+      language: sessionOptions.language,
+      prompt: sessionOptions.prompt,
+    },
+    "live-stream",
+  );
 }
 
 async function serializePayload(

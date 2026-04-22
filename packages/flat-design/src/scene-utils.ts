@@ -1,8 +1,4 @@
-import type {
-  FlatAnimation,
-  FlatDesignScene,
-  FlatPolygon,
-} from "./scene-types";
+import type { FlatAnimation, FlatDesignScene, FlatPolygon } from "./scene-types";
 
 export function formatAnimationValues(animation: FlatAnimation): string {
   if (animation.kind === "attribute") {
@@ -15,17 +11,13 @@ export function formatAnimationValues(animation: FlatAnimation): string {
 
   if (animation.transformType === "scale") {
     return animation.values
-      .map((value) =>
-        typeof value === "number" ? `${value} ${value}` : `${value.x} ${value.y}`,
-      )
+      .map((value) => (typeof value === "number" ? `${value} ${value}` : `${value.x} ${value.y}`))
       .join(";");
   }
 
   return animation.values
     .map((value) =>
-      typeof value === "number"
-        ? `${value}`
-        : `${value.angle} ${value.cx} ${value.cy}`,
+      typeof value === "number" ? `${value}` : `${value.angle} ${value.cx} ${value.cy}`,
     )
     .join(";");
 }

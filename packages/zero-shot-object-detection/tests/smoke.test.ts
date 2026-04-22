@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/zero-shot-object-detection", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("zero-shot-object-detection");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=zero-shot-object-detection");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=zero-shot-object-detection",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

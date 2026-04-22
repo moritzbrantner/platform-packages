@@ -36,9 +36,7 @@ export type CreateVideoClassificationPipelineOptions = Omit<
 export function createVideoClassificationPipeline<
   Input = VideoClassificationInput,
   Output = VideoClassificationOutput,
->(
-  options: CreateVideoClassificationPipelineOptions,
-): VideoClassificationPipeline<Input, Output> {
+>(options: CreateVideoClassificationPipelineOptions): VideoClassificationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

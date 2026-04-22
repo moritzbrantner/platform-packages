@@ -33,10 +33,7 @@ export type CreateTextRankingPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createTextRankingPipeline<
-  Input = TextRankingInput,
-  Output = TextRankingOutput,
->(
+export function createTextRankingPipeline<Input = TextRankingInput, Output = TextRankingOutput>(
   options: CreateTextRankingPipelineOptions,
 ): TextRankingPipeline<Input, Output> {
   return createUniversalTaskPipeline({

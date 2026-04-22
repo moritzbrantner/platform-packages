@@ -126,7 +126,10 @@ function SubtitlesPage() {
   const frameRef = useRef<number | undefined>(undefined);
   const lastFrameTimeRef = useRef<number | undefined>(undefined);
 
-  const parsed = useMemo(() => parseSubtitleSource(source, fileName, format), [source, fileName, format]);
+  const parsed = useMemo(
+    () => parseSubtitleSource(source, fileName, format),
+    [source, fileName, format],
+  );
   const document = parsed.document;
   const durationMs = useMemo(
     () => Math.max(1, ...document.cues.map((cue) => cue.endTimeMs)),
@@ -375,7 +378,11 @@ function SubtitlesPage() {
                     <Stat label="Issues" value={String(validation.length)} />
                   </div>
                   {validation.map((issue) => (
-                    <Item key={`${issue.code}-${issue.cueId}`} variant="muted" className="bg-muted/20">
+                    <Item
+                      key={`${issue.code}-${issue.cueId}`}
+                      variant="muted"
+                      className="bg-muted/20"
+                    >
                       <ItemContent>
                         <ItemTitle>{issue.code}</ItemTitle>
                         <ItemDescription>{issue.message}</ItemDescription>
@@ -455,7 +462,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function PlayIcon() {
-  return <span aria-hidden="true" className="ml-0.5 h-0 w-0 border-y-[7px] border-l-[12px] border-y-transparent border-l-current" />;
+  return (
+    <span
+      aria-hidden="true"
+      className="ml-0.5 h-0 w-0 border-y-[7px] border-l-[12px] border-y-transparent border-l-current"
+    />
+  );
 }
 
 function PauseIcon() {
@@ -469,7 +481,10 @@ function PauseIcon() {
 
 function RestartIcon() {
   return (
-    <span aria-hidden="true" className="relative h-4 w-4 rounded-full border-2 border-current border-r-transparent">
+    <span
+      aria-hidden="true"
+      className="relative h-4 w-4 rounded-full border-2 border-current border-r-transparent"
+    >
       <span className="absolute -left-1 top-0 h-0 w-0 border-y-[4px] border-r-[7px] border-y-transparent border-r-current" />
     </span>
   );
@@ -562,15 +577,19 @@ function getCuePlacement(cue: TimedTextCue): {
 
 function getCueStyle(cue: TimedTextCue): CSSProperties {
   const color = assColorToCss(cue.settings?.["ass-primary-color"]) ?? "#ffffff";
-  const backgroundColor = assColorToCss(cue.settings?.["ass-back-color"], 0.72) ?? "rgba(0,0,0,0.72)";
+  const backgroundColor =
+    assColorToCss(cue.settings?.["ass-back-color"], 0.72) ?? "rgba(0,0,0,0.72)";
   const fontSize = Number(cue.settings?.["ass-font-size"]);
 
   return {
     backgroundColor,
     color,
     fontFamily: cue.settings?.["ass-font"] ?? "Inter, system-ui, sans-serif",
-    fontSize: Number.isFinite(fontSize) ? `${Math.max(16, Math.min(34, fontSize * 0.58))}px` : "24px",
-    fontStyle: cue.settings?.["ass-italic"] && cue.settings["ass-italic"] !== "0" ? "italic" : undefined,
+    fontSize: Number.isFinite(fontSize)
+      ? `${Math.max(16, Math.min(34, fontSize * 0.58))}px`
+      : "24px",
+    fontStyle:
+      cue.settings?.["ass-italic"] && cue.settings["ass-italic"] !== "0" ? "italic" : undefined,
     fontWeight: cue.settings?.["ass-bold"] && cue.settings["ass-bold"] !== "0" ? 700 : 600,
     lineHeight: 1.22,
     textAlign: getCueTextAlign(cue),
@@ -601,7 +620,9 @@ function getCueTextAlign(cue: TimedTextCue): CSSProperties["textAlign"] {
 }
 
 function assColorToCss(value: string | undefined, alphaOverride?: number): string | undefined {
-  const match = value?.match(/^&H(?<alpha>[\da-f]{2})(?<blue>[\da-f]{2})(?<green>[\da-f]{2})(?<red>[\da-f]{2})$/iu);
+  const match = value?.match(
+    /^&H(?<alpha>[\da-f]{2})(?<blue>[\da-f]{2})(?<green>[\da-f]{2})(?<red>[\da-f]{2})$/iu,
+  );
 
   if (!match?.groups) {
     return undefined;

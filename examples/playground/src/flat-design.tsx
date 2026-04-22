@@ -205,10 +205,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function readNumericFrameValue(
-  keyframe: FlatMotionKeyframe,
-  field: TimelineField,
-): number {
+function readNumericFrameValue(keyframe: FlatMotionKeyframe, field: TimelineField): number {
   const value = keyframe[field];
 
   return typeof value === "number" ? value : 0;
@@ -226,7 +223,7 @@ function createConfigFromPreset(presetId: string): NodeMotionConfig {
           { time: 0, x: 0, y: 0 },
           {
             time: 0.5,
-            x: options.axis === "x" ? options.distance ?? 12 : 0,
+            x: options.axis === "x" ? (options.distance ?? 12) : 0,
             y: options.axis === "x" ? 0 : -(options.distance ?? 12),
           },
           { time: 1, x: 0, y: 0 },
@@ -239,8 +236,8 @@ function createConfigFromPreset(presetId: string): NodeMotionConfig {
           { time: 0, x: 0, y: 0 },
           {
             time: 0.5,
-            x: options.axis === "y" ? 0 : options.distance ?? 18,
-            y: options.axis === "y" ? options.distance ?? 18 : 0,
+            x: options.axis === "y" ? 0 : (options.distance ?? 18),
+            y: options.axis === "y" ? (options.distance ?? 18) : 0,
           },
           { time: 1, x: 0, y: 0 },
         ],
@@ -360,14 +357,7 @@ function assignShapeEditorState(
     className: createShapeClassName(id, selectedNodeId),
     animations,
     children: shape.children.map((child, childIndex) =>
-      assignShapeEditorState(
-        child,
-        id,
-        childIndex,
-        selectedNodeId,
-        nodeMotionConfigs,
-        animate,
-      ),
+      assignShapeEditorState(child, id, childIndex, selectedNodeId, nodeMotionConfigs, animate),
     ),
   };
 }
@@ -401,10 +391,7 @@ function prepareEditableScene(
   };
 }
 
-function collectShapeNodes(
-  shapes: FlatShape[],
-  depth = 0,
-): SvgNodeOption[] {
+function collectShapeNodes(shapes: FlatShape[], depth = 0): SvgNodeOption[] {
   return shapes.flatMap((shape) => {
     const current = shape.id
       ? [
@@ -512,13 +499,14 @@ function FlatDesignPage() {
   const [paletteId, setPaletteId] = useState<(typeof palettePresets)[number]["id"]>("day");
   const [selectedNodeId, setSelectedNodeId] = useState<string>("custom-card");
   const [activeKeyframeIndex, setActiveKeyframeIndex] = useState(0);
-  const [nodeMotionConfigs, setNodeMotionConfigs] = useState<Record<string, NodeMotionConfig>>(
-    () => cloneNodeMotionConfigs(initialNodeMotionConfigs),
+  const [nodeMotionConfigs, setNodeMotionConfigs] = useState<Record<string, NodeMotionConfig>>(() =>
+    cloneNodeMotionConfigs(initialNodeMotionConfigs),
   );
   const [presetName, setPresetName] = useState("Selected node motion");
   const [savedMotionPresets, setSavedMotionPresets] = useState<SavedMotionPreset[]>([]);
 
-  const activePreset = palettePresets.find((preset) => preset.id === paletteId) ?? palettePresets[0];
+  const activePreset =
+    palettePresets.find((preset) => preset.id === paletteId) ?? palettePresets[0];
   const motionChoices = [
     ...motionPresets.map((preset) => ({ id: preset.id, label: preset.label })),
     ...savedMotionPresets.map((preset) => ({
@@ -553,8 +541,7 @@ function FlatDesignPage() {
     () => new Set(nodeOptions.map((option) => option.id)),
     [nodeOptions],
   );
-  const selectedMotionConfig =
-    nodeMotionConfigs[selectedNodeId] ?? createDefaultNodeMotionConfig();
+  const selectedMotionConfig = nodeMotionConfigs[selectedNodeId] ?? createDefaultNodeMotionConfig();
   const selectedKeyframe =
     selectedMotionConfig.keyframes[
       Math.min(activeKeyframeIndex, selectedMotionConfig.keyframes.length - 1)
@@ -570,9 +557,7 @@ function FlatDesignPage() {
     return svg.length > 440 ? `${svg.slice(0, 440)}...` : svg;
   }, [customScene]);
 
-  function updateSelectedMotionConfig(
-    updater: (config: NodeMotionConfig) => NodeMotionConfig,
-  ) {
+  function updateSelectedMotionConfig(updater: (config: NodeMotionConfig) => NodeMotionConfig) {
     setNodeMotionConfigs((configs) => {
       const current = configs[selectedNodeId] ?? createDefaultNodeMotionConfig();
       const next = updater({
@@ -592,20 +577,14 @@ function FlatDesignPage() {
                 ? clamp(keyframe.opacity, 0, 1)
                 : keyframe.opacity,
             scale:
-              typeof keyframe.scale === "number"
-                ? clamp(keyframe.scale, 0.2, 3)
-                : keyframe.scale,
+              typeof keyframe.scale === "number" ? clamp(keyframe.scale, 0.2, 3) : keyframe.scale,
           })),
         },
       };
     });
   }
 
-  function updateTimelineFrame(
-    index: number,
-    field: TimelineField,
-    rawValue: number,
-  ) {
+  function updateTimelineFrame(index: number, field: TimelineField, rawValue: number) {
     const value =
       field === "time"
         ? clamp(rawValue, 0, 1)
@@ -774,8 +753,8 @@ function FlatDesignPage() {
               <div className="space-y-2">
                 <CardTitle className="text-2xl">Preset showcase scene</CardTitle>
                 <CardDescription className="max-w-2xl text-sm leading-6">
-                  The package ships with a ready-made flat illustration preset, but the
-                  scene remains plain data all the way down to the SVG nodes.
+                  The package ships with a ready-made flat illustration preset, but the scene
+                  remains plain data all the way down to the SVG nodes.
                 </CardDescription>
               </div>
             </div>
@@ -942,8 +921,7 @@ function FlatDesignPage() {
                 <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
                   <span>0s</span>
                   <span>
-                    {formatNodeLabel(selectedNodeId)} ·{" "}
-                    {selectedMotionConfig.duration.toFixed(1)}s
+                    {formatNodeLabel(selectedNodeId)} · {selectedMotionConfig.duration.toFixed(1)}s
                   </span>
                   <span>{selectedMotionConfig.duration.toFixed(1)}s</span>
                 </div>
@@ -1006,11 +984,7 @@ function FlatDesignPage() {
                             className="h-auto rounded-full border border-border px-2 py-1 text-foreground"
                             onClick={() => setActiveKeyframeIndex(index)}
                           >
-                            {getFrameSeconds(
-                              keyframe,
-                              selectedMotionConfig.duration,
-                            ).toFixed(2)}
-                            s
+                            {getFrameSeconds(keyframe, selectedMotionConfig.duration).toFixed(2)}s
                           </Button>
                         </td>
                         {(["time", "x", "y", "scale", "rotate", "opacity"] as const).map(
@@ -1040,11 +1014,7 @@ function FlatDesignPage() {
                                 }
                                 value={readNumericFrameValue(keyframe, field)}
                                 onChange={(event) =>
-                                  updateTimelineFrame(
-                                    index,
-                                    field,
-                                    Number(event.target.value),
-                                  )
+                                  updateTimelineFrame(index, field, Number(event.target.value))
                                 }
                               />
                             </td>

@@ -74,16 +74,7 @@ describe("@moritzbrantner/flat-design", () => {
   });
 
   test("builds reusable figures with packaged motion presets", () => {
-    const motions = [
-      "bobbing",
-      "drift",
-      "float",
-      "pulse",
-      "pop",
-      "sway",
-      "spin",
-      "blink",
-    ] as const;
+    const motions = ["bobbing", "drift", "float", "pulse", "pop", "sway", "spin", "blink"] as const;
 
     for (const motion of motions) {
       const figures = [
@@ -140,8 +131,8 @@ describe("@moritzbrantner/flat-design", () => {
 
     const svg = renderFlatSceneToSvg(scene);
 
-    expect(svg).toContain('translate(72 64)');
-    expect(svg).toContain('translate(158 124)');
+    expect(svg).toContain("translate(72 64)");
+    expect(svg).toContain("translate(158 124)");
     expect(svg).toContain('additive="sum"');
     expect(svg.match(/animateTransform/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
     expect(svg).toContain('attributeName="opacity"');

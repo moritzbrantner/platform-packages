@@ -18,8 +18,10 @@ export interface WordPredictionComposerMessage {
   author?: string;
 }
 
-export interface WordPredictionComposerProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange" | "onSubmit"> {
+export interface WordPredictionComposerProps extends Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "children" | "onChange" | "onSubmit"
+> {
   model: WordPredictionModel;
   value?: string;
   defaultValue?: string;
@@ -35,7 +37,10 @@ export interface WordPredictionComposerProps
   emptySuggestionsText?: string;
   initialShowScore?: boolean;
   initialShowContext?: boolean;
-  textareaProps?: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "defaultValue" | "onChange">;
+  textareaProps?: Omit<
+    TextareaHTMLAttributes<HTMLTextAreaElement>,
+    "value" | "defaultValue" | "onChange"
+  >;
 }
 
 export function WordPredictionComposer({
@@ -159,7 +164,13 @@ export function WordPredictionComposer({
 
         {currentValue.trim() ? (
           <article style={{ ...styles.messageRow, ...styles.messageRowOutgoing }}>
-            <div style={{ ...styles.messageBubble, ...styles.messageBubbleOutgoing, ...styles.draftBubble }}>
+            <div
+              style={{
+                ...styles.messageBubble,
+                ...styles.messageBubbleOutgoing,
+                ...styles.draftBubble,
+              }}
+            >
               <p style={styles.messageAuthor}>Draft</p>
               <p style={styles.messageText}>{currentValue}</p>
             </div>
@@ -321,8 +332,7 @@ const styles = {
     gap: "1rem",
     borderRadius: "1.5rem",
     border: "1px solid rgba(120, 132, 154, 0.28)",
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(245,247,250,0.98) 100%)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(245,247,250,0.98) 100%)",
     padding: "1rem",
     boxShadow: "0 24px 80px rgba(15, 23, 42, 0.08)",
   } satisfies CSSProperties,

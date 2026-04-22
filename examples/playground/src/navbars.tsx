@@ -245,7 +245,9 @@ function NavbarVariantPreview({ variant }: { variant: PlatformNavbarVariant }) {
       })),
     [activeItemId],
   );
-  const selectedItem = groups.flatMap((group) => group.items).find((item) => item.id === activeItemId);
+  const selectedItem = groups
+    .flatMap((group) => group.items)
+    .find((item) => item.id === activeItemId);
 
   return (
     <section className="rounded-none border border-border/60 bg-background/48 p-4 shadow-2xl shadow-black/10 supports-backdrop-filter:backdrop-blur-xl">

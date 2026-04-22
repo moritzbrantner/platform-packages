@@ -27,7 +27,10 @@ describe("@moritzbrantner/maps cluster area", () => {
 
   test("falls back to a closed area for degenerate point sets", () => {
     const ring = createClusterAreaRing(
-      [[13.405, 52.52], [13.405, 52.52]],
+      [
+        [13.405, 52.52],
+        [13.405, 52.52],
+      ],
       [13.405, 52.52],
     );
 

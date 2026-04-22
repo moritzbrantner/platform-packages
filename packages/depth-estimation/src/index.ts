@@ -36,9 +36,7 @@ export type CreateDepthEstimationPipelineOptions = Omit<
 export function createDepthEstimationPipeline<
   Input = DepthEstimationInput,
   Output = DepthEstimationOutput,
->(
-  options: CreateDepthEstimationPipelineOptions,
-): DepthEstimationPipeline<Input, Output> {
+>(options: CreateDepthEstimationPipelineOptions): DepthEstimationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

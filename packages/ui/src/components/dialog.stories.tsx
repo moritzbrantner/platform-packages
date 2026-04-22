@@ -30,8 +30,7 @@ function DialogDemo({ defaultOpen = false }: DialogDemoProps) {
           </DialogDescription>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          This dialog is rendered through a portal and can be tested from the
-          document scope.
+          This dialog is rendered through a portal and can be tested from the document scope.
         </p>
         <DialogFooter>
           <Button variant="outline">Cancel</Button>

@@ -1,7 +1,7 @@
-import { motion, type HTMLMotionProps } from "motion/react"
+import { motion, type HTMLMotionProps } from "motion/react";
 
-import { cn } from "../lib/cn"
-import { glassSurfaceMotion } from "../lib/motion"
+import { cn } from "../lib/cn";
+import { glassSurfaceMotion } from "../lib/motion";
 
 function Kbd({
   className,
@@ -14,13 +14,13 @@ function Kbd({
       data-slot="kbd"
       className={cn(
         "pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-sm bg-muted px-1 font-sans text-xs font-medium text-muted-foreground select-none in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10 [&_svg:not([class*='size-'])]:size-3",
-        className
+        className,
       )}
       layout={layout}
       transition={transition}
       {...props}
     />
-  )
+  );
 }
 
 function KbdGroup({
@@ -37,7 +37,7 @@ function KbdGroup({
       transition={transition}
       {...props}
     />
-  )
+  );
 }
 
-export { Kbd, KbdGroup }
+export { Kbd, KbdGroup };

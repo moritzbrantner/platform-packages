@@ -3,6 +3,7 @@
 Typed SVG primitives for building flat-design illustrations and lightweight animations.
 
 ## What it includes
+
 - A scene schema for layered SVG artwork.
 - Helper factories for bobbing, drift, float, pulse, pop, sway, blink, opacity, and spin animations.
 - Timeline animation helpers for building motion presets from keyframes.
@@ -12,6 +13,7 @@ Typed SVG primitives for building flat-design illustrations and lightweight anim
 - A ready-made `createFlatShowcaseScene()` preset you can customize or use as a starting point.
 
 ## Quick start
+
 ```tsx
 import {
   FlatScene,

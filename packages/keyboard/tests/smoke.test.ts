@@ -33,11 +33,7 @@ describe("@moritzbrantner/keyboard", () => {
     const input = document.createElement("input");
 
     expect(
-      matchesKeyboardShortcut(
-        { key: "k", metaKey: true, target: document.body },
-        "mod+k",
-        "mac",
-      ),
+      matchesKeyboardShortcut({ key: "k", metaKey: true, target: document.body }, "mod+k", "mac"),
     ).toBe(true);
     expect(
       matchesKeyboardShortcut({ key: "k", metaKey: true, target: input }, "mod+k", "mac"),

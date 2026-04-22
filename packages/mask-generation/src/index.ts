@@ -36,9 +36,7 @@ export type CreateMaskGenerationPipelineOptions = Omit<
 export function createMaskGenerationPipeline<
   Input = MaskGenerationInput,
   Output = MaskGenerationOutput,
->(
-  options: CreateMaskGenerationPipelineOptions,
-): MaskGenerationPipeline<Input, Output> {
+>(options: CreateMaskGenerationPipelineOptions): MaskGenerationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

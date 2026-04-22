@@ -104,7 +104,11 @@ export function detectTimedTextFormat(input: string, fileName?: string): TimedTe
     return "transcript-json";
   }
 
-  if (splitCueBlocks(normalized).some((block) => YOUTUBE_TIMESTAMP_PATTERN.test(block.split("\n")[0] ?? ""))) {
+  if (
+    splitCueBlocks(normalized).some((block) =>
+      YOUTUBE_TIMESTAMP_PATTERN.test(block.split("\n")[0] ?? ""),
+    )
+  ) {
     return "youtube";
   }
 
@@ -190,11 +194,7 @@ export function parseVtt(input: string): TimedTextDocument {
   if (lines[0] && lines[0].startsWith("WEBVTT")) {
     lines.shift();
 
-    while (
-      lines[0] !== undefined &&
-      lines[0].trim() !== "" &&
-      !lines[0].includes("-->")
-    ) {
+    while (lines[0] !== undefined && lines[0].trim() !== "" && !lines[0].includes("-->")) {
       lines.shift();
     }
 
@@ -210,7 +210,12 @@ export function parseVtt(input: string): TimedTextDocument {
   for (const block of blocks) {
     const trimmedBlock = block.trim();
 
-    if (!trimmedBlock || trimmedBlock.startsWith("NOTE") || trimmedBlock.startsWith("STYLE") || trimmedBlock.startsWith("REGION")) {
+    if (
+      !trimmedBlock ||
+      trimmedBlock.startsWith("NOTE") ||
+      trimmedBlock.startsWith("STYLE") ||
+      trimmedBlock.startsWith("REGION")
+    ) {
       continue;
     }
 
@@ -499,7 +504,10 @@ function parseSrtCueBlock(block: string, index: number): TimedTextCue {
     id: isNumericId(idLine) ? `cue-${index + 1}` : idLine || `cue-${index + 1}`,
     startTimeMs: parseTimestamp(match.groups.start),
     endTimeMs: parseTimestamp(match.groups.end),
-    text: lines.slice(timingLineIndex + 1).join("\n").trim(),
+    text: lines
+      .slice(timingLineIndex + 1)
+      .join("\n")
+      .trim(),
   };
 }
 
@@ -518,16 +526,16 @@ function parseVttCueBlock(block: string, index: number): TimedTextCue {
     throw new Error(`Invalid VTT cue at block ${index + 1}: malformed timestamp line.`);
   }
 
-  const id = lines
-    .slice(0, timingLineIndex)
-    .join(" ")
-    .trim();
+  const id = lines.slice(0, timingLineIndex).join(" ").trim();
 
   return {
     id: id || `cue-${index + 1}`,
     startTimeMs: parseTimestamp(match.groups.start),
     endTimeMs: parseTimestamp(match.groups.end),
-    text: lines.slice(timingLineIndex + 1).join("\n").trim(),
+    text: lines
+      .slice(timingLineIndex + 1)
+      .join("\n")
+      .trim(),
     settings: parseVttSettings(timingLine),
   };
 }
@@ -637,7 +645,9 @@ function parseYoutubeXml(input: string): TimedTextDocument {
     const attributes = parseXmlAttributes(match.groups?.attributes ?? "");
     const startTimeMs = parseXmlSeconds(attributes.start, "start", cues.length);
     const durationMs =
-      attributes.dur === undefined ? undefined : parseXmlSeconds(attributes.dur, "dur", cues.length);
+      attributes.dur === undefined
+        ? undefined
+        : parseXmlSeconds(attributes.dur, "dur", cues.length);
 
     cues.push({
       id: `cue-${cues.length + 1}`,
@@ -892,7 +902,18 @@ function getDefaultAssStyleFormat(): string[] {
 }
 
 function getDefaultAssEventFormat(): string[] {
-  return ["layer", "start", "end", "style", "name", "marginl", "marginr", "marginv", "effect", "text"];
+  return [
+    "layer",
+    "start",
+    "end",
+    "style",
+    "name",
+    "marginl",
+    "marginr",
+    "marginv",
+    "effect",
+    "text",
+  ];
 }
 
 function parseAssInlineSettings(text: string): {
@@ -900,7 +921,10 @@ function parseAssInlineSettings(text: string): {
   italic?: string;
   position?: string;
 } {
-  const overrideText = Array.from(text.matchAll(/\{(?<body>[^}]*)\}/gu), (match) => match.groups?.body ?? "").join("\\");
+  const overrideText = Array.from(
+    text.matchAll(/\{(?<body>[^}]*)\}/gu),
+    (match) => match.groups?.body ?? "",
+  ).join("\\");
   const alignment = overrideText.match(/\\an(?<value>[1-9])/u)?.groups?.value;
   const positionMatch = overrideText.match(/\\pos\((?<x>-?\d+(?:\.\d+)?),(?<y>-?\d+(?:\.\d+)?)\)/u);
   const italicMatch = overrideText.match(/\\i(?<value>[01])/u);
@@ -1024,7 +1048,9 @@ function parseXmlAttributes(value: string): Record<string, string> {
       continue;
     }
 
-    attributes[match.groups.name] = decodeXmlEntities(match.groups.double ?? match.groups.single ?? "");
+    attributes[match.groups.name] = decodeXmlEntities(
+      match.groups.double ?? match.groups.single ?? "",
+    );
   }
 
   return attributes;
@@ -1059,7 +1085,7 @@ function cleanYoutubeXmlText(value: string): string {
 
 function decodeXmlEntities(value: string): string {
   return value
-    .replace(/&quot;/gu, "\"")
+    .replace(/&quot;/gu, '"')
     .replace(/&apos;/gu, "'")
     .replace(/&lt;/gu, "<")
     .replace(/&gt;/gu, ">")
@@ -1139,18 +1165,8 @@ function parseWords(value: unknown, index: number): TimedTextWord[] | undefined 
     return [
       {
         text,
-        startTimeMs: parseTranscriptJsonTimestamp(
-          record.startTimeMs,
-          record.start,
-          "start",
-          index,
-        ),
-        endTimeMs: parseTranscriptJsonTimestamp(
-          record.endTimeMs,
-          record.end,
-          "end",
-          index,
-        ),
+        startTimeMs: parseTranscriptJsonTimestamp(record.startTimeMs, record.start, "start", index),
+        endTimeMs: parseTranscriptJsonTimestamp(record.endTimeMs, record.end, "end", index),
         confidence: typeof record.confidence === "number" ? record.confidence : undefined,
       } satisfies TimedTextWord,
     ];

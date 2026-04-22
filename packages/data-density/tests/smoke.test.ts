@@ -30,9 +30,7 @@ describe("@moritzbrantner/data-density", () => {
         metricKeys,
       ),
     ).toEqual({ margin: 8, orders: 3, revenue: 30 });
-    expect(
-      createDensityMetricSummary([{ orders: 2 }, { orders: 3, revenue: 10 }]),
-    ).toEqual({
+    expect(createDensityMetricSummary([{ orders: 2 }, { orders: 3, revenue: 10 }])).toEqual({
       itemCount: 2,
       metricKeys: ["orders", "revenue"],
       metrics: { orders: 5, revenue: 10 },

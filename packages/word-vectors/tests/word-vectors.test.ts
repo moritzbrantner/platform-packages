@@ -35,11 +35,7 @@ describe("@moritzbrantner/word-vectors", () => {
 
   test("returns sparse vector entries with contextual weights", () => {
     const model = createWordVectorModel({
-      texts: [
-        "Cats chase mice.",
-        "Dogs chase balls.",
-        "Cats and dogs chase things.",
-      ],
+      texts: ["Cats chase mice.", "Dogs chase balls.", "Cats and dogs chase things."],
       windowSize: 2,
     });
 
@@ -73,11 +69,7 @@ describe("@moritzbrantner/word-vectors", () => {
 
   test("preserves deterministic similarity after serialization and exposes similar contexts", () => {
     const model = createWordVectorModel({
-      texts: [
-        "Coffee beans smell rich.",
-        "Tea leaves smell fresh.",
-        "Coffee cups stay warm.",
-      ],
+      texts: ["Coffee beans smell rich.", "Tea leaves smell fresh.", "Coffee cups stay warm."],
       windowSize: 2,
     });
     const restored = deserializeWordVectorModel(serializeWordVectorModel(model));
@@ -137,18 +129,12 @@ describe("@moritzbrantner/word-vectors", () => {
     });
 
     expect(fromCorpus.words()).toEqual(fromDocuments.words());
-    expect(fromCorpus.similarity("coffee", "tea")).toBe(
-      fromDocuments.similarity("coffee", "tea"),
-    );
+    expect(fromCorpus.similarity("coffee", "tea")).toBe(fromDocuments.similarity("coffee", "tea"));
   });
 
   test("creates optional semantic backoff suggestions for word prediction", () => {
     const model = createWordVectorModel({
-      texts: [
-        "Coffee is strong.",
-        "Tea is calming.",
-        "Coffee tastes bold.",
-      ],
+      texts: ["Coffee is strong.", "Tea is calming.", "Coffee tastes bold."],
     });
 
     const suggestions = createWordVectorBackoffSource(model)(["coffee"]);

@@ -22,11 +22,7 @@ bun add @moritzbrantner/ocr
 ## Quick start
 
 ```ts
-import {
-  createOcrPipeline,
-  normalizeOcrDocument,
-  ocrToTextDocument,
-} from "@moritzbrantner/ocr";
+import { createOcrPipeline, normalizeOcrDocument, ocrToTextDocument } from "@moritzbrantner/ocr";
 
 const pipeline = createOcrPipeline({
   extractor: {

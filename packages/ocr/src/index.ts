@@ -88,9 +88,7 @@ export interface OcrToTextDocumentOptions<
   metadata?: Metadata;
   granularity?: SegmentTextDocumentOptions["granularity"];
   useIntlSegmenter?: boolean;
-  createDocument?: (
-    options: CreateTextDocumentOptions<Metadata>,
-  ) => TextDocument<Metadata>;
+  createDocument?: (options: CreateTextDocumentOptions<Metadata>) => TextDocument<Metadata>;
 }
 
 export function normalizeOcrDocument(
@@ -112,9 +110,10 @@ export function normalizeOcrDocument(
           });
 
           const words = block.words
-            ?.filter((word) =>
-              (word.confidence ?? 1) >= minimumConfidence &&
-              normalizeBlockText(word.text, { collapseWhitespace, trimBlocks }).length > 0,
+            ?.filter(
+              (word) =>
+                (word.confidence ?? 1) >= minimumConfidence &&
+                normalizeBlockText(word.text, { collapseWhitespace, trimBlocks }).length > 0,
             )
             .map((word) => ({
               ...word,
@@ -143,25 +142,24 @@ export function normalizeOcrDocument(
   };
 }
 
-export function collectOcrText(
-  document: OcrDocument,
-  options: CollectOcrTextOptions = {},
-): string {
+export function collectOcrText(document: OcrDocument, options: CollectOcrTextOptions = {}): string {
   const pageSeparator = options.pageSeparator ?? "\n\n";
   const blockSeparator = options.blockSeparator ?? "\n";
 
   return document.pages
-    .map((page) => page.blocks.map((block) => block.text).filter(Boolean).join(blockSeparator))
+    .map((page) =>
+      page.blocks
+        .map((block) => block.text)
+        .filter(Boolean)
+        .join(blockSeparator),
+    )
     .filter(Boolean)
     .join(pageSeparator);
 }
 
 export function ocrToTextDocument<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  document: OcrDocument,
-  options: OcrToTextDocumentOptions<Metadata> = {},
-): TextDocument<Metadata> {
+>(document: OcrDocument, options: OcrToTextDocumentOptions<Metadata> = {}): TextDocument<Metadata> {
   const createDocument = options.createDocument ?? createTextDocument;
   const text = collectOcrText(document);
 

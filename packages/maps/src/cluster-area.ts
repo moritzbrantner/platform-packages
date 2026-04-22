@@ -185,17 +185,12 @@ function createProjectedVoronoiContext(
   };
 }
 
-function createProjectedVoronoiCells(
-  context: ReturnType<typeof createProjectedVoronoiContext>,
-) {
+function createProjectedVoronoiCells(context: ReturnType<typeof createProjectedVoronoiContext>) {
   const voronoi = context.delaunay.voronoi(context.viewportBounds);
-  const cells: Array<
-    | {
-        clusterId: ClusterVoronoiInput["clusterId"];
-        ring: Coordinate[];
-      }
-    | null
-  > = [];
+  const cells: Array<{
+    clusterId: ClusterVoronoiInput["clusterId"];
+    ring: Coordinate[];
+  } | null> = [];
 
   for (let clusterIndex = 0; clusterIndex < context.projectedClusters.length; clusterIndex += 1) {
     const polygon = voronoi.cellPolygon(clusterIndex);
@@ -207,11 +202,7 @@ function createProjectedVoronoiCells(
 
     const ring = orientRingForScreenInterior(
       closeRing(
-        compactRing(
-          polygon
-            .slice(0, -1)
-            .map(([x, y]) => snapCoordinate([x, y] as Coordinate)),
-        ),
+        compactRing(polygon.slice(0, -1).map(([x, y]) => snapCoordinate([x, y] as Coordinate))),
       ),
     );
 
@@ -374,7 +365,10 @@ function buildDissolvedPolygons(loops: readonly Coordinate[][]) {
         return right.area - left.area;
       }
 
-      return compareCoordinates(removeClosingPoint(left.loop)[0]!, removeClosingPoint(right.loop)[0]!);
+      return compareCoordinates(
+        removeClosingPoint(left.loop)[0]!,
+        removeClosingPoint(right.loop)[0]!,
+      );
     });
   const polygonIndexes = new Array<number>(nodes.length).fill(-1);
   const polygons: Coordinate[][][] = [];
@@ -427,9 +421,7 @@ function stitchDirectedSegmentsToLoops(segments: readonly ProjectedSegment[]) {
     outgoingSegments.set(segment.startKey, [segment]);
   }
 
-  const orderedSegments = [...segments].sort((left, right) =>
-    left.id.localeCompare(right.id),
-  );
+  const orderedSegments = [...segments].sort((left, right) => left.id.localeCompare(right.id));
 
   for (const segment of orderedSegments) {
     if (visited.has(segment.id)) {
@@ -614,8 +606,7 @@ function chooseNextUndirectedSegment(
       continue;
     }
 
-    const candidateKey =
-      candidate.startKey === nextKey ? candidate.endKey : candidate.startKey;
+    const candidateKey = candidate.startKey === nextKey ? candidate.endKey : candidate.startKey;
 
     if (previousKey && candidateKey === previousKey && candidateSegments.length > 1) {
       continue;
@@ -657,9 +648,7 @@ function orientRingForScreenInterior(ring: readonly Coordinate[]) {
     return closeRing(openRing);
   }
 
-  return getSignedArea(openRing) <= 0
-    ? closeRing(openRing)
-    : closeRing([...openRing].reverse());
+  return getSignedArea(openRing) <= 0 ? closeRing(openRing) : closeRing([...openRing].reverse());
 }
 
 function createDirectedSegment(coordinates: [Coordinate, Coordinate]): ProjectedSegment {
@@ -674,7 +663,9 @@ function createDirectedSegment(coordinates: [Coordinate, Coordinate]): Projected
   };
 }
 
-function createUndirectedSegment(coordinates: [Coordinate, Coordinate]): ProjectedUndirectedSegment {
+function createUndirectedSegment(
+  coordinates: [Coordinate, Coordinate],
+): ProjectedUndirectedSegment {
   const normalized = normalizeEdge(coordinates[0], coordinates[1]);
 
   return {
@@ -970,18 +961,8 @@ export function clipRingToPolygon(
     let previousPoint = input.at(-1)!;
 
     for (const currentPoint of input) {
-      const currentInside = isInsideClipEdge(
-        currentPoint,
-        clipStart,
-        clipEnd,
-        clipOrientation,
-      );
-      const previousInside = isInsideClipEdge(
-        previousPoint,
-        clipStart,
-        clipEnd,
-        clipOrientation,
-      );
+      const currentInside = isInsideClipEdge(currentPoint, clipStart, clipEnd, clipOrientation);
+      const previousInside = isInsideClipEdge(previousPoint, clipStart, clipEnd, clipOrientation);
 
       if (currentInside) {
         if (!previousInside) {
@@ -1037,10 +1018,7 @@ function createProjectionFromBounds(bounds: Bounds) {
 
   return {
     project(coordinate: Coordinate): Coordinate {
-      return [
-        (coordinate[0] - centerLongitude) * scale,
-        coordinate[1] - centerLatitude,
-      ];
+      return [(coordinate[0] - centerLongitude) * scale, coordinate[1] - centerLatitude];
     },
     unproject(coordinate: Coordinate): Coordinate {
       return [
@@ -1061,10 +1039,7 @@ function projectPoints(points: readonly Coordinate[], center: Coordinate) {
   }));
 }
 
-function buildAlphaLoops(
-  points: readonly ProjectedPoint[],
-  delaunay: Delaunay<ProjectedPoint>,
-) {
+function buildAlphaLoops(points: readonly ProjectedPoint[], delaunay: Delaunay<ProjectedPoint>) {
   const nearestNeighborDistance = getNearestNeighborDistance(points, delaunay);
 
   for (const multiplier of ALPHA_MULTIPLIERS) {
@@ -1133,11 +1108,7 @@ function extractAlphaLoops(
   return buildLoopsFromEdges(boundaryEdges, points);
 }
 
-function getCircumradius(
-  first: ProjectedPoint,
-  second: ProjectedPoint,
-  third: ProjectedPoint,
-) {
+function getCircumradius(first: ProjectedPoint, second: ProjectedPoint, third: ProjectedPoint) {
   const sideA = distance(second, third);
   const sideB = distance(first, third);
   const sideC = distance(first, second);
@@ -1156,9 +1127,7 @@ function toggleBoundaryEdge(
   endIndex: number,
 ) {
   const normalizedKey =
-    startIndex < endIndex
-      ? `${startIndex}:${endIndex}`
-      : `${endIndex}:${startIndex}`;
+    startIndex < endIndex ? `${startIndex}:${endIndex}` : `${endIndex}:${startIndex}`;
 
   if (boundaryEdges.has(normalizedKey)) {
     boundaryEdges.delete(normalizedKey);
@@ -1168,10 +1137,7 @@ function toggleBoundaryEdge(
   boundaryEdges.set(normalizedKey, { from: startIndex, to: endIndex });
 }
 
-function buildLoopsFromEdges(
-  boundaryEdges: Map<string, Edge>,
-  points: readonly ProjectedPoint[],
-) {
+function buildLoopsFromEdges(boundaryEdges: Map<string, Edge>, points: readonly ProjectedPoint[]) {
   const outgoingEdges = new Map<number, Edge[]>();
 
   for (const edge of boundaryEdges.values()) {
@@ -1301,10 +1267,7 @@ function chooseNextEdge(
     }
 
     const nextPoint = points[edge.to]!;
-    const outgoingAngle = Math.atan2(
-      nextPoint.y - currentPoint.y,
-      nextPoint.x - currentPoint.x,
-    );
+    const outgoingAngle = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x);
     const rightTurn = normalizeAngle(incomingAngle - outgoingAngle);
 
     if (rightTurn < bestTurn) {
@@ -1416,10 +1379,7 @@ function getIntersection(
     segmentEnd[0] - segmentStart[0],
     segmentEnd[1] - segmentStart[1],
   ];
-  const clipDirection: Coordinate = [
-    clipEnd[0] - clipStart[0],
-    clipEnd[1] - clipStart[1],
-  ];
+  const clipDirection: Coordinate = [clipEnd[0] - clipStart[0], clipEnd[1] - clipStart[1]];
   const denominator =
     segmentDirection[0] * clipDirection[1] - segmentDirection[1] * clipDirection[0];
 
@@ -1427,17 +1387,10 @@ function getIntersection(
     return null;
   }
 
-  const difference: Coordinate = [
-    clipStart[0] - segmentStart[0],
-    clipStart[1] - segmentStart[1],
-  ];
-  const t =
-    (difference[0] * clipDirection[1] - difference[1] * clipDirection[0]) / denominator;
+  const difference: Coordinate = [clipStart[0] - segmentStart[0], clipStart[1] - segmentStart[1]];
+  const t = (difference[0] * clipDirection[1] - difference[1] * clipDirection[0]) / denominator;
 
-  return [
-    segmentStart[0] + segmentDirection[0] * t,
-    segmentStart[1] + segmentDirection[1] * t,
-  ];
+  return [segmentStart[0] + segmentDirection[0] * t, segmentStart[1] + segmentDirection[1] * t];
 }
 
 function buildConvexHull(points: readonly Coordinate[]) {
@@ -1516,11 +1469,7 @@ function getPaddingDegrees(points: readonly Coordinate[]) {
   return Math.max(longitudeSpan, latitudeSpan) * 0.14;
 }
 
-function createEllipseRing(
-  center: Coordinate,
-  radiusLongitude: number,
-  radiusLatitude: number,
-) {
+function createEllipseRing(center: Coordinate, radiusLongitude: number, radiusLatitude: number) {
   const ring: Coordinate[] = [];
 
   for (let index = 0; index < DEFAULT_SEGMENTS; index += 1) {
@@ -1547,16 +1496,12 @@ function distance(first: ProjectedPoint, second: ProjectedPoint) {
 }
 
 function cross(first: ProjectedPoint, second: ProjectedPoint, third: ProjectedPoint) {
-  return (
-    (second.x - first.x) * (third.y - first.y) -
-    (second.y - first.y) * (third.x - first.x)
-  );
+  return (second.x - first.x) * (third.y - first.y) - (second.y - first.y) * (third.x - first.x);
 }
 
 function crossCoordinates(first: Coordinate, second: Coordinate, third: Coordinate) {
   return (
-    (second[0] - first[0]) * (third[1] - first[1]) -
-    (second[1] - first[1]) * (third[0] - first[0])
+    (second[0] - first[0]) * (third[1] - first[1]) - (second[1] - first[1]) * (third[0] - first[0])
   );
 }
 

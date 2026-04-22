@@ -10,10 +10,7 @@ describe("@moritzbrantner/text-summarization", () => {
         async summarize({ input }) {
           return {
             model: "summarizer",
-            summary: input
-              .split(/\s+/u)
-              .slice(0, 3)
-              .join(" "),
+            summary: input.split(/\s+/u).slice(0, 3).join(" "),
             raw: null,
           };
         },

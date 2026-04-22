@@ -19,9 +19,7 @@ describe("@moritzbrantner/maps temporal points", () => {
       },
       {
         id: "east",
-        frames: [
-          { latitude: 40.7, longitude: -74, time: 40 },
-        ],
+        frames: [{ latitude: 40.7, longitude: -74, time: 40 }],
       },
     ];
 

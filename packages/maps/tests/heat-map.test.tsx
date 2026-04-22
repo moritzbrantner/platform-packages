@@ -302,9 +302,7 @@ describe("@moritzbrantner/maps heat maps", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Demand heat map").getAttribute("data-map-ready")).toBe(
-        "true",
-      );
+      expect(screen.getByLabelText("Demand heat map").getAttribute("data-map-ready")).toBe("true");
     });
 
     const marker = leafletMock

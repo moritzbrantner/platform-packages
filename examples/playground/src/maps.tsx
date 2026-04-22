@@ -41,9 +41,7 @@ const DATASET_SIZE = 100_000;
 const TEMPORAL_MAP_START = Date.UTC(2026, 0, 14, 6);
 const TEMPORAL_MAP_STEP_MS = 45 * 60 * 1000;
 const TEMPORAL_MAP_STEPS = 28;
-type PlaygroundMapInstance = Parameters<
-  NonNullable<ClusteredMapProps["onMapReady"]>
->[0];
+type PlaygroundMapInstance = Parameters<NonNullable<ClusteredMapProps["onMapReady"]>>[0];
 type PlaygroundMapStyle = Exclude<ClusteredMapProps["mapStyle"], string | undefined>;
 const E2E_MAP_STYLE: PlaygroundMapStyle = {
   attribution: "",
@@ -59,13 +57,13 @@ function MapsPage() {
   );
   const points = useMemo(() => createDeliveryPoints(DATASET_SIZE), []);
   const courierTracks = useMemo(() => createCourierTracks(220), []);
-  const [selection, setSelection] = useState<AggregatedMapFeature<DeliveryPoint["properties"]> | null>(
-    null,
-  );
+  const [selection, setSelection] = useState<AggregatedMapFeature<
+    DeliveryPoint["properties"]
+  > | null>(null);
   const [summary, setSummary] = useState<VisibleAggregationSummary | null>(null);
-  const [temporalSelection, setTemporalSelection] = useState<
-    AggregatedMapFeature<CourierTrack["properties"]> | null
-  >(null);
+  const [temporalSelection, setTemporalSelection] = useState<AggregatedMapFeature<
+    CourierTrack["properties"]
+  > | null>(null);
   const [temporalSummary, setTemporalSummary] = useState<VisibleAggregationSummary | null>(null);
   const [playbackTime, setPlaybackTime] = useState(TEMPORAL_MAP_START);
   const initialViewState = useMemo(
@@ -96,10 +94,9 @@ function MapsPage() {
             <div className="space-y-2">
               <CardTitle>Clustered delivery demand map</CardTitle>
               <CardDescription className="max-w-3xl text-sm leading-6">
-                The package uses a client-side aggregation index to collapse dense
-                regions at low zoom and automatically reveal raw points as you drill
-                in. This keeps the interaction usable even when the source dataset is
-                six figures long.
+                The package uses a client-side aggregation index to collapse dense regions at low
+                zoom and automatically reveal raw points as you drill in. This keeps the interaction
+                usable even when the source dataset is six figures long.
               </CardDescription>
             </div>
           </CardHeader>
@@ -161,7 +158,14 @@ function MapsPage() {
               <CardTitle>Cluster or point details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
-              {selection ? <SelectionDetails selection={selection} /> : <p>Click a cluster to expand it or click an individual point to inspect a single delivery record.</p>}
+              {selection ? (
+                <SelectionDetails selection={selection} />
+              ) : (
+                <p>
+                  Click a cluster to expand it or click an individual point to inspect a single
+                  delivery record.
+                </p>
+              )}
               <Button asChild variant="outline">
                 <a href="/index.html">Back to overview</a>
               </Button>
@@ -177,16 +181,15 @@ function MapsPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
               <p>
-                `ClusteredMap` provides the browser map surface and click-driven zoom
-                expansion.
+                `ClusteredMap` provides the browser map surface and click-driven zoom expansion.
               </p>
               <p>
-                `createPointAggregationIndex` is exported separately so aggregation can
-                be tested or reused without rendering a map at all.
+                `createPointAggregationIndex` is exported separately so aggregation can be tested or
+                reused without rendering a map at all.
               </p>
               <p>
-                Each point can carry numeric metrics such as `orders` or `revenue`,
-                and those totals roll up into every cluster automatically.
+                Each point can carry numeric metrics such as `orders` or `revenue`, and those totals
+                roll up into every cluster automatically.
               </p>
             </CardContent>
           </Card>
@@ -207,10 +210,10 @@ function MapsPage() {
             <div className="space-y-2">
               <CardTitle>Temporal courier activity map</CardTitle>
               <CardDescription className="max-w-3xl text-sm leading-6">
-                `TemporalClusteredMap` keeps the base `ClusteredMap` focused on
-                rendering while adding a playback rail that slices the active points
-                for the current moment. Couriers appear when they are dispatched,
-                move across the map, and disappear once the handoff is complete.
+                `TemporalClusteredMap` keeps the base `ClusteredMap` focused on rendering while
+                adding a playback rail that slices the active points for the current moment.
+                Couriers appear when they are dispatched, move across the map, and disappear once
+                the handoff is complete.
               </CardDescription>
             </div>
           </CardHeader>
@@ -249,13 +252,17 @@ function MapsPage() {
               <MetricCard
                 label="Visible couriers"
                 testId="metric-visible-couriers"
-                value={temporalSummary ? formatInteger(temporalSummary.visiblePointCount) : "\u2014"}
+                value={
+                  temporalSummary ? formatInteger(temporalSummary.visiblePointCount) : "\u2014"
+                }
                 hint="Couriers currently visible on the map after time slicing."
               />
               <MetricCard
                 label="In-flight revenue"
                 testId="metric-temporal-revenue"
-                value={temporalSummary ? formatCurrency(temporalSummary.metrics.revenue ?? 0) : "\u2014"}
+                value={
+                  temporalSummary ? formatCurrency(temporalSummary.metrics.revenue ?? 0) : "\u2014"
+                }
                 hint="Cluster and point metrics still roll up inside the active frame."
               />
             </CardContent>
@@ -273,8 +280,8 @@ function MapsPage() {
                 <TemporalSelectionDetails selection={temporalSelection} />
               ) : (
                 <p>
-                  Click a live courier or one of the temporary clusters while the
-                  playback moves through the day.
+                  Click a live courier or one of the temporary clusters while the playback moves
+                  through the day.
                 </p>
               )}
             </CardContent>
@@ -310,18 +317,11 @@ function MetricCard({
   return (
     <Item variant="muted" className="items-start bg-card/70 p-4">
       <ItemContent>
-        <ItemDescription className="text-xs uppercase tracking-[0.2em]">
-          {label}
-        </ItemDescription>
-        <ItemTitle
-          data-testid={testId}
-          className="mt-1 text-3xl font-semibold tracking-tight"
-        >
+        <ItemDescription className="text-xs uppercase tracking-[0.2em]">{label}</ItemDescription>
+        <ItemTitle data-testid={testId} className="mt-1 text-3xl font-semibold tracking-tight">
           {value}
         </ItemTitle>
-        <ItemDescription className="line-clamp-none leading-6">
-          {hint}
-        </ItemDescription>
+        <ItemDescription className="line-clamp-none leading-6">{hint}</ItemDescription>
       </ItemContent>
     </Item>
   );
@@ -339,8 +339,8 @@ function SelectionDetails({
           Cluster with {formatInteger(selection.pointCount)} points
         </p>
         <p>
-          Expansion zoom: {selection.expansionZoom.toFixed(0)}. Revenue inside this
-          cluster: {formatCurrency(selection.metrics.revenue ?? 0)}.
+          Expansion zoom: {selection.expansionZoom.toFixed(0)}. Revenue inside this cluster:{" "}
+          {formatCurrency(selection.metrics.revenue ?? 0)}.
         </p>
         <p>Open orders inside this cluster: {formatInteger(selection.metrics.orders ?? 0)}.</p>
       </div>
@@ -389,8 +389,7 @@ function TemporalSelectionDetails({
         {selection.point.label || `Courier ${selection.point.id}`}
       </p>
       <p>
-        Route: {selection.point.properties.route}. Status:{" "}
-        {selection.point.properties.status}.
+        Route: {selection.point.properties.route}. Status: {selection.point.properties.status}.
       </p>
       <p>
         {formatInteger(Math.round(selection.metrics.orders ?? 0))} orders,{" "}
@@ -472,38 +471,33 @@ function createCourierTracks(count: number): CourierTrack[] {
     const orderBase = 2 + Math.floor(random() * 5);
     const revenueBase = 140 + Math.round(random() * 780);
     const route = `${origin.city} to ${destination.city}`;
-    const frames: Array<CourierTrack["frames"][number]> = Array.from({ length: frameCount }, (_, frameIndex) => {
-      const progress = frameCount === 1 ? 1 : frameIndex / (frameCount - 1);
-      const latitudeArc =
-        Math.sin(progress * Math.PI) * arc +
-        (random() - 0.5) * 0.25;
-      const longitudeArc = Math.cos(progress * Math.PI * 2) * 0.9;
-      const time = TEMPORAL_MAP_START + (startStep + frameIndex) * TEMPORAL_MAP_STEP_MS;
-      const status: CourierProperties["status"] =
-        progress < 0.18
-          ? "Dispatching"
-          : progress > 0.84
-            ? "Handoff"
-            : "En route";
+    const frames: Array<CourierTrack["frames"][number]> = Array.from(
+      { length: frameCount },
+      (_, frameIndex) => {
+        const progress = frameCount === 1 ? 1 : frameIndex / (frameCount - 1);
+        const latitudeArc = Math.sin(progress * Math.PI) * arc + (random() - 0.5) * 0.25;
+        const longitudeArc = Math.cos(progress * Math.PI * 2) * 0.9;
+        const time = TEMPORAL_MAP_START + (startStep + frameIndex) * TEMPORAL_MAP_STEP_MS;
+        const status: CourierProperties["status"] =
+          progress < 0.18 ? "Dispatching" : progress > 0.84 ? "Handoff" : "En route";
 
-      return {
-        latitude:
-          origin.latitude + (destination.latitude - origin.latitude) * progress + latitudeArc,
-        longitude:
-          origin.longitude +
-          (destination.longitude - origin.longitude) * progress +
-          longitudeArc,
-        metrics: {
-          orders: orderBase + progress * 3,
-          revenue: revenueBase + progress * 480,
-        },
-        properties: {
-          route,
-          status,
-        },
-        time,
-      };
-    });
+        return {
+          latitude:
+            origin.latitude + (destination.latitude - origin.latitude) * progress + latitudeArc,
+          longitude:
+            origin.longitude + (destination.longitude - origin.longitude) * progress + longitudeArc,
+          metrics: {
+            orders: orderBase + progress * 3,
+            revenue: revenueBase + progress * 480,
+          },
+          properties: {
+            route,
+            status,
+          },
+          time,
+        };
+      },
+    );
     const finalFrameTime = TEMPORAL_MAP_START + (endStep + 1) * TEMPORAL_MAP_STEP_MS;
 
     if (finalFrameTime <= TEMPORAL_MAP_START + totalDurationMs) {

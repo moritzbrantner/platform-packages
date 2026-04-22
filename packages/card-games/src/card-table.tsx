@@ -6,8 +6,7 @@ import { cx } from "./lib/cx";
 
 export type CardTableTone = "emerald" | "midnight" | "crimson";
 
-export interface CardTableProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface CardTableProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   eyebrow?: ReactNode;
   title?: ReactNode;
   subtitle?: ReactNode;

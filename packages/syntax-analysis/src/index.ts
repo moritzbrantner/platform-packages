@@ -109,9 +109,7 @@ export interface SyntaxPipeline<
 
 export function createSyntaxPipeline<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  options: CreateSyntaxPipelineOptions<Metadata>,
-): SyntaxPipeline<Metadata> {
+>(options: CreateSyntaxPipelineOptions<Metadata>): SyntaxPipeline<Metadata> {
   return {
     async analyzeSyntax(input, analysisOptions = {}) {
       const document = ensureTextDocument(input, analysisOptions.chunking ?? options.chunking);
@@ -174,10 +172,12 @@ export function summarizeSyntaxDocument(input: {
       relation: tag,
       count,
     })),
-    topLemmas: toSortedHistogram(lemmaCounts).slice(0, 10).map(({ tag, count }) => ({
-      lemma: tag,
-      count,
-    })),
+    topLemmas: toSortedHistogram(lemmaCounts)
+      .slice(0, 10)
+      .map(({ tag, count }) => ({
+        lemma: tag,
+        count,
+      })),
   };
 }
 
@@ -325,7 +325,8 @@ function buildDependencyArcs(
     dependentTokenId: token.id,
     dependentTokenIndex: token.wordIndex ?? token.index,
     headTokenId: index > 0 ? tokenList[index - 1].id : null,
-    headTokenIndex: index > 0 ? (tokenList[index - 1].wordIndex ?? tokenList[index - 1].index) : null,
+    headTokenIndex:
+      index > 0 ? (tokenList[index - 1].wordIndex ?? tokenList[index - 1].index) : null,
     relation: index === 0 ? "root" : "dep",
     score: 0,
   }));
@@ -352,7 +353,9 @@ function parseDependencyLabel(
   }
 
   const headToken =
-    headValue.toLocaleLowerCase() === "root" ? null : tokens[Number.parseInt(headValue, 10) - 1] ?? null;
+    headValue.toLocaleLowerCase() === "root"
+      ? null
+      : (tokens[Number.parseInt(headValue, 10) - 1] ?? null);
 
   return {
     sentenceId: dependentToken.sentenceId,

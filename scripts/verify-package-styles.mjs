@@ -22,20 +22,15 @@ for (const packageDir of packageDirs) {
   const packageJsonPath = path.join(packageDir, "package.json");
 
   if (!existsSync(packageJsonPath)) {
-    errors.push(
-      `Missing package.json in ${path.relative(rootDir, packageDir)}`,
-    );
+    errors.push(`Missing package.json in ${path.relative(rootDir, packageDir)}`);
     continue;
   }
 
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
-  const packageName =
-    packageJson.name ?? path.relative(rootDir, packageDir) ?? packageDir;
+  const packageName = packageJson.name ?? path.relative(rootDir, packageDir) ?? packageDir;
   const stylesPath = path.join(packageDir, "styles.css");
   const files = Array.isArray(packageJson.files) ? packageJson.files : [];
-  const sideEffects = Array.isArray(packageJson.sideEffects)
-    ? packageJson.sideEffects
-    : [];
+  const sideEffects = Array.isArray(packageJson.sideEffects) ? packageJson.sideEffects : [];
   const stylesExport = packageJson.exports?.["./styles.css"];
   const shipsStyles =
     existsSync(stylesPath) ||
@@ -59,9 +54,7 @@ for (const packageDir of packageDirs) {
   }
 
   if (!/@source\s+/.test(stylesheet)) {
-    errors.push(
-      `${packageName}: styles.css must declare at least one Tailwind @source`,
-    );
+    errors.push(`${packageName}: styles.css must declare at least one Tailwind @source`);
   }
 
   if (!files.includes("styles.css")) {
@@ -69,9 +62,7 @@ for (const packageDir of packageDirs) {
   }
 
   if (stylesExport !== "./styles.css") {
-    errors.push(
-      `${packageName}: package.json exports must expose ./styles.css`,
-    );
+    errors.push(`${packageName}: package.json exports must expose ./styles.css`);
   }
 
   if (!sideEffects.includes("*.css")) {

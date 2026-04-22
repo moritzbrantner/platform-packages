@@ -33,10 +33,7 @@ export type CreateTranslationPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createTranslationPipeline<
-  Input = TranslationInput,
-  Output = TranslationOutput,
->(
+export function createTranslationPipeline<Input = TranslationInput, Output = TranslationOutput>(
   options: CreateTranslationPipelineOptions,
 ): TranslationPipeline<Input, Output> {
   return createUniversalTaskPipeline({

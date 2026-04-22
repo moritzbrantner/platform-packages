@@ -262,7 +262,9 @@ function flattenBlocks(document: OcrDocument, minimumConfidence: number) {
   return document.pages.flatMap((page) =>
     page.blocks
       .map((block, blockIndex) => ({ page, block, blockIndex }))
-      .filter(({ block }) => (block.confidence ?? 1) >= minimumConfidence && block.text.trim().length > 0),
+      .filter(
+        ({ block }) => (block.confidence ?? 1) >= minimumConfidence && block.text.trim().length > 0,
+      ),
   );
 }
 
@@ -278,7 +280,10 @@ function classifyBlock(text: string): StructuredBlockType {
   return "line";
 }
 
-function makeConfidence(ocrConfidence: number | undefined, structuralConfidence: number): StructuredBlockConfidence {
+function makeConfidence(
+  ocrConfidence: number | undefined,
+  structuralConfidence: number,
+): StructuredBlockConfidence {
   const ocr = ocrConfidence ?? 1;
   return {
     ocr,
@@ -306,7 +311,9 @@ function extractTables(
   const tables: TableGrid[] = [];
 
   for (const page of document.pages) {
-    const pageBlocks = (byPage.get(page.index) ?? []).sort((a, b) => (a.bbox?.[1] ?? 0) - (b.bbox?.[1] ?? 0));
+    const pageBlocks = (byPage.get(page.index) ?? []).sort(
+      (a, b) => (a.bbox?.[1] ?? 0) - (b.bbox?.[1] ?? 0),
+    );
     const rows = groupIntoRows(pageBlocks, rowTolerance);
 
     if (rows.length < 2 || rows.every((row) => row.cells.length < 2)) {
@@ -338,7 +345,10 @@ function extractTables(
   return tables;
 }
 
-function groupIntoRows(blocks: StructuredBlock[], tolerance: number): Array<{ cells: StructuredBlock[] }> {
+function groupIntoRows(
+  blocks: StructuredBlock[],
+  tolerance: number,
+): Array<{ cells: StructuredBlock[] }> {
   const rows: Array<{ anchorY: number; cells: StructuredBlock[] }> = [];
 
   for (const block of blocks) {
@@ -494,8 +504,10 @@ function compareByReadingOrder(
 ): number {
   return (
     left.page.index - right.page.index ||
-    (left.block.bbox?.[1] ?? Number.POSITIVE_INFINITY) - (right.block.bbox?.[1] ?? Number.POSITIVE_INFINITY) ||
-    (left.block.bbox?.[0] ?? Number.POSITIVE_INFINITY) - (right.block.bbox?.[0] ?? Number.POSITIVE_INFINITY) ||
+    (left.block.bbox?.[1] ?? Number.POSITIVE_INFINITY) -
+      (right.block.bbox?.[1] ?? Number.POSITIVE_INFINITY) ||
+    (left.block.bbox?.[0] ?? Number.POSITIVE_INFINITY) -
+      (right.block.bbox?.[0] ?? Number.POSITIVE_INFINITY) ||
     left.blockIndex - right.blockIndex
   );
 }
@@ -507,7 +519,9 @@ function looksLikeKey(text: string): boolean {
     return false;
   }
 
-  return /[:：]$/u.test(trimmed) || (/^[A-Z][A-Za-z\s]{1,40}$/u.test(trimmed) && trimmed.length <= 30);
+  return (
+    /[:：]$/u.test(trimmed) || (/^[A-Z][A-Za-z\s]{1,40}$/u.test(trimmed) && trimmed.length <= 30)
+  );
 }
 
 function looksLikeValue(text: string): boolean {

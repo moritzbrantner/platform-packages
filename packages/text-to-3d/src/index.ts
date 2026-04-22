@@ -15,14 +15,8 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("text-to-3d");
 
 export type TextTo3DInput = UniversalTaskInput<"text-to-3d">;
 export type TextTo3DOutput = UniversalTaskOutput<"text-to-3d">;
-export type TextTo3DRequest<Input = TextTo3DInput> = UniversalTaskRequest<
-  "text-to-3d",
-  Input
->;
-export type TextTo3DResult<Output = TextTo3DOutput> = UniversalTaskResult<
-  "text-to-3d",
-  Output
->;
+export type TextTo3DRequest<Input = TextTo3DInput> = UniversalTaskRequest<"text-to-3d", Input>;
+export type TextTo3DResult<Output = TextTo3DOutput> = UniversalTaskResult<"text-to-3d", Output>;
 export type TextTo3DPipeline<
   Input = TextTo3DInput,
   Output = TextTo3DOutput,
@@ -33,10 +27,7 @@ export type CreateTextTo3DPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createTextTo3DPipeline<
-  Input = TextTo3DInput,
-  Output = TextTo3DOutput,
->(
+export function createTextTo3DPipeline<Input = TextTo3DInput, Output = TextTo3DOutput>(
   options: CreateTextTo3DPipelineOptions,
 ): TextTo3DPipeline<Input, Output> {
   return createUniversalTaskPipeline({

@@ -13,9 +13,9 @@ const gradients = [
   "from-fuchsia-500/25 via-rose-500/15 to-background",
 ];
 
-export function StoryDefaultStage<
-  TData extends StoryNodeData = StoryNodeData,
->(props: StoryRenderProps<TData>) {
+export function StoryDefaultStage<TData extends StoryNodeData = StoryNodeData>(
+  props: StoryRenderProps<TData>,
+) {
   const { node, currentIndex, progress } = props;
   const reducedMotion = useReducedMotion();
   const CustomScene = node.scene;
@@ -37,12 +37,7 @@ export function StoryDefaultStage<
       exit={reducedMotion ? undefined : { opacity: 0, y: -16, scale: 0.98 }}
       transition={{ duration: reducedMotion ? 0 : 0.45, ease: "easeOut" }}
     >
-      <div
-        className={cn(
-          "absolute inset-0 bg-gradient-to-br opacity-90",
-          gradient,
-        )}
-      />
+      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-90", gradient)} />
       <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_60%)]" />
       <div className="relative z-10 flex flex-1 flex-col justify-between p-8 md:p-10">
         <div>

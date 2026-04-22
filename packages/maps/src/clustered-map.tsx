@@ -9,12 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  LayerGroup,
-  Map as LeafletMap,
-  PathOptions,
-  TileLayerOptions,
-} from "leaflet";
+import type { LayerGroup, Map as LeafletMap, PathOptions, TileLayerOptions } from "leaflet";
 
 import {
   createPointAggregationIndex,
@@ -419,7 +414,10 @@ function addClusterAreaLayer(
   }
 
   leaflet
-    .polygon(areaFeature.geometry.coordinates.map((ring) => ring.map(toLeafletLatLng)), options)
+    .polygon(
+      areaFeature.geometry.coordinates.map((ring) => ring.map(toLeafletLatLng)),
+      options,
+    )
     .addTo(overlay);
 }
 

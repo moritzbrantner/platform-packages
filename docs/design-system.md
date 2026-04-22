@@ -1,0 +1,103 @@
+# Design system
+
+`@moritzbrantner/ui` is the low-level design-system package for this workspace. It owns shared tokens, React primitives, composed UI components, theme metadata, Storybook coverage, and package-consumption guarantees.
+
+`@moritzbrantner/foundation-ui` is intentionally higher level. It may compose `@moritzbrantner/ui` with auth, profiles, uploads, settings, and other product workflows, but those workflows should not move into `@moritzbrantner/ui`.
+
+## Layers
+
+The package is maintained in four layers:
+
+1. Tokens: CSS variables for color, typography, radius, spacing, shadows, motion, z-index, focus rings, and chart colors.
+2. Primitives: reusable controls such as `Button`, `Input`, `Checkbox`, `Select`, `Dialog`, `Popover`, `Tooltip`, and `Tabs`.
+3. Composed components: shared arrangements such as `Card`, `DataTable`, `PlatformNavbar`, `PageShell`, `Toolbar`, `Stepper`, and `Dropzone`.
+4. Product patterns: app shell, auth, uploads, settings, data-entry, and report-problem flows. These belong in product packages such as `foundation-ui`, not in `ui`.
+
+## Consumer contract
+
+Apps import exactly one global UI stylesheet:
+
+```tsx
+import "@moritzbrantner/ui/styles.css";
+```
+
+The package also exposes theme-specific stylesheets:
+
+```tsx
+import "@moritzbrantner/ui/zleek/styles.css";
+import "@moritzbrantner/ui/bobba/styles.css";
+```
+
+Use root component imports by default:
+
+```tsx
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@moritzbrantner/ui";
+```
+
+Narrow imports are available for package consumers that need them:
+
+```tsx
+import { Button } from "@moritzbrantner/ui/components/button";
+import { cn } from "@moritzbrantner/ui/lib/cn";
+```
+
+## Component contract
+
+Public components should:
+
+- Accept `className`.
+- Forward normal DOM props.
+- Use `data-slot` for stable styling and testing hooks.
+- Use variants for intentional design choices.
+- Prefer `asChild` for polymorphic composition when the underlying primitive supports it.
+- Export variant helpers only when downstream consumers need them.
+- Avoid product-specific business logic.
+- Avoid open-ended visual props such as `color`, `rounded`, `shadow`, or arbitrary spacing controls.
+
+Good:
+
+```tsx
+<Button variant="secondary" size="sm">
+  Save
+</Button>
+```
+
+Avoid:
+
+```tsx
+<Button color="blue" rounded="large" shadow="heavy" padding="wide" />
+```
+
+## Token strategy
+
+Tokens are semantic CSS custom properties in `packages/ui/styles.css`. Public component styling should use tokens such as `--primary`, `--muted`, `--border`, and `--ring`, not raw color names.
+
+Theme wrappers such as `UiTheme`, `BobbaTheme`, and `ZleekTheme` add metadata classes and `data-ui-theme` attributes. They do not scope CSS variables by themselves, so multiple visual themes are not intended to coexist in one document unless the stylesheets are changed to support scoped tokens.
+
+## Adding components
+
+Add a component to `@moritzbrantner/ui` only when it is a fundamental primitive or is needed by at least two projects.
+
+Every new public component must have:
+
+- A root export from `src/index.ts`.
+- A component subpath from the generated `tsup` entry map.
+- Storybook coverage through either a dedicated story or an aggregate catalog story.
+- Tests for important rendering, accessibility, and variant behavior.
+- Styling based on existing tokens.
+
+## Verification
+
+Before publishing `@moritzbrantner/ui`, run:
+
+```sh
+bun run --filter @moritzbrantner/ui check-types
+bun run --filter @moritzbrantner/ui lint
+bun run --filter @moritzbrantner/ui test
+bun run --filter @moritzbrantner/ui build
+bun run --filter @moritzbrantner/ui test:storybook
+bun run --filter @moritzbrantner/ui test:package
+cd packages/ui && npm pack --dry-run --ignore-scripts --json
+```
+
+`bun run --filter @moritzbrantner/ui lint` includes a design-system verifier that checks package exports, stylesheet exports, component root exports, Storybook coverage, and the consumer example.

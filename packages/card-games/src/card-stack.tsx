@@ -27,7 +27,10 @@ export function CardStack({
   return (
     <div
       {...divProps}
-      className={cx("mb-card-stack grid w-fit pl-[0.4rem] pr-[1.6rem] pt-[0.4rem] pb-[2.1rem]", className)}
+      className={cx(
+        "mb-card-stack grid w-fit pl-[0.4rem] pr-[1.6rem] pt-[0.4rem] pb-[2.1rem]",
+        className,
+      )}
       style={style}
     >
       {items.map((child, index) => {

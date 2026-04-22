@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/table-question-answering", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("table-question-answering");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=table-question-answering");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=table-question-answering",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

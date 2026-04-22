@@ -133,35 +133,32 @@ export type StoryRenderProps<TData extends StoryNodeData = StoryNodeData> = {
   restart: () => void;
 };
 
-export type StoryStageComponent<TData extends StoryNodeData = StoryNodeData> =
-  ComponentType<StoryRenderProps<TData>>;
+export type StoryStageComponent<TData extends StoryNodeData = StoryNodeData> = ComponentType<
+  StoryRenderProps<TData>
+>;
 
-export type StoryRemotionSceneProps<
-  TData extends StoryNodeData = StoryNodeData,
-> = StoryRenderProps<TData> & {
-  frame: number;
-  absoluteFrame: number;
-  durationInFrames: number;
-  sceneProgress: number;
-  timelineScene: StoryTimelineScene<TData>;
-};
+export type StoryRemotionSceneProps<TData extends StoryNodeData = StoryNodeData> =
+  StoryRenderProps<TData> & {
+    frame: number;
+    absoluteFrame: number;
+    durationInFrames: number;
+    sceneProgress: number;
+    timelineScene: StoryTimelineScene<TData>;
+  };
 
-export type StoryRemotionSceneComponent<
-  TData extends StoryNodeData = StoryNodeData,
-> = ComponentType<StoryRemotionSceneProps<TData>>;
+export type StoryRemotionSceneComponent<TData extends StoryNodeData = StoryNodeData> =
+  ComponentType<StoryRemotionSceneProps<TData>>;
 
 export type StoryThreeSceneProps<TData extends StoryNodeData = StoryNodeData> =
   StoryRenderProps<TData> & {
     stageProps?: Record<string, unknown>;
   };
 
-export type StoryThreeSceneComponent<
-  TData extends StoryNodeData = StoryNodeData,
-> = ComponentType<StoryThreeSceneProps<TData>>;
+export type StoryThreeSceneComponent<TData extends StoryNodeData = StoryNodeData> = ComponentType<
+  StoryThreeSceneProps<TData>
+>;
 
-export type StoryRendererRegistry<
-  TData extends StoryNodeData = StoryNodeData,
-> = {
+export type StoryRendererRegistry<TData extends StoryNodeData = StoryNodeData> = {
   web?: Record<string, StoryStageComponent<TData>>;
   remotion?: Record<string, StoryRemotionSceneComponent<TData>>;
   three?: Record<string, StoryThreeSceneComponent<TData>>;

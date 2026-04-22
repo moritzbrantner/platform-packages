@@ -104,10 +104,7 @@ function DataDensityPage() {
     zoom: geoZoom,
   });
   const topGeoFeatures = [...geoAggregation.features]
-    .sort(
-      (left, right) =>
-        (right.metrics.load ?? 0) - (left.metrics.load ?? 0),
-    )
+    .sort((left, right) => (right.metrics.load ?? 0) - (left.metrics.load ?? 0))
     .slice(0, 5);
 
   return (
@@ -152,7 +149,8 @@ function DataDensityPage() {
             </div>
             <CardTitle>Alert row window</CardTitle>
             <CardDescription>
-              Move through thousands of ordered records while rendering only the requested rows plus overscan.
+              Move through thousands of ordered records while rendering only the requested rows plus
+              overscan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -188,7 +186,8 @@ function DataDensityPage() {
             </Badge>
             <CardTitle>Aggregated metrics travel with the view</CardTitle>
             <CardDescription>
-              The summary is computed from the returned window, so a virtualized renderer can keep totals visible without scanning the full dataset.
+              The summary is computed from the returned window, so a virtualized renderer can keep
+              totals visible without scanning the full dataset.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -206,9 +205,9 @@ function DataDensityPage() {
             />
             <Item variant="muted" className="items-start bg-muted/20">
               <ItemDescription className="line-clamp-none leading-6">
-                The same primitive backs dense table, graph node, and timeline views:
-                build an index once, request the currently visible slice, and keep the
-                surrounding UI focused on compact render data.
+                The same primitive backs dense table, graph node, and timeline views: build an index
+                once, request the currently visible slice, and keep the surrounding UI focused on
+                compact render data.
               </ItemDescription>
             </Item>
           </CardContent>
@@ -228,7 +227,8 @@ function DataDensityPage() {
             </div>
             <CardTitle>Minute traffic collapsed into chart bins</CardTitle>
             <CardDescription>
-              The index returns min, max, average, count, and metric totals for each display-sized bin.
+              The index returns min, max, average, count, and metric totals for each display-sized
+              bin.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -255,10 +255,7 @@ function DataDensityPage() {
                 label="Incidents"
                 value={formatInteger(binnedSeries.summary.metrics.incidents ?? 0)}
               />
-              <MetricStrip
-                label="Samples"
-                value={formatInteger(binnedSeries.summary.binCount)}
-              />
+              <MetricStrip label="Samples" value={formatInteger(binnedSeries.summary.binCount)} />
             </div>
           </CardContent>
         </Card>
@@ -275,7 +272,8 @@ function DataDensityPage() {
             </div>
             <CardTitle>Viewport aggregation without a map renderer</CardTitle>
             <CardDescription>
-              The geo index can be tested directly, then handed to a map, canvas, SVG layer, or server-driven viewport API.
+              The geo index can be tested directly, then handed to a map, canvas, SVG layer, or
+              server-driven viewport API.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -335,7 +333,8 @@ function DataDensityPage() {
             </Badge>
             <CardTitle>@moritzbrantner/timelines</CardTitle>
             <CardDescription>
-              A dense temporal-event package would reuse row windows for lane virtualization and numeric bins for zoomed-out time ranges.
+              A dense temporal-event package would reuse row windows for lane virtualization and
+              numeric bins for zoomed-out time ranges.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
@@ -358,15 +357,7 @@ function DataDensityPage() {
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-}) {
+function MetricCard({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
       <CardContent className="space-y-2 p-5">
@@ -382,20 +373,14 @@ function MetricStrip({ label, value }: { label: string; value: string }) {
   return (
     <Item variant="muted" className="items-start bg-muted/20 p-4">
       <ItemContent>
-        <ItemDescription className="text-xs uppercase tracking-[0.18em]">
-          {label}
-        </ItemDescription>
+        <ItemDescription className="text-xs uppercase tracking-[0.18em]">{label}</ItemDescription>
         <ItemTitle className="mt-1 text-xl font-semibold">{value}</ItemTitle>
       </ItemContent>
     </Item>
   );
 }
 
-function OperationsRowItem({
-  entry,
-}: {
-  entry: IndexedDataDensityItem<OperationsRow>;
-}) {
+function OperationsRowItem({ entry }: { entry: IndexedDataDensityItem<OperationsRow> }) {
   const latencyPercent = Math.min(100, Math.round((entry.item.latencyMs / 260) * 100));
 
   return (
@@ -418,19 +403,14 @@ function OperationsRowItem({
       </div>
       <div className="text-left md:text-right">
         <p className="font-medium">{formatInteger(entry.metrics.events)} events</p>
-        <p className="text-muted-foreground">
-          {formatCurrency(entry.metrics.revenue)}
-        </p>
+        <p className="text-muted-foreground">{formatCurrency(entry.metrics.revenue)}</p>
       </div>
     </Item>
   );
 }
 
 function SeriesBars({ bins }: { bins: Array<BinnedSeriesBin> }) {
-  const maxAverage = Math.max(
-    1,
-    ...bins.map((bin) => bin.averageY ?? 0),
-  );
+  const maxAverage = Math.max(1, ...bins.map((bin) => bin.averageY ?? 0));
   const labelStep = Math.max(1, Math.floor(bins.length / 6));
 
   return (
@@ -440,10 +420,7 @@ function SeriesBars({ bins }: { bins: Array<BinnedSeriesBin> }) {
           const height = Math.max(4, ((bin.averageY ?? 0) / maxAverage) * 100);
 
           return (
-            <div
-              key={bin.index}
-              className="flex h-full min-w-0 flex-1 flex-col justify-end gap-2"
-            >
+            <div key={bin.index} className="flex h-full min-w-0 flex-1 flex-col justify-end gap-2">
               <div
                 className="w-full rounded-t-sm bg-primary"
                 style={{ height: `${height}%` }}
@@ -476,9 +453,7 @@ function GeoPreview({
       {visibleFeatures.map((feature) => {
         const [left, top] = projectFeature(feature, bounds);
         const isCluster = feature.kind === "cluster";
-        const size = isCluster
-          ? Math.min(64, 24 + Math.log2(feature.pointCount + 1) * 7)
-          : 14;
+        const size = isCluster ? Math.min(64, 24 + Math.log2(feature.pointCount + 1) * 7) : 14;
 
         return (
           <div
@@ -495,11 +470,7 @@ function GeoPreview({
               transform: "translate(-50%, -50%)",
               width: size,
             }}
-            title={
-              isCluster
-                ? `${feature.pointCountAbbreviated} facilities`
-                : feature.point.label
-            }
+            title={isCluster ? `${feature.pointCountAbbreviated} facilities` : feature.point.label}
           >
             {isCluster ? feature.pointCountAbbreviated : null}
           </div>
@@ -512,11 +483,7 @@ function GeoPreview({
   );
 }
 
-function FeatureRow({
-  feature,
-}: {
-  feature: AggregatedGeoDensityFeature<FacilityProperties>;
-}) {
+function FeatureRow({ feature }: { feature: AggregatedGeoDensityFeature<FacilityProperties> }) {
   const label =
     feature.kind === "cluster"
       ? `${feature.pointCountAbbreviated} facilities`
@@ -537,9 +504,7 @@ function FeatureRow({
       </div>
       <div className="text-left md:text-right">
         <p>{formatInteger(feature.metrics.load ?? 0)} load</p>
-        <p className="text-muted-foreground">
-          {formatInteger(feature.metrics.demand ?? 0)} demand
-        </p>
+        <p className="text-muted-foreground">{formatInteger(feature.metrics.demand ?? 0)} demand</p>
       </div>
     </Item>
   );
@@ -550,9 +515,7 @@ function SuggestionPoint({ title, text }: { title: string; text: string }) {
     <Item variant="muted" className="items-start bg-muted/20 p-4">
       <ItemContent>
         <ItemTitle>{title}</ItemTitle>
-        <ItemDescription className="line-clamp-none leading-6">
-          {text}
-        </ItemDescription>
+        <ItemDescription className="line-clamp-none leading-6">{text}</ItemDescription>
       </ItemContent>
     </Item>
   );
@@ -610,9 +573,7 @@ function createTrafficSeries(count: number): Array<NumericSeriesPoint> {
   });
 }
 
-function createFacilityPoints(
-  count: number,
-): Array<GeoDensityPoint<FacilityProperties>> {
+function createFacilityPoints(count: number): Array<GeoDensityPoint<FacilityProperties>> {
   const cities = [
     { city: "London", latitude: 51.5072, longitude: -0.1276, region: "UK" },
     { city: "Paris", latitude: 48.8566, longitude: 2.3522, region: "FR" },
@@ -666,9 +627,7 @@ function projectFeature(
 }
 
 function getFeatureKey(feature: AggregatedGeoDensityFeature<FacilityProperties>) {
-  return feature.kind === "cluster"
-    ? `cluster-${feature.clusterId}`
-    : `point-${feature.point.id}`;
+  return feature.kind === "cluster" ? `cluster-${feature.clusterId}` : `point-${feature.point.id}`;
 }
 
 function formatHour(minute: number) {

@@ -72,7 +72,7 @@ test("readme marks the scaffold-critical package set explicitly", () => {
 test("readme package inventory lists every workspace package", () => {
   const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
   const inventoryPackages = Array.from(
-    readme.matchAll(/^\| `(@moritzbrantner\/[^`]+)` \| ([^|]+) \|/gm),
+    readme.matchAll(/^\|\s*`(@moritzbrantner\/[^`]+)`\s*\|\s*([^|]+?)\s*\|/gm),
     (match) => ({
       name: match[1]!,
       status: match[2]!.trim(),
@@ -87,27 +87,36 @@ test("readme package inventory lists every workspace package", () => {
     inventoryPackages.map((entry) => entry.name).sort((left, right) => left.localeCompare(right)),
   ).toEqual(workspacePackages);
   expect(new Set(inventoryPackages.map((entry) => entry.status))).toEqual(
-    new Set([
-      "experimental",
-      "generated task wrapper",
-      "release-ready",
-      "scaffold-critical",
-    ]),
+    new Set(["experimental", "generated task wrapper", "release-ready", "scaffold-critical"]),
   );
 });
 
 test("publishing guide describes the full workspace release path", () => {
-  const publishingGuide = readFileSync(
-    path.join(repoRoot, "docs/publishing.md"),
-    "utf8",
-  );
+  const publishingGuide = readFileSync(path.join(repoRoot, "docs/publishing.md"), "utf8");
 
-  expect(publishingGuide).toContain(
-    "Prepare or publish the full workspace package set",
-  );
+  expect(publishingGuide).toContain("Prepare or publish the full workspace package set");
   expect(publishingGuide).toContain("validates and publishes every public package");
   expect(publishingGuide).toContain("consumer repos should adopt these first");
   expect(publishingGuide).toContain("Release-readiness categories");
+});
+
+test("root quality tooling is wired for Oxc linting and formatting", () => {
+  const packageJson = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8")) as {
+    devDependencies?: Record<string, string>;
+    scripts?: Record<string, string>;
+  };
+
+  expect(packageJson.devDependencies?.oxlint).toBeTruthy();
+  expect(packageJson.devDependencies?.oxfmt).toBeTruthy();
+  expect(packageJson.scripts?.format).toBe("oxfmt");
+  expect(packageJson.scripts?.["format:check"]).toBe("oxfmt --check");
+  expect(packageJson.scripts?.["lint:ox"]).toBe("oxlint --format=github");
+  expect(packageJson.scripts?.["lint:repo"]).toContain("verify-package-styles.mjs");
+  expect(packageJson.scripts?.["lint:repo"]).toContain("verify-ui-components.mjs");
+  expect(packageJson.scripts?.lint).toContain("bun run format:check");
+  expect(packageJson.scripts?.lint).toContain("bun run lint:ox");
+  expect(existsSync(path.join(repoRoot, ".oxlintrc.json"))).toBe(true);
+  expect(existsSync(path.join(repoRoot, ".oxfmtrc.json"))).toBe(true);
 });
 
 test("scaffold-critical packages keep their public package contracts", () => {
@@ -142,18 +151,14 @@ test("config packages import and parse from their package roots", async () => {
   const typescriptConfigs = Object.fromEntries(
     ["base.json", "react-library.json", "next-app.json", "node.json"].map((configFile) => [
       configFile,
-      JSON.parse(
-        readFileSync(path.join(packagesRoot, "typescript-config", configFile), "utf8"),
-      ),
+      JSON.parse(readFileSync(path.join(packagesRoot, "typescript-config", configFile), "utf8")),
     ]),
   );
 
   expect(typescriptConfigs["base.json"].compilerOptions.module).toBe("NodeNext");
   expect(typescriptConfigs["base.json"].compilerOptions.strict).toBe(true);
   expect(typescriptConfigs["react-library.json"].compilerOptions.jsx).toBe("react-jsx");
-  expect(typescriptConfigs["next-app.json"].compilerOptions.plugins).toEqual([
-    { name: "next" },
-  ]);
+  expect(typescriptConfigs["next-app.json"].compilerOptions.plugins).toEqual([{ name: "next" }]);
   expect(typescriptConfigs["node.json"].compilerOptions.types).toContain("node");
 });
 
@@ -199,7 +204,9 @@ test("publishable package metadata exposes matching build artifacts", () => {
 test("release-ready package inventory entries have publishable metadata", () => {
   const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
   const releaseReadyPackageNames = Array.from(
-    readme.matchAll(/^\| `@moritzbrantner\/([^`]+)` \| (scaffold-critical|release-ready) \|/gm),
+    readme.matchAll(
+      /^\|\s*`@moritzbrantner\/([^`]+)`\s*\|\s*(scaffold-critical|release-ready)\s*\|/gm,
+    ),
     (match) => match[1]!,
   );
 
@@ -224,10 +231,7 @@ test("Hugging Face task wrappers follow the generated package contract", () => {
     path.join(packagesRoot, "huggingface-universal", "src", "index.ts"),
     "utf8",
   );
-  const tasks = Array.from(
-    universalSource.matchAll(/task:\s*"([^"]+)"/g),
-    (match) => match[1]!,
-  );
+  const tasks = Array.from(universalSource.matchAll(/task:\s*"([^"]+)"/g), (match) => match[1]!);
 
   expect(tasks).toHaveLength(47);
 
@@ -244,8 +248,8 @@ test("Hugging Face task wrappers follow the generated package contract", () => {
         "@moritzbrantner/huggingface-universal": "^0.1.1",
       },
     );
-    expect(source).toContain(`getHuggingFaceTaskDescriptor("${task}")`);
-    expect(source).toContain(`createHuggingFaceTaskPackage("${task}")`);
+    expect(source).toMatch(new RegExp(`getHuggingFaceTaskDescriptor\\(\\s*"${task}"\\s*,?\\s*\\)`));
+    expect(source).toMatch(new RegExp(`createHuggingFaceTaskPackage\\(\\s*"${task}"\\s*,?\\s*\\)`));
     expect(source).toContain(
       task === "question-answering"
         ? `create${pascalName}UniversalPipeline`
@@ -263,9 +267,7 @@ test("Hugging Face task wrappers follow the generated package contract", () => {
 });
 
 function readPackageJson(packageDir: string) {
-  return JSON.parse(
-    readFileSync(path.join(packagesRoot, packageDir, "package.json"), "utf8"),
-  ) as {
+  return JSON.parse(readFileSync(path.join(packagesRoot, packageDir, "package.json"), "utf8")) as {
     dependencies?: Record<string, string>;
     exports?: unknown;
     files?: string[];

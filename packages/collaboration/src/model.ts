@@ -206,10 +206,7 @@ export function loadCollaborationStore(
   data: Uint8Array,
   options: LoadCollaborationStoreOptions = {},
 ): CollaborationStore {
-  const doc = Automerge.load<CollaborationDocument>(
-    data,
-    buildInitOptions(options.actorId),
-  );
+  const doc = Automerge.load<CollaborationDocument>(data, buildInitOptions(options.actorId));
 
   return createStoreFromDoc(doc, options.now);
 }
@@ -218,9 +215,7 @@ export function createCollaborationOverview(
   document: CollaborationDocument | Automerge.Doc<CollaborationDocument>,
   options: CreateCollaborationOverviewOptions = {},
 ): CollaborationOverview {
-  const includedStatuses = options.includeIdleSessions
-    ? ACTIVE_AND_IDLE_STATUSES
-    : ACTIVE_STATUSES;
+  const includedStatuses = options.includeIdleSessions ? ACTIVE_AND_IDLE_STATUSES : ACTIVE_STATUSES;
   const objects = Object.values(document.objects ?? {});
   const collaborators = document.collaborators ?? {};
   const sessions = Object.values(document.sessions ?? {}).filter((session) =>
@@ -233,7 +228,9 @@ export function createCollaborationOverview(
 
   for (const session of sessions) {
     const normalizedObjectIds = uniqueObjectIds(session.objectIds);
-    const validObjectIds = normalizedObjectIds.filter((objectId) => Boolean(document.objects[objectId]));
+    const validObjectIds = normalizedObjectIds.filter((objectId) =>
+      Boolean(document.objects[objectId]),
+    );
 
     if (validObjectIds.length === 0) {
       unassignedCollaboratorIds.add(session.collaboratorId);
@@ -245,7 +242,10 @@ export function createCollaborationOverview(
       const collaboratorIds = directCollaboratorIdsByObjectId.get(objectId) ?? new Set<string>();
       collaboratorIds.add(session.collaboratorId);
       directCollaboratorIdsByObjectId.set(objectId, collaboratorIds);
-      directSessionCountByObjectId.set(objectId, (directSessionCountByObjectId.get(objectId) ?? 0) + 1);
+      directSessionCountByObjectId.set(
+        objectId,
+        (directSessionCountByObjectId.get(objectId) ?? 0) + 1,
+      );
     }
   }
 
@@ -315,7 +315,9 @@ export function createCollaborationOverview(
     roots: accumulator.roots,
     rows: accumulator.rows,
     unassignedActiveCollaborators: Array.from(unassignedCollaboratorIds)
-      .map((collaboratorId) => toOverviewCollaborator(collaborators[collaboratorId], collaboratorId))
+      .map((collaboratorId) =>
+        toOverviewCollaborator(collaborators[collaboratorId], collaboratorId),
+      )
       .sort(compareCollaborator),
   };
 }
@@ -347,10 +349,7 @@ function createStoreFromDoc(
         return doc;
       }
 
-      const [nextDoc] = Automerge.applyChanges(
-        Automerge.clone(doc, store.actorId),
-        changes,
-      );
+      const [nextDoc] = Automerge.applyChanges(Automerge.clone(doc, store.actorId), changes);
       doc = ensureDocumentShape(nextDoc);
       return doc;
     },
@@ -407,7 +406,9 @@ function createStoreFromDoc(
       }
 
       const descendants = collectDescendantIds(doc, objectId);
-      const idsToRemove = new Set<string>(options.removeDescendants ? [objectId, ...descendants] : [objectId]);
+      const idsToRemove = new Set<string>(
+        options.removeDescendants ? [objectId, ...descendants] : [objectId],
+      );
       const parentId = object.parentId;
       const updatedAt = clock();
 
@@ -521,7 +522,7 @@ function createStoreFromDoc(
     upsertObject(input) {
       const existing = doc.objects[input.id];
       const nextParentId =
-        input.parentId === undefined ? existing?.parentId ?? null : input.parentId;
+        input.parentId === undefined ? (existing?.parentId ?? null) : input.parentId;
 
       validateParentRelationship(doc, input.id, nextParentId);
       const timestamp = clock();
@@ -553,7 +554,8 @@ function createStoreFromDoc(
     },
     upsertSession(input) {
       const collaborator = doc.collaborators[input.collaboratorId];
-      const collaboratorName = input.collaboratorName ?? collaborator?.displayName ?? input.collaboratorId;
+      const collaboratorName =
+        input.collaboratorName ?? collaborator?.displayName ?? input.collaboratorId;
       const objectIds = validateObjectIds(doc, input.objectIds ?? []);
       const timestamp = clock();
 
@@ -657,9 +659,7 @@ function cloneRecord<T>(
     return {};
   }
 
-  return Object.fromEntries(
-    Object.entries(record).map(([key, value]) => [key, mapValue(value)]),
-  );
+  return Object.fromEntries(Object.entries(record).map(([key, value]) => [key, mapValue(value)]));
 }
 
 function validateObjectIds(
@@ -747,13 +747,7 @@ function finalizeOverviewNode(
   node.totalActiveSessionCount = node.directActiveSessionCount;
 
   const children = node.children.map((child) =>
-    finalizeOverviewNode(
-      child,
-      collaborators,
-      document,
-      accumulator,
-      depth + 1,
-    ),
+    finalizeOverviewNode(child, collaborators, document, accumulator, depth + 1),
   );
 
   for (const child of node.children) {
@@ -769,7 +763,9 @@ function finalizeOverviewNode(
     children,
     depth,
     directActiveCollaborators: Array.from(node.directActiveCollaboratorIds)
-      .map((collaboratorId) => toOverviewCollaborator(collaborators[collaboratorId], collaboratorId))
+      .map((collaboratorId) =>
+        toOverviewCollaborator(collaborators[collaboratorId], collaboratorId),
+      )
       .sort(compareCollaborator),
     directActiveCollaboratorCount: node.directActiveCollaboratorIds.size,
     directActiveSessionCount: node.directActiveSessionCount,
@@ -779,7 +775,9 @@ function finalizeOverviewNode(
     parentId: node.parentId,
     path: buildPath(document, node.id),
     totalActiveCollaborators: Array.from(node.totalActiveCollaboratorIds)
-      .map((collaboratorId) => toOverviewCollaborator(collaborators[collaboratorId], collaboratorId))
+      .map((collaboratorId) =>
+        toOverviewCollaborator(collaborators[collaboratorId], collaboratorId),
+      )
       .sort(compareCollaborator),
     totalActiveCollaboratorCount: node.totalActiveCollaboratorIds.size,
     totalActiveSessionCount: node.totalActiveSessionCount,
@@ -848,7 +846,9 @@ function defaultNow(): string {
   return new Date().toISOString();
 }
 
-function buildInitOptions(actorId: string | undefined): Automerge.InitOptions<CollaborationDocument> | undefined {
+function buildInitOptions(
+  actorId: string | undefined,
+): Automerge.InitOptions<CollaborationDocument> | undefined {
   const normalizedActorId = normalizeActorId(actorId);
 
   return normalizedActorId ? { actor: normalizedActorId } : undefined;

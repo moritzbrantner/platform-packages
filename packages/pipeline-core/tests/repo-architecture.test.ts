@@ -93,8 +93,7 @@ function getRuntimeDependencies(packageJson: PackageJson): string[] {
   return Object.keys({
     ...packageJson.dependencies,
     ...packageJson.peerDependencies,
-  })
-    .sort((left, right) => left.localeCompare(right));
+  }).sort((left, right) => left.localeCompare(right));
 }
 
 function findCycle(graph: Map<string, string[]>): string[] | null {

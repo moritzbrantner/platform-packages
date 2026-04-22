@@ -22,10 +22,7 @@ export type IndexedTreeNode<TData = Record<string, unknown>> = {
 
 export type TreeIndexOptions<TData = Record<string, unknown>> = {
   missingParent?: "error" | "root";
-  sortSiblings?: (
-    left: IndexedTreeNode<TData>,
-    right: IndexedTreeNode<TData>,
-  ) => number;
+  sortSiblings?: (left: IndexedTreeNode<TData>, right: IndexedTreeNode<TData>) => number;
 };
 
 export type TreeFlattenOptions = {
@@ -36,10 +33,7 @@ export type TreeIndex<TData = Record<string, unknown>> = {
   flatten(options?: TreeFlattenOptions): Array<IndexedTreeNode<TData>>;
   getAncestors(nodeId: TreeNodeId): Array<IndexedTreeNode<TData>>;
   getChildren(nodeId: TreeNodeId): Array<IndexedTreeNode<TData>>;
-  getDescendants(
-    nodeId: TreeNodeId,
-    options?: TreeFlattenOptions,
-  ): Array<IndexedTreeNode<TData>>;
+  getDescendants(nodeId: TreeNodeId, options?: TreeFlattenOptions): Array<IndexedTreeNode<TData>>;
   getNodeById(nodeId: TreeNodeId): IndexedTreeNode<TData> | null;
   getPath(nodeId: TreeNodeId): Array<IndexedTreeNode<TData>>;
   getSubtree(nodeId: TreeNodeId): IndexedTreeNode<TData> | null;
@@ -63,11 +57,7 @@ export function createTreeIndex<TData = Record<string, unknown>>(
   const indexedNodes = nodes.map((node, index) => normalizeTreeNode(node, index));
   const nodeLookup = createNodeLookup(indexedNodes);
 
-  normalizeParentReferences(
-    indexedNodes,
-    nodeLookup,
-    options.missingParent ?? "root",
-  );
+  normalizeParentReferences(indexedNodes, nodeLookup, options.missingParent ?? "root");
   assertTreeIsAcyclic(indexedNodes, nodeLookup);
 
   const roots = attachChildren(indexedNodes, nodeLookup);
@@ -194,10 +184,7 @@ function normalizeTreeNode<TData>(
     id: String(node.id),
     index,
     label: node.label ?? "",
-    parentId:
-      node.parentId === undefined || node.parentId === null
-        ? null
-        : String(node.parentId),
+    parentId: node.parentId === undefined || node.parentId === null ? null : String(node.parentId),
     path: [],
   };
 }
@@ -269,12 +256,7 @@ function visitParentChain<TData>(
   visiting.add(node.id);
 
   if (node.parentId) {
-    visitParentChain(
-      nodeLookup.get(node.parentId)!,
-      nodeLookup,
-      visiting,
-      visited,
-    );
+    visitParentChain(nodeLookup.get(node.parentId)!, nodeLookup, visiting, visited);
   }
 
   visiting.delete(node.id);
@@ -305,10 +287,7 @@ function attachChildren<TData>(
 
 function sortTreeSiblings<TData>(
   nodes: Array<IndexedTreeNode<TData>>,
-  sortSiblings: (
-    left: IndexedTreeNode<TData>,
-    right: IndexedTreeNode<TData>,
-  ) => number,
+  sortSiblings: (left: IndexedTreeNode<TData>, right: IndexedTreeNode<TData>) => number,
 ) {
   nodes.sort(sortSiblings);
 
@@ -362,10 +341,7 @@ function flattenDepthFirst<TNode>(
 
 function getDefaultChildren<TNode>(node: TNode): readonly TNode[] {
   return (
-    node &&
-    typeof node === "object" &&
-    "children" in node &&
-    Array.isArray(node.children)
+    node && typeof node === "object" && "children" in node && Array.isArray(node.children)
       ? node.children
       : []
   ) as readonly TNode[];

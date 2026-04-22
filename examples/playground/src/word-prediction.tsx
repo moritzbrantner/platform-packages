@@ -184,9 +184,8 @@ function WordPredictionPage() {
             </Badge>
             <CardTitle>Train the composer</CardTitle>
             <CardDescription>
-              Each non-empty line becomes another example phrase. The conversation on
-              the right is also fed back into the model so the ranking adapts as you
-              send messages.
+              Each non-empty line becomes another example phrase. The conversation on the right is
+              also fed back into the model so the ranking adapts as you send messages.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -213,14 +212,11 @@ function WordPredictionPage() {
               <FieldContent>
                 <FieldTitle>Use built-in default data</FieldTitle>
                 <FieldDescription>
-                  Starts from {DEFAULT_WORD_PREDICTION_TEXTS.length} seed phrases before
-                  applying the preset corpus and live conversation.
+                  Starts from {DEFAULT_WORD_PREDICTION_TEXTS.length} seed phrases before applying
+                  the preset corpus and live conversation.
                 </FieldDescription>
               </FieldContent>
-              <Switch
-                checked={includeDefaultData}
-                onCheckedChange={setIncludeDefaultData}
-              />
+              <Switch checked={includeDefaultData} onCheckedChange={setIncludeDefaultData} />
             </Field>
 
             <div className="space-y-2">
@@ -275,9 +271,9 @@ function WordPredictionPage() {
             <CardHeader>
               <CardTitle>Chat-style composer</CardTitle>
               <CardDescription>
-                Suggestions stay above the textbox, are clickable, and map directly to
-                Ctrl+1-9. By default only the word is shown; the composer itself lets
-                you reveal score and context when needed.
+                Suggestions stay above the textbox, are clickable, and map directly to Ctrl+1-9. By
+                default only the word is shown; the composer itself lets you reveal score and
+                context when needed.
               </CardDescription>
             </CardHeader>
             <CardContent>

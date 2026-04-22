@@ -24,13 +24,35 @@ describe("@moritzbrantner/speed-reading", () => {
     expect(fastChunk).toBeTruthy();
     expect(sentenceChunk).toBeTruthy();
     expect(
-      getSpeedReadingDelay(sentenceChunk ?? { text: "", wordCount: 0, index: 0, pivotIndex: 0, prefix: "", pivot: "", suffix: "" }, {
-        wordsPerMinute: 300,
-      }),
+      getSpeedReadingDelay(
+        sentenceChunk ?? {
+          text: "",
+          wordCount: 0,
+          index: 0,
+          pivotIndex: 0,
+          prefix: "",
+          pivot: "",
+          suffix: "",
+        },
+        {
+          wordsPerMinute: 300,
+        },
+      ),
     ).toBeGreaterThan(
-      getSpeedReadingDelay(fastChunk ?? { text: "", wordCount: 0, index: 0, pivotIndex: 0, prefix: "", pivot: "", suffix: "" }, {
-        wordsPerMinute: 300,
-      }),
+      getSpeedReadingDelay(
+        fastChunk ?? {
+          text: "",
+          wordCount: 0,
+          index: 0,
+          pivotIndex: 0,
+          prefix: "",
+          pivot: "",
+          suffix: "",
+        },
+        {
+          wordsPerMinute: 300,
+        },
+      ),
     );
   });
 

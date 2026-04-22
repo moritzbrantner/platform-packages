@@ -10,11 +10,7 @@ type StepperProps = React.ComponentProps<"ol"> & {
   orientation?: StepperOrientation;
 };
 
-function Stepper({
-  className,
-  orientation = "horizontal",
-  ...props
-}: StepperProps) {
+function Stepper({ className, orientation = "horizontal", ...props }: StepperProps) {
   return (
     <ol
       data-slot="stepper"
@@ -32,11 +28,7 @@ type StepperItemProps = React.ComponentProps<"li"> & {
   status?: StepperStatus;
 };
 
-function StepperItem({
-  className,
-  status = "incomplete",
-  ...props
-}: StepperItemProps) {
+function StepperItem({ className, status = "incomplete", ...props }: StepperItemProps) {
   return (
     <li
       data-slot="stepper-item"
@@ -50,11 +42,7 @@ function StepperItem({
   );
 }
 
-function StepperIndicator({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function StepperIndicator({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="stepper-indicator"
@@ -75,13 +63,7 @@ function StepperIndicator({
 }
 
 function StepperContent({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="stepper-content"
-      className={cn("min-w-0 pt-0.5", className)}
-      {...props}
-    />
-  );
+  return <div data-slot="stepper-content" className={cn("min-w-0 pt-0.5", className)} {...props} />;
 }
 
 function StepperTitle({ className, ...props }: React.ComponentProps<"div">) {
@@ -97,10 +79,7 @@ function StepperTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function StepperDescription({
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
+function StepperDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="stepper-description"
@@ -110,10 +89,7 @@ function StepperDescription({
   );
 }
 
-function StepperConnector({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function StepperConnector({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       aria-hidden="true"

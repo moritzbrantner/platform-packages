@@ -42,13 +42,7 @@ const themeConfig = {
 function UiTheme({ theme, className, ...props }: UiThemeProps) {
   const config = themeConfig[theme];
 
-  return (
-    <div
-      data-ui-theme={config.name}
-      className={cn(config.className, className)}
-      {...props}
-    />
-  );
+  return <div data-ui-theme={config.name} className={cn(config.className, className)} {...props} />;
 }
 
 function ZleekTheme(props: Omit<UiThemeProps, "theme">) {
@@ -59,12 +53,5 @@ function BobbaTheme(props: Omit<UiThemeProps, "theme">) {
   return <UiTheme theme="bobba" {...props} />;
 }
 
-export {
-  BobbaTheme,
-  UiTheme,
-  ZleekTheme,
-  bobbaTheme,
-  themeConfig,
-  zleekTheme,
-};
+export { BobbaTheme, UiTheme, ZleekTheme, bobbaTheme, themeConfig, zleekTheme };
 export type { UiThemeConfig, UiThemeName, UiThemeProps };

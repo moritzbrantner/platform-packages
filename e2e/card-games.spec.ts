@@ -1,13 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("renders the card games playground preview and updates the focus card", async ({
-  page,
-}) => {
+test("renders the card games playground preview and updates the focus card", async ({ page }) => {
   await page.goto("/card-games.html");
 
-  await expect(
-    page.getByRole("heading", { name: "Card games package examples" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Card games package examples" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Player hand" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Draw and discard piles" })).toBeVisible();
   await expect(page.getByLabel("Player hand")).toBeVisible();
@@ -18,9 +14,7 @@ test("renders the card games playground preview and updates the focus card", asy
     element.click();
   });
 
-  await expect(
-    page.getByRole("heading", { name: "Night courier", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Night courier", exact: true })).toBeVisible();
   await expect(page.getByText("Platform deck").first()).toBeVisible();
 
   const focusCard = page.getByRole("button", { name: "Play Night courier" });
@@ -49,9 +43,7 @@ test("renders the card games playground preview and updates the focus card", asy
 
   await page.getByRole("menuitem", { name: "Inspect card" }).click();
   await expect(page.getByRole("dialog")).toContainText("Rules text");
-  await expect(
-    page.getByRole("heading", { name: "Ember ace", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ember ace", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
 
   await vanguardSlot.click({ button: "right" });

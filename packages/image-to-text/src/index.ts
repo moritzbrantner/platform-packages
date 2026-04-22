@@ -33,10 +33,7 @@ export type CreateImageToTextPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createImageToTextPipeline<
-  Input = ImageToTextInput,
-  Output = ImageToTextOutput,
->(
+export function createImageToTextPipeline<Input = ImageToTextInput, Output = ImageToTextOutput>(
   options: CreateImageToTextPipelineOptions,
 ): ImageToTextPipeline<Input, Output> {
   return createUniversalTaskPipeline({

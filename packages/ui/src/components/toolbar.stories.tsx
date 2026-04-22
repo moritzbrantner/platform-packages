@@ -1,21 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn } from "storybook/test";
-import {
-  DownloadIcon,
-  MoreHorizontalIcon,
-  RotateCcwIcon,
-  SaveIcon,
-} from "lucide-react";
+import { DownloadIcon, MoreHorizontalIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
 
 import { Button } from "./button";
 import { Toggle } from "./toggle";
-import {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarSeparator,
-  ToolbarSpacer,
-  ToolbarTitle,
-} from "./toolbar";
+import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarSpacer, ToolbarTitle } from "./toolbar";
 
 type ToolbarDemoProps = {
   onSave?: () => void;
@@ -94,4 +83,3 @@ export const Compact: Story = {
     density: "compact",
   },
 };
-

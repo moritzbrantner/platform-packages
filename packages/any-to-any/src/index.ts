@@ -15,14 +15,8 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("any-to-any");
 
 export type AnyToAnyInput = UniversalTaskInput<"any-to-any">;
 export type AnyToAnyOutput = UniversalTaskOutput<"any-to-any">;
-export type AnyToAnyRequest<Input = AnyToAnyInput> = UniversalTaskRequest<
-  "any-to-any",
-  Input
->;
-export type AnyToAnyResult<Output = AnyToAnyOutput> = UniversalTaskResult<
-  "any-to-any",
-  Output
->;
+export type AnyToAnyRequest<Input = AnyToAnyInput> = UniversalTaskRequest<"any-to-any", Input>;
+export type AnyToAnyResult<Output = AnyToAnyOutput> = UniversalTaskResult<"any-to-any", Output>;
 export type AnyToAnyPipeline<
   Input = AnyToAnyInput,
   Output = AnyToAnyOutput,
@@ -33,10 +27,7 @@ export type CreateAnyToAnyPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createAnyToAnyPipeline<
-  Input = AnyToAnyInput,
-  Output = AnyToAnyOutput,
->(
+export function createAnyToAnyPipeline<Input = AnyToAnyInput, Output = AnyToAnyOutput>(
   options: CreateAnyToAnyPipelineOptions,
 ): AnyToAnyPipeline<Input, Output> {
   return createUniversalTaskPipeline({

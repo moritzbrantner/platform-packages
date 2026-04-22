@@ -1,9 +1,4 @@
-import type {
-  StoryChoice,
-  StoryDocument,
-  StoryNode,
-  StoryNodeData,
-} from "./story-model";
+import type { StoryChoice, StoryDocument, StoryNode, StoryNodeData } from "./story-model";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -13,9 +8,7 @@ function invariant(condition: boolean, message: string) {
   }
 }
 
-export function createStoryNodeLookup<TData extends StoryNodeData>(
-  story: StoryDocument<TData>,
-) {
+export function createStoryNodeLookup<TData extends StoryNodeData>(story: StoryDocument<TData>) {
   return new Map(story.nodes.map((node) => [node.id, node] as const));
 }
 
@@ -60,15 +53,10 @@ export function isStoryEnding<TData extends StoryNodeData>(
   return getStoryChoices(story, node).length === 0;
 }
 
-export function validateStory<TData extends StoryNodeData>(
-  story: StoryDocument<TData>,
-) {
+export function validateStory<TData extends StoryNodeData>(story: StoryDocument<TData>) {
   invariant(story.id.length > 0, "Story id must be non-empty.");
   invariant(story.title.length > 0, `Story "${story.id}" must have a title.`);
-  invariant(
-    story.nodes.length > 0,
-    `Story "${story.id}" must declare at least one node.`,
-  );
+  invariant(story.nodes.length > 0, `Story "${story.id}" must declare at least one node.`);
 
   const nodeIds = new Set<string>();
 
@@ -83,10 +71,7 @@ export function validateStory<TData extends StoryNodeData>(
 
     const choiceIds = new Set<string>();
     for (const choice of node.choices ?? []) {
-      invariant(
-        choice.id.length > 0,
-        `Choice ids must be non-empty on node "${node.id}".`,
-      );
+      invariant(choice.id.length > 0, `Choice ids must be non-empty on node "${node.id}".`);
       invariant(
         !choiceIds.has(choice.id),
         `Choice ids must be unique per node. Duplicate choice "${choice.id}" found on "${node.id}".`,
@@ -120,20 +105,16 @@ export function validateStory<TData extends StoryNodeData>(
     }
   }
 
-  detectUnconditionalCycle(story);
+  detectStoryGraphCycle(story);
 
   return story;
 }
 
-export function defineStory<TData extends StoryNodeData>(
-  story: StoryDocument<TData>,
-) {
+export function defineStory<TData extends StoryNodeData>(story: StoryDocument<TData>) {
   return validateStory(story);
 }
 
-function detectUnconditionalCycle<TData extends StoryNodeData>(
-  story: StoryDocument<TData>,
-) {
+function detectStoryGraphCycle<TData extends StoryNodeData>(story: StoryDocument<TData>) {
   const nodeLookup = createStoryNodeLookup(story);
   const visiting = new Set<string>();
   const visited = new Set<string>();
@@ -142,21 +123,26 @@ function detectUnconditionalCycle<TData extends StoryNodeData>(
     if (visited.has(nodeId)) return;
     if (visiting.has(nodeId)) {
       throw new Error(
-        `Story "${story.id}" contains an unconditional cycle: ${[
-          ...trail,
-          nodeId,
-        ].join(" -> ")}.`,
+        `Story "${story.id}" contains a cycle: ${[...trail, nodeId].join(" -> ")}.`,
       );
     }
 
     const node = nodeLookup.get(nodeId);
-    if (!node?.next || node.choices?.length) {
+    if (!node) {
       visited.add(nodeId);
       return;
     }
 
     visiting.add(nodeId);
-    visit(node.next, [...trail, nodeId]);
+
+    for (const choice of node.choices ?? []) {
+      visit(choice.target, [...trail, nodeId]);
+    }
+
+    if (node.next) {
+      visit(node.next, [...trail, nodeId]);
+    }
+
     visiting.delete(nodeId);
     visited.add(nodeId);
   };
@@ -166,9 +152,7 @@ function detectUnconditionalCycle<TData extends StoryNodeData>(
   }
 }
 
-export function maybeValidateStory<TData extends StoryNodeData>(
-  story: StoryDocument<TData>,
-) {
+export function maybeValidateStory<TData extends StoryNodeData>(story: StoryDocument<TData>) {
   if (isDevelopment) {
     validateStory(story);
   }

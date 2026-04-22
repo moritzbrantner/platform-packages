@@ -98,7 +98,12 @@ describe("@moritzbrantner/foundation-contract", () => {
 
     const blocked = blockProfile(followed, "user-jules");
     expect(blocked.followingUserIds).toEqual([]);
-    expect(getVisibleProfiles([{ userId: "user-jules", tag: "jules", displayName: "Jules", imageUrl: null }], blocked)).toEqual([]);
+    expect(
+      getVisibleProfiles(
+        [{ userId: "user-jules", tag: "jules", displayName: "Jules", imageUrl: null }],
+        blocked,
+      ),
+    ).toEqual([]);
     expect(unblockProfile(blocked, "user-jules").blockedUserIds).toEqual([]);
   });
 
@@ -124,6 +129,8 @@ describe("@moritzbrantner/foundation-contract", () => {
         details: "The follow button did not update after tapping it twice.",
       }).ok,
     ).toBe(true);
-    expect(createProblemReferenceId(new Date("2026-04-20T09:35:00.000Z"))).toBe("PROB-20260420-0935");
+    expect(createProblemReferenceId(new Date("2026-04-20T09:35:00.000Z"))).toBe(
+      "PROB-20260420-0935",
+    );
   });
 });

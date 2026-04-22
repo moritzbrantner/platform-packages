@@ -88,9 +88,7 @@ describe("@moritzbrantner/parallel-text", () => {
     );
 
     expect(screen.getByLabelText("English")).toBeTruthy();
-    expect(screen.getByRole("tab", { name: "Spanish" }).getAttribute("aria-selected")).toBe(
-      "true",
-    );
+    expect(screen.getByRole("tab", { name: "Spanish" }).getAttribute("aria-selected")).toBe("true");
 
     const hello = screen.getByRole("button", { name: "Hello" });
     const hola = screen.getByRole("button", { name: "Hola" });
@@ -109,9 +107,7 @@ describe("@moritzbrantner/parallel-text", () => {
     expect(spanishSentence.getAttribute("data-sentence-highlighted")).toBe("true");
 
     fireEvent.click(screen.getByRole("tab", { name: "French" }));
-    expect(screen.getByRole("tab", { name: "French" }).getAttribute("aria-selected")).toBe(
-      "true",
-    );
+    expect(screen.getByRole("tab", { name: "French" }).getAttribute("aria-selected")).toBe("true");
 
     const bonjour = screen.getByRole("button", { name: "Bonjour" });
     fireEvent.mouseEnter(screen.getByRole("button", { name: "Hello" }));

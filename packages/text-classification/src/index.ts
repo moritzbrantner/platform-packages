@@ -36,9 +36,7 @@ export type CreateTextClassificationPipelineOptions = Omit<
 export function createTextClassificationPipeline<
   Input = TextClassificationInput,
   Output = TextClassificationOutput,
->(
-  options: CreateTextClassificationPipelineOptions,
-): TextClassificationPipeline<Input, Output> {
+>(options: CreateTextClassificationPipelineOptions): TextClassificationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

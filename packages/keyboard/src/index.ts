@@ -54,12 +54,7 @@ export type KeyboardShortcutRegistry = {
   unregister(commandId: string): void;
 };
 
-const MODIFIER_ORDER: readonly NormalizedKeyboardModifier[] = [
-  "ctrl",
-  "alt",
-  "shift",
-  "meta",
-];
+const MODIFIER_ORDER: readonly NormalizedKeyboardModifier[] = ["ctrl", "alt", "shift", "meta"];
 
 const KEY_ALIASES = new Map([
   [" ", "space"],
@@ -229,10 +224,9 @@ export function isEditableKeyboardTarget(target: EventTarget | null | undefined)
   );
 }
 
-export function resolveKeyboardPlatform(platform: KeyboardPlatform = "auto"): Exclude<
-  KeyboardPlatform,
-  "auto"
-> {
+export function resolveKeyboardPlatform(
+  platform: KeyboardPlatform = "auto",
+): Exclude<KeyboardPlatform, "auto"> {
   if (platform !== "auto") {
     return platform;
   }
@@ -300,11 +294,11 @@ function formatKeyboardModifier(
     }
   }
 
-  return modifier === "meta"
-    ? "Meta"
-    : modifier.charAt(0).toLocaleUpperCase() + modifier.slice(1);
+  return modifier === "meta" ? "Meta" : modifier.charAt(0).toLocaleUpperCase() + modifier.slice(1);
 }
 
 function formatKeyboardKey(key: string) {
-  return key.length === 1 ? key.toLocaleUpperCase() : key.charAt(0).toLocaleUpperCase() + key.slice(1);
+  return key.length === 1
+    ? key.toLocaleUpperCase()
+    : key.charAt(0).toLocaleUpperCase() + key.slice(1);
 }

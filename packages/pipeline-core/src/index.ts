@@ -103,10 +103,10 @@ export function artifact<
 export function isPipelineArtifact(value: unknown): value is PipelineArtifact {
   return Boolean(
     value &&
-      typeof value === "object" &&
-      "kind" in value &&
-      "value" in value &&
-      typeof (value as PipelineArtifact).kind === "string",
+    typeof value === "object" &&
+    "kind" in value &&
+    "value" in value &&
+    typeof (value as PipelineArtifact).kind === "string",
   );
 }
 

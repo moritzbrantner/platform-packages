@@ -139,29 +139,29 @@ describe("@moritzbrantner/speech utilities", () => {
           text: "Hello world from whisper",
           language: "en",
           segments: [
-          {
-            id: "seg-1",
-            text: "Hello world from whisper",
-            start: 0,
-            end: 1.4,
-            confidence: 0.91,
-            words: [
-              {
-                text: "Hello",
-                start: 0,
-                end: 0.6,
-                confidence: 0.95,
-              },
-              {
-                text: "world",
-                start: 0.7,
-                end: 1.4,
-                confidence: 0.94,
-              },
-            ],
-          },
-        ],
-      }),
+            {
+              id: "seg-1",
+              text: "Hello world from whisper",
+              start: 0,
+              end: 1.4,
+              confidence: 0.91,
+              words: [
+                {
+                  text: "Hello",
+                  start: 0,
+                  end: 0.6,
+                  confidence: 0.95,
+                },
+                {
+                  text: "world",
+                  start: 0.7,
+                  end: 1.4,
+                  confidence: 0.94,
+                },
+              ],
+            },
+          ],
+        }),
         {
           status: 200,
           headers: {

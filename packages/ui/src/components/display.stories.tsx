@@ -94,9 +94,7 @@ function DisplayPreview() {
           </div>
           <TimelineContent>
             <TimelineTitle>Styles refined</TimelineTitle>
-            <TimelineDescription>
-              Cards and dialogs use calmer glass surfaces.
-            </TimelineDescription>
+            <TimelineDescription>Cards and dialogs use calmer glass surfaces.</TimelineDescription>
           </TimelineContent>
         </TimelineItem>
       </Timeline>

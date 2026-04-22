@@ -11,11 +11,13 @@ The normative scaffold contract lives in `monorepo/SCAFFOLD_V2.md`.
 ## What is local vs shared
 
 Local:
+
 - package implementation details for the broader package catalog
 - release scoping and publication mechanics for shared packages
 - playground and package-level package validation
 
 Shared:
+
 - the scaffold-facing package contract used by `monorepo`, `next-template`, `expo-template`, and `electron-template`
 - published runtime/tooling packages that maintained repos consume by version
 

@@ -59,12 +59,12 @@ describe("@moritzbrantner/collaboration", () => {
     expect(project?.directActiveCollaboratorCount).toBe(0);
     expect(project?.totalActiveCollaboratorCount).toBe(2);
     expect(project?.totalActiveSessionCount).toBe(2);
-    expect(brief?.directActiveCollaborators.map((collaborator) => collaborator.displayName)).toEqual([
-      "Alex",
-    ]);
-    expect(specs?.directActiveCollaborators.map((collaborator) => collaborator.displayName)).toEqual([
-      "Sam",
-    ]);
+    expect(
+      brief?.directActiveCollaborators.map((collaborator) => collaborator.displayName),
+    ).toEqual(["Alex"]);
+    expect(
+      specs?.directActiveCollaborators.map((collaborator) => collaborator.displayName),
+    ).toEqual(["Sam"]);
   });
 
   test("applies incremental changes and restores from serialized state", () => {

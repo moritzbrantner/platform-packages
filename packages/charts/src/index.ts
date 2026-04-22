@@ -17,8 +17,7 @@ export type ChartSeriesPoint<TProperties = Record<string, unknown>> =
   NumericSeriesPoint<TProperties>;
 export type IndexedChartSeriesPoint<TProperties = Record<string, unknown>> =
   IndexedNumericSeriesPoint<TProperties>;
-export type ChartDensityBin<TProperties = Record<string, unknown>> =
-  BinnedSeriesBin<TProperties>;
+export type ChartDensityBin<TProperties = Record<string, unknown>> = BinnedSeriesBin<TProperties>;
 
 export type ChartDensityValueMode = "average" | "count" | "max" | "min" | "sum";
 

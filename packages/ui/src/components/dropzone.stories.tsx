@@ -31,9 +31,7 @@ function DropzoneDemo({ disabled = false, onChange }: DropzoneDemoProps) {
       </DropzoneIcon>
       <DropzoneContent>
         <DropzoneTitle>Upload release artifact</DropzoneTitle>
-        <DropzoneDescription>
-          PDF, Markdown, or plain text files up to 10 MB.
-        </DropzoneDescription>
+        <DropzoneDescription>PDF, Markdown, or plain text files up to 10 MB.</DropzoneDescription>
       </DropzoneContent>
     </Dropzone>
   );

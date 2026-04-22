@@ -10,19 +10,18 @@ import {
   type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
-export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("zero-shot-image-classification");
+export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor(
+  "zero-shot-image-classification",
+);
 export const huggingFaceTask = createHuggingFaceTaskPackage("zero-shot-image-classification");
 
 export type ZeroShotImageClassificationInput = UniversalTaskInput<"zero-shot-image-classification">;
-export type ZeroShotImageClassificationOutput = UniversalTaskOutput<"zero-shot-image-classification">;
-export type ZeroShotImageClassificationRequest<Input = ZeroShotImageClassificationInput> = UniversalTaskRequest<
-  "zero-shot-image-classification",
-  Input
->;
-export type ZeroShotImageClassificationResult<Output = ZeroShotImageClassificationOutput> = UniversalTaskResult<
-  "zero-shot-image-classification",
-  Output
->;
+export type ZeroShotImageClassificationOutput =
+  UniversalTaskOutput<"zero-shot-image-classification">;
+export type ZeroShotImageClassificationRequest<Input = ZeroShotImageClassificationInput> =
+  UniversalTaskRequest<"zero-shot-image-classification", Input>;
+export type ZeroShotImageClassificationResult<Output = ZeroShotImageClassificationOutput> =
+  UniversalTaskResult<"zero-shot-image-classification", Output>;
 export type ZeroShotImageClassificationPipeline<
   Input = ZeroShotImageClassificationInput,
   Output = ZeroShotImageClassificationOutput,

@@ -91,15 +91,16 @@ function SpeechPage() {
 
   const usesWebSocket = /^wss?:\/\//iu.test(endpoint.trim());
   const transcriptPhrases = transcriptToPhrases(transcript);
-  const activeTranscriber = endpoint.trim() && !usesWebSocket
-    ? createOpenAICompatibleTranscriber({
-        endpoint: endpoint.trim(),
-        model: modelName.trim() || "whisper-1",
-        apiKey: apiKey.trim() || undefined,
-      })
-    : !endpoint.trim()
-      ? createMockTranscriber()
-      : undefined;
+  const activeTranscriber =
+    endpoint.trim() && !usesWebSocket
+      ? createOpenAICompatibleTranscriber({
+          endpoint: endpoint.trim(),
+          model: modelName.trim() || "whisper-1",
+          apiKey: apiKey.trim() || undefined,
+        })
+      : !endpoint.trim()
+        ? createMockTranscriber()
+        : undefined;
   const activeStreamingTranscriber = usesWebSocket
     ? createWebSocketTranscriber({
         url: endpoint.trim(),
@@ -108,7 +109,11 @@ function SpeechPage() {
     : undefined;
   const model = createWordPredictionModel({
     includeDefaultData,
-    texts: [...splitCorpus(seedCorpus), ...transcriptPhrases, ...messages.map((message) => message.text)],
+    texts: [
+      ...splitCorpus(seedCorpus),
+      ...transcriptPhrases,
+      ...messages.map((message) => message.text),
+    ],
     maxContextSize: 3,
   });
   const semanticBackoff = createSemanticBackoffFromTexts(
@@ -144,8 +149,8 @@ function SpeechPage() {
             <div className="space-y-2">
               <CardTitle>Configure the speech adapter</CardTitle>
               <CardDescription>
-                Leave the endpoint empty to use a mock transcriber. Add either an HTTP
-                endpoint or a `ws://` / `wss://` endpoint to exercise a real speech-to-text model.
+                Leave the endpoint empty to use a mock transcriber. Add either an HTTP endpoint or a
+                `ws://` / `wss://` endpoint to exercise a real speech-to-text model.
               </CardDescription>
             </div>
           </CardHeader>
@@ -201,10 +206,7 @@ function SpeechPage() {
                   Keeps the composer useful before your first transcript arrives.
                 </FieldDescription>
               </FieldContent>
-              <Switch
-                checked={includeDefaultData}
-                onCheckedChange={setIncludeDefaultData}
-              />
+              <Switch checked={includeDefaultData} onCheckedChange={setIncludeDefaultData} />
             </Field>
 
             <div className="space-y-3">
@@ -280,8 +282,8 @@ function SpeechPage() {
                 </Badge>
                 <CardTitle>Speech data feeding the model</CardTitle>
                 <CardDescription>
-                  The transcript is segmented into phrases and added to the training data
-                  for the word prediction composer on the right.
+                  The transcript is segmented into phrases and added to the training data for the
+                  word prediction composer on the right.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -308,7 +310,11 @@ function SpeechPage() {
                   />
                 </div>
 
-                <Button type="button" variant="outline" onClick={() => setDraft(transcript ? `${transcript} ` : "I will ")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDraft(transcript ? `${transcript} ` : "I will ")}
+                >
                   Copy transcript into the composer draft
                 </Button>
               </CardContent>
@@ -321,8 +327,8 @@ function SpeechPage() {
                 </Badge>
                 <CardTitle>Transcript-aware word prediction</CardTitle>
                 <CardDescription>
-                  Suggestions are trained from the seed phrases, the live transcript,
-                  and the messages already sent in this demo conversation.
+                  Suggestions are trained from the seed phrases, the live transcript, and the
+                  messages already sent in this demo conversation.
                 </CardDescription>
               </CardHeader>
               <CardContent>

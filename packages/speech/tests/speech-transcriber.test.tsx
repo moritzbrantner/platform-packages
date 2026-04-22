@@ -23,7 +23,10 @@ class MockMediaRecorder {
   private dataListeners = new Set<(event: Event & { data: Blob }) => void>();
   private stopListeners = new Set<() => void>();
 
-  addEventListener(type: "dataavailable" | "stop", listener: ((event: Event & { data: Blob }) => void) | (() => void)) {
+  addEventListener(
+    type: "dataavailable" | "stop",
+    listener: ((event: Event & { data: Blob }) => void) | (() => void),
+  ) {
     if (type === "dataavailable") {
       this.dataListeners.add(listener as (event: Event & { data: Blob }) => void);
       return;
@@ -32,7 +35,10 @@ class MockMediaRecorder {
     this.stopListeners.add(listener as () => void);
   }
 
-  removeEventListener(type: "dataavailable" | "stop", listener: ((event: Event & { data: Blob }) => void) | (() => void)) {
+  removeEventListener(
+    type: "dataavailable" | "stop",
+    listener: ((event: Event & { data: Blob }) => void) | (() => void),
+  ) {
     if (type === "dataavailable") {
       this.dataListeners.delete(listener as (event: Event & { data: Blob }) => void);
       return;

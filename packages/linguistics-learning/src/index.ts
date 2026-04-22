@@ -181,7 +181,10 @@ export function deriveStudyTerms(
   }
 
   if (options.includeMultiwordTerms) {
-    const phraseCounts = new Map<string, { count: number; spans: TextSpan[]; surfaces: Set<string> }>();
+    const phraseCounts = new Map<
+      string,
+      { count: number; spans: TextSpan[]; surfaces: Set<string> }
+    >();
 
     for (let index = 0; index < wordTokens.length - 1; index += 1) {
       const left = wordTokens[index];
@@ -254,10 +257,7 @@ export function deriveCorpusStudyTerms(
       continue;
     }
 
-    if (
-      allowedLanguages &&
-      (!document.language || !allowedLanguages.has(document.language))
-    ) {
+    if (allowedLanguages && (!document.language || !allowedLanguages.has(document.language))) {
       continue;
     }
 
@@ -332,15 +332,9 @@ export function gradeRecall(
   const previousEase = previous?.easeFactor ?? 2.5;
   const nextEase = Math.max(
     MIN_EASE_FACTOR,
-    Number(
-      (
-        previousEase +
-        (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
-      ).toFixed(3),
-    ),
+    Number((previousEase + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))).toFixed(3)),
   );
-  const repetitions =
-    quality < 3 ? 0 : previous ? previous.repetitions + 1 : 1;
+  const repetitions = quality < 3 ? 0 : previous ? previous.repetitions + 1 : 1;
   const intervalDays =
     quality < 3
       ? 1

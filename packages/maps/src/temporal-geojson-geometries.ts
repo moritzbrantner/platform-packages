@@ -144,9 +144,7 @@ export type TemporalGeoJsonOutputFeature<TProperties = Record<string, unknown>> 
   type: "Feature";
 };
 
-export type TemporalGeoJsonOutputFeatureCollection<
-  TProperties = Record<string, unknown>,
-> = {
+export type TemporalGeoJsonOutputFeatureCollection<TProperties = Record<string, unknown>> = {
   features: Array<TemporalGeoJsonOutputFeature<TProperties>>;
   type: "FeatureCollection";
 };
@@ -234,9 +232,7 @@ export function getTemporalGeoJsonTimeRange<TProperties = Record<string, unknown
   return getTemporalTrackTimeRange(tracks);
 }
 
-export function getTemporalGeoJsonFeatureCollectionAtTime<
-  TProperties = Record<string, unknown>,
->(
+export function getTemporalGeoJsonFeatureCollectionAtTime<TProperties = Record<string, unknown>>(
   tracks: readonly TemporalGeoJsonTrack<TProperties>[],
   time: number,
   options: TemporalGeoJsonInterpolationOptions = {},
@@ -486,12 +482,7 @@ function interpolateMultiPolygonGeometry(
   }
 
   const polygons = previousGeometry.coordinates.map((polygon, index) =>
-    interpolatePolygonCoordinates(
-      polygon,
-      nextGeometry.coordinates[index]!,
-      progress,
-      options,
-    ),
+    interpolatePolygonCoordinates(polygon, nextGeometry.coordinates[index]!, progress, options),
   );
 
   if (polygons.some((polygon) => polygon === null)) {
@@ -511,10 +502,7 @@ function interpolateLineCoordinates(
   options: ResolvedInterpolationOptions,
 ): GeoJsonPosition[] | null {
   if (options.strategy === "compatible") {
-    if (
-      previousCoordinates.length !== nextCoordinates.length ||
-      previousCoordinates.length < 2
-    ) {
+    if (previousCoordinates.length !== nextCoordinates.length || previousCoordinates.length < 2) {
       return null;
     }
 
@@ -523,20 +511,12 @@ function interpolateLineCoordinates(
     );
   }
 
-  if (
-    options.strategy !== "resample" &&
-    options.strategy !== "centroid-radial"
-  ) {
+  if (options.strategy !== "resample" && options.strategy !== "centroid-radial") {
     return null;
   }
 
   const coordinateCount = clampInteger(
-    Math.max(
-      previousCoordinates.length,
-      nextCoordinates.length,
-      options.minResampleCoordinates,
-      2,
-    ),
+    Math.max(previousCoordinates.length, nextCoordinates.length, options.minResampleCoordinates, 2),
     2,
     options.maxCoordinatesPerLine,
   );
@@ -622,12 +602,7 @@ function interpolateResampledRing(
   const orientedNextRing = orientRingLike(nextOpenRing, previousOpenRing);
   const alignedNextRing = alignRingStart(orientedNextRing, previousOpenRing[0]!);
   const coordinateCount = clampInteger(
-    Math.max(
-      previousOpenRing.length,
-      alignedNextRing.length,
-      options.minResampleCoordinates,
-      3,
-    ),
+    Math.max(previousOpenRing.length, alignedNextRing.length, options.minResampleCoordinates, 3),
     3,
     options.maxCoordinatesPerRing,
   );
@@ -655,12 +630,7 @@ function interpolateCentroidRadialRing(
   }
 
   const coordinateCount = clampInteger(
-    Math.max(
-      previousOpenRing.length,
-      nextOpenRing.length,
-      options.minResampleCoordinates,
-      3,
-    ),
+    Math.max(previousOpenRing.length, nextOpenRing.length, options.minResampleCoordinates, 3),
     3,
     options.maxCoordinatesPerRing,
   );
@@ -827,10 +797,7 @@ function normalizePosition(value: unknown): GeoJsonPosition | null {
   return [longitude, latitude];
 }
 
-function readTrackId<
-  TProperties extends Record<string, unknown>,
-  TTrackProperties,
->(
+function readTrackId<TProperties extends Record<string, unknown>, TTrackProperties>(
   feature: TemporalGeoJsonGeometryFeature<TProperties>,
   index: number,
   options: TemporalGeoJsonGeometryTrackOptions<TProperties, TTrackProperties>,
@@ -852,10 +819,7 @@ function readTrackId<
     : `feature-${index}`;
 }
 
-function readTime<
-  TProperties extends Record<string, unknown>,
-  TTrackProperties,
->(
+function readTime<TProperties extends Record<string, unknown>, TTrackProperties>(
   feature: TemporalGeoJsonGeometryFeature<TProperties>,
   index: number,
   options: TemporalGeoJsonGeometryTrackOptions<TProperties, TTrackProperties>,
@@ -869,10 +833,7 @@ function readTime<
   return feature.properties?.time ?? feature.properties?.timestamp;
 }
 
-function readLabel<
-  TProperties extends Record<string, unknown>,
-  TTrackProperties,
->(
+function readLabel<TProperties extends Record<string, unknown>, TTrackProperties>(
   feature: TemporalGeoJsonGeometryFeature<TProperties>,
   index: number,
   options: TemporalGeoJsonGeometryTrackOptions<TProperties, TTrackProperties>,
@@ -889,10 +850,7 @@ function readLabel<
   return typeof propertyLabel === "string" ? propertyLabel : String(trackId);
 }
 
-function readMetrics<
-  TProperties extends Record<string, unknown>,
-  TTrackProperties,
->(
+function readMetrics<TProperties extends Record<string, unknown>, TTrackProperties>(
   feature: TemporalGeoJsonGeometryFeature<TProperties>,
   index: number,
   options: TemporalGeoJsonGeometryTrackOptions<TProperties, TTrackProperties>,
@@ -921,10 +879,7 @@ function readMetrics<
   return metrics;
 }
 
-function readVisible<
-  TProperties extends Record<string, unknown>,
-  TTrackProperties,
->(
+function readVisible<TProperties extends Record<string, unknown>, TTrackProperties>(
   feature: TemporalGeoJsonGeometryFeature<TProperties>,
   index: number,
   options: TemporalGeoJsonGeometryTrackOptions<TProperties, TTrackProperties>,
@@ -938,10 +893,7 @@ function readVisible<
   return feature.properties?.visible !== false;
 }
 
-function readProperties<
-  TProperties extends Record<string, unknown>,
-  TTrackProperties,
->(
+function readProperties<TProperties extends Record<string, unknown>, TTrackProperties>(
   feature: TemporalGeoJsonGeometryFeature<TProperties>,
   index: number,
   options: TemporalGeoJsonGeometryTrackOptions<TProperties, TTrackProperties>,
@@ -1035,19 +987,11 @@ function resampleRing(
   }
 
   return Array.from({ length: coordinateCount }, (_, index) =>
-    interpolateAlongPath(
-      openRing,
-      distances,
-      (totalDistance * index) / coordinateCount,
-      true,
-    ),
+    interpolateAlongPath(openRing, distances, (totalDistance * index) / coordinateCount, true),
   );
 }
 
-function getCumulativeDistances(
-  coordinates: readonly GeoJsonPosition[],
-  closed: boolean,
-) {
+function getCumulativeDistances(coordinates: readonly GeoJsonPosition[], closed: boolean) {
   const distances = [0];
   const segmentCount = closed ? coordinates.length : coordinates.length - 1;
 
@@ -1080,9 +1024,8 @@ function interpolateAlongPath(
     const start = coordinates[index]!;
     const end = coordinates[(index + 1) % coordinates.length]!;
     const segmentLength = segmentEndDistance - segmentStartDistance;
-    const progress = segmentLength === 0
-      ? 0
-      : (targetDistance - segmentStartDistance) / segmentLength;
+    const progress =
+      segmentLength === 0 ? 0 : (targetDistance - segmentStartDistance) / segmentLength;
 
     return interpolatePosition(start, end, progress);
   }
@@ -1162,10 +1105,7 @@ function getRaySegmentIntersection(
 
   return {
     distance: rayDistance,
-    position: [
-      origin[0] + ray[0] * rayDistance,
-      origin[1] + ray[1] * rayDistance,
-    ],
+    position: [origin[0] + ray[0] * rayDistance, origin[1] + ray[1] * rayDistance],
   };
 }
 
@@ -1201,15 +1141,10 @@ function orientRingLike(
   const ringIsClockwise = booleanClockwise(normalizedRing);
   const referenceRingIsClockwise = booleanClockwise(normalizedReferenceRing);
 
-  return ringIsClockwise === referenceRingIsClockwise
-    ? [...ring]
-    : [...ring].reverse();
+  return ringIsClockwise === referenceRingIsClockwise ? [...ring] : [...ring].reverse();
 }
 
-function alignRingStart(
-  ring: readonly GeoJsonPosition[],
-  targetPosition: GeoJsonPosition,
-) {
+function alignRingStart(ring: readonly GeoJsonPosition[], targetPosition: GeoJsonPosition) {
   let bestIndex = 0;
   let bestDistance = Number.POSITIVE_INFINITY;
 
@@ -1301,10 +1236,7 @@ function distance(left: GeoJsonPosition, right: GeoJsonPosition) {
   return Math.hypot(right[0] - left[0], right[1] - left[1]);
 }
 
-function cross(
-  left: readonly [number, number],
-  right: readonly [number, number],
-) {
+function cross(left: readonly [number, number], right: readonly [number, number]) {
   return left[0] * right[1] - left[1] * right[0];
 }
 

@@ -54,10 +54,11 @@ function resolveTrackAtTime<TProperties>(
   time: number,
 ): MapPoint<TProperties> | null {
   const frames = [...track.frames]
-    .filter((frame) =>
-      Number.isFinite(frame.time) &&
-      Number.isFinite(frame.latitude) &&
-      Number.isFinite(frame.longitude),
+    .filter(
+      (frame) =>
+        Number.isFinite(frame.time) &&
+        Number.isFinite(frame.latitude) &&
+        Number.isFinite(frame.longitude),
     )
     .sort((left, right) => left.time - right.time);
 
@@ -80,9 +81,7 @@ function resolveTrackAtTime<TProperties>(
   const previousFrame = frames[firstFrameAfterTime - 1]!;
 
   if (previousFrame.time === time) {
-    return previousFrame.visible === false
-      ? null
-      : toMapPoint(track, index, previousFrame);
+    return previousFrame.visible === false ? null : toMapPoint(track, index, previousFrame);
   }
 
   if (previousFrame.visible === false) {

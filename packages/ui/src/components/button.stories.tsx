@@ -4,14 +4,7 @@ import { ArrowRightIcon, CheckIcon, SaveIcon } from "lucide-react";
 
 import { Button } from "./button";
 
-const buttonVariants = [
-  "default",
-  "secondary",
-  "outline",
-  "ghost",
-  "link",
-  "destructive",
-] as const;
+const buttonVariants = ["default", "secondary", "outline", "ghost", "link", "destructive"] as const;
 
 const buttonSizes = ["xs", "sm", "default", "lg", "icon", "icon-sm"] as const;
 

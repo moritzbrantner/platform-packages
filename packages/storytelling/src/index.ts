@@ -30,15 +30,8 @@ export {
 } from "./story-player";
 export { StoryProgress, type StoryProgressProps } from "./story-progress";
 export { StoryScroller, type StoryScrollerProps } from "./story-scroller";
-export {
-  StoryStageFrame,
-  type StoryStageFrameProps,
-} from "./story-stage-frame";
-export {
-  StoryMinimap,
-  type StoryMinimapItem,
-  type StoryMinimapProps,
-} from "./story-minimap";
+export { StoryStageFrame, type StoryStageFrameProps } from "./story-stage-frame";
+export { StoryMinimap, type StoryMinimapItem, type StoryMinimapProps } from "./story-minimap";
 export type {
   ResolvedStoryPath,
   StoryChoice,

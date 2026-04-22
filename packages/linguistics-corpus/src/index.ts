@@ -38,8 +38,7 @@ export interface TermFrequencyOptions extends CorpusDocumentFilterOptions {
   minCount?: number;
 }
 
-export type CorpusDocumentWindowQuery = DataDensityItemWindowQuery &
-  CorpusDocumentFilterOptions;
+export type CorpusDocumentWindowQuery = DataDensityItemWindowQuery & CorpusDocumentFilterOptions;
 
 export type CorpusTermWindowQuery = DataDensityItemWindowQuery & TermFrequencyOptions;
 
@@ -78,8 +77,7 @@ export interface CorpusDocumentDensityItem {
   wordTokenCount: number;
 }
 
-export type IndexedCorpusDocumentDensityItem =
-  IndexedDataDensityItem<CorpusDocumentDensityItem>;
+export type IndexedCorpusDocumentDensityItem = IndexedDataDensityItem<CorpusDocumentDensityItem>;
 
 export interface CorpusDocumentWindow {
   documents: IndexedCorpusDocumentDensityItem[];
@@ -92,8 +90,7 @@ export interface CorpusTermDensityItem extends TermFrequencyEntry {
   normalized: string;
 }
 
-export type IndexedCorpusTermDensityItem =
-  IndexedDataDensityItem<CorpusTermDensityItem>;
+export type IndexedCorpusTermDensityItem = IndexedDataDensityItem<CorpusTermDensityItem>;
 
 export interface CorpusTermWindow {
   summary: DataDensityWindowSummary;
@@ -302,12 +299,12 @@ function createTermDensityItems(
     for (let index = 0; index < entry.tokenNormals.length; index += 1) {
       const normalized = entry.tokenNormals[index];
       const surface = entry.tokenTexts[index];
-      const languageKey = options.byLanguage ? entry.document.language ?? "und" : "";
+      const languageKey = options.byLanguage ? (entry.document.language ?? "und") : "";
       const key = `${languageKey}\u0000${normalized}`;
       const next = counts.get(key) ?? {
         count: 0,
         documentIds: new Set<string>(),
-        language: options.byLanguage ? entry.document.language ?? "und" : undefined,
+        language: options.byLanguage ? (entry.document.language ?? "und") : undefined,
         normalized,
         surface: new Map<string, number>(),
       };
@@ -383,7 +380,9 @@ function resolveEntries(
 ): IndexedDocument[] {
   if (
     Array.isArray(source) &&
-    source.every((entry) => typeof entry === "object" && entry !== null && "metadataFields" in entry)
+    source.every(
+      (entry) => typeof entry === "object" && entry !== null && "metadataFields" in entry,
+    )
   ) {
     return source;
   }
@@ -424,9 +423,7 @@ function segmentDocument(document: TextDocument) {
   };
 }
 
-function collectMetadataFields(
-  metadata: Record<string, unknown> | undefined,
-): Map<string, string> {
+function collectMetadataFields(metadata: Record<string, unknown> | undefined): Map<string, string> {
   const fields = new Map<string, string>();
 
   if (!metadata) {
@@ -443,8 +440,9 @@ function collectMetadataFields(
       fields.set(
         key,
         value
-          .filter((entry) =>
-            typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean",
+          .filter(
+            (entry) =>
+              typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean",
           )
           .join(" "),
       );
@@ -580,7 +578,9 @@ function matchesMetadata(
 }
 
 function extractTerms(value: string): string[] {
-  return Array.from(value.matchAll(TERM_PATTERN), (match) => normalizeTerm(match[0])).filter(Boolean);
+  return Array.from(value.matchAll(TERM_PATTERN), (match) => normalizeTerm(match[0])).filter(
+    Boolean,
+  );
 }
 
 function normalizeTerm(value: string): string {

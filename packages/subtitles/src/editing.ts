@@ -273,9 +273,7 @@ function normalizeCue(
 }
 
 function resolveCueIndex(document: TimedTextDocument, target: number | string): number {
-  return typeof target === "number"
-    ? target
-    : document.cues.findIndex((cue) => cue.id === target);
+  return typeof target === "number" ? target : document.cues.findIndex((cue) => cue.id === target);
 }
 
 function copyCue(cue: TimedTextCue): TimedTextCue {

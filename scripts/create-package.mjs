@@ -1,14 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,9 +19,7 @@ if (positionalArgs.length !== 1) {
 const packageName = positionalArgs[0];
 
 if (!/^[a-z0-9-]+$/.test(packageName)) {
-  console.error(
-    "Package name must use lowercase letters, numbers, and hyphens only.",
-  );
+  console.error("Package name must use lowercase letters, numbers, and hyphens only.");
   process.exit(1);
 }
 
@@ -152,9 +143,7 @@ function getPackageScope() {
   }
 
   if (scopes.size > 1) {
-    console.error(
-      `Found multiple package scopes in the repo: ${Array.from(scopes).join(", ")}`,
-    );
+    console.error(`Found multiple package scopes in the repo: ${Array.from(scopes).join(", ")}`);
     console.error("Resolve the scope mismatch before generating a new package.");
     process.exit(1);
   }
@@ -207,9 +196,7 @@ function updateVitestAliases(contents, packageId, relativeEntryFile) {
 
   const aliases = new Map();
   const aliasEntries = Array.from(
-    match[2].matchAll(
-      /"([^"]+)":\s*path\.resolve\(\s*rootDir,\s*"([^"]+)"\s*\),/gm,
-    ),
+    match[2].matchAll(/"([^"]+)":\s*path\.resolve\(\s*rootDir,\s*"([^"]+)"\s*\),/gm),
   );
 
   if (aliasEntries.length === 0) {
@@ -225,19 +212,14 @@ function updateVitestAliases(contents, packageId, relativeEntryFile) {
 
   const nextAliasBlock = `${match[1]}${Array.from(aliases.entries())
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(
-      ([alias, target]) =>
-        `      "${alias}": path.resolve(rootDir, "${target}"),`,
-    )
+    .map(([alias, target]) => `      "${alias}": path.resolve(rootDir, "${target}"),`)
     .join("\n")}${match[3]}`;
 
   return contents.replace(aliasBlockPattern, nextAliasBlock);
 }
 
 function updateRootPackageJson(packageJson, nextPackageDirectory) {
-  const workspaces = Array.isArray(packageJson.workspaces)
-    ? [...packageJson.workspaces]
-    : [];
+  const workspaces = Array.isArray(packageJson.workspaces) ? [...packageJson.workspaces] : [];
 
   if (!workspaces.includes(nextPackageDirectory)) {
     workspaces.push(nextPackageDirectory);

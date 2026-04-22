@@ -15,14 +15,10 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("zero-shot-object-de
 
 export type ZeroShotObjectDetectionInput = UniversalTaskInput<"zero-shot-object-detection">;
 export type ZeroShotObjectDetectionOutput = UniversalTaskOutput<"zero-shot-object-detection">;
-export type ZeroShotObjectDetectionRequest<Input = ZeroShotObjectDetectionInput> = UniversalTaskRequest<
-  "zero-shot-object-detection",
-  Input
->;
-export type ZeroShotObjectDetectionResult<Output = ZeroShotObjectDetectionOutput> = UniversalTaskResult<
-  "zero-shot-object-detection",
-  Output
->;
+export type ZeroShotObjectDetectionRequest<Input = ZeroShotObjectDetectionInput> =
+  UniversalTaskRequest<"zero-shot-object-detection", Input>;
+export type ZeroShotObjectDetectionResult<Output = ZeroShotObjectDetectionOutput> =
+  UniversalTaskResult<"zero-shot-object-detection", Output>;
 export type ZeroShotObjectDetectionPipeline<
   Input = ZeroShotObjectDetectionInput,
   Output = ZeroShotObjectDetectionOutput,

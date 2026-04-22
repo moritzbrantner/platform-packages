@@ -25,15 +25,10 @@ function escapeAttribute(value: number | string): string {
 }
 
 function escapeText(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-function serializeAttributes(
-  attributes: Record<string, number | string | undefined>,
-): string {
+function serializeAttributes(attributes: Record<string, number | string | undefined>): string {
   return Object.entries(attributes)
     .filter(([, value]) => value !== undefined)
     .map(([key, value]) => `${key}="${escapeAttribute(value!)}"`)
@@ -69,12 +64,13 @@ function serializeAnimation(animation: FlatAnimation): string {
 
 function serializeGradient(gradient: FlatGradient): string {
   const stops = gradient.stops
-    .map((stop) =>
-      `<stop ${serializeAttributes({
-        offset: stop.offset,
-        "stop-color": stop.color,
-        "stop-opacity": stop.opacity,
-      })} />`,
+    .map(
+      (stop) =>
+        `<stop ${serializeAttributes({
+          offset: stop.offset,
+          "stop-color": stop.color,
+          "stop-opacity": stop.opacity,
+        })} />`,
     )
     .join("");
 

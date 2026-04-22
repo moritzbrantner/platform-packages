@@ -117,7 +117,7 @@ describe("@moritzbrantner/document-structure-extraction", () => {
       },
     ]);
 
-    expect(structureToCsvRows(result)[0]).toContain("\"City\"");
+    expect(structureToCsvRows(result)[0]).toContain('"City"');
   });
 
   test("maps structured blocks to text spans for traceability", () => {

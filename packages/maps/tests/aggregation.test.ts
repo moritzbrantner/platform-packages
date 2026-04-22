@@ -77,33 +77,36 @@ describe("@moritzbrantner/maps aggregation", () => {
   });
 
   test("filters points before building cluster totals", () => {
-    const index = createPointAggregationIndex([
+    const index = createPointAggregationIndex(
+      [
+        {
+          id: "berlin-a",
+          latitude: 52.52,
+          longitude: 13.405,
+          metrics: { orders: 3, revenue: 300 },
+          properties: { city: "Berlin" },
+        },
+        {
+          id: "berlin-b",
+          latitude: 52.5204,
+          longitude: 13.4054,
+          metrics: { orders: 2, revenue: 180 },
+          properties: { city: "Berlin" },
+        },
+        {
+          id: "paris-a",
+          latitude: 48.8566,
+          longitude: 2.3522,
+          metrics: { orders: 7, revenue: 700 },
+          properties: { city: "Paris" },
+        },
+      ],
       {
-        id: "berlin-a",
-        latitude: 52.52,
-        longitude: 13.405,
-        metrics: { orders: 3, revenue: 300 },
-        properties: { city: "Berlin" },
+        filterPoint(point) {
+          return point.properties.city === "Berlin";
+        },
       },
-      {
-        id: "berlin-b",
-        latitude: 52.5204,
-        longitude: 13.4054,
-        metrics: { orders: 2, revenue: 180 },
-        properties: { city: "Berlin" },
-      },
-      {
-        id: "paris-a",
-        latitude: 48.8566,
-        longitude: 2.3522,
-        metrics: { orders: 7, revenue: 700 },
-        properties: { city: "Paris" },
-      },
-    ], {
-      filterPoint(point) {
-        return point.properties.city === "Berlin";
-      },
-    });
+    );
 
     const aggregation = index.getViewportAggregation({
       bounds: [-180, -85, 180, 85],

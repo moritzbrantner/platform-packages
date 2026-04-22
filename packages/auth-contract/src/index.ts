@@ -1,6 +1,6 @@
 export type AuthPermission = string;
 export type AuthRole = string;
-export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
 export type AuthUser = {
   id: string;
@@ -64,7 +64,7 @@ export function isSessionActive(
 
 export function createAuthState(session: AuthSession | null): AuthState {
   return {
-    status: isSessionActive(session) ? 'authenticated' : 'unauthenticated',
+    status: isSessionActive(session) ? "authenticated" : "unauthenticated",
     session: isSessionActive(session) ? session : null,
     error: null,
   };

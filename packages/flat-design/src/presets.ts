@@ -17,9 +17,7 @@ export type FlatShowcaseSceneOptions = {
   palette?: Partial<FlatColorPalette>;
 };
 
-export function createFlatShowcaseScene(
-  options: FlatShowcaseSceneOptions = {},
-): FlatDesignScene {
+export function createFlatShowcaseScene(options: FlatShowcaseSceneOptions = {}): FlatDesignScene {
   const {
     animate = true,
     description = "Animated flat-design hero scene with layered SVG shapes.",
@@ -201,18 +199,14 @@ export function createFlatShowcaseScene(
             y: 98,
             scale: 1,
             opacity: 0.92,
-            motion: animate
-              ? { preset: "drift", options: { distance: 20, dur: "11s" } }
-              : false,
+            motion: animate ? { preset: "drift", options: { distance: 20, dur: "11s" } } : false,
           }),
           createFlatCloudFigure({
             x: 500,
             y: 76,
             scale: 0.82,
             opacity: 0.92,
-            motion: animate
-              ? { preset: "drift", options: { distance: 20, dur: "11s" } }
-              : false,
+            motion: animate ? { preset: "drift", options: { distance: 20, dur: "11s" } } : false,
           }),
         ],
       },
@@ -269,9 +263,7 @@ export function createFlatShowcaseScene(
             color: palette.accentAlt,
             highlight: palette.highlight,
             checkColor: palette.accentAlt,
-            motion: animate
-              ? { preset: "bobbing", options: { distance: 14, dur: "4.2s" } }
-              : false,
+            motion: animate ? { preset: "bobbing", options: { distance: 14, dur: "4.2s" } } : false,
           }),
           createFlatCardFigure({
             x: 191,
@@ -279,9 +271,7 @@ export function createFlatShowcaseScene(
             surface: palette.highlight,
             detail: palette.surfaceAlt,
             accent: palette.accent,
-            motion: animate
-              ? { preset: "bobbing", options: { distance: 10, dur: "4.8s" } }
-              : false,
+            motion: animate ? { preset: "bobbing", options: { distance: 10, dur: "4.8s" } } : false,
           }),
         ],
       },

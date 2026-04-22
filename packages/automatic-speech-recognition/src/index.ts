@@ -10,19 +10,17 @@ import {
   type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
-export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("automatic-speech-recognition");
+export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor(
+  "automatic-speech-recognition",
+);
 export const huggingFaceTask = createHuggingFaceTaskPackage("automatic-speech-recognition");
 
 export type AutomaticSpeechRecognitionInput = UniversalTaskInput<"automatic-speech-recognition">;
 export type AutomaticSpeechRecognitionOutput = UniversalTaskOutput<"automatic-speech-recognition">;
-export type AutomaticSpeechRecognitionRequest<Input = AutomaticSpeechRecognitionInput> = UniversalTaskRequest<
-  "automatic-speech-recognition",
-  Input
->;
-export type AutomaticSpeechRecognitionResult<Output = AutomaticSpeechRecognitionOutput> = UniversalTaskResult<
-  "automatic-speech-recognition",
-  Output
->;
+export type AutomaticSpeechRecognitionRequest<Input = AutomaticSpeechRecognitionInput> =
+  UniversalTaskRequest<"automatic-speech-recognition", Input>;
+export type AutomaticSpeechRecognitionResult<Output = AutomaticSpeechRecognitionOutput> =
+  UniversalTaskResult<"automatic-speech-recognition", Output>;
 export type AutomaticSpeechRecognitionPipeline<
   Input = AutomaticSpeechRecognitionInput,
   Output = AutomaticSpeechRecognitionOutput,

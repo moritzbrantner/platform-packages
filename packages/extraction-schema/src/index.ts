@@ -108,7 +108,13 @@ export interface InformationExtractionRecord {
   label?: string;
   confidence?: number;
   properties?: Record<string, unknown>;
-  fields?: Array<{ name?: string; key?: string; value?: unknown; confidence?: number; unit?: string }>;
+  fields?: Array<{
+    name?: string;
+    key?: string;
+    value?: unknown;
+    confidence?: number;
+    unit?: string;
+  }>;
 }
 
 export interface InformationExtractionOutput {
@@ -123,7 +129,9 @@ export interface InformationExtractionOutput {
   }>;
 }
 
-type InformationExtractionRelationRecord = NonNullable<InformationExtractionOutput["relations"]>[number];
+type InformationExtractionRelationRecord = NonNullable<
+  InformationExtractionOutput["relations"]
+>[number];
 
 export interface DocumentStructureBlock {
   id?: string;
@@ -279,7 +287,9 @@ export function validateExtractionOutput(
     }
   }
 
-  const relationSchemas = new Map((schema.relations ?? []).map((relation) => [relation.type, relation]));
+  const relationSchemas = new Map(
+    (schema.relations ?? []).map((relation) => [relation.type, relation]),
+  );
 
   for (const relation of output.relations) {
     const relationSchema = relationSchemas.get(relation.type);
@@ -327,7 +337,10 @@ export function validateExtractionOutput(
   return { ok: issues.length === 0, issues };
 }
 
-export function normalizeDate(value: string | Date, options: CanonicalizationOptions = {}): string | null {
+export function normalizeDate(
+  value: string | Date,
+  options: CanonicalizationOptions = {},
+): string | null {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value.toISOString().slice(0, 10);
   }
@@ -359,7 +372,11 @@ export function normalizeDate(value: string | Date, options: CanonicalizationOpt
   }
 
   const parts =
-    order === "dmy" ? { day: a, month: b, year: c } : order === "ymd" ? { year: a, month: b, day: c } : { month: a, day: b, year: c };
+    order === "dmy"
+      ? { day: a, month: b, year: c }
+      : order === "ymd"
+        ? { year: a, month: b, day: c }
+        : { month: a, day: b, year: c };
 
   const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
 
@@ -505,7 +522,9 @@ export function adaptInformationExtractionOutput(
   const relations = (input.relations ?? [])
     .map((relation) => normalizeInformationRelation(relation))
     .filter((relation): relation is NormalizedRelation => relation !== null)
-    .filter((relation) => entityIdSet.has(relation.fromEntityId) && entityIdSet.has(relation.toEntityId))
+    .filter(
+      (relation) => entityIdSet.has(relation.fromEntityId) && entityIdSet.has(relation.toEntityId),
+    )
     .sort(compareRelationDeterministically);
 
   return { entities, relations };
@@ -525,7 +544,9 @@ export function adaptDocumentStructureExtractionOutput(
   const relations = (input.links ?? [])
     .map((link) => normalizeDocumentLink(link))
     .filter((relation): relation is NormalizedRelation => relation !== null)
-    .filter((relation) => entityIdSet.has(relation.fromEntityId) && entityIdSet.has(relation.toEntityId))
+    .filter(
+      (relation) => entityIdSet.has(relation.fromEntityId) && entityIdSet.has(relation.toEntityId),
+    )
     .sort(compareRelationDeterministically);
 
   return { entities, relations };
@@ -599,7 +620,13 @@ function normalizeInformationEntity(
       continue;
     }
 
-    const normalized = normalizeField(fieldName, field.value, field.confidence ?? confidence, options, field.unit);
+    const normalized = normalizeField(
+      fieldName,
+      field.value,
+      field.confidence ?? confidence,
+      options,
+      field.unit,
+    );
     if (normalized) {
       fields[normalized.name] = normalized;
     }
@@ -679,9 +706,7 @@ function normalizeDocumentBlock(
   };
 }
 
-function normalizeDocumentLink(
-  link: DocumentStructureLinkRecord,
-): NormalizedRelation | null {
+function normalizeDocumentLink(link: DocumentStructureLinkRecord): NormalizedRelation | null {
   if (!link?.relation || !link.fromBlockId || !link.toBlockId) {
     return null;
   }
@@ -710,7 +735,13 @@ function normalizeField(
   if (typeof value === "string") {
     const maybeDate = normalizeDate(value, options);
     if (maybeDate) {
-      return { name, value: maybeDate, rawValue: value, confidence: clampConfidence(confidence), unit: explicitUnit };
+      return {
+        name,
+        value: maybeDate,
+        rawValue: value,
+        confidence: clampConfidence(confidence),
+        unit: explicitUnit,
+      };
     }
 
     const parsedNumeric = parseNumericWithUnit(value, { ...options, defaultUnit: explicitUnit });
@@ -751,7 +782,10 @@ function compareEntityDeterministically(left: NormalizedEntity, right: Normalize
   return left.type.localeCompare(right.type) || left.id.localeCompare(right.id);
 }
 
-function compareRelationDeterministically(left: NormalizedRelation, right: NormalizedRelation): number {
+function compareRelationDeterministically(
+  left: NormalizedRelation,
+  right: NormalizedRelation,
+): number {
   return (
     left.type.localeCompare(right.type) ||
     left.fromEntityId.localeCompare(right.fromEntityId) ||
@@ -779,7 +813,9 @@ function resolveFieldThreshold(
 
   const key = `${entityType}.${fieldName}`;
 
-  return clampConfidence(policy.perFieldPath?.[key] ?? field?.minimumConfidence ?? policy.fieldMinimum);
+  return clampConfidence(
+    policy.perFieldPath?.[key] ?? field?.minimumConfidence ?? policy.fieldMinimum,
+  );
 }
 
 function resolveRelationThreshold(
@@ -791,7 +827,9 @@ function resolveRelationThreshold(
     return clampConfidence(relation?.minimumConfidence ?? 0);
   }
 
-  return clampConfidence(policy.perRelationType?.[relationType] ?? relation?.minimumConfidence ?? policy.relationMinimum);
+  return clampConfidence(
+    policy.perRelationType?.[relationType] ?? relation?.minimumConfidence ?? policy.relationMinimum,
+  );
 }
 
 function clampConfidence(value: number): number {
@@ -853,7 +891,9 @@ function isPlaceholderValue(value: string | number | boolean): boolean {
   return normalized === "unknown" || normalized === "n/a" || normalized === "none";
 }
 
-function dedupeFieldEntries(entries: Array<[string, NormalizedField]>): Array<[string, NormalizedField]> {
+function dedupeFieldEntries(
+  entries: Array<[string, NormalizedField]>,
+): Array<[string, NormalizedField]> {
   const byKey = new Map<string, [string, NormalizedField]>();
 
   for (const [fieldName, field] of entries) {
@@ -865,7 +905,9 @@ function dedupeFieldEntries(entries: Array<[string, NormalizedField]>): Array<[s
     }
   }
 
-  return Array.from(byKey.values()).sort(([leftName], [rightName]) => leftName.localeCompare(rightName));
+  return Array.from(byKey.values()).sort(([leftName], [rightName]) =>
+    leftName.localeCompare(rightName),
+  );
 }
 
 function dedupeRelations(relations: readonly NormalizedRelation[]): NormalizedRelation[] {

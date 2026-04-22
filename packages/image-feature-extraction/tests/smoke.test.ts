@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/image-feature-extraction", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("image-feature-extraction");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=image-feature-extraction");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=image-feature-extraction",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

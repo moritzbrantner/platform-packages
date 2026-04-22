@@ -15,11 +15,7 @@ describe("@moritzbrantner/text-inference", () => {
       id: "demo",
     });
 
-    expect(chunks.map((chunk) => chunk.text)).toEqual([
-      "Alpha one.",
-      "Beta two.",
-      "Gamma three.",
-    ]);
+    expect(chunks.map((chunk) => chunk.text)).toEqual(["Alpha one.", "Beta two.", "Gamma three."]);
     expect(chunks[1]).toMatchObject({
       documentId: "demo",
       start: 11,
@@ -52,7 +48,11 @@ describe("@moritzbrantner/text-inference", () => {
   });
 
   test("wraps Hugging Face HTTP inference with normalized outputs", async () => {
-    const requests: Array<{ url: string; body: string | undefined; headers: HeadersInit | undefined }> = [];
+    const requests: Array<{
+      url: string;
+      body: string | undefined;
+      headers: HeadersInit | undefined;
+    }> = [];
     const provider = createHuggingFaceTextInferenceProvider({
       apiKey: "hf_test",
       fetch: async (input, init) => {
@@ -92,7 +92,7 @@ describe("@moritzbrantner/text-inference", () => {
     expect(requests[0]?.url).toBe(
       "https://router.huggingface.co/hf-inference/models/distilbert/distilbert-base-uncased-finetuned-sst-2-english",
     );
-    expect(requests[0]?.body).toContain("\"inputs\":\"I love this.\"");
+    expect(requests[0]?.body).toContain('"inputs":"I love this."');
     expect(requests[1]?.url).toBe(
       "https://router.huggingface.co/hf-inference/models/facebook/bart-large-cnn",
     );

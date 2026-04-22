@@ -1,6 +1,7 @@
 # Publishing packages
 
 ## First publish
+
 1. Commit and push this repository to `github.com/moritzbrantner/platform-packages`.
 2. Confirm your package scope matches the GitHub Packages owner. GitHub Packages only accepts npm scopes owned by the publishing user or organization.
 3. If you are not publishing from a `platform` GitHub owner, rename `@moritzbrantner/*` packages to your real GitHub scope before the first release.
@@ -11,6 +12,7 @@
 The current workflow validates and publishes every public package under `packages/*`.
 
 ## Later releases
+
 1. Make your package changes.
 2. Run `bun run changeset`.
 3. Select the packages that changed and choose the appropriate version bump.
@@ -36,8 +38,12 @@ Before publishing new package families:
 4. Add a Changeset for every package being published.
 5. Confirm `release:build`, `release:lint`, `release:typecheck`, and `release:test` cover the package.
 
+`release:lint` runs the root lint command, including Oxfmt formatting checks, Oxlint diagnostics, package-level lint tasks, and repository-specific package/style/UI verifiers.
+
 ## Package requirements
+
 Every publishable package under `packages/*` must have:
+
 - a scoped lowercase package name owned by the GitHub Packages publisher
 - `"private": false`
 - a `repository` block pointing to `moritzbrantner/platform-packages`
@@ -45,6 +51,7 @@ Every publishable package under `packages/*` must have:
 - real publishable files referenced by `main`, `exports`, or package-specific config paths
 
 ## Installing from another repository
+
 Consumers need an `.npmrc` entry for the package scope you publish under and a token that can read packages:
 
 ```ini

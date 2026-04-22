@@ -20,22 +20,8 @@ import {
 } from "./app-layout";
 import { Badge } from "./badge";
 import { Button } from "./button";
-import {
-  Stat,
-  StatDelta,
-  StatDescription,
-  StatGroup,
-  StatLabel,
-  StatValue,
-} from "./stat";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./table";
+import { Stat, StatDelta, StatDescription, StatGroup, StatLabel, StatValue } from "./stat";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
 
 type DashboardDemoProps = {
   onRefresh?: () => void;
@@ -57,8 +43,8 @@ function DashboardDemo({ onRefresh = () => undefined }: DashboardDemoProps) {
           </Badge>
           <PageTitle>Package operations</PageTitle>
           <PageDescription>
-            Monitor package readiness, active reviews, and follow-up work across
-            the shared platform workspace.
+            Monitor package readiness, active reviews, and follow-up work across the shared platform
+            workspace.
           </PageDescription>
         </div>
         <PageActions>
@@ -93,9 +79,7 @@ function DashboardDemo({ onRefresh = () => undefined }: DashboardDemoProps) {
             <SurfaceHeader>
               <div>
                 <SurfaceTitle>Release queue</SurfaceTitle>
-                <SurfaceDescription>
-                  Packages currently staged for verification.
-                </SurfaceDescription>
+                <SurfaceDescription>Packages currently staged for verification.</SurfaceDescription>
               </div>
               <SurfaceAction>
                 <Badge variant="secondary">3 items</Badge>
@@ -127,8 +111,7 @@ function DashboardDemo({ onRefresh = () => undefined }: DashboardDemoProps) {
             <SurfaceHeader>
               <SurfaceTitle>Review focus</SurfaceTitle>
               <SurfaceDescription>
-                Keep interactive examples and typed exports aligned before the
-                next publish.
+                Keep interactive examples and typed exports aligned before the next publish.
               </SurfaceDescription>
             </SurfaceHeader>
             <SurfaceContent className="mt-4 grid gap-3">
@@ -180,8 +163,7 @@ export const CenteredHeader: Story = {
         <Badge variant="outline">Preview</Badge>
         <PageTitle>Centered launch page</PageTitle>
         <PageDescription>
-          A compact page header for focused empty states, onboarding screens, and
-          feature previews.
+          A compact page header for focused empty states, onboarding screens, and feature previews.
         </PageDescription>
         <PageActions>
           <Button>Start review</Button>
@@ -200,14 +182,11 @@ export const SurfaceVariants: Story = {
           <Surface key={variant} variant={variant}>
             <SurfaceHeader>
               <SurfaceTitle className="capitalize">{variant}</SurfaceTitle>
-              <SurfaceDescription>
-                Surface styling for reusable page sections.
-              </SurfaceDescription>
+              <SurfaceDescription>Surface styling for reusable page sections.</SurfaceDescription>
             </SurfaceHeader>
             <SurfaceContent className="mt-4">
               <p className="text-sm leading-6 text-muted-foreground">
-                Use this variant where the surrounding page needs a distinct
-                panel treatment.
+                Use this variant where the surrounding page needs a distinct panel treatment.
               </p>
             </SurfaceContent>
           </Surface>
@@ -228,13 +207,11 @@ export const StickyActionBar: Story = {
           </SurfaceDescription>
         </SurfaceHeader>
         <SurfaceContent className="mt-4 grid gap-3">
-          {["Package metadata", "Visual review", "Compatibility notes"].map(
-            (item) => (
-              <div key={item} className="border border-border/60 bg-muted/25 p-3">
-                {item}
-              </div>
-            )
-          )}
+          {["Package metadata", "Visual review", "Compatibility notes"].map((item) => (
+            <div key={item} className="border border-border/60 bg-muted/25 p-3">
+              {item}
+            </div>
+          ))}
         </SurfaceContent>
         <SurfaceFooter>
           <ActionBar sticky className="w-full">

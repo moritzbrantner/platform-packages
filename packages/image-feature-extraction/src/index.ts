@@ -15,14 +15,10 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("image-feature-extra
 
 export type ImageFeatureExtractionInput = UniversalTaskInput<"image-feature-extraction">;
 export type ImageFeatureExtractionOutput = UniversalTaskOutput<"image-feature-extraction">;
-export type ImageFeatureExtractionRequest<Input = ImageFeatureExtractionInput> = UniversalTaskRequest<
-  "image-feature-extraction",
-  Input
->;
-export type ImageFeatureExtractionResult<Output = ImageFeatureExtractionOutput> = UniversalTaskResult<
-  "image-feature-extraction",
-  Output
->;
+export type ImageFeatureExtractionRequest<Input = ImageFeatureExtractionInput> =
+  UniversalTaskRequest<"image-feature-extraction", Input>;
+export type ImageFeatureExtractionResult<Output = ImageFeatureExtractionOutput> =
+  UniversalTaskResult<"image-feature-extraction", Output>;
 export type ImageFeatureExtractionPipeline<
   Input = ImageFeatureExtractionInput,
   Output = ImageFeatureExtractionOutput,

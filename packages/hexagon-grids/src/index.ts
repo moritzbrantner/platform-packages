@@ -49,10 +49,7 @@ export interface HexPolygon {
   holes?: GeoJsonLinearRing[];
 }
 
-export type HexPolygonInput =
-  | GeoJsonPolygonGeometry
-  | GeoJsonMultiPolygonGeometry
-  | HexPolygon;
+export type HexPolygonInput = GeoJsonPolygonGeometry | GeoJsonMultiPolygonGeometry | HexPolygon;
 
 export type HexMetricRecord = Record<string, number>;
 
@@ -84,8 +81,7 @@ export interface AggregatePointsToHexGridOptions<TPoint extends HexGridPoint> {
   filterPoint?: (point: TPoint) => boolean;
 }
 
-export interface AggregatedHexCell<TPoint extends HexGridPoint>
-  extends HexCellDescriptor {
+export interface AggregatedHexCell<TPoint extends HexGridPoint> extends HexCellDescriptor {
   pointCount: number;
   metrics: HexMetricRecord;
   points: TPoint[];
@@ -279,7 +275,9 @@ function normalizePolygonInput(polygon: HexPolygonInput): GeoJsonLinearRing[][] 
 }
 
 function normalizeRing(ring: GeoJsonLinearRing): GeoJsonLinearRing {
-  const normalizedRing = ring.map(([longitude, latitude]) => [longitude, latitude] as GeoJsonPosition);
+  const normalizedRing = ring.map(
+    ([longitude, latitude]) => [longitude, latitude] as GeoJsonPosition,
+  );
 
   if (normalizedRing.length < 3) {
     throw new Error("Hex polygon rings must contain at least three coordinates.");

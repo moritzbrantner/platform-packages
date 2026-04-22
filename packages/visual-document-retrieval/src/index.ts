@@ -15,14 +15,10 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("visual-document-ret
 
 export type VisualDocumentRetrievalInput = UniversalTaskInput<"visual-document-retrieval">;
 export type VisualDocumentRetrievalOutput = UniversalTaskOutput<"visual-document-retrieval">;
-export type VisualDocumentRetrievalRequest<Input = VisualDocumentRetrievalInput> = UniversalTaskRequest<
-  "visual-document-retrieval",
-  Input
->;
-export type VisualDocumentRetrievalResult<Output = VisualDocumentRetrievalOutput> = UniversalTaskResult<
-  "visual-document-retrieval",
-  Output
->;
+export type VisualDocumentRetrievalRequest<Input = VisualDocumentRetrievalInput> =
+  UniversalTaskRequest<"visual-document-retrieval", Input>;
+export type VisualDocumentRetrievalResult<Output = VisualDocumentRetrievalOutput> =
+  UniversalTaskResult<"visual-document-retrieval", Output>;
 export type VisualDocumentRetrievalPipeline<
   Input = VisualDocumentRetrievalInput,
   Output = VisualDocumentRetrievalOutput,

@@ -1,11 +1,4 @@
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@moritzbrantner/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@moritzbrantner/ui";
 
 import {
   ExampleLinkCard,
@@ -45,25 +38,24 @@ function HomePage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
               <p>
-                Use the grouped navbar to jump between related package surfaces.
-                Each page is a manual smoke test for package styling, responsive
-                behavior, and stateful interactions.
+                Use the grouped navbar to jump between related package surfaces. Each page is a
+                manual smoke test for package styling, responsive behavior, and stateful
+                interactions.
               </p>
               <p>
-                The maps pages cover both heavy clustering and temporal playback:
-                the primary maps page validates six-figure aggregation, while the
-                temporal maps playground isolates moving track behavior.
+                The maps pages cover both heavy clustering and temporal playback: the primary maps
+                page validates six-figure aggregation, while the temporal maps playground isolates
+                moving track behavior.
               </p>
               <p>
-                Run <code>bun run dev:playground</code> from the workspace root.
-                Vite aliases packages to local source files, so edits in
-                <code>packages/maps</code>, <code>packages/ui</code>, and sibling
-                package sources show up immediately.
+                Run <code>bun run dev:playground</code> from the workspace root. Vite aliases
+                packages to local source files, so edits in
+                <code>packages/maps</code>, <code>packages/ui</code>, and sibling package sources
+                show up immediately.
               </p>
               <p>
-                Use the theme toggle in the navigation bar to check light and dark
-                rendering. The examples intentionally cover interactive states
-                rather than only static screenshots.
+                Use the theme toggle in the navigation bar to check light and dark rendering. The
+                examples intentionally cover interactive states rather than only static screenshots.
               </p>
             </CardContent>
           </Card>
@@ -101,9 +93,7 @@ function ExampleGroupSection({
           </Badge>
           <h2 className="text-2xl font-semibold tracking-tight">{group.label}</h2>
         </div>
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          {group.description}
-        </p>
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{group.description}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {group.items.map((item) => (

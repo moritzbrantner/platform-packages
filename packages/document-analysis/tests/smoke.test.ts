@@ -105,7 +105,10 @@ describe("@moritzbrantner/document-analysis", () => {
       pages: [
         {
           index: 0,
-          blocks: [{ text: "INVOICE", bbox: [0, 0, 50, 10] }, { text: "Amount: 42", bbox: [0, 15, 80, 25] }],
+          blocks: [
+            { text: "INVOICE", bbox: [0, 0, 50, 10] },
+            { text: "Amount: 42", bbox: [0, 15, 80, 25] },
+          ],
         },
       ],
     });

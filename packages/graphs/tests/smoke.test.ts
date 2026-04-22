@@ -1,9 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import {
-  createGraphDensityIndex,
-  createGraphDensityViewportSummary,
-} from "@moritzbrantner/graphs";
+import { createGraphDensityIndex, createGraphDensityViewportSummary } from "@moritzbrantner/graphs";
 
 describe("@moritzbrantner/graphs", () => {
   test("creates node windows and edge summaries from graph data", () => {
@@ -27,11 +24,7 @@ describe("@moritzbrantner/graphs", () => {
       offset: 1,
     });
 
-    expect(subgraph.nodes.map((node) => node.id)).toEqual([
-      "node-1",
-      "node-2",
-      "node-3",
-    ]);
+    expect(subgraph.nodes.map((node) => node.id)).toEqual(["node-1", "node-2", "node-3"]);
     expect(subgraph.summary.visibleItemCount).toBe(3);
     expect(subgraph.summary.metrics.demand).toBe(9);
     expect(subgraph.edges.map((edge) => edge.id)).toEqual(["edge-1-2", "edge-2-3"]);

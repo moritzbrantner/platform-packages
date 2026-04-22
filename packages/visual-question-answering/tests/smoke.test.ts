@@ -10,7 +10,9 @@ import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-u
 describe("@moritzbrantner/visual-question-answering", () => {
   test("exports the Hugging Face task descriptor", () => {
     expect(huggingFaceTaskDescriptor.task).toBe("visual-question-answering");
-    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain("pipeline_tag=visual-question-answering");
+    expect(huggingFaceTaskDescriptor.modelSearchUrl).toContain(
+      "pipeline_tag=visual-question-answering",
+    );
   });
 
   test("creates a universal pipeline for the task", async () => {

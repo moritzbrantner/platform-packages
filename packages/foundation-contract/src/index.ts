@@ -1,19 +1,19 @@
-export type AppRole = 'SUPERADMIN' | 'ADMIN' | 'MANAGER' | 'USER';
+export type AppRole = "SUPERADMIN" | "ADMIN" | "MANAGER" | "USER";
 
 export const appPermissionKeys = [
-  'dashboard.view',
-  'account.updateOwnEmail',
-  'account.deleteOwn',
-  'notifications.readOwn',
-  'profile.editOwn',
-  'profile.manageOwnImage',
-  'profile.manageOwnTags',
-  'profile.manageOwnSearchVisibility',
-  'profile.manageOwnFollowerVisibility',
-  'profile.follow',
-  'profile.block',
-  'workspace.access',
-  'workspace.dataEntry.write',
+  "dashboard.view",
+  "account.updateOwnEmail",
+  "account.deleteOwn",
+  "notifications.readOwn",
+  "profile.editOwn",
+  "profile.manageOwnImage",
+  "profile.manageOwnTags",
+  "profile.manageOwnSearchVisibility",
+  "profile.manageOwnFollowerVisibility",
+  "profile.follow",
+  "profile.block",
+  "workspace.access",
+  "workspace.dataEntry.write",
 ] as const;
 
 export type AppPermissionKey = (typeof appPermissionKeys)[number];
@@ -25,47 +25,47 @@ function uniquePermissions(permissions: readonly AppPermissionKey[]) {
 
 export const defaultRolePermissionAssignments: RolePermissionAssignments = {
   USER: uniquePermissions([
-    'dashboard.view',
-    'account.updateOwnEmail',
-    'account.deleteOwn',
-    'notifications.readOwn',
-    'profile.editOwn',
-    'profile.manageOwnImage',
-    'profile.manageOwnTags',
-    'profile.manageOwnSearchVisibility',
-    'profile.manageOwnFollowerVisibility',
-    'profile.follow',
-    'profile.block',
-    'workspace.access',
+    "dashboard.view",
+    "account.updateOwnEmail",
+    "account.deleteOwn",
+    "notifications.readOwn",
+    "profile.editOwn",
+    "profile.manageOwnImage",
+    "profile.manageOwnTags",
+    "profile.manageOwnSearchVisibility",
+    "profile.manageOwnFollowerVisibility",
+    "profile.follow",
+    "profile.block",
+    "workspace.access",
   ]),
   MANAGER: uniquePermissions([
-    'dashboard.view',
-    'account.updateOwnEmail',
-    'account.deleteOwn',
-    'notifications.readOwn',
-    'profile.editOwn',
-    'profile.manageOwnImage',
-    'profile.manageOwnTags',
-    'profile.manageOwnSearchVisibility',
-    'profile.manageOwnFollowerVisibility',
-    'profile.follow',
-    'profile.block',
-    'workspace.access',
+    "dashboard.view",
+    "account.updateOwnEmail",
+    "account.deleteOwn",
+    "notifications.readOwn",
+    "profile.editOwn",
+    "profile.manageOwnImage",
+    "profile.manageOwnTags",
+    "profile.manageOwnSearchVisibility",
+    "profile.manageOwnFollowerVisibility",
+    "profile.follow",
+    "profile.block",
+    "workspace.access",
   ]),
   ADMIN: uniquePermissions([
-    'dashboard.view',
-    'account.updateOwnEmail',
-    'account.deleteOwn',
-    'notifications.readOwn',
-    'profile.editOwn',
-    'profile.manageOwnImage',
-    'profile.manageOwnTags',
-    'profile.manageOwnSearchVisibility',
-    'profile.manageOwnFollowerVisibility',
-    'profile.follow',
-    'profile.block',
-    'workspace.access',
-    'workspace.dataEntry.write',
+    "dashboard.view",
+    "account.updateOwnEmail",
+    "account.deleteOwn",
+    "notifications.readOwn",
+    "profile.editOwn",
+    "profile.manageOwnImage",
+    "profile.manageOwnTags",
+    "profile.manageOwnSearchVisibility",
+    "profile.manageOwnFollowerVisibility",
+    "profile.follow",
+    "profile.block",
+    "workspace.access",
+    "workspace.dataEntry.write",
   ]),
   SUPERADMIN: uniquePermissions([...appPermissionKeys]),
 };
@@ -79,33 +79,33 @@ export function hasPermission(role: AppRole | null | undefined, permission: AppP
 }
 
 export function canAccessDataEntryWorkspace(role: AppRole | null | undefined) {
-  return hasPermission(role, 'workspace.access');
+  return hasPermission(role, "workspace.access");
 }
 
 export function canWriteDataEntryRecords(role: AppRole | null | undefined) {
-  return hasPermission(role, 'workspace.dataEntry.write');
+  return hasPermission(role, "workspace.dataEntry.write");
 }
 
 export function canReadOwnNotifications(role: AppRole | null | undefined) {
-  return hasPermission(role, 'notifications.readOwn');
+  return hasPermission(role, "notifications.readOwn");
 }
 
 export function canEditOwnProfile(role: AppRole | null | undefined) {
-  return hasPermission(role, 'profile.editOwn');
+  return hasPermission(role, "profile.editOwn");
 }
 
 export function canFollowProfiles(role: AppRole | null | undefined) {
-  return hasPermission(role, 'profile.follow');
+  return hasPermission(role, "profile.follow");
 }
 
 export function canBlockProfiles(role: AppRole | null | undefined) {
-  return hasPermission(role, 'profile.block');
+  return hasPermission(role, "profile.block");
 }
 
-export const backgroundOptions = ['paper', 'aurora', 'dusk', 'forest'] as const;
+export const backgroundOptions = ["paper", "aurora", "dusk", "forest"] as const;
 export type BackgroundOption = (typeof backgroundOptions)[number];
 
-export const dateFormatOptions = ['localized', 'long', 'iso'] as const;
+export const dateFormatOptions = ["localized", "long", "iso"] as const;
 export type DateFormatOption = (typeof dateFormatOptions)[number];
 
 export type NotificationSettings = {
@@ -130,8 +130,8 @@ export type AppSettings = {
 };
 
 export const defaultAppSettings: AppSettings = {
-  background: 'paper',
-  dateFormat: 'localized',
+  background: "paper",
+  dateFormat: "localized",
   weekStartsOn: 1,
   showOutsideDays: true,
   compactSpacing: false,
@@ -142,20 +142,20 @@ export const defaultAppSettings: AppSettings = {
   },
   notifications: {
     enabled: true,
-    type: 'instant',
+    type: "instant",
   },
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function isBackgroundOption(value: unknown): value is BackgroundOption {
-  return typeof value === 'string' && backgroundOptions.includes(value as BackgroundOption);
+  return typeof value === "string" && backgroundOptions.includes(value as BackgroundOption);
 }
 
 function isDateFormatOption(value: unknown): value is DateFormatOption {
-  return typeof value === 'string' && dateFormatOptions.includes(value as DateFormatOption);
+  return typeof value === "string" && dateFormatOptions.includes(value as DateFormatOption);
 }
 
 export function normalizeAppSettings(value: unknown): AppSettings {
@@ -167,40 +167,59 @@ export function normalizeAppSettings(value: unknown): AppSettings {
   const security = isRecord(value.security) ? value.security : null;
 
   return {
-    background: isBackgroundOption(value.background) ? value.background : defaultAppSettings.background,
-    dateFormat: isDateFormatOption(value.dateFormat) ? value.dateFormat : defaultAppSettings.dateFormat,
+    background: isBackgroundOption(value.background)
+      ? value.background
+      : defaultAppSettings.background,
+    dateFormat: isDateFormatOption(value.dateFormat)
+      ? value.dateFormat
+      : defaultAppSettings.dateFormat,
     weekStartsOn: value.weekStartsOn === 0 ? 0 : 1,
-    showOutsideDays: typeof value.showOutsideDays === 'boolean' ? value.showOutsideDays : defaultAppSettings.showOutsideDays,
-    compactSpacing: typeof value.compactSpacing === 'boolean' ? value.compactSpacing : defaultAppSettings.compactSpacing,
-    reducedMotion: typeof value.reducedMotion === 'boolean' ? value.reducedMotion : defaultAppSettings.reducedMotion,
-    showHotkeyHints: typeof value.showHotkeyHints === 'boolean' ? value.showHotkeyHints : defaultAppSettings.showHotkeyHints,
+    showOutsideDays:
+      typeof value.showOutsideDays === "boolean"
+        ? value.showOutsideDays
+        : defaultAppSettings.showOutsideDays,
+    compactSpacing:
+      typeof value.compactSpacing === "boolean"
+        ? value.compactSpacing
+        : defaultAppSettings.compactSpacing,
+    reducedMotion:
+      typeof value.reducedMotion === "boolean"
+        ? value.reducedMotion
+        : defaultAppSettings.reducedMotion,
+    showHotkeyHints:
+      typeof value.showHotkeyHints === "boolean"
+        ? value.showHotkeyHints
+        : defaultAppSettings.showHotkeyHints,
     security: {
       passwordRecoveryTwoFactorEnabled:
-        typeof security?.passwordRecoveryTwoFactorEnabled === 'boolean'
+        typeof security?.passwordRecoveryTwoFactorEnabled === "boolean"
           ? security.passwordRecoveryTwoFactorEnabled
           : defaultAppSettings.security.passwordRecoveryTwoFactorEnabled,
     },
     notifications: {
       enabled:
-        typeof notifications?.enabled === 'boolean'
+        typeof notifications?.enabled === "boolean"
           ? notifications.enabled
           : defaultAppSettings.notifications.enabled,
-      type: typeof notifications?.type === 'string' ? notifications.type : defaultAppSettings.notifications.type,
+      type:
+        typeof notifications?.type === "string"
+          ? notifications.type
+          : defaultAppSettings.notifications.type,
     },
   };
 }
 
 export function formatDatePreview(date: Date, settings: AppSettings, locale: string) {
-  if (settings.dateFormat === 'iso') {
+  if (settings.dateFormat === "iso") {
     return date.toISOString().slice(0, 10);
   }
 
   return new Intl.DateTimeFormat(locale, {
-    dateStyle: settings.dateFormat === 'long' ? 'full' : 'medium',
+    dateStyle: settings.dateFormat === "long" ? "full" : "medium",
   }).format(date);
 }
 
-export const followerVisibilityRoles = ['PUBLIC', 'MEMBERS', 'PRIVATE'] as const;
+export const followerVisibilityRoles = ["PUBLIC", "MEMBERS", "PRIVATE"] as const;
 export type FollowerVisibilityRole = (typeof followerVisibilityRoles)[number];
 
 export type ProfileDirectoryEntry = {
@@ -233,48 +252,48 @@ export type ProfileRelationshipState = {
 
 export const demoProfiles: readonly ProfileDirectoryEntry[] = [
   {
-    userId: 'user-alex',
-    tag: 'alex',
-    displayName: 'Alex Mercer',
+    userId: "user-alex",
+    tag: "alex",
+    displayName: "Alex Mercer",
     imageUrl: null,
-    headline: 'Product engineer',
-    location: 'Berlin, Germany',
-    bio: 'Designing calm tools for teams that ship across web, mobile, and desktop.',
+    headline: "Product engineer",
+    location: "Berlin, Germany",
+    bio: "Designing calm tools for teams that ship across web, mobile, and desktop.",
     isSearchable: true,
-    followerVisibility: 'PUBLIC',
+    followerVisibility: "PUBLIC",
   },
   {
-    userId: 'user-jules',
-    tag: 'jules',
-    displayName: 'Jules Costa',
+    userId: "user-jules",
+    tag: "jules",
+    displayName: "Jules Costa",
     imageUrl: null,
-    headline: 'Frontend platform lead',
-    location: 'Porto, Portugal',
-    bio: 'Keeping shared packages predictable while teams move quickly.',
+    headline: "Frontend platform lead",
+    location: "Porto, Portugal",
+    bio: "Keeping shared packages predictable while teams move quickly.",
     isSearchable: true,
-    followerVisibility: 'MEMBERS',
+    followerVisibility: "MEMBERS",
   },
   {
-    userId: 'user-mika',
-    tag: 'mika',
-    displayName: 'Mika Chen',
+    userId: "user-mika",
+    tag: "mika",
+    displayName: "Mika Chen",
     imageUrl: null,
-    headline: 'Design technologist',
-    location: 'Taipei, Taiwan',
-    bio: 'Blending motion, interaction, and content systems into one product language.',
+    headline: "Design technologist",
+    location: "Taipei, Taiwan",
+    bio: "Blending motion, interaction, and content systems into one product language.",
     isSearchable: true,
-    followerVisibility: 'PUBLIC',
+    followerVisibility: "PUBLIC",
   },
   {
-    userId: 'user-sam',
-    tag: 'sam',
-    displayName: 'Sam Rivera',
+    userId: "user-sam",
+    tag: "sam",
+    displayName: "Sam Rivera",
     imageUrl: null,
-    headline: 'Operations manager',
-    location: 'Madrid, Spain',
-    bio: 'Turning team workflows into measurable operating rhythms.',
+    headline: "Operations manager",
+    location: "Madrid, Spain",
+    bio: "Turning team workflows into measurable operating rhythms.",
     isSearchable: true,
-    followerVisibility: 'PRIVATE',
+    followerVisibility: "PRIVATE",
   },
 ];
 
@@ -286,7 +305,10 @@ function removeValue(values: readonly string[], value: string) {
   return values.filter((item) => item !== value);
 }
 
-export function followProfile(state: ProfileRelationshipState, userId: string): ProfileRelationshipState {
+export function followProfile(
+  state: ProfileRelationshipState,
+  userId: string,
+): ProfileRelationshipState {
   if (state.blockedUserIds.includes(userId)) {
     return state;
   }
@@ -297,21 +319,30 @@ export function followProfile(state: ProfileRelationshipState, userId: string): 
   };
 }
 
-export function unfollowProfile(state: ProfileRelationshipState, userId: string): ProfileRelationshipState {
+export function unfollowProfile(
+  state: ProfileRelationshipState,
+  userId: string,
+): ProfileRelationshipState {
   return {
     ...state,
     followingUserIds: removeValue(state.followingUserIds, userId),
   };
 }
 
-export function blockProfile(state: ProfileRelationshipState, userId: string): ProfileRelationshipState {
+export function blockProfile(
+  state: ProfileRelationshipState,
+  userId: string,
+): ProfileRelationshipState {
   return {
     followingUserIds: removeValue(state.followingUserIds, userId),
     blockedUserIds: addUnique(state.blockedUserIds, userId),
   };
 }
 
-export function unblockProfile(state: ProfileRelationshipState, userId: string): ProfileRelationshipState {
+export function unblockProfile(
+  state: ProfileRelationshipState,
+  userId: string,
+): ProfileRelationshipState {
   return {
     ...state,
     blockedUserIds: removeValue(state.blockedUserIds, userId),
@@ -329,7 +360,7 @@ export function getVisibleProfiles(
   return profiles.filter((profile) => !isProfileBlocked(state, profile.userId));
 }
 
-export type NotificationStatus = 'unread' | 'read';
+export type NotificationStatus = "unread" | "read";
 
 export type NotificationFeedItem = {
   id: string;
@@ -348,36 +379,39 @@ export type NotificationsPageData = {
 
 export const demoNotificationFeed: readonly NotificationFeedItem[] = [
   {
-    id: 'notif-profile',
-    title: 'Profile views are trending',
-    body: 'Your public profile appeared in six demo directory searches today.',
-    href: '/profile/@alex',
-    status: 'unread',
-    createdAt: '2026-04-20T08:15:00.000Z',
+    id: "notif-profile",
+    title: "Profile views are trending",
+    body: "Your public profile appeared in six demo directory searches today.",
+    href: "/profile/@alex",
+    status: "unread",
+    createdAt: "2026-04-20T08:15:00.000Z",
   },
   {
-    id: 'notif-follow',
-    title: 'Jules followed you',
-    body: 'Open the people directory to review your current following list.',
-    href: '/people',
-    status: 'unread',
-    createdAt: '2026-04-20T09:30:00.000Z',
+    id: "notif-follow",
+    title: "Jules followed you",
+    body: "Open the people directory to review your current following list.",
+    href: "/people",
+    status: "unread",
+    createdAt: "2026-04-20T09:30:00.000Z",
   },
   {
-    id: 'notif-settings',
-    title: 'Privacy preferences saved',
-    body: 'Follower visibility is currently available to members.',
-    href: '/settings',
-    status: 'read',
-    createdAt: '2026-04-19T14:10:00.000Z',
+    id: "notif-settings",
+    title: "Privacy preferences saved",
+    body: "Follower visibility is currently available to members.",
+    href: "/settings",
+    status: "read",
+    createdAt: "2026-04-19T14:10:00.000Z",
   },
 ];
 
 function countUnread(items: readonly NotificationFeedItem[]) {
-  return items.filter((item) => item.status === 'unread').length;
+  return items.filter((item) => item.status === "unread").length;
 }
 
-function countToday(items: readonly NotificationFeedItem[], now = new Date('2026-04-20T12:00:00.000Z')) {
+function countToday(
+  items: readonly NotificationFeedItem[],
+  now = new Date("2026-04-20T12:00:00.000Z"),
+) {
   const todayKey = now.toISOString().slice(0, 10);
   return items.filter((item) => item.createdAt.slice(0, 10) === todayKey).length;
 }
@@ -392,9 +426,12 @@ export function createNotificationsPageData(
   };
 }
 
-export function markNotificationRead(state: NotificationsPageData, notificationId: string): NotificationsPageData {
+export function markNotificationRead(
+  state: NotificationsPageData,
+  notificationId: string,
+): NotificationsPageData {
   const items = state.items.map((item) =>
-    item.id === notificationId ? { ...item, status: 'read' as const } : item,
+    item.id === notificationId ? { ...item, status: "read" as const } : item,
   );
 
   return {
@@ -405,7 +442,7 @@ export function markNotificationRead(state: NotificationsPageData, notificationI
 }
 
 export function markAllNotificationsRead(state: NotificationsPageData): NotificationsPageData {
-  const items = state.items.map((item) => ({ ...item, status: 'read' as const }));
+  const items = state.items.map((item) => ({ ...item, status: "read" as const }));
 
   return {
     ...state,
@@ -414,13 +451,13 @@ export function markAllNotificationsRead(state: NotificationsPageData): Notifica
   };
 }
 
-export type ManagedTable = 'User' | 'Profile' | 'SecurityAuditLog' | 'SecurityRateLimitCounter';
+export type ManagedTable = "User" | "Profile" | "SecurityAuditLog" | "SecurityRateLimitCounter";
 
 export const managedTables: readonly ManagedTable[] = [
-  'User',
-  'Profile',
-  'SecurityAuditLog',
-  'SecurityRateLimitCounter',
+  "User",
+  "Profile",
+  "SecurityAuditLog",
+  "SecurityRateLimitCounter",
 ] as const;
 
 export type TablePermission = {
@@ -440,28 +477,28 @@ export type TablePermissionView = {
 
 export const tablePermissions: readonly TablePermission[] = [
   {
-    table: 'User',
-    label: 'User',
-    readRoles: ['MANAGER', 'ADMIN', 'SUPERADMIN'],
-    writeRoles: ['ADMIN', 'SUPERADMIN'],
+    table: "User",
+    label: "User",
+    readRoles: ["MANAGER", "ADMIN", "SUPERADMIN"],
+    writeRoles: ["ADMIN", "SUPERADMIN"],
   },
   {
-    table: 'Profile',
-    label: 'Profile',
-    readRoles: ['USER', 'MANAGER', 'ADMIN', 'SUPERADMIN'],
-    writeRoles: ['USER', 'MANAGER', 'ADMIN', 'SUPERADMIN'],
+    table: "Profile",
+    label: "Profile",
+    readRoles: ["USER", "MANAGER", "ADMIN", "SUPERADMIN"],
+    writeRoles: ["USER", "MANAGER", "ADMIN", "SUPERADMIN"],
   },
   {
-    table: 'SecurityAuditLog',
-    label: 'SecurityAuditLog',
-    readRoles: ['MANAGER', 'ADMIN', 'SUPERADMIN'],
-    writeRoles: ['ADMIN', 'SUPERADMIN'],
+    table: "SecurityAuditLog",
+    label: "SecurityAuditLog",
+    readRoles: ["MANAGER", "ADMIN", "SUPERADMIN"],
+    writeRoles: ["ADMIN", "SUPERADMIN"],
   },
   {
-    table: 'SecurityRateLimitCounter',
-    label: 'SecurityRateLimitCounter',
-    readRoles: ['ADMIN', 'SUPERADMIN'],
-    writeRoles: ['ADMIN', 'SUPERADMIN'],
+    table: "SecurityRateLimitCounter",
+    label: "SecurityRateLimitCounter",
+    readRoles: ["ADMIN", "SUPERADMIN"],
+    writeRoles: ["ADMIN", "SUPERADMIN"],
   },
 ] as const;
 
@@ -470,7 +507,10 @@ export function canReadTable(role: AppRole | null | undefined, table: ManagedTab
     return false;
   }
 
-  return tablePermissions.find((permission) => permission.table === table)?.readRoles.includes(role) ?? false;
+  return (
+    tablePermissions.find((permission) => permission.table === table)?.readRoles.includes(role) ??
+    false
+  );
 }
 
 export function canWriteTable(role: AppRole | null | undefined, table: ManagedTable) {
@@ -478,19 +518,22 @@ export function canWriteTable(role: AppRole | null | undefined, table: ManagedTa
     return false;
   }
 
-  return tablePermissions.find((permission) => permission.table === table)?.writeRoles.includes(role) ?? false;
+  return (
+    tablePermissions.find((permission) => permission.table === table)?.writeRoles.includes(role) ??
+    false
+  );
 }
 
 export function getFieldsForManagedTable(table: ManagedTable): readonly string[] {
   switch (table) {
-    case 'User':
-      return ['email', 'displayName', 'role'];
-    case 'Profile':
-      return ['tag', 'displayName', 'headline'];
-    case 'SecurityAuditLog':
-      return ['actorId', 'action', 'createdAt'];
-    case 'SecurityRateLimitCounter':
-      return ['key', 'count', 'resetAt'];
+    case "User":
+      return ["email", "displayName", "role"];
+    case "Profile":
+      return ["tag", "displayName", "headline"];
+    case "SecurityAuditLog":
+      return ["actorId", "action", "createdAt"];
+    case "SecurityRateLimitCounter":
+      return ["key", "count", "resetAt"];
   }
 }
 
@@ -507,13 +550,13 @@ export function getTablePermissionViews(role: AppRole | null | undefined): Table
 }
 
 export const problemAreaOptions = [
-  'account',
-  'billing',
-  'profiles',
-  'notifications',
-  'data-entry',
-  'privacy',
-  'other',
+  "account",
+  "billing",
+  "profiles",
+  "notifications",
+  "data-entry",
+  "privacy",
+  "other",
 ] as const;
 
 export type ProblemArea = (typeof problemAreaOptions)[number];
@@ -532,44 +575,46 @@ export type ReportProblemValidationResult =
   | { ok: false; errors: Partial<Record<keyof ReportProblemPayload, string>> };
 
 function isProblemArea(value: unknown): value is ProblemArea {
-  return typeof value === 'string' && problemAreaOptions.includes(value as ProblemArea);
+  return typeof value === "string" && problemAreaOptions.includes(value as ProblemArea);
 }
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export function validateReportProblemPayload(payload: Partial<ReportProblemPayload>): ReportProblemValidationResult {
+export function validateReportProblemPayload(
+  payload: Partial<ReportProblemPayload>,
+): ReportProblemValidationResult {
   const errors: Partial<Record<keyof ReportProblemPayload, string>> = {};
-  const name = String(payload.name ?? '').trim();
-  const email = String(payload.email ?? '').trim();
+  const name = String(payload.name ?? "").trim();
+  const email = String(payload.email ?? "").trim();
   const area = payload.area;
-  const pageUrl = String(payload.pageUrl ?? '').trim();
-  const subject = String(payload.subject ?? '').trim();
-  const details = String(payload.details ?? '').trim();
+  const pageUrl = String(payload.pageUrl ?? "").trim();
+  const subject = String(payload.subject ?? "").trim();
+  const details = String(payload.details ?? "").trim();
 
   if (name.length < 2) {
-    errors.name = 'Enter your name.';
+    errors.name = "Enter your name.";
   }
 
   if (!isEmail(email)) {
-    errors.email = 'Enter a valid email address.';
+    errors.email = "Enter a valid email address.";
   }
 
   if (!isProblemArea(area)) {
-    errors.area = 'Choose a problem area.';
+    errors.area = "Choose a problem area.";
   }
 
   if (!pageUrl) {
-    errors.pageUrl = 'Enter the affected page URL.';
+    errors.pageUrl = "Enter the affected page URL.";
   }
 
   if (subject.length < 5) {
-    errors.subject = 'Use at least 5 characters.';
+    errors.subject = "Use at least 5 characters.";
   }
 
   if (details.length < 20) {
-    errors.details = 'Use at least 20 characters.';
+    errors.details = "Use at least 20 characters.";
   }
 
   if (Object.keys(errors).length > 0 || !isProblemArea(area)) {
@@ -590,7 +635,8 @@ export function validateReportProblemPayload(payload: Partial<ReportProblemPaylo
 }
 
 export function createProblemReferenceId(now = new Date()) {
-  const datePart = now.toISOString().slice(0, 10).replaceAll('-', '');
-  const minutePart = String(now.getUTCHours()).padStart(2, '0') + String(now.getUTCMinutes()).padStart(2, '0');
+  const datePart = now.toISOString().slice(0, 10).replaceAll("-", "");
+  const minutePart =
+    String(now.getUTCHours()).padStart(2, "0") + String(now.getUTCMinutes()).padStart(2, "0");
   return `PROB-${datePart}-${minutePart}`;
 }

@@ -239,6 +239,27 @@ const navigationGroups = [
 ] as const satisfies PlatformNavbarGroup[];
 
 describe("@moritzbrantner/ui", () => {
+  test("declares the reusable design-system package contract", () => {
+    const packageJson = JSON.parse(readFileSync("packages/ui/package.json", "utf8"));
+    const consumerExample = readFileSync("packages/ui/examples/consumer/src/App.tsx", "utf8");
+
+    expect(packageJson.name).toBe("@moritzbrantner/ui");
+    expect(packageJson.private).toBe(false);
+    expect(packageJson.peerDependencies.react).toBeTruthy();
+    expect(packageJson.peerDependencies["react-dom"]).toBeTruthy();
+    expect(packageJson.files).toEqual(
+      expect.arrayContaining(["dist", "styles.css", "zleek", "bobba"]),
+    );
+    expect(packageJson.sideEffects).toEqual(expect.arrayContaining(["*.css"]));
+    expect(packageJson.exports["./styles.css"]).toBe("./styles.css");
+    expect(packageJson.exports["./zleek/styles.css"]).toBe("./zleek/styles.css");
+    expect(packageJson.exports["./bobba/styles.css"]).toBe("./bobba/styles.css");
+    expect(packageJson.exports["./components/*"].import).toBe("./dist/components/*.js");
+    expect(packageJson.exports["./lib/cn"].import).toBe("./dist/lib/cn.js");
+    expect(consumerExample).toContain('import "@moritzbrantner/ui/styles.css";');
+    expect(consumerExample).toContain('from "@moritzbrantner/ui"');
+  });
+
   test("ships the full shadcn basic component catalog", () => {
     const indexSource = readFileSync("packages/ui/src/index.ts", "utf8");
 
@@ -480,9 +501,9 @@ describe("@moritzbrantner/ui", () => {
 
     expect(screen.getByRole("status", { name: "Loading" })).toBeTruthy();
     expect(screen.getByRole("status", { name: "Syncing package" })).toBeTruthy();
-    expect(container.querySelector("[data-slot='pulse-spinner']")?.getAttribute("aria-hidden")).toBe(
-      "true",
-    );
+    expect(
+      container.querySelector("[data-slot='pulse-spinner']")?.getAttribute("aria-hidden"),
+    ).toBe("true");
 
     const upload = screen.getByRole("progressbar", { name: "Upload progress" });
     const fetching = screen.getByRole("progressbar", { name: "Fetching package" });
@@ -610,17 +631,11 @@ describe("@moritzbrantner/ui", () => {
     );
 
     expect(screen.getByRole("button", { name: "Grid" }).className).toContain("rounded-md");
-    expect(screen.getByRole("switch", { name: "Notifications" }).className).toContain(
-      "rounded-md",
-    );
+    expect(screen.getByRole("switch", { name: "Notifications" }).className).toContain("rounded-md");
   });
 
   test("renders a custom calendar cell component", () => {
-    function CustomCell({
-      children,
-      events = [],
-      ...props
-    }: CalendarCellComponentProps) {
+    function CustomCell({ children, events = [], ...props }: CalendarCellComponentProps) {
       return (
         <CalendarDayButton {...props}>
           {children}

@@ -39,7 +39,7 @@ import {
   uploadTypeGroups,
   type UploadPlatform,
 } from "@moritzbrantner/upload-playbook";
-import { PlatformNavbar, type PlatformNavbarRenderLinkProps } from "@moritzbrantner/ui";
+import { Button, PlatformNavbar, type PlatformNavbarRenderLinkProps } from "@moritzbrantner/ui";
 
 export type FoundationPlatform = "web" | "electron" | "tauri";
 
@@ -75,10 +75,40 @@ export type FoundationLinkRenderInput = {
 type CommonLabelKey = "loading" | "save" | "saved" | "cancel" | "submit" | "submitting";
 type AuthLabelKey = "title" | "description" | "login" | "logout" | "register" | "authenticatedAs";
 type ProfileLabelKey = "title" | "description" | "followers" | "following" | "blocked" | "edit";
-type PeopleLabelKey = "title" | "description" | "follow" | "unfollow" | "block" | "unblock" | "empty";
-type NotificationsLabelKey = "title" | "description" | "unread" | "today" | "markRead" | "markAllRead" | "empty";
-type SettingsLabelKey = "title" | "description" | "appearance" | "dates" | "workflow" | "notifications" | "preview";
-type ReportProblemLabelKey = "title" | "description" | "name" | "email" | "area" | "pageUrl" | "subject" | "details" | "success";
+type PeopleLabelKey =
+  | "title"
+  | "description"
+  | "follow"
+  | "unfollow"
+  | "block"
+  | "unblock"
+  | "empty";
+type NotificationsLabelKey =
+  | "title"
+  | "description"
+  | "unread"
+  | "today"
+  | "markRead"
+  | "markAllRead"
+  | "empty";
+type SettingsLabelKey =
+  | "title"
+  | "description"
+  | "appearance"
+  | "dates"
+  | "workflow"
+  | "notifications"
+  | "preview";
+type ReportProblemLabelKey =
+  | "title"
+  | "description"
+  | "name"
+  | "email"
+  | "area"
+  | "pageUrl"
+  | "subject"
+  | "details"
+  | "success";
 type DataEntryLabelKey = "title" | "description" | "readOnly" | "createRow" | "created";
 type UploadsLabelKey = "title" | "description" | "guide" | "lifecycle" | "types" | "queue";
 
@@ -138,7 +168,9 @@ export type FoundationBackend = AuthClient & {
   getAuthState?: () => MaybePromise<AuthState>;
   register?: (input: { email: string; displayName: string }) => MaybePromise<AuthSession>;
   getProfile?: () => MaybePromise<FoundationProfile>;
-  updateProfile?: (input: Partial<Pick<FoundationProfile, "displayName" | "headline" | "location" | "bio">>) => MaybePromise<FoundationProfile>;
+  updateProfile?: (
+    input: Partial<Pick<FoundationProfile, "displayName" | "headline" | "location" | "bio">>,
+  ) => MaybePromise<FoundationProfile>;
   listPeople?: () => MaybePromise<ProfileDirectoryEntry[]>;
   getRelationshipState?: () => MaybePromise<ProfileRelationshipState>;
   followPerson?: (userId: string) => MaybePromise<ProfileRelationshipState>;
@@ -152,7 +184,10 @@ export type FoundationBackend = AuthClient & {
   updateSettings?: (settings: Partial<AppSettings>) => MaybePromise<AppSettings>;
   submitReportProblem?: (payload: ReportProblemPayload) => MaybePromise<{ referenceId: string }>;
   getDataEntryTables?: (role?: AppRole | null) => MaybePromise<TablePermissionView[]>;
-  createDataEntryRow?: (table: TablePermissionView, values: Record<string, string>) => MaybePromise<{ id: string }>;
+  createDataEntryRow?: (
+    table: TablePermissionView,
+    values: Record<string, string>,
+  ) => MaybePromise<{ id: string }>;
   getUploads?: () => MaybePromise<FoundationUploadItem[]>;
   addUploadSample?: (item?: Partial<FoundationUploadItem>) => MaybePromise<FoundationUploadItem[]>;
 };
@@ -215,7 +250,8 @@ const defaultLabels: ResolvedFoundationLabels = {
   },
   settings: {
     title: "Settings",
-    description: "Update shared appearance, date, workflow, security, and notification preferences.",
+    description:
+      "Update shared appearance, date, workflow, security, and notification preferences.",
     appearance: "Appearance",
     dates: "Dates",
     workflow: "Workflow",
@@ -280,7 +316,11 @@ export function FoundationProvider({
   runtime: FoundationRuntime;
   children: React.ReactNode;
 }) {
-  return <FoundationRuntimeContext.Provider value={runtime}>{children}</FoundationRuntimeContext.Provider>;
+  return (
+    <FoundationRuntimeContext.Provider value={runtime}>
+      {children}
+    </FoundationRuntimeContext.Provider>
+  );
 }
 
 export function useFoundationRuntime() {
@@ -382,17 +422,25 @@ export function AuthScreen() {
   return (
     <Screen title={labels.auth.title} description={labels.auth.description}>
       <div style={panelStyle}>
-        <p>{session ? `${labels.auth.authenticatedAs} ${session.user.displayName}` : labels.common.loading}</p>
+        <p>
+          {session
+            ? `${labels.auth.authenticatedAs} ${session.user.displayName}`
+            : labels.common.loading}
+        </p>
         <div style={rowStyle}>
-          <button type="button" onClick={handleLogin} disabled={pending}>
+          <Button type="button" onClick={handleLogin} disabled={pending}>
             {labels.auth.login}
-          </button>
-          <button type="button" onClick={handleRegister} disabled={pending || !runtime.backend.register}>
+          </Button>
+          <Button
+            type="button"
+            onClick={handleRegister}
+            disabled={pending || !runtime.backend.register}
+          >
             {labels.auth.register}
-          </button>
-          <button type="button" onClick={handleLogout} disabled={pending || !session}>
+          </Button>
+          <Button type="button" onClick={handleLogout} disabled={pending || !session}>
             {labels.auth.logout}
-          </button>
+          </Button>
         </div>
       </div>
     </Screen>
@@ -420,10 +468,12 @@ export function ProfileScreen() {
 
   async function handleSave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextProfile = await Promise.resolve(runtime.backend.updateProfile?.({ displayName }) ?? {
-      ...(profile ?? defaultProfile()),
-      displayName,
-    });
+    const nextProfile = await Promise.resolve(
+      runtime.backend.updateProfile?.({ displayName }) ?? {
+        ...(profile ?? defaultProfile()),
+        displayName,
+      },
+    );
     setProfile(nextProfile);
   }
 
@@ -443,7 +493,7 @@ export function ProfileScreen() {
               Display name
               <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
             </label>
-            <button type="submit">{labels.common.save}</button>
+            <Button type="submit">{labels.common.save}</Button>
           </form>
         </article>
         <Stat label={labels.profile.followers} value={String(profile?.followerCount ?? 0)} />
@@ -457,13 +507,18 @@ export function PeopleScreen() {
   const runtime = useFoundationRuntime();
   const labels = resolveLabels(runtime.labels);
   const [profiles, setProfiles] = React.useState<ProfileDirectoryEntry[]>([]);
-  const [relationships, setRelationships] = React.useState<ProfileRelationshipState>({ followingUserIds: [], blockedUserIds: [] });
+  const [relationships, setRelationships] = React.useState<ProfileRelationshipState>({
+    followingUserIds: [],
+    blockedUserIds: [],
+  });
 
   React.useEffect(() => {
     let mounted = true;
     Promise.all([
       Promise.resolve(runtime.backend.listPeople?.() ?? demoProfiles),
-      Promise.resolve(runtime.backend.getRelationshipState?.() ?? { followingUserIds: [], blockedUserIds: [] }),
+      Promise.resolve(
+        runtime.backend.getRelationshipState?.() ?? { followingUserIds: [], blockedUserIds: [] },
+      ),
     ]).then(([nextProfiles, nextRelationships]) => {
       if (mounted) {
         setProfiles([...nextProfiles]);
@@ -495,30 +550,34 @@ export function PeopleScreen() {
               <p>{profile.headline}</p>
               <p>{profile.bio}</p>
               <div style={rowStyle}>
-                <button
+                <Button
                   type="button"
                   onClick={() =>
                     updateRelationship(() =>
                       isFollowing
-                        ? (runtime.backend.unfollowPerson?.(profile.userId) ?? unfollowProfile(relationships, profile.userId))
-                        : (runtime.backend.followPerson?.(profile.userId) ?? followProfile(relationships, profile.userId)),
+                        ? (runtime.backend.unfollowPerson?.(profile.userId) ??
+                          unfollowProfile(relationships, profile.userId))
+                        : (runtime.backend.followPerson?.(profile.userId) ??
+                          followProfile(relationships, profile.userId)),
                     )
                   }
                 >
                   {isFollowing ? labels.people.unfollow : labels.people.follow}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() =>
                     updateRelationship(() =>
                       isBlocked
-                        ? (runtime.backend.unblockPerson?.(profile.userId) ?? unblockProfile(relationships, profile.userId))
-                        : (runtime.backend.blockPerson?.(profile.userId) ?? blockProfile(relationships, profile.userId)),
+                        ? (runtime.backend.unblockPerson?.(profile.userId) ??
+                          unblockProfile(relationships, profile.userId))
+                        : (runtime.backend.blockPerson?.(profile.userId) ??
+                          blockProfile(relationships, profile.userId)),
                     )
                   }
                 >
                   {isBlocked ? labels.people.unblock : labels.people.block}
-                </button>
+                </Button>
               </div>
             </article>
           );
@@ -535,23 +594,31 @@ export function NotificationsScreen() {
 
   React.useEffect(() => {
     let mounted = true;
-    Promise.resolve(runtime.backend.getNotifications?.() ?? createNotificationsPageData()).then((nextData) => {
-      if (mounted) {
-        setData(nextData);
-      }
-    });
+    Promise.resolve(runtime.backend.getNotifications?.() ?? createNotificationsPageData()).then(
+      (nextData) => {
+        if (mounted) {
+          setData(nextData);
+        }
+      },
+    );
     return () => {
       mounted = false;
     };
   }, [runtime.backend]);
 
   async function markRead(notificationId: string) {
-    const nextData = await Promise.resolve(runtime.backend.markNotificationRead?.(notificationId) ?? markNotificationRead(data ?? createNotificationsPageData(), notificationId));
+    const nextData = await Promise.resolve(
+      runtime.backend.markNotificationRead?.(notificationId) ??
+        markNotificationRead(data ?? createNotificationsPageData(), notificationId),
+    );
     setData(nextData);
   }
 
   async function markAllRead() {
-    const nextData = await Promise.resolve(runtime.backend.markAllNotificationsRead?.() ?? markAllNotificationsRead(data ?? createNotificationsPageData()));
+    const nextData = await Promise.resolve(
+      runtime.backend.markAllNotificationsRead?.() ??
+        markAllNotificationsRead(data ?? createNotificationsPageData()),
+    );
     setData(nextData);
   }
 
@@ -560,9 +627,9 @@ export function NotificationsScreen() {
       <div style={rowStyle}>
         <Stat label={labels.notifications.unread} value={String(data?.unreadCount ?? 0)} />
         <Stat label={labels.notifications.today} value={String(data?.todayCount ?? 0)} />
-        <button type="button" onClick={markAllRead}>
+        <Button type="button" onClick={markAllRead}>
           {labels.notifications.markAllRead}
-        </button>
+        </Button>
       </div>
       <div style={listStyle}>
         {data?.items.length === 0 ? <p>{labels.notifications.empty}</p> : null}
@@ -572,9 +639,13 @@ export function NotificationsScreen() {
             <p>{item.body}</p>
             <small>{item.status}</small>
             <div>
-              <button type="button" onClick={() => markRead(item.id)} disabled={item.status === "read"}>
+              <Button
+                type="button"
+                onClick={() => markRead(item.id)}
+                disabled={item.status === "read"}
+              >
                 {labels.notifications.markRead}
-              </button>
+              </Button>
             </div>
           </article>
         ))}
@@ -602,7 +673,10 @@ export function SettingsScreen() {
   }, [runtime.backend]);
 
   async function updateSettings(partial: Partial<AppSettings>) {
-    const nextSettings = await Promise.resolve(runtime.backend.updateSettings?.(partial) ?? normalizeAppSettings({ ...settings, ...partial }));
+    const nextSettings = await Promise.resolve(
+      runtime.backend.updateSettings?.(partial) ??
+        normalizeAppSettings({ ...settings, ...partial }),
+    );
     setSettings(nextSettings);
   }
 
@@ -613,7 +687,12 @@ export function SettingsScreen() {
           <h2>{labels.settings.appearance}</h2>
           <label>
             Background
-            <select value={settings.background} onChange={(event) => updateSettings({ background: event.target.value as AppSettings["background"] })}>
+            <select
+              value={settings.background}
+              onChange={(event) =>
+                updateSettings({ background: event.target.value as AppSettings["background"] })
+              }
+            >
               <option value="paper">Paper</option>
               <option value="aurora">Aurora</option>
               <option value="dusk">Dusk</option>
@@ -621,11 +700,19 @@ export function SettingsScreen() {
             </select>
           </label>
           <label>
-            <input type="checkbox" checked={settings.compactSpacing} onChange={(event) => updateSettings({ compactSpacing: event.target.checked })} />
+            <input
+              type="checkbox"
+              checked={settings.compactSpacing}
+              onChange={(event) => updateSettings({ compactSpacing: event.target.checked })}
+            />
             Compact spacing
           </label>
           <label>
-            <input type="checkbox" checked={settings.reducedMotion} onChange={(event) => updateSettings({ reducedMotion: event.target.checked })} />
+            <input
+              type="checkbox"
+              checked={settings.reducedMotion}
+              onChange={(event) => updateSettings({ reducedMotion: event.target.checked })}
+            />
             Reduced motion
           </label>
         </article>
@@ -633,7 +720,12 @@ export function SettingsScreen() {
           <h2>{labels.settings.dates}</h2>
           <label>
             Date format
-            <select value={settings.dateFormat} onChange={(event) => updateSettings({ dateFormat: event.target.value as AppSettings["dateFormat"] })}>
+            <select
+              value={settings.dateFormat}
+              onChange={(event) =>
+                updateSettings({ dateFormat: event.target.value as AppSettings["dateFormat"] })
+              }
+            >
               <option value="localized">Localized</option>
               <option value="long">Long</option>
               <option value="iso">ISO</option>
@@ -693,7 +785,11 @@ export function ReportProblemScreen() {
       return;
     }
 
-    const result = await Promise.resolve(runtime.backend.submitReportProblem?.(validation.value) ?? { referenceId: createProblemReferenceId() });
+    const result = await Promise.resolve(
+      runtime.backend.submitReportProblem?.(validation.value) ?? {
+        referenceId: createProblemReferenceId(),
+      },
+    );
     setMessage(`${labels.reportProblem.success}: ${result.referenceId}`);
     form.reset();
     setPending(false);
@@ -703,7 +799,12 @@ export function ReportProblemScreen() {
     <Screen title={labels.reportProblem.title} description={labels.reportProblem.description}>
       <form onSubmit={handleSubmit} style={formStyle} noValidate>
         <InputField name="name" label={labels.reportProblem.name} error={errors.name} />
-        <InputField name="email" label={labels.reportProblem.email} type="email" error={errors.email} />
+        <InputField
+          name="email"
+          label={labels.reportProblem.email}
+          type="email"
+          error={errors.email}
+        />
         <label>
           {labels.reportProblem.area}
           <select name="area" defaultValue={problemAreaOptions[0]}>
@@ -722,9 +823,9 @@ export function ReportProblemScreen() {
           <textarea name="details" rows={6} />
           {errors.details ? <small role="alert">{errors.details}</small> : null}
         </label>
-        <button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending}>
           {pending ? labels.common.submitting : labels.common.submit}
-        </button>
+        </Button>
         {message ? <p role="status">{message}</p> : null}
       </form>
     </Screen>
@@ -739,7 +840,9 @@ export function DataEntryScreen({ role = "USER" }: { role?: AppRole }) {
 
   React.useEffect(() => {
     let mounted = true;
-    Promise.resolve(runtime.backend.getDataEntryTables?.(role) ?? getTablePermissionViews(role)).then((nextTables) => {
+    Promise.resolve(
+      runtime.backend.getDataEntryTables?.(role) ?? getTablePermissionViews(role),
+    ).then((nextTables) => {
       if (mounted) {
         setTables(nextTables);
       }
@@ -753,8 +856,12 @@ export function DataEntryScreen({ role = "USER" }: { role?: AppRole }) {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const values = Object.fromEntries(table.fields.map((field) => [field, String(formData.get(field) ?? "")]));
-    const result = await Promise.resolve(runtime.backend.createDataEntryRow?.(table, values) ?? { id: `${table.table}-${Date.now()}` });
+    const values = Object.fromEntries(
+      table.fields.map((field) => [field, String(formData.get(field) ?? "")]),
+    );
+    const result = await Promise.resolve(
+      runtime.backend.createDataEntryRow?.(table, values) ?? { id: `${table.table}-${Date.now()}` },
+    );
     setCreated(`${labels.dataEntry.created}: ${result.id}`);
     form.reset();
   }
@@ -771,7 +878,7 @@ export function DataEntryScreen({ role = "USER" }: { role?: AppRole }) {
                 {table.fields.map((field) => (
                   <InputField key={field} name={field} label={field} />
                 ))}
-                <button type="submit">{labels.dataEntry.createRow}</button>
+                <Button type="submit">{labels.dataEntry.createRow}</Button>
               </form>
             ) : null}
           </article>
@@ -785,7 +892,8 @@ export function DataEntryScreen({ role = "USER" }: { role?: AppRole }) {
 export function UploadsScreen() {
   const runtime = useFoundationRuntime();
   const labels = resolveLabels(runtime.labels);
-  const uploadPlatform: UploadPlatform = runtime.platform === "electron" ? "desktop" : runtime.platform === "tauri" ? "desktop" : "web";
+  const uploadPlatform: UploadPlatform =
+    runtime.platform === "electron" ? "desktop" : runtime.platform === "tauri" ? "desktop" : "web";
   const guide = getUploadGuide(uploadPlatform);
   const [uploads, setUploads] = React.useState<FoundationUploadItem[]>([]);
 
@@ -830,7 +938,9 @@ export function UploadsScreen() {
     <Screen title={labels.uploads.title} description={labels.uploads.description}>
       <div style={gridStyle}>
         <article style={panelStyle}>
-          <h2>{labels.uploads.guide}: {guide.title}</h2>
+          <h2>
+            {labels.uploads.guide}: {guide.title}
+          </h2>
           <p>{guide.picker}</p>
           <p>{guide.queue}</p>
           <p>{guide.storage}</p>
@@ -853,9 +963,9 @@ export function UploadsScreen() {
         </article>
         <article style={panelStyle}>
           <h2>{labels.uploads.queue}</h2>
-          <button type="button" onClick={addSample}>
+          <Button type="button" onClick={addSample}>
             Add sample
-          </button>
+          </Button>
           <ul>
             {uploads.map((item) => {
               const kind = inferUploadKind(item.name, item.mimeType);
@@ -874,10 +984,12 @@ export function UploadsScreen() {
   );
 }
 
-export function createMemoryFoundationBackend(options: {
-  user?: Partial<AuthUser>;
-  role?: AppRole;
-} = {}): FoundationBackend {
+export function createMemoryFoundationBackend(
+  options: {
+    user?: Partial<AuthUser>;
+    role?: AppRole;
+  } = {},
+): FoundationBackend {
   const user: AuthUser = {
     id: options.user?.id ?? "demo-user",
     email: options.user?.email ?? "demo@example.com",
@@ -975,7 +1087,9 @@ export function createMemoryFoundationBackend(options: {
       settings = normalizeAppSettings({ ...settings, ...partial });
       return settings;
     },
-    submitReportProblem: () => ({ referenceId: createProblemReferenceId(new Date("2026-04-20T09:35:00.000Z")) }),
+    submitReportProblem: () => ({
+      referenceId: createProblemReferenceId(new Date("2026-04-20T09:35:00.000Z")),
+    }),
     getDataEntryTables: (role) => getTablePermissionViews(role ?? options.role ?? "USER"),
     createDataEntryRow: (table) => ({ id: `${table.table}-${++rowId}` }),
     getUploads: () => uploads,
@@ -1034,7 +1148,12 @@ function renderFoundationLink(runtime: FoundationRuntime, props: PlatformNavbarR
   }
 
   return (
-    <a href={props.href ?? `#${routeId}`} className={props.className} aria-current={props["aria-current"]} onClick={onClick}>
+    <a
+      href={props.href ?? `#${routeId}`}
+      className={props.className}
+      aria-current={props["aria-current"]}
+      onClick={onClick}
+    >
       {props.children}
     </a>
   );
@@ -1057,7 +1176,9 @@ function resolveLabels(labels?: FoundationLabels): ResolvedFoundationLabels {
 }
 
 function getEnabledRoutes(runtime: FoundationRuntime) {
-  return routeOrder.filter((routeId) => runtime.capabilities?.[routeCapabilities[routeId]] !== false);
+  return routeOrder.filter(
+    (routeId) => runtime.capabilities?.[routeCapabilities[routeId]] !== false,
+  );
 }
 
 async function readAuthState(backend: FoundationBackend): Promise<AuthState> {

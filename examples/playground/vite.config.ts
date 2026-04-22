@@ -14,24 +14,15 @@ export default defineConfig({
     alias: [
       {
         find: /^@moritzbrantner\/card-games$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/card-games/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/card-games/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/data-density$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/data-density/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/data-density/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/flat-design$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/flat-design/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/maps$/,
@@ -39,38 +30,23 @@ export default defineConfig({
       },
       {
         find: /^@moritzbrantner\/media-editor$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/media-editor/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/media-editor/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/linguistics-core$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/linguistics-core/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/linguistics-core/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/linguistics-corpus$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/linguistics-corpus/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/linguistics-corpus/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/linguistics-learning$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/linguistics-learning/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/linguistics-learning/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/parallel-text$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/parallel-text/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/parallel-text/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/ocr$/,
@@ -78,17 +54,11 @@ export default defineConfig({
       },
       {
         find: /^@moritzbrantner\/speed-reading$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/speed-reading/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/speed-reading/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/speed-reading\/core$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/speed-reading/src/core.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/speed-reading/src/core.ts"),
       },
       {
         find: /^@moritzbrantner\/speech$/,
@@ -112,31 +82,19 @@ export default defineConfig({
       },
       {
         find: /^@moritzbrantner\/storytelling$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/storytelling/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/storytelling/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/storytelling\/three$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/storytelling/src/three.tsx",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/storytelling/src/three.tsx"),
       },
       {
         find: /^@moritzbrantner\/storytelling\/remotion$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/storytelling/src/remotion.tsx",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/storytelling/src/remotion.tsx"),
       },
       {
         find: /^@moritzbrantner\/word-prediction$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/word-prediction/src/index.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/word-prediction/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/word-vectors$/,
@@ -144,10 +102,7 @@ export default defineConfig({
       },
       {
         find: /^@moritzbrantner\/word-vectors\/documents$/,
-        replacement: path.resolve(
-          workspaceRoot,
-          "packages/word-vectors/src/documents.ts",
-        ),
+        replacement: path.resolve(workspaceRoot, "packages/word-vectors/src/documents.ts"),
       },
     ],
   },
@@ -204,10 +159,7 @@ export default defineConfig({
       },
       output: {
         manualChunks(id) {
-          if (
-            id.includes("@react-three/fiber") ||
-            id.includes("/node_modules/three/")
-          ) {
+          if (id.includes("@react-three/fiber") || id.includes("/node_modules/three/")) {
             return "three-stage-vendor";
           }
         },

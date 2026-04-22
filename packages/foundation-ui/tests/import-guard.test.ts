@@ -19,7 +19,9 @@ describe("@moritzbrantner/foundation-ui import guard", () => {
       const source = readFileSync(file, "utf8");
 
       for (const pattern of forbiddenPatterns) {
-        expect(source, `${path.relative(packageRoot, file)} matched ${pattern}`).not.toMatch(pattern);
+        expect(source, `${path.relative(packageRoot, file)} matched ${pattern}`).not.toMatch(
+          pattern,
+        );
       }
     }
   });

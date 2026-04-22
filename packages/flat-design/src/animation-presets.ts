@@ -64,9 +64,7 @@ function withDefaults<T extends FlatAnimationTiming>(
   };
 }
 
-export function createBobbingAnimation(
-  options: BobbingOptions = {},
-): FlatTransformAnimation {
+export function createBobbingAnimation(options: BobbingOptions = {}): FlatTransformAnimation {
   const { axis = "y", distance = 12, ...timing } = options;
 
   return {
@@ -87,9 +85,7 @@ export function createBobbingAnimation(
   };
 }
 
-export function createDriftAnimation(
-  options: BobbingOptions = {},
-): FlatTransformAnimation {
+export function createDriftAnimation(options: BobbingOptions = {}): FlatTransformAnimation {
   const { axis = "x", distance = 18, ...timing } = options;
 
   return {
@@ -110,9 +106,7 @@ export function createDriftAnimation(
   };
 }
 
-export function createFloatAnimation(
-  options: FloatOptions = {},
-): FlatTransformAnimation {
+export function createFloatAnimation(options: FloatOptions = {}): FlatTransformAnimation {
   const { distance = 16, drift = 8, ...timing } = options;
 
   return {
@@ -128,11 +122,7 @@ export function createFloatAnimation(
       dur: "7.5s",
       calcMode: "spline",
       keyTimes: [0, 0.38, 0.72, 1],
-      keySplines: [
-        "0.42 0 0.58 1",
-        "0.42 0 0.58 1",
-        "0.42 0 0.58 1",
-      ],
+      keySplines: ["0.42 0 0.58 1", "0.42 0 0.58 1", "0.42 0 0.58 1"],
       additive: "sum",
     }),
   };
@@ -156,9 +146,7 @@ export function createOpacityPulseAnimation(
   };
 }
 
-export function createPulseAnimation(
-  options: PulseOptions = {},
-): FlatTransformAnimation {
+export function createPulseAnimation(options: PulseOptions = {}): FlatTransformAnimation {
   const { from = 1, to = 1.05, ...timing } = options;
 
   return {
@@ -175,9 +163,7 @@ export function createPulseAnimation(
   };
 }
 
-export function createPopAnimation(
-  options: PulseOptions = {},
-): FlatTransformAnimation {
+export function createPopAnimation(options: PulseOptions = {}): FlatTransformAnimation {
   const { from = 1, to = 1.12, ...timing } = options;
 
   return {
@@ -188,19 +174,13 @@ export function createPopAnimation(
       dur: "3.2s",
       calcMode: "spline",
       keyTimes: [0, 0.35, 0.68, 1],
-      keySplines: [
-        "0.22 1 0.36 1",
-        "0.22 1 0.36 1",
-        "0.22 1 0.36 1",
-      ],
+      keySplines: ["0.22 1 0.36 1", "0.22 1 0.36 1", "0.22 1 0.36 1"],
       additive: "sum",
     }),
   };
 }
 
-export function createSwayAnimation(
-  options: SpinOptions = {},
-): FlatTransformAnimation {
+export function createSwayAnimation(options: SpinOptions = {}): FlatTransformAnimation {
   const { angle = 5, cx = 0, cy = 0, ...timing } = options;
 
   return {
@@ -221,9 +201,7 @@ export function createSwayAnimation(
   };
 }
 
-export function createSpinAnimation(
-  options: SpinOptions = {},
-): FlatTransformAnimation {
+export function createSpinAnimation(options: SpinOptions = {}): FlatTransformAnimation {
   const { angle = 360, cx = 0, cy = 0, ...timing } = options;
 
   return {
@@ -241,14 +219,9 @@ export function createSpinAnimation(
   };
 }
 
-function normalizeTimelineKeyframes(
-  keyframes: FlatMotionKeyframe[],
-): FlatMotionKeyframe[] {
+function normalizeTimelineKeyframes(keyframes: FlatMotionKeyframe[]): FlatMotionKeyframe[] {
   if (keyframes.length === 0) {
-    return [
-      { time: 0 },
-      { time: 1 },
-    ];
+    return [{ time: 0 }, { time: 1 }];
   }
 
   return [...keyframes]
@@ -263,14 +236,10 @@ function hasTimelineValue(
   keyframes: FlatMotionKeyframe[],
   keys: Array<keyof FlatMotionKeyframe>,
 ): boolean {
-  return keyframes.some((keyframe) =>
-    keys.some((key) => keyframe[key] !== undefined),
-  );
+  return keyframes.some((keyframe) => keys.some((key) => keyframe[key] !== undefined));
 }
 
-export function createTimelineAnimations(
-  options: FlatTimelineAnimationOptions,
-): FlatAnimation[] {
+export function createTimelineAnimations(options: FlatTimelineAnimationOptions): FlatAnimation[] {
   const { keyframes, rotateCenter = { cx: 0, cy: 0 }, ...timing } = options;
   const frames = normalizeTimelineKeyframes(keyframes);
   const baseTiming = withDefaults(

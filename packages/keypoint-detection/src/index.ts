@@ -36,9 +36,7 @@ export type CreateKeypointDetectionPipelineOptions = Omit<
 export function createKeypointDetectionPipeline<
   Input = KeypointDetectionInput,
   Output = KeypointDetectionOutput,
->(
-  options: CreateKeypointDetectionPipelineOptions,
-): KeypointDetectionPipeline<Input, Output> {
+>(options: CreateKeypointDetectionPipelineOptions): KeypointDetectionPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

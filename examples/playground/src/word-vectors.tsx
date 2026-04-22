@@ -23,11 +23,7 @@ import {
 import { PlaygroundPage } from "./app-shell";
 import { mountPage } from "./mount";
 
-const texts = [
-  "Coffee beans smell rich.",
-  "Tea leaves smell fresh.",
-  "Coffee cups stay warm.",
-];
+const texts = ["Coffee beans smell rich.", "Tea leaves smell fresh.", "Coffee cups stay warm."];
 const model = createWordVectorModel({
   texts,
   windowSize: 2,
@@ -67,9 +63,16 @@ function WordVectorsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <p><strong>Similarity:</strong> {restored.similarity("coffee", "tea").toFixed(3)}</p>
-            <p><strong>Vocabulary:</strong> {restored.words().join(", ")}</p>
-            <p><strong>Corpus adapter similarity:</strong> {fromCorpus.similarity("coffee", "tea").toFixed(3)}</p>
+            <p>
+              <strong>Similarity:</strong> {restored.similarity("coffee", "tea").toFixed(3)}
+            </p>
+            <p>
+              <strong>Vocabulary:</strong> {restored.words().join(", ")}
+            </p>
+            <p>
+              <strong>Corpus adapter similarity:</strong>{" "}
+              {fromCorpus.similarity("coffee", "tea").toFixed(3)}
+            </p>
           </CardContent>
         </Card>
 
@@ -95,8 +98,18 @@ function WordVectorsPage() {
               <CardTitle>Contexts and backoff</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <p><strong>Context weights:</strong> {similarContexts.map((entry) => `${entry.word} (${entry.weight.toFixed(2)})`).join(", ")}</p>
-              <p><strong>Semantic backoff:</strong> {Array.from(semanticBackoff).map((entry) => `${entry.word}:${entry.score?.toFixed(2) ?? "1.00"}`).join(", ")}</p>
+              <p>
+                <strong>Context weights:</strong>{" "}
+                {similarContexts
+                  .map((entry) => `${entry.word} (${entry.weight.toFixed(2)})`)
+                  .join(", ")}
+              </p>
+              <p>
+                <strong>Semantic backoff:</strong>{" "}
+                {Array.from(semanticBackoff)
+                  .map((entry) => `${entry.word}:${entry.score?.toFixed(2) ?? "1.00"}`)
+                  .join(", ")}
+              </p>
             </CardContent>
           </Card>
         </div>

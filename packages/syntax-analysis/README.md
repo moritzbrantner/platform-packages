@@ -41,7 +41,9 @@ const pipeline = createSyntaxPipeline({
 
 const syntax = await pipeline.analyzeSyntax("Clara migrated legacy services to Berlin.");
 
-console.log(syntax.tokens.map((token) => ({ text: token.text, pos: token.posTag, lemma: token.lemma })));
+console.log(
+  syntax.tokens.map((token) => ({ text: token.text, pos: token.posTag, lemma: token.lemma })),
+);
 console.log(syntax.dependencyArcs);
 console.log(syntax.summary);
 ```

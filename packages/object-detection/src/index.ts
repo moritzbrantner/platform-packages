@@ -36,9 +36,7 @@ export type CreateObjectDetectionPipelineOptions = Omit<
 export function createObjectDetectionPipeline<
   Input = ObjectDetectionInput,
   Output = ObjectDetectionOutput,
->(
-  options: CreateObjectDetectionPipelineOptions,
-): ObjectDetectionPipeline<Input, Output> {
+>(options: CreateObjectDetectionPipelineOptions): ObjectDetectionPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

@@ -35,9 +35,7 @@ export type StoryHistoryEntry<TData extends StoryNodeData = StoryNodeData> = {
   data?: TData;
 };
 
-export type InteractiveStoryDefinition<
-  TData extends StoryNodeData = StoryNodeData,
-> = {
+export type InteractiveStoryDefinition<TData extends StoryNodeData = StoryNodeData> = {
   id: string;
   title: string;
   subtitle?: string;
@@ -61,47 +59,45 @@ export type StoryRenderProps<TData extends StoryNodeData = StoryNodeData> = {
   restart: () => void;
 };
 
-export type StoryStageComponent<TData extends StoryNodeData = StoryNodeData> =
-  ComponentType<StoryRenderProps<TData>>;
+export type StoryStageComponent<TData extends StoryNodeData = StoryNodeData> = ComponentType<
+  StoryRenderProps<TData>
+>;
 
-export type StoryRemotionSceneProps<
-  TData extends StoryNodeData = StoryNodeData,
-> = StoryRenderProps<TData> & {
-  frame: number;
-  absoluteFrame: number;
-  durationInFrames: number;
-};
+export type StoryRemotionSceneProps<TData extends StoryNodeData = StoryNodeData> =
+  StoryRenderProps<TData> & {
+    frame: number;
+    absoluteFrame: number;
+    durationInFrames: number;
+  };
 
-export type StoryRemotionSceneComponent<
-  TData extends StoryNodeData = StoryNodeData,
-> = ComponentType<StoryRemotionSceneProps<TData>>;
+export type StoryRemotionSceneComponent<TData extends StoryNodeData = StoryNodeData> =
+  ComponentType<StoryRemotionSceneProps<TData>>;
 
 export type StoryThreeSceneProps<TData extends StoryNodeData = StoryNodeData> =
   StoryRenderProps<TData>;
 
-export type StoryThreeSceneComponent<
-  TData extends StoryNodeData = StoryNodeData,
-> = ComponentType<StoryThreeSceneProps<TData>>;
+export type StoryThreeSceneComponent<TData extends StoryNodeData = StoryNodeData> = ComponentType<
+  StoryThreeSceneProps<TData>
+>;
 
-export type InteractiveStoryNode<TData extends StoryNodeData = StoryNodeData> =
-  {
-    id: string;
-    title: string;
-    body?: ReactNode;
-    prompt?: ReactNode;
-    eyebrow?: string;
-    choices?: StoryChoiceDefinition[];
-    next?: string;
-    continueLabel?: string;
-    durationInFrames?: number;
-    data?: TData;
-    className?: string;
-    panelClassName?: string;
-    stageClassName?: string;
-    scene?: StoryStageComponent<TData>;
-    remotionScene?: StoryRemotionSceneComponent<TData>;
-    threeScene?: StoryThreeSceneComponent<TData>;
-  };
+export type InteractiveStoryNode<TData extends StoryNodeData = StoryNodeData> = {
+  id: string;
+  title: string;
+  body?: ReactNode;
+  prompt?: ReactNode;
+  eyebrow?: string;
+  choices?: StoryChoiceDefinition[];
+  next?: string;
+  continueLabel?: string;
+  durationInFrames?: number;
+  data?: TData;
+  className?: string;
+  panelClassName?: string;
+  stageClassName?: string;
+  scene?: StoryStageComponent<TData>;
+  remotionScene?: StoryRemotionSceneComponent<TData>;
+  threeScene?: StoryThreeSceneComponent<TData>;
+};
 
 export type ResolvedStoryPath<TData extends StoryNodeData = StoryNodeData> = {
   nodes: InteractiveStoryNode<TData>[];

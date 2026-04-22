@@ -15,14 +15,10 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("zero-shot-classific
 
 export type ZeroShotClassificationInput = UniversalTaskInput<"zero-shot-classification">;
 export type ZeroShotClassificationOutput = UniversalTaskOutput<"zero-shot-classification">;
-export type ZeroShotClassificationRequest<Input = ZeroShotClassificationInput> = UniversalTaskRequest<
-  "zero-shot-classification",
-  Input
->;
-export type ZeroShotClassificationResult<Output = ZeroShotClassificationOutput> = UniversalTaskResult<
-  "zero-shot-classification",
-  Output
->;
+export type ZeroShotClassificationRequest<Input = ZeroShotClassificationInput> =
+  UniversalTaskRequest<"zero-shot-classification", Input>;
+export type ZeroShotClassificationResult<Output = ZeroShotClassificationOutput> =
+  UniversalTaskResult<"zero-shot-classification", Output>;
 export type ZeroShotClassificationPipeline<
   Input = ZeroShotClassificationInput,
   Output = ZeroShotClassificationOutput,

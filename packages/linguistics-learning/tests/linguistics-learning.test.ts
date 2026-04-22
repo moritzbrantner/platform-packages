@@ -133,18 +133,12 @@ describe("@moritzbrantner/linguistics-learning", () => {
   });
 
   test("updates spaced-repetition intervals with SM-2 style grading", () => {
-    const first = gradeRecall(
-      { quality: 5, reviewedAt: "2026-04-16T00:00:00.000Z" },
-      [],
-    );
-    const second = gradeRecall(
-      { quality: 4, reviewedAt: "2026-04-17T00:00:00.000Z" },
-      [first],
-    );
-    const lapse = gradeRecall(
-      { quality: 1, reviewedAt: "2026-04-23T00:00:00.000Z" },
-      [first, second],
-    );
+    const first = gradeRecall({ quality: 5, reviewedAt: "2026-04-16T00:00:00.000Z" }, []);
+    const second = gradeRecall({ quality: 4, reviewedAt: "2026-04-17T00:00:00.000Z" }, [first]);
+    const lapse = gradeRecall({ quality: 1, reviewedAt: "2026-04-23T00:00:00.000Z" }, [
+      first,
+      second,
+    ]);
 
     expect(first.intervalDays).toBe(1);
     expect(second.intervalDays).toBe(6);

@@ -1,8 +1,8 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Loader2Icon } from "lucide-react"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2Icon } from "lucide-react";
 
-import { cn } from "../lib/cn"
+import { cn } from "../lib/cn";
 
 const spinnerVariants = cva("shrink-0 animate-spin text-current", {
   variants: {
@@ -25,7 +25,7 @@ const spinnerVariants = cva("shrink-0 animate-spin text-current", {
     size: "sm",
     variant: "default",
   },
-})
+});
 
 const dotsSpinnerVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-1 text-current",
@@ -50,8 +50,8 @@ const dotsSpinnerVariants = cva(
       size: "sm",
       variant: "default",
     },
-  }
-)
+  },
+);
 
 const pulseSpinnerVariants = cva("relative inline-flex shrink-0 text-current", {
   variants: {
@@ -74,37 +74,37 @@ const pulseSpinnerVariants = cva("relative inline-flex shrink-0 text-current", {
     size: "sm",
     variant: "default",
   },
-})
+});
 
 type SpinnerAccessibilityProps = {
-  label?: string
-  decorative?: boolean
-}
+  label?: string;
+  decorative?: boolean;
+};
 
 type SpinnerProps = React.ComponentProps<"svg"> &
   VariantProps<typeof spinnerVariants> &
-  SpinnerAccessibilityProps
+  SpinnerAccessibilityProps;
 
 type DotsSpinnerProps = React.ComponentProps<"span"> &
   VariantProps<typeof dotsSpinnerVariants> &
-  SpinnerAccessibilityProps
+  SpinnerAccessibilityProps;
 
 type PulseSpinnerProps = React.ComponentProps<"span"> &
   VariantProps<typeof pulseSpinnerVariants> &
-  SpinnerAccessibilityProps
+  SpinnerAccessibilityProps;
 
 function getLoadingA11yProps({
   ariaLabel,
   decorative,
   label = "Loading",
 }: {
-  ariaLabel?: string
-  decorative?: boolean | null
-  label?: string | null
+  ariaLabel?: string;
+  decorative?: boolean | null;
+  label?: string | null;
 }) {
   return decorative
     ? { "aria-hidden": true }
-    : { role: "status", "aria-label": ariaLabel ?? label ?? "Loading" }
+    : { role: "status", "aria-label": ariaLabel ?? label ?? "Loading" };
 }
 
 function Spinner({
@@ -125,7 +125,7 @@ function Spinner({
       {...getLoadingA11yProps({ ariaLabel, decorative, label })}
       {...props}
     />
-  )
+  );
 }
 
 function DotsSpinner({
@@ -155,7 +155,7 @@ function DotsSpinner({
         />
       ))}
     </span>
-  )
+  );
 }
 
 function PulseSpinner({
@@ -179,7 +179,7 @@ function PulseSpinner({
       <span className="absolute inline-flex size-full animate-ping rounded-full bg-current opacity-70" />
       <span className="relative inline-flex size-full rounded-full bg-current" />
     </span>
-  )
+  );
 }
 
 export {
@@ -189,5 +189,5 @@ export {
   dotsSpinnerVariants,
   pulseSpinnerVariants,
   spinnerVariants,
-}
-export type { DotsSpinnerProps, PulseSpinnerProps, SpinnerProps }
+};
+export type { DotsSpinnerProps, PulseSpinnerProps, SpinnerProps };

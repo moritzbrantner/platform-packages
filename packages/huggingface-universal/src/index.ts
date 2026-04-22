@@ -425,9 +425,7 @@ const TASK_DEFINITIONS = [
 
 export type HuggingFaceTaskSlug = (typeof TASK_DEFINITIONS)[number]["task"];
 
-export interface HuggingFaceTaskDescriptor<
-  Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug,
-> {
+export interface HuggingFaceTaskDescriptor<Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug> {
   task: Task;
   label: string;
   category: HuggingFaceTaskCategory;
@@ -437,9 +435,7 @@ export interface HuggingFaceTaskDescriptor<
   modelSearchUrl: string;
 }
 
-export interface HuggingFaceModelReference<
-  Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug,
-> {
+export interface HuggingFaceModelReference<Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug> {
   task: Task;
   model: string;
   endpoint?: string;
@@ -639,7 +635,7 @@ export type UniversalTaskTypeMap = {
     input: readonly string[] | { sentences: readonly string[]; sourceSentence?: string };
     output: UniversalEmbeddingOutput | UniversalRankingOutput[];
   };
-  "summarization": {
+  summarization: {
     input: string;
     output: UniversalTextGenerationOutput[];
   };
@@ -687,7 +683,7 @@ export type UniversalTaskTypeMap = {
     input: string;
     output: UniversalScoredLabel[];
   };
-  "translation": {
+  translation: {
     input: string;
     output: UniversalTextGenerationOutput[];
   };
@@ -815,9 +811,7 @@ export interface CreateUniversalTaskPipelineOptions<
   defaultParameters?: Record<string, unknown>;
 }
 
-export interface HuggingFaceTaskPackage<
-  Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug,
-> {
+export interface HuggingFaceTaskPackage<Task extends HuggingFaceTaskSlug = HuggingFaceTaskSlug> {
   descriptor: HuggingFaceTaskDescriptor<Task>;
   createModelReference(
     model: string,
@@ -890,9 +884,7 @@ export function createUniversalTaskPipeline<
   Task extends HuggingFaceTaskSlug,
   Input = UniversalTaskInput<Task>,
   Output = UniversalTaskOutput<Task>,
->(
-  options: CreateUniversalTaskPipelineOptions<Task>,
-): UniversalTaskPipeline<Task, Input, Output> {
+>(options: CreateUniversalTaskPipelineOptions<Task>): UniversalTaskPipeline<Task, Input, Output> {
   return createUniversalPipelineFromRun({
     descriptor: options.descriptor,
     model: options.model,
@@ -915,9 +907,7 @@ export function createUniversalTaskPipeline<
   });
 }
 
-export function normalizeTextGenerationOutput(
-  raw: unknown,
-): UniversalTextGenerationOutput[] {
+export function normalizeTextGenerationOutput(raw: unknown): UniversalTextGenerationOutput[] {
   if (Array.isArray(raw)) {
     return raw.flatMap((item) => normalizeTextGenerationOutput(item));
   }
@@ -964,9 +954,7 @@ export function normalizeScoredLabelsOutput(raw: unknown): UniversalScoredLabel[
   return label !== undefined && score !== undefined ? [{ label, score }] : [];
 }
 
-export function normalizeObjectDetectionOutput(
-  raw: unknown,
-): UniversalObjectDetectionOutput[] {
+export function normalizeObjectDetectionOutput(raw: unknown): UniversalObjectDetectionOutput[] {
   if (Array.isArray(raw)) {
     return raw.flatMap((item) => normalizeObjectDetectionOutput(item));
   }
@@ -1136,10 +1124,13 @@ function createUniversalPipelineFromRun<
 >(options: {
   descriptor: HuggingFaceTaskDescriptor<Task>;
   model: HuggingFaceModelReference<Task>;
-  run(input: Input, runOptions?: UniversalTaskRunOptions): Promise<UniversalTaskResult<Task, Output>>;
+  run(
+    input: Input,
+    runOptions?: UniversalTaskRunOptions,
+  ): Promise<UniversalTaskResult<Task, Output>>;
 }): UniversalTaskPipeline<Task, Input, Output> {
-  const pipeline = createPipelineFromRun<Input, UniversalTaskResult<Task, Output>>((input, context) =>
-    options.run(input, context as UniversalTaskRunOptions),
+  const pipeline = createPipelineFromRun<Input, UniversalTaskResult<Task, Output>>(
+    (input, context) => options.run(input, context as UniversalTaskRunOptions),
   );
 
   return {

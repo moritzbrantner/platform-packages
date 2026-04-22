@@ -36,9 +36,7 @@ export type CreateAudioTextToTextPipelineOptions = Omit<
 export function createAudioTextToTextPipeline<
   Input = AudioTextToTextInput,
   Output = AudioTextToTextOutput,
->(
-  options: CreateAudioTextToTextPipelineOptions,
-): AudioTextToTextPipeline<Input, Output> {
+>(options: CreateAudioTextToTextPipelineOptions): AudioTextToTextPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

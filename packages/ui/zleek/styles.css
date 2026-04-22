@@ -53,20 +53,18 @@
 
 :root {
   --font-sans-app:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   --font-mono-app:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
   --radius: 0.25rem;
   --glass-blur: 20px;
   --glass-shadow: 0 24px 60px oklch(0.145 0 0 / 0.12);
   --glass-interactive-shadow: 0 18px 38px oklch(0.145 0 0 / 0.12);
-  --glass-raised-shadow:
-    0 18px 32px oklch(0.145 0 0 / 0.16), 0 4px 10px oklch(0.145 0 0 / 0.08);
+  --glass-raised-shadow: 0 18px 32px oklch(0.145 0 0 / 0.16), 0 4px 10px oklch(0.145 0 0 / 0.08);
   --glass-inset-shadow:
-    inset 0 2px 6px oklch(0.145 0 0 / 0.1),
-    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 2px 6px oklch(0.145 0 0 / 0.1), inset 0 1px 0 oklch(1 0 0 / 0.42),
     0 1px 0 oklch(1 0 0 / 0.14);
   --glass-inset-highlight: oklch(1 0 0 / 0.55);
   --glass-surface-tint: oklch(1 0 0 / 0.12);
@@ -107,11 +105,9 @@
 .dark {
   --glass-shadow: 0 24px 70px oklch(0 0 0 / 0.35);
   --glass-interactive-shadow: 0 18px 40px oklch(0 0 0 / 0.3);
-  --glass-raised-shadow:
-    0 18px 34px oklch(0 0 0 / 0.34), 0 4px 12px oklch(0 0 0 / 0.2);
+  --glass-raised-shadow: 0 18px 34px oklch(0 0 0 / 0.34), 0 4px 12px oklch(0 0 0 / 0.2);
   --glass-inset-shadow:
-    inset 0 2px 8px oklch(0 0 0 / 0.34),
-    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    inset 0 2px 8px oklch(0 0 0 / 0.34), inset 0 1px 0 oklch(1 0 0 / 0.08),
     0 1px 0 oklch(1 0 0 / 0.04);
   --glass-inset-highlight: oklch(1 0 0 / 0.12);
   --glass-surface-tint: oklch(1 0 0 / 0.035);
@@ -361,19 +357,11 @@
     background-color: color-mix(in oklch, var(--accent) 62%, transparent);
   }
 
-  :where(
-    [data-slot="checkbox"],
-    [data-slot="radio-group-item"],
-    [data-slot="switch"]
-  ) {
+  :where([data-slot="checkbox"], [data-slot="radio-group-item"], [data-slot="switch"]) {
     background-color: color-mix(in oklch, var(--background) 52%, transparent);
   }
 
-  :where(
-    [data-slot="progress"],
-    [data-slot="loading-bar-track"],
-    [data-slot="slider-track"]
-  ) {
+  :where([data-slot="progress"], [data-slot="loading-bar-track"], [data-slot="slider-track"]) {
     background-color: color-mix(in oklch, var(--muted) 72%, transparent);
   }
 

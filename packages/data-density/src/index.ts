@@ -197,9 +197,7 @@ export type GeoPointAggregationIndex<TProperties = Record<string, unknown>> = {
     offset?: number,
   ): Array<IndexedGeoDensityPoint<TProperties>>;
   getPointById(pointId: string): IndexedGeoDensityPoint<TProperties> | null;
-  getViewportAggregation(
-    query: GeoViewportAggregationQuery,
-  ): GeoViewportAggregation<TProperties>;
+  getViewportAggregation(query: GeoViewportAggregationQuery): GeoViewportAggregation<TProperties>;
 };
 
 type InternalMetricProperties = {
@@ -238,9 +236,7 @@ export function normalizeDensityMetrics(
   }
 
   return Object.fromEntries(
-    Object.entries(metrics).filter((entry): entry is [string, number] =>
-      Number.isFinite(entry[1]),
-    ),
+    Object.entries(metrics).filter((entry): entry is [string, number] => Number.isFinite(entry[1])),
   );
 }
 
@@ -319,14 +315,16 @@ export function createDataDensityWindowIndex<TItem>(
   options: DataDensityWindowIndexOptions<TItem> = {},
 ): DataDensityWindowIndex<TItem> {
   const indexedItems = items
-    .map((item, index): IndexedDataDensityItem<TItem> => ({
-      id: String(options.getId?.(item, index) ?? readItemId(item, index)),
-      index,
-      item,
-      metrics: normalizeDensityMetrics(
-        options.getMetrics?.(item, index) ?? readItemMetrics(item),
-      ),
-    }))
+    .map(
+      (item, index): IndexedDataDensityItem<TItem> => ({
+        id: String(options.getId?.(item, index) ?? readItemId(item, index)),
+        index,
+        item,
+        metrics: normalizeDensityMetrics(
+          options.getMetrics?.(item, index) ?? readItemMetrics(item),
+        ),
+      }),
+    )
     .filter((entry) => options.filterItem?.(entry.item, entry.index) ?? true);
   const itemLookup = new Map(indexedItems.map((item) => [item.id, item]));
   const metricKeys = collectDensityMetricKeys(indexedItems.map((item) => item.metrics));
@@ -349,7 +347,10 @@ export function createDataDensityWindowIndex<TItem>(
         summary: {
           endIndex,
           filteredItemCount: indexedItems.length,
-          metrics: sumDensityMetrics(windowItems.map((item) => item.metrics), metricKeys),
+          metrics: sumDensityMetrics(
+            windowItems.map((item) => item.metrics),
+            metricKeys,
+          ),
           startIndex,
           totalItemCount: items.length,
           visibleItemCount: windowItems.length,
@@ -389,15 +390,16 @@ export function createBinnedSeriesIndex<TProperties = Record<string, unknown>>(
         updateSeriesBin(bins[binIndex]!, point, metricKeys);
       }
 
-      const visibleBins = query.includeEmptyBins
-        ? bins
-        : bins.filter((bin) => bin.pointCount > 0);
+      const visibleBins = query.includeEmptyBins ? bins : bins.filter((bin) => bin.pointCount > 0);
 
       return {
         bins: visibleBins,
         summary: {
           binCount: visibleBins.length,
-          metrics: sumDensityMetrics(visibleBins.map((bin) => bin.metrics), metricKeys),
+          metrics: sumDensityMetrics(
+            visibleBins.map((bin) => bin.metrics),
+            metricKeys,
+          ),
           pointCount: visibleBins.reduce((total, bin) => total + bin.pointCount, 0),
           xDomain,
         },
@@ -431,9 +433,7 @@ export function createBinnedSeriesIndex<TProperties = Record<string, unknown>>(
   };
 }
 
-export function createGeoPointAggregationIndex<
-  TProperties = Record<string, unknown>,
->(
+export function createGeoPointAggregationIndex<TProperties = Record<string, unknown>>(
   points: readonly GeoDensityPoint<TProperties>[],
   options: GeoPointAggregationIndexOptions<TProperties> = {},
 ): GeoPointAggregationIndex<TProperties> {
@@ -443,10 +443,7 @@ export function createGeoPointAggregationIndex<
     .filter((point) => options.filterPoint?.(point) ?? true);
   const pointLookup = new Map(normalizedPoints.map((point) => [point.id, point]));
   const metricKeys = collectDensityMetricKeys(normalizedPoints.map((point) => point.metrics));
-  const tree = new Supercluster<
-    InternalMetricProperties,
-    InternalClusterProperties
-  >({
+  const tree = new Supercluster<InternalMetricProperties, InternalClusterProperties>({
     extent: options.extent ?? 512,
     map: (properties) => mapProperties(properties, metricKeys),
     maxZoom: options.maxZoom ?? 16,
@@ -455,8 +452,7 @@ export function createGeoPointAggregationIndex<
     reduce: (accumulated, properties) => {
       for (const metricKey of metricKeys) {
         accumulated[metricKey] =
-          readNumericMetric(accumulated, metricKey) +
-          readNumericMetric(properties, metricKey);
+          readNumericMetric(accumulated, metricKey) + readNumericMetric(properties, metricKey);
       }
     },
   });
@@ -495,9 +491,7 @@ export function createGeoPointAggregationIndex<
       const rawFeatures = getFeaturesForBounds(tree, query.bounds, query.zoom);
       const features = rawFeatures
         .map((feature) => toAggregatedGeoFeature(feature, pointLookup, metricKeys, tree))
-        .filter((feature): feature is AggregatedGeoDensityFeature<TProperties> =>
-          Boolean(feature),
-        );
+        .filter((feature): feature is AggregatedGeoDensityFeature<TProperties> => Boolean(feature));
 
       return {
         features,
@@ -545,9 +539,7 @@ function normalizeSeriesPoint<TProperties>(
   };
 }
 
-function isFiniteSeriesPoint<TProperties>(
-  point: IndexedNumericSeriesPoint<TProperties>,
-) {
+function isFiniteSeriesPoint<TProperties>(point: IndexedNumericSeriesPoint<TProperties>) {
   return Number.isFinite(point.x) && Number.isFinite(point.y);
 }
 
@@ -707,9 +699,11 @@ function getFeaturesForBounds(
 }
 
 function toAggregatedGeoFeature<TProperties>(
-  feature: GeoJsonPointFeature | ReturnType<
-    Supercluster<InternalMetricProperties, InternalClusterProperties>["getClusters"]
-  >[number],
+  feature:
+    | GeoJsonPointFeature
+    | ReturnType<
+        Supercluster<InternalMetricProperties, InternalClusterProperties>["getClusters"]
+      >[number],
   pointLookup: Map<string, InternalGeoPoint<TProperties>>,
   metricKeys: readonly string[],
   tree: Supercluster<InternalMetricProperties, InternalClusterProperties>,

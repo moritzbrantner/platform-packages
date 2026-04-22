@@ -198,9 +198,7 @@ export function TemporalHeatMap<TProperties = Record<string, unknown>>({
         const span = timeRange.end - timeRange.start;
 
         nextTime =
-          span > 0
-            ? timeRange.start + ((nextTime - timeRange.start) % span)
-            : timeRange.end;
+          span > 0 ? timeRange.start + ((nextTime - timeRange.start) % span) : timeRange.end;
       }
 
       commitTime(nextTime);
@@ -301,10 +299,7 @@ export function getTemporalHeatMapMaxWeight<TProperties = Record<string, unknown
   );
 }
 
-function getInitialTime(
-  defaultTime: number | undefined,
-  timeRange: TemporalMapTimeRange | null,
-) {
+function getInitialTime(defaultTime: number | undefined, timeRange: TemporalMapTimeRange | null) {
   if (!timeRange) {
     return 0;
   }

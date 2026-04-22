@@ -36,9 +36,7 @@ export type CreateTextGenerationPipelineOptions = Omit<
 export function createTextGenerationPipeline<
   Input = TextGenerationInput,
   Output = TextGenerationOutput,
->(
-  options: CreateTextGenerationPipelineOptions,
-): TextGenerationPipeline<Input, Output> {
+>(options: CreateTextGenerationPipelineOptions): TextGenerationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

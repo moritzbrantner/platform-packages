@@ -23,19 +23,14 @@ import type {
   StoryStageComponent,
 } from "./story-types";
 
-export type InteractiveStoryPlayerProps<
-  TData extends StoryNodeData = StoryNodeData,
-> = {
+export type InteractiveStoryPlayerProps<TData extends StoryNodeData = StoryNodeData> = {
   story: InteractiveStoryDefinition<TData>;
   initialChoiceIds?: string[];
   className?: string;
   panelClassName?: string;
   ariaLabel?: string;
   stageRenderer?: StoryStageComponent<TData>;
-  onChoice?: (
-    choice: StoryChoiceDefinition,
-    history: StoryHistoryEntry<TData>[],
-  ) => void;
+  onChoice?: (choice: StoryChoiceDefinition, history: StoryHistoryEntry<TData>[]) => void;
   onPathChange?: (history: StoryHistoryEntry<TData>[]) => void;
 };
 
@@ -46,9 +41,7 @@ function buildInitialHistory<TData extends StoryNodeData>(
   return resolveStoryPath(story, initialChoiceIds).history as StoryHistoryEntry<TData>[];
 }
 
-export function InteractiveStoryPlayer<
-  TData extends StoryNodeData = StoryNodeData,
->({
+export function InteractiveStoryPlayer<TData extends StoryNodeData = StoryNodeData>({
   story: input,
   initialChoiceIds = [],
   className,
@@ -191,9 +184,7 @@ export function InteractiveStoryPlayer<
                   {currentNode.eyebrow}
                 </p>
               ) : null}
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight">
-                {currentNode.title}
-              </h3>
+              <h3 className="mt-3 text-2xl font-semibold tracking-tight">{currentNode.title}</h3>
               {currentNode.body ? (
                 <div className="mt-4 text-sm leading-7 text-muted-foreground md:text-base">
                   {currentNode.body}
@@ -201,7 +192,8 @@ export function InteractiveStoryPlayer<
               ) : null}
               <div className="mt-8 rounded-[1.5rem] border bg-card/70 p-5">
                 <p className="text-sm font-medium">
-                  {currentNode.prompt ?? (ending ? "This branch is complete." : "Choose what happens next.")}
+                  {currentNode.prompt ??
+                    (ending ? "This branch is complete." : "Choose what happens next.")}
                 </p>
                 <div className="mt-4 space-y-3">
                   {choices.length > 0 ? (
@@ -217,9 +209,7 @@ export function InteractiveStoryPlayer<
                           "disabled:cursor-not-allowed disabled:opacity-50",
                         )}
                       >
-                        <span className="block text-sm font-medium">
-                          {choice.label}
-                        </span>
+                        <span className="block text-sm font-medium">{choice.label}</span>
                         {choice.description ? (
                           <span className="mt-1 block text-sm text-muted-foreground">
                             {choice.description}
@@ -236,12 +226,7 @@ export function InteractiveStoryPlayer<
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={goBack}
-                  disabled={!canGoBack}
-                >
+                <Button type="button" variant="outline" onClick={goBack} disabled={!canGoBack}>
                   {story.backLabel ?? "Go back"}
                 </Button>
                 <Button type="button" variant="secondary" onClick={restart}>

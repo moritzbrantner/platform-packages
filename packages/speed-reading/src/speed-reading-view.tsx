@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useEffectEvent, useMemo, useState, type CSSProperties, type HTMLAttributes } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type HTMLAttributes,
+} from "react";
 
 import { countSpeedReadingWords, createSpeedReadingChunks, getSpeedReadingDelay } from "./core";
 
-export interface SpeedReadingViewProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface SpeedReadingViewProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   text: string;
   wordsPerMinute?: number;
   chunkSize?: number;
@@ -42,9 +48,9 @@ export function SpeedReadingView({
   );
   const resolvedIsPlaying = isPlaying ?? internalIsPlaying;
   const currentChunk = chunks[resolvedChunkIndex] ?? null;
-  const previousChunk = resolvedChunkIndex > 0 ? chunks[resolvedChunkIndex - 1] ?? null : null;
+  const previousChunk = resolvedChunkIndex > 0 ? (chunks[resolvedChunkIndex - 1] ?? null) : null;
   const nextChunk =
-    resolvedChunkIndex < chunks.length - 1 ? chunks[resolvedChunkIndex + 1] ?? null : null;
+    resolvedChunkIndex < chunks.length - 1 ? (chunks[resolvedChunkIndex + 1] ?? null) : null;
   const words = useMemo(() => countSpeedReadingWords(text), [text]);
 
   const emitPlayingChange = useEffectEvent((nextValue: boolean) => {
@@ -86,9 +92,12 @@ export function SpeedReadingView({
       return undefined;
     }
 
-    const timeoutId = window.setTimeout(() => {
-      emitChunkIndexChange(resolvedChunkIndex + 1);
-    }, getSpeedReadingDelay(currentChunk, { wordsPerMinute }));
+    const timeoutId = window.setTimeout(
+      () => {
+        emitChunkIndexChange(resolvedChunkIndex + 1);
+      },
+      getSpeedReadingDelay(currentChunk, { wordsPerMinute }),
+    );
 
     return () => window.clearTimeout(timeoutId);
   }, [

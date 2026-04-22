@@ -59,9 +59,7 @@ export type GraphDensityNodeWindow<TNodeProperties = Record<string, unknown>> = 
   summary: DataDensityWindowSummary;
 };
 
-export type GraphDensityEdgeSelection<
-  TEdgeProperties = Record<string, unknown>,
-> = {
+export type GraphDensityEdgeSelection<TEdgeProperties = Record<string, unknown>> = {
   edges: Array<IndexedGraphDensityEdge<TEdgeProperties>>;
   summary: {
     edgeCount: number;
@@ -118,10 +116,9 @@ export type GraphDensityIndex<
   ): GraphDensityEdgeSelection<TEdgeProperties>;
   getNodeById(nodeId: string): IndexedGraphDensityNode<TNodeProperties> | null;
   getNodeWindow(query: DataDensityItemWindowQuery): GraphDensityNodeWindow<TNodeProperties>;
-  getSubgraph(query: GraphDensitySubgraphQuery): GraphDensitySubgraph<
-    TNodeProperties,
-    TEdgeProperties
-  >;
+  getSubgraph(
+    query: GraphDensitySubgraphQuery,
+  ): GraphDensitySubgraph<TNodeProperties, TEdgeProperties>;
 };
 
 export function createGraphDensityIndex<
@@ -149,9 +146,7 @@ export function createGraphDensityIndex<
     )
     .filter((edge) => options.filterEdge?.(edge) ?? true);
   const edgeLookup = new Map(normalizedEdges.map((edge) => [edge.id, edge]));
-  const edgeMetricKeys = collectDensityMetricKeys(
-    normalizedEdges.map((edge) => edge.metrics),
-  );
+  const edgeMetricKeys = collectDensityMetricKeys(normalizedEdges.map((edge) => edge.metrics));
   const getEdgesForNodes: GraphDensityIndex<
     TNodeProperties,
     TEdgeProperties
@@ -162,10 +157,9 @@ export function createGraphDensityIndex<
       edgeMetricKeys,
       selectionOptions.mode ?? "internal",
     );
-  const getNodeWindow: GraphDensityIndex<
-    TNodeProperties,
-    TEdgeProperties
-  >["getNodeWindow"] = (query) => {
+  const getNodeWindow: GraphDensityIndex<TNodeProperties, TEdgeProperties>["getNodeWindow"] = (
+    query,
+  ) => {
     const window = nodeWindowIndex.getWindow(query);
 
     return {
@@ -214,12 +208,8 @@ export const createGraphWindowIndex = createGraphDensityIndex;
 export function createGraphDensityViewportSummary<
   TNodeProperties = Record<string, unknown>,
   TEdgeProperties = Record<string, unknown>,
->(
-  subgraph: GraphDensitySubgraph<TNodeProperties, TEdgeProperties>,
-): GraphDensityViewportSummary {
-  const edgeMetricKeys = collectDensityMetricKeys(
-    subgraph.edges.map((edge) => edge.metrics),
-  );
+>(subgraph: GraphDensitySubgraph<TNodeProperties, TEdgeProperties>): GraphDensityViewportSummary {
+  const edgeMetricKeys = collectDensityMetricKeys(subgraph.edges.map((edge) => edge.metrics));
 
   return {
     ...createDensityViewportSummary(

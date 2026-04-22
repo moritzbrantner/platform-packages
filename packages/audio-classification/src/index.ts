@@ -36,9 +36,7 @@ export type CreateAudioClassificationPipelineOptions = Omit<
 export function createAudioClassificationPipeline<
   Input = AudioClassificationInput,
   Output = AudioClassificationOutput,
->(
-  options: CreateAudioClassificationPipelineOptions,
-): AudioClassificationPipeline<Input, Output> {
+>(options: CreateAudioClassificationPipelineOptions): AudioClassificationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

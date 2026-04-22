@@ -1,0 +1,21 @@
+{
+  "name": "@moritzbrantner/ui-consumer-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@moritzbrantner/ui": "file:../..",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "6.0.2",
+    "vite": "^8.0.8"
+  }
+}

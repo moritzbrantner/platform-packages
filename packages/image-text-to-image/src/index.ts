@@ -36,9 +36,7 @@ export type CreateImageTextToImagePipelineOptions = Omit<
 export function createImageTextToImagePipeline<
   Input = ImageTextToImageInput,
   Output = ImageTextToImageOutput,
->(
-  options: CreateImageTextToImagePipelineOptions,
-): ImageTextToImagePipeline<Input, Output> {
+>(options: CreateImageTextToImagePipelineOptions): ImageTextToImagePipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

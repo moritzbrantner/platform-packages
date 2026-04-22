@@ -37,13 +37,7 @@ function renderAnimation(animation: FlatAnimation, key: string) {
   };
 
   if (animation.kind === "attribute") {
-    return (
-      <animate
-        key={key}
-        attributeName={animation.attributeName}
-        {...commonProps}
-      />
-    );
+    return <animate key={key} attributeName={animation.attributeName} {...commonProps} />;
   }
 
   return (
@@ -58,9 +52,7 @@ function renderAnimation(animation: FlatAnimation, key: string) {
 }
 
 function renderAnimations(animations?: FlatAnimation[]) {
-  return animations?.map((animation, index) =>
-    renderAnimation(animation, `animation-${index}`),
-  );
+  return animations?.map((animation, index) => renderAnimation(animation, `animation-${index}`));
 }
 
 function renderGradient(gradient: FlatGradient, key: string) {
@@ -152,14 +144,7 @@ function renderShape(shape: FlatShape, key: string): ReactNode {
       );
     case "ellipse":
       return (
-        <ellipse
-          key={key}
-          {...commonProps}
-          cx={shape.cx}
-          cy={shape.cy}
-          rx={shape.rx}
-          ry={shape.ry}
-        >
+        <ellipse key={key} {...commonProps} cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry}>
           {animations}
         </ellipse>
       );
@@ -177,14 +162,7 @@ function renderShape(shape: FlatShape, key: string): ReactNode {
       );
     case "line":
       return (
-        <line
-          key={key}
-          {...commonProps}
-          x1={shape.x1}
-          y1={shape.y1}
-          x2={shape.x2}
-          y2={shape.y2}
-        >
+        <line key={key} {...commonProps} x1={shape.x1} y1={shape.y1} x2={shape.x2} y2={shape.y2}>
           {animations}
         </line>
       );
@@ -215,7 +193,10 @@ export function FlatScene({
 }: FlatSceneProps) {
   const titleId = useId();
   const descriptionId = useId();
-  const labelledBy = [scene.title ? titleId : undefined, scene.description ? descriptionId : undefined]
+  const labelledBy = [
+    scene.title ? titleId : undefined,
+    scene.description ? descriptionId : undefined,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -233,7 +214,9 @@ export function FlatScene({
       {scene.title ? <title id={titleId}>{scene.title}</title> : null}
       {scene.description ? <desc id={descriptionId}>{scene.description}</desc> : null}
       {scene.gradients?.length ? (
-        <defs>{scene.gradients.map((gradient, index) => renderGradient(gradient, `gradient-${index}`))}</defs>
+        <defs>
+          {scene.gradients.map((gradient, index) => renderGradient(gradient, `gradient-${index}`))}
+        </defs>
       ) : null}
       {scene.background ? <rect width="100%" height="100%" fill={scene.background} /> : null}
       {scene.layers.map((layer, index) => renderLayer(layer, `layer-${index}`))}

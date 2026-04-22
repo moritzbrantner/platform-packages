@@ -58,7 +58,8 @@ function LinguisticsCorpusPage() {
             </Badge>
             <CardTitle>Metadata-aware search</CardTitle>
             <CardDescription>
-              Search stays deterministic and filters by the document metadata you pass into the core document model.
+              Search stays deterministic and filters by the document metadata you pass into the core
+              document model.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
@@ -95,11 +96,7 @@ function LinguisticsCorpusPage() {
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
             {frequencies.map((entry) => (
-              <Item
-                key={`${entry.language}-${entry.term}`}
-                variant="muted"
-                className="bg-muted/20"
-              >
+              <Item key={`${entry.language}-${entry.term}`} variant="muted" className="bg-muted/20">
                 <ItemContent>
                   <ItemTitle>{entry.term}</ItemTitle>
                   <ItemDescription>

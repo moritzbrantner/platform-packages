@@ -366,10 +366,7 @@ describe("@moritzbrantner/maps temporal GeoJSON", () => {
       ],
     };
 
-    const [point] = getTemporalMapPointsAtTime(
-      createTemporalMapTracksFromGeoJson(collection),
-      5,
-    );
+    const [point] = getTemporalMapPointsAtTime(createTemporalMapTracksFromGeoJson(collection), 5);
 
     expect(point).toMatchObject({
       id: "courier-4",

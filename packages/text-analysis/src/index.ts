@@ -81,9 +81,7 @@ export interface TextAnalysisPipeline<
 
 export function createTextAnalysisPipeline<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  options: CreateTextAnalysisPipelineOptions<Metadata>,
-): TextAnalysisPipeline<Metadata> {
+>(options: CreateTextAnalysisPipelineOptions<Metadata>): TextAnalysisPipeline<Metadata> {
   return {
     async analyze(input, analysisOptions = {}) {
       const document = ensureTextDocument(input, options.chunking);
@@ -133,7 +131,9 @@ export function createTextAnalysisPipeline<
         mergeEntities(chunkResults.flatMap((chunk) => chunk.entities)),
         analysisOptions.keywordLimit ?? options.keywordLimit ?? DEFAULT_KEYWORD_LIMIT,
       );
-      const embeddings = chunkResults.flatMap((chunk) => (chunk.embedding ? [chunk.embedding] : []));
+      const embeddings = chunkResults.flatMap((chunk) =>
+        chunk.embedding ? [chunk.embedding] : [],
+      );
 
       return {
         document,
@@ -165,7 +165,10 @@ function collapseEntities(
 }
 
 function mergeEntities(entities: Iterable<TextAnalysisEntity>): TextAnalysisEntity[] {
-  const merged = new Map<string, { text: string; label: string; totalScore: number; count: number }>();
+  const merged = new Map<
+    string,
+    { text: string; label: string; totalScore: number; count: number }
+  >();
 
   for (const entity of entities) {
     const key = `${entity.label}\u0000${entity.text.toLocaleLowerCase()}`;
@@ -189,9 +192,7 @@ function mergeEntities(entities: Iterable<TextAnalysisEntity>): TextAnalysisEnti
     }))
     .sort(
       (left, right) =>
-        right.count - left.count ||
-        right.score - left.score ||
-        left.text.localeCompare(right.text),
+        right.count - left.count || right.score - left.score || left.text.localeCompare(right.text),
     );
 }
 
@@ -211,7 +212,9 @@ function rankKeywords(
       weight: count,
       source: "term-frequency" as const,
     }))
-    .filter((keyword) => !entities.some((entity) => entity.text.toLocaleLowerCase() === keyword.text))
+    .filter(
+      (keyword) => !entities.some((entity) => entity.text.toLocaleLowerCase() === keyword.text),
+    )
     .sort((left, right) => right.weight - left.weight || left.text.localeCompare(right.text));
 
   return [...entityKeywords, ...frequencyKeywords]

@@ -36,9 +36,7 @@ export type CreateTabularRegressionPipelineOptions = Omit<
 export function createTabularRegressionPipeline<
   Input = TabularRegressionInput,
   Output = TabularRegressionOutput,
->(
-  options: CreateTabularRegressionPipelineOptions,
-): TabularRegressionPipeline<Input, Output> {
+>(options: CreateTabularRegressionPipelineOptions): TabularRegressionPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

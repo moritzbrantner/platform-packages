@@ -11,7 +11,10 @@ const UNIGRAM_WEIGHT = 0.35;
 const RECENCY_WEIGHT = 0.05;
 const SEMANTIC_BACKOFF_WEIGHT = 0.15;
 
-const modelInternals = new WeakMap<WordPredictionModel, { options: ModelOptions; trainingData: TrainingData }>();
+const modelInternals = new WeakMap<
+  WordPredictionModel,
+  { options: ModelOptions; trainingData: TrainingData }
+>();
 
 export interface CreateWordPredictionModelOptions {
   texts?: Iterable<string> | string;
@@ -132,13 +135,7 @@ export function createWordPredictionModel(
     },
     predictCompletion(input, predictOptions) {
       const { contextTokens, prefix } = parseInput(input, modelOptions);
-      return predictCompletion(
-        trainingData,
-        modelOptions,
-        contextTokens,
-        prefix,
-        predictOptions,
-      );
+      return predictCompletion(trainingData, modelOptions, contextTokens, prefix, predictOptions);
     },
   };
 
@@ -172,17 +169,13 @@ export function deserializeWordPredictionModel(
   value: string | SerializableWordPredictionModel,
 ): WordPredictionModel {
   const snapshot =
-    typeof value === "string"
-      ? (JSON.parse(value) as SerializableWordPredictionModel)
-      : value;
+    typeof value === "string" ? (JSON.parse(value) as SerializableWordPredictionModel) : value;
   const modelOptions: ModelOptions = {
     lowercase: snapshot.lowercase,
     maxContextSize: clampContextSize(snapshot.maxContextSize),
   };
   const trainingData: TrainingData = {
-    surfaceForms: new Map(
-      snapshot.surfaceForms.map(([word, forms]) => [word, new Map(forms)]),
-    ),
+    surfaceForms: new Map(snapshot.surfaceForms.map(([word, forms]) => [word, new Map(forms)])),
     unigramCounts: new Map(snapshot.unigramCounts),
     lastSeenAt: new Map(snapshot.lastSeenAt),
     nextWordCountsByContextSize: new Map(
@@ -229,13 +222,7 @@ function createModelFromTrainingData(
     },
     predictCompletion(input, predictOptions) {
       const { contextTokens, prefix } = parseInput(input, modelOptions);
-      return predictCompletion(
-        trainingData,
-        modelOptions,
-        contextTokens,
-        prefix,
-        predictOptions,
-      );
+      return predictCompletion(trainingData, modelOptions, contextTokens, prefix, predictOptions);
     },
   };
 
@@ -349,7 +336,12 @@ function trainModel(trainingData: TrainingData, text: string, options: ModelOpti
     for (let size = 1; size <= maxContextSize; size += 1) {
       const contextTokens = context.slice(-size);
       const contextKey = buildContextKey(contextTokens);
-      incrementNestedCount(trainingData.nextWordCountsByContextSize, size, contextKey, token.normalized);
+      incrementNestedCount(
+        trainingData.nextWordCountsByContextSize,
+        size,
+        contextKey,
+        token.normalized,
+      );
       incrementNestedTotal(trainingData.totalByContextSize, size, contextKey);
     }
 
@@ -441,7 +433,14 @@ function predictWords(
       }
 
       const score = (count / total) * contextWeight;
-      upsertCandidate(scores, candidate, score, count, size, resolveSurfaceForm(trainingData, candidate));
+      upsertCandidate(
+        scores,
+        candidate,
+        score,
+        count,
+        size,
+        resolveSurfaceForm(trainingData, candidate),
+      );
     }
   }
 
@@ -472,7 +471,7 @@ function predictWords(
       upsertCandidate(
         scores,
         normalizedCandidate,
-        (typeof suggestion === "string" ? 1 : suggestion.score ?? 1) * SEMANTIC_BACKOFF_WEIGHT,
+        (typeof suggestion === "string" ? 1 : (suggestion.score ?? 1)) * SEMANTIC_BACKOFF_WEIGHT,
         0,
         0,
         candidateWord,

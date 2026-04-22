@@ -330,18 +330,14 @@ export const playgroundExampleGroups: readonly PlaygroundExampleGroup[] = [
   },
 ] as const;
 
-export const playgroundExamples = playgroundExampleGroups.flatMap(
-  (group) => group.items,
-);
+export const playgroundExamples = playgroundExampleGroups.flatMap((group) => group.items);
 
 function getPlaygroundExample(page: PageKey) {
   return playgroundExamples.find((item) => item.key === page) ?? playgroundExamples[0];
 }
 
 function getPlaygroundGroup(page: PageKey) {
-  return playgroundExampleGroups.find((group) =>
-    group.items.some((item) => item.key === page),
-  );
+  return playgroundExampleGroups.find((group) => group.items.some((item) => item.key === page));
 }
 
 function createNavbarGroups(activePage: PageKey): PlatformNavbarGroup[] {
@@ -415,9 +411,7 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
                 {activeGroup?.label ?? "Playground"}
               </Badge>
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                  {title}
-                </h1>
+                <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{title}</h1>
                 <p className="max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
                   {description}
                 </p>
@@ -439,12 +433,7 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
 
 export function PlaygroundPage(props: AppShellProps) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <AppFrame {...props} />
     </ThemeProvider>
   );
@@ -471,9 +460,7 @@ export function ExampleLinkCard({
         </Badge>
         <div className="space-y-2">
           <CardTitle className="text-2xl">{title}</CardTitle>
-          <CardDescription className="max-w-xl text-sm leading-6">
-            {description}
-          </CardDescription>
+          <CardDescription className="max-w-xl text-sm leading-6">{description}</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="flex h-full items-end">

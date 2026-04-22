@@ -1,7 +1,7 @@
-import * as React from "react"
-import { cva } from "class-variance-authority"
+import * as React from "react";
+import { cva } from "class-variance-authority";
 
-import { cn } from "../lib/cn"
+import { cn } from "../lib/cn";
 
 const pageShellVariants = cva("min-h-screen bg-background text-foreground", {
   variants: {
@@ -15,7 +15,7 @@ const pageShellVariants = cva("min-h-screen bg-background text-foreground", {
   defaultVariants: {
     background: "default",
   },
-})
+});
 
 const pageShellInnerVariants = cva("mx-auto flex w-full flex-col", {
   variants: {
@@ -34,13 +34,13 @@ const pageShellInnerVariants = cva("mx-auto flex w-full flex-col", {
     maxWidth: "default",
     padding: "default",
   },
-})
+});
 
 type PageShellProps = React.ComponentProps<"div"> & {
-  maxWidth?: "default" | "wide" | "full"
-  padding?: "default" | "compact" | "none"
-  background?: "default" | "muted" | "none"
-}
+  maxWidth?: "default" | "wide" | "full";
+  padding?: "default" | "compact" | "none";
+  background?: "default" | "muted" | "none";
+};
 
 function PageShell({
   className,
@@ -66,7 +66,7 @@ function PageShell({
         {children}
       </div>
     </div>
-  )
+  );
 }
 
 const pageHeaderVariants = cva(
@@ -74,8 +74,7 @@ const pageHeaderVariants = cva(
   {
     variants: {
       align: {
-        start:
-          "@md/page-header:grid-cols-[minmax(0,1fr)_auto] @md/page-header:items-start",
+        start: "@md/page-header:grid-cols-[minmax(0,1fr)_auto] @md/page-header:items-start",
         center:
           "justify-items-center text-center @md/page-header:mx-auto @md/page-header:max-w-3xl",
       },
@@ -83,18 +82,14 @@ const pageHeaderVariants = cva(
     defaultVariants: {
       align: "start",
     },
-  }
-)
+  },
+);
 
 type PageHeaderProps = React.ComponentProps<"header"> & {
-  align?: "start" | "center"
-}
+  align?: "start" | "center";
+};
 
-function PageHeader({
-  className,
-  align = "start",
-  ...props
-}: PageHeaderProps) {
+function PageHeader({ className, align = "start", ...props }: PageHeaderProps) {
   return (
     <header
       data-slot="page-header"
@@ -102,7 +97,7 @@ function PageHeader({
       className={cn(pageHeaderVariants({ align }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function PageTitle({ className, ...props }: React.ComponentProps<"h1">) {
@@ -111,24 +106,21 @@ function PageTitle({ className, ...props }: React.ComponentProps<"h1">) {
       data-slot="page-title"
       className={cn(
         "max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-balance md:text-4xl",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function PageDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="page-description"
-      className={cn(
-        "max-w-3xl text-sm leading-6 text-muted-foreground md:text-base",
-        className
-      )}
+      className={cn("max-w-3xl text-sm leading-6 text-muted-foreground md:text-base", className)}
       {...props}
     />
-  )
+  );
 }
 
 function PageActions({ className, ...props }: React.ComponentProps<"div">) {
@@ -137,21 +129,15 @@ function PageActions({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="page-actions"
       className={cn(
         "flex flex-wrap items-center gap-2 group-data-[align=center]/page-header:justify-center @md/page-header:group-data-[align=start]/page-header:justify-end",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function PageContent({ className, ...props }: React.ComponentProps<"main">) {
-  return (
-    <main
-      data-slot="page-content"
-      className={cn("grid gap-6", className)}
-      {...props}
-    />
-  )
+  return <main data-slot="page-content" className={cn("grid gap-6", className)} {...props} />;
 }
 
 const surfaceVariants = cva(
@@ -175,20 +161,15 @@ const surfaceVariants = cva(
       variant: "default",
       padding: "default",
     },
-  }
-)
+  },
+);
 
 type SurfaceProps = React.ComponentProps<"section"> & {
-  variant?: "default" | "muted" | "transparent"
-  padding?: "default" | "compact" | "none"
-}
+  variant?: "default" | "muted" | "transparent";
+  padding?: "default" | "compact" | "none";
+};
 
-function Surface({
-  className,
-  variant = "default",
-  padding = "default",
-  ...props
-}: SurfaceProps) {
+function Surface({ className, variant = "default", padding = "default", ...props }: SurfaceProps) {
   return (
     <section
       data-slot="surface"
@@ -197,7 +178,7 @@ function Surface({
       className={cn(surfaceVariants({ variant, padding }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function SurfaceHeader({ className, ...props }: React.ComponentProps<"div">) {
@@ -206,11 +187,11 @@ function SurfaceHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="surface-header"
       className={cn(
         "grid auto-rows-min items-start gap-1 px-4 group-data-[padding=compact]/surface:px-3 group-data-[padding=none]/surface:px-0 has-data-[slot=surface-action]:grid-cols-[1fr_auto] has-data-[slot=surface-description]:grid-rows-[auto_auto]",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function SurfaceTitle({ className, ...props }: React.ComponentProps<"h2">) {
@@ -220,33 +201,27 @@ function SurfaceTitle({ className, ...props }: React.ComponentProps<"h2">) {
       className={cn("text-base font-medium leading-snug", className)}
       {...props}
     />
-  )
+  );
 }
 
-function SurfaceDescription({
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
+function SurfaceDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="surface-description"
       className={cn("text-sm leading-6 text-muted-foreground", className)}
       {...props}
     />
-  )
+  );
 }
 
 function SurfaceAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="surface-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
-      )}
+      className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
       {...props}
     />
-  )
+  );
 }
 
 function SurfaceContent({ className, ...props }: React.ComponentProps<"div">) {
@@ -255,11 +230,11 @@ function SurfaceContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="surface-content"
       className={cn(
         "px-4 group-data-[padding=compact]/surface:px-3 group-data-[padding=none]/surface:px-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function SurfaceFooter({ className, ...props }: React.ComponentProps<"div">) {
@@ -268,11 +243,11 @@ function SurfaceFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="surface-footer"
       className={cn(
         "mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 bg-muted/35 px-4 pt-4 group-data-[padding=compact]/surface:mt-3 group-data-[padding=compact]/surface:px-3 group-data-[padding=compact]/surface:pt-3 group-data-[padding=none]/surface:mt-0 group-data-[padding=none]/surface:px-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 const sectionGridVariants = cva("grid", {
@@ -294,19 +269,14 @@ const sectionGridVariants = cva("grid", {
     columns: "two",
     gap: "default",
   },
-})
+});
 
 type SectionGridProps = React.ComponentProps<"div"> & {
-  columns?: "one" | "two" | "three" | "sidebar-left" | "sidebar-right"
-  gap?: "default" | "compact" | "loose"
-}
+  columns?: "one" | "two" | "three" | "sidebar-left" | "sidebar-right";
+  gap?: "default" | "compact" | "loose";
+};
 
-function SectionGrid({
-  className,
-  columns = "two",
-  gap = "default",
-  ...props
-}: SectionGridProps) {
+function SectionGrid({ className, columns = "two", gap = "default", ...props }: SectionGridProps) {
   return (
     <div
       data-slot="section-grid"
@@ -315,7 +285,7 @@ function SectionGrid({
       className={cn(sectionGridVariants({ columns, gap }), className)}
       {...props}
     />
-  )
+  );
 }
 
 const actionBarVariants = cva("flex flex-wrap items-center gap-2", {
@@ -334,19 +304,14 @@ const actionBarVariants = cva("flex flex-wrap items-center gap-2", {
     align: "end",
     sticky: false,
   },
-})
+});
 
 type ActionBarProps = React.ComponentProps<"div"> & {
-  align?: "start" | "end" | "between"
-  sticky?: boolean
-}
+  align?: "start" | "end" | "between";
+  sticky?: boolean;
+};
 
-function ActionBar({
-  className,
-  align = "end",
-  sticky = false,
-  ...props
-}: ActionBarProps) {
+function ActionBar({ className, align = "end", sticky = false, ...props }: ActionBarProps) {
   return (
     <div
       data-slot="action-bar"
@@ -355,7 +320,7 @@ function ActionBar({
       className={cn(actionBarVariants({ align, sticky }), className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -374,11 +339,5 @@ export {
   SurfaceFooter,
   SurfaceHeader,
   SurfaceTitle,
-}
-export type {
-  ActionBarProps,
-  PageHeaderProps,
-  PageShellProps,
-  SectionGridProps,
-  SurfaceProps,
-}
+};
+export type { ActionBarProps, PageHeaderProps, PageShellProps, SectionGridProps, SurfaceProps };

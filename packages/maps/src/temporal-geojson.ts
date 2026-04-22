@@ -1,9 +1,5 @@
 import type { MapMetricRecord } from "./aggregation";
-import {
-  filterFiniteMetrics,
-  isRecord,
-  parseTemporalGeoJsonTime,
-} from "./temporal-core";
+import { filterFiniteMetrics, isRecord, parseTemporalGeoJsonTime } from "./temporal-core";
 import type { TemporalMapKeyframe, TemporalMapTrack } from "./temporal-points";
 
 export type TemporalGeoJsonProperties = Record<string, unknown>;
@@ -64,10 +60,7 @@ export type TemporalGeoJsonTrackOptions<
   metricKeys?: readonly string[];
 };
 
-type MutableTemporalMapTrack<TProperties> = Omit<
-  TemporalMapTrack<TProperties>,
-  "frames"
-> & {
+type MutableTemporalMapTrack<TProperties> = Omit<TemporalMapTrack<TProperties>, "frames"> & {
   frames: TemporalMapKeyframe<TProperties>[];
 };
 

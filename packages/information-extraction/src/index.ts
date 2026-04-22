@@ -357,11 +357,13 @@ export function createInformationExtractionPipeline<
         analysis: extractionOptions.analysis,
         normalizedExtraction: schemaResult?.normalizedExtraction,
         validation: schemaResult?.validation,
-        graph: extractionOptions.emitGraph ? toGraphJson({
-          documentId: document.id,
-          relations: mergedRelations,
-          events: mergedEvents,
-        }) : undefined,
+        graph: extractionOptions.emitGraph
+          ? toGraphJson({
+              documentId: document.id,
+              relations: mergedRelations,
+              events: mergedEvents,
+            })
+          : undefined,
       };
     },
   };
@@ -378,10 +380,7 @@ export function normalizeInformationExtractionForSchema(
   let normalizedExtraction = adaptInformationExtractionOutput(
     toSchemaInformationExtractionOutput(relations, events, {
       ...options,
-      includeEvents: hasSchemaEntityType(
-        options.schema,
-        options.eventEntityType ?? "event",
-      ),
+      includeEvents: hasSchemaEntityType(options.schema, options.eventEntityType ?? "event"),
     }),
     options.canonicalization,
   );
@@ -418,7 +417,10 @@ export function toSchemaInformationExtractionOutput(
   const defaultEntityType = options.defaultEntityType ?? "entity";
   const eventEntityType = options.eventEntityType ?? "event";
   const includeEvents = options.includeEvents ?? true;
-  const entities = new Map<string, NonNullable<SchemaInformationExtractionOutput["entities"]>[number]>();
+  const entities = new Map<
+    string,
+    NonNullable<SchemaInformationExtractionOutput["entities"]>[number]
+  >();
   const outputRelations: NonNullable<SchemaInformationExtractionOutput["relations"]> = [];
 
   for (const relation of relations) {
@@ -453,9 +455,7 @@ export function toSchemaInformationExtractionOutput(
       confidence: event.confidence,
       fields: [
         { name: "trigger", value: event.trigger, confidence: event.confidence },
-        ...(event.time
-          ? [{ name: "time", value: event.time, confidence: event.confidence }]
-          : []),
+        ...(event.time ? [{ name: "time", value: event.time, confidence: event.confidence }] : []),
       ],
     });
 
@@ -650,7 +650,9 @@ async function collectChunkEntities<
   });
 }
 
-function collectAnalysisEntities<Metadata extends Record<string, unknown> = Record<string, unknown>>(
+function collectAnalysisEntities<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+>(
   chunkText: string,
   chunkStart: number,
   analysis: TextAnalysisResult<Metadata> | undefined,
@@ -711,8 +713,7 @@ function extractRuleRelations(
       const subjectEntity = findBestEntity(subject, spanStart, entities);
       const objectEntity = findBestEntity(object, spanStart, entities);
       const confidence = clamp01(
-        pattern.baseConfidence *
-          combineEntityConfidence(subjectEntity?.score, objectEntity?.score),
+        pattern.baseConfidence * combineEntityConfidence(subjectEntity?.score, objectEntity?.score),
       );
 
       relations.push({
@@ -769,7 +770,10 @@ async function extractProviderRelations(
         confidence: clamp01(relation.confidence),
         source: "provider" as const,
         evidenceSpan: {
-          text: chunkText.slice(relation.subject.start, Math.max(relation.subject.end, relation.object.end)),
+          text: chunkText.slice(
+            relation.subject.start,
+            Math.max(relation.subject.end, relation.object.end),
+          ),
           start,
           end,
           chunkId,
@@ -802,8 +806,8 @@ function extractRuleEvents(
 
     const triggerStart = sentence.start + (word.index ?? 0);
     const triggerEnd = triggerStart + token.length;
-    const nearby = entities.filter((entity) =>
-      entity.start >= sentence.start && entity.end <= sentence.end,
+    const nearby = entities.filter(
+      (entity) => entity.start >= sentence.start && entity.end <= sentence.end,
     );
     const argumentsList = buildEventArguments(nearby, triggerStart);
     const time = TIME_PATTERN.exec(sentence.text)?.[0];
@@ -929,8 +933,7 @@ function mergeRelations(
 
   for (const relation of relations) {
     const exactKey = relationMergeKey(relation);
-    const key =
-      findSimilarRelationKey(merged, relation, relationSimilarityWindow) ?? exactKey;
+    const key = findSimilarRelationKey(merged, relation, relationSimilarityWindow) ?? exactKey;
     const existing = merged.get(key);
 
     if (!existing) {
@@ -944,7 +947,8 @@ function mergeRelations(
     }
 
     const isNearby =
-      Math.abs(existing.evidenceSpan.start - relation.evidenceSpan.start) <= relationSimilarityWindow;
+      Math.abs(existing.evidenceSpan.start - relation.evidenceSpan.start) <=
+      relationSimilarityWindow;
 
     existing.totalConfidence += relation.confidence;
     existing.maxConfidence = Math.max(existing.maxConfidence, relation.confidence);
@@ -997,7 +1001,8 @@ function findSimilarRelationKey(
 
     const objectSimilarity = hasNearObjectPrefix(existing.object, relation.object);
     const isNearby =
-      Math.abs(existing.evidenceSpan.start - relation.evidenceSpan.start) <= relationSimilarityWindow;
+      Math.abs(existing.evidenceSpan.start - relation.evidenceSpan.start) <=
+      relationSimilarityWindow;
 
     if (objectSimilarity && (isNearby || existing.object.length !== relation.object.length)) {
       return key;
@@ -1024,7 +1029,10 @@ function hasNearObjectPrefix(left: string, right: string): boolean {
 }
 
 function mergeEvents(events: readonly ExtractedEventFrame[]): ExtractedEventFrame[] {
-  const merged = new Map<string, ExtractedEventFrame & { totalConfidence: number; count: number }>();
+  const merged = new Map<
+    string,
+    ExtractedEventFrame & { totalConfidence: number; count: number }
+  >();
 
   for (const event of events) {
     const key = `${normalizeKey(event.trigger)}\u0000${event.time ?? ""}\u0000${event.arguments
@@ -1058,8 +1066,7 @@ function mergeEvents(events: readonly ExtractedEventFrame[]): ExtractedEventFram
     .map(({ totalConfidence: _totalConfidence, count: _count, ...event }) => event)
     .sort(
       (left, right) =>
-        right.confidence - left.confidence ||
-        left.trigger.localeCompare(right.trigger),
+        right.confidence - left.confidence || left.trigger.localeCompare(right.trigger),
     );
 }
 

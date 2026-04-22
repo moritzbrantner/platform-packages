@@ -36,9 +36,7 @@ export type CreateTokenClassificationPipelineOptions = Omit<
 export function createTokenClassificationPipeline<
   Input = TokenClassificationInput,
   Output = TokenClassificationOutput,
->(
-  options: CreateTokenClassificationPipelineOptions,
-): TokenClassificationPipeline<Input, Output> {
+>(options: CreateTokenClassificationPipelineOptions): TokenClassificationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

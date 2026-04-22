@@ -10,19 +10,17 @@ import {
   type UniversalTaskResult,
 } from "@moritzbrantner/huggingface-universal";
 
-export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor("document-question-answering");
+export const huggingFaceTaskDescriptor = getHuggingFaceTaskDescriptor(
+  "document-question-answering",
+);
 export const huggingFaceTask = createHuggingFaceTaskPackage("document-question-answering");
 
 export type DocumentQuestionAnsweringInput = UniversalTaskInput<"document-question-answering">;
 export type DocumentQuestionAnsweringOutput = UniversalTaskOutput<"document-question-answering">;
-export type DocumentQuestionAnsweringRequest<Input = DocumentQuestionAnsweringInput> = UniversalTaskRequest<
-  "document-question-answering",
-  Input
->;
-export type DocumentQuestionAnsweringResult<Output = DocumentQuestionAnsweringOutput> = UniversalTaskResult<
-  "document-question-answering",
-  Output
->;
+export type DocumentQuestionAnsweringRequest<Input = DocumentQuestionAnsweringInput> =
+  UniversalTaskRequest<"document-question-answering", Input>;
+export type DocumentQuestionAnsweringResult<Output = DocumentQuestionAnsweringOutput> =
+  UniversalTaskResult<"document-question-answering", Output>;
 export type DocumentQuestionAnsweringPipeline<
   Input = DocumentQuestionAnsweringInput,
   Output = DocumentQuestionAnsweringOutput,

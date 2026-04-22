@@ -65,13 +65,7 @@ function ToolbarTitle({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function ToolbarSpacer({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="toolbar-spacer"
-      className={cn("min-w-2 flex-1", className)}
-      {...props}
-    />
-  );
+  return <div data-slot="toolbar-spacer" className={cn("min-w-2 flex-1", className)} {...props} />;
 }
 
 function ToolbarSeparator({
@@ -92,12 +86,4 @@ function ToolbarSeparator({
   );
 }
 
-export {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarTitle,
-  ToolbarSpacer,
-  ToolbarSeparator,
-  toolbarVariants,
-};
-
+export { Toolbar, ToolbarGroup, ToolbarTitle, ToolbarSpacer, ToolbarSeparator, toolbarVariants };

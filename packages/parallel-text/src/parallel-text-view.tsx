@@ -28,8 +28,7 @@ export interface ParallelTextTranslationOption {
   tokenAlignments?: TokenAlignmentInput[];
 }
 
-export interface ParallelTextViewProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface ParallelTextViewProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   originalText: string;
   translatedText?: string;
   sentenceAlignments?: SentenceAlignmentInput[];
@@ -572,8 +571,7 @@ const styles: Record<string, CSSProperties> = {
     flexDirection: "column",
     gap: 16,
     padding: 18,
-    background:
-      "linear-gradient(180deg, rgba(250,250,249,1) 0%, rgba(244,244,245,1) 100%)",
+    background: "linear-gradient(180deg, rgba(250,250,249,1) 0%, rgba(244,244,245,1) 100%)",
     color: "#18181b",
   },
   headerRow: {

@@ -16,18 +16,9 @@ function Dropzone({ className, ...props }: React.ComponentProps<"label">) {
   );
 }
 
-function DropzoneInput({
-  className,
-  type = "file",
-  ...props
-}: React.ComponentProps<"input">) {
+function DropzoneInput({ className, type = "file", ...props }: React.ComponentProps<"input">) {
   return (
-    <input
-      data-slot="dropzone-input"
-      type={type}
-      className={cn("sr-only", className)}
-      {...props}
-    />
+    <input data-slot="dropzone-input" type={type} className={cn("sr-only", className)} {...props} />
   );
 }
 
@@ -46,11 +37,7 @@ function DropzoneIcon({ className, ...props }: React.ComponentProps<"div">) {
 
 function DropzoneContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="dropzone-content"
-      className={cn("grid max-w-sm gap-1", className)}
-      {...props}
-    />
+    <div data-slot="dropzone-content" className={cn("grid max-w-sm gap-1", className)} {...props} />
   );
 }
 
@@ -64,10 +51,7 @@ function DropzoneTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function DropzoneDescription({
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
+function DropzoneDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="dropzone-description"
@@ -90,4 +74,3 @@ export {
   DropzoneDescription,
   DropzoneDefaultIcon,
 };
-

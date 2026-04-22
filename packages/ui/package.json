@@ -99,7 +99,7 @@
   "scripts": {
     "build": "tsup --config tsup.config.ts",
     "build-storybook": "storybook build --output-dir storybook-static",
-    "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
+    "lint": "node ./scripts/verify-design-system.mjs && node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "pack:dry": "npm pack --dry-run --ignore-scripts --json",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",

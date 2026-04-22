@@ -10,7 +10,11 @@ import {
 
 describe("@moritzbrantner/upload-playbook", () => {
   test("exposes platform upload guides", () => {
-    expect(getAllUploadGuides().map((guide) => guide.platform)).toEqual(["web", "desktop", "mobile"]);
+    expect(getAllUploadGuides().map((guide) => guide.platform)).toEqual([
+      "web",
+      "desktop",
+      "mobile",
+    ]);
     expect(getUploadGuide("desktop").title).toContain("Electron");
   });
 

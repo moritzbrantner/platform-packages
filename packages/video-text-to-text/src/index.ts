@@ -36,9 +36,7 @@ export type CreateVideoTextToTextPipelineOptions = Omit<
 export function createVideoTextToTextPipeline<
   Input = VideoTextToTextInput,
   Output = VideoTextToTextOutput,
->(
-  options: CreateVideoTextToTextPipelineOptions,
-): VideoTextToTextPipeline<Input, Output> {
+>(options: CreateVideoTextToTextPipelineOptions): VideoTextToTextPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

@@ -40,12 +40,8 @@ export function createClusterAreaSubjects<TProperties>(
   );
 }
 
-export function getClusterAreaId<TProperties>(
-  feature: AggregatedMapFeature<TProperties>,
-) {
-  return feature.kind === "cluster"
-    ? `cluster:${feature.clusterId}`
-    : `point:${feature.point.id}`;
+export function getClusterAreaId<TProperties>(feature: AggregatedMapFeature<TProperties>) {
+  return feature.kind === "cluster" ? `cluster:${feature.clusterId}` : `point:${feature.point.id}`;
 }
 
 export function assignClusterAreaColors(
@@ -326,11 +322,7 @@ function createFallbackPalette(size: number) {
 function darkenHexColor(color: string, amount: number) {
   const [red, green, blue] = hexToRgb(color);
 
-  return rgbToHex(
-    red * (1 - amount),
-    green * (1 - amount),
-    blue * (1 - amount),
-  );
+  return rgbToHex(red * (1 - amount), green * (1 - amount), blue * (1 - amount));
 }
 
 function blendHexColors(colors: readonly string[]) {
@@ -343,18 +335,13 @@ function blendHexColors(colors: readonly string[]) {
     [0, 0, 0],
   );
 
-  return rgbToHex(
-    totals[0] / colors.length,
-    totals[1] / colors.length,
-    totals[2] / colors.length,
-  );
+  return rgbToHex(totals[0] / colors.length, totals[1] / colors.length, totals[2] / colors.length);
 }
 
 function hslToHex(hue: number, saturation: number, lightness: number) {
   const normalizedSaturation = saturation / 100;
   const normalizedLightness = lightness / 100;
-  const chroma =
-    (1 - Math.abs(2 * normalizedLightness - 1)) * normalizedSaturation;
+  const chroma = (1 - Math.abs(2 * normalizedLightness - 1)) * normalizedSaturation;
   const huePrime = hue / 60;
   const secondary = chroma * (1 - Math.abs((huePrime % 2) - 1));
   const match = normalizedLightness - chroma / 2;
@@ -372,11 +359,7 @@ function hslToHex(hue: number, saturation: number, lightness: number) {
               ? [secondary, 0, chroma]
               : [chroma, 0, secondary];
 
-  return rgbToHex(
-    (red + match) * 255,
-    (green + match) * 255,
-    (blue + match) * 255,
-  );
+  return rgbToHex((red + match) * 255, (green + match) * 255, (blue + match) * 255);
 }
 
 function hexToRgb(color: string) {

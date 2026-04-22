@@ -25,9 +25,8 @@ export interface HuggingFaceModelReference<Task extends HuggingFaceTextTask = Hu
   parameters?: Record<string, unknown>;
 }
 
-export type TextInferenceInput<
-  Metadata extends Record<string, unknown> = Record<string, unknown>,
-> = string | TextDocument<Metadata>;
+export type TextInferenceInput<Metadata extends Record<string, unknown> = Record<string, unknown>> =
+  string | TextDocument<Metadata>;
 
 export interface EnsureTextDocumentOptions<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
@@ -42,7 +41,8 @@ export type { TextChunk } from "@moritzbrantner/linguistics-core";
 
 export interface ChunkTextOptions<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
-> extends EnsureTextDocumentOptions<Metadata>, ChunkTextDocumentOptions {}
+>
+  extends EnsureTextDocumentOptions<Metadata>, ChunkTextDocumentOptions {}
 
 export interface ScoredLabel {
   label: string;
@@ -162,7 +162,8 @@ export interface CreateHuggingFaceTextInferenceProviderOptions {
 }
 
 export interface HuggingFaceTextInferenceProvider
-  extends FeatureExtractionProvider,
+  extends
+    FeatureExtractionProvider,
     QuestionAnsweringProvider,
     SummarizationProvider,
     TextClassificationProvider,
@@ -208,7 +209,9 @@ export function chunkTextForInference<
   return chunkTextDocument(document, options);
 }
 
-export function mergeScoredLabels(labelGroups: Iterable<ReadonlyArray<ScoredLabel>>): ScoredLabel[] {
+export function mergeScoredLabels(
+  labelGroups: Iterable<ReadonlyArray<ScoredLabel>>,
+): ScoredLabel[] {
   const counts = new Map<string, { total: number; count: number; max: number }>();
 
   for (const group of labelGroups) {
@@ -236,7 +239,9 @@ export function mergeScoredLabels(labelGroups: Iterable<ReadonlyArray<ScoredLabe
     .map(({ label, score }) => ({ label, score }));
 }
 
-export function collapseFeatureVector(value: FeatureExtractionValue | FeatureExtractionValue[]): number[] {
+export function collapseFeatureVector(
+  value: FeatureExtractionValue | FeatureExtractionValue[],
+): number[] {
   const vectors = collectFeatureVectors(value);
 
   if (vectors.length === 0) {

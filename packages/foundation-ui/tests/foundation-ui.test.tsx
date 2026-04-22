@@ -18,7 +18,10 @@ import {
   type FoundationRuntime,
 } from "@moritzbrantner/foundation-ui";
 
-function renderWithRuntime(ui: React.ReactElement, backend: FoundationBackend = createMemoryFoundationBackend()) {
+function renderWithRuntime(
+  ui: React.ReactElement,
+  backend: FoundationBackend = createMemoryFoundationBackend(),
+) {
   const runtime: FoundationRuntime = {
     platform: "web",
     locale: "en-US",
@@ -38,15 +41,15 @@ describe("@moritzbrantner/foundation-ui", () => {
   });
 
   test.each([
-    [<AuthScreen key="auth" />, "Account access"],
-    [<ProfileScreen key="profile" />, "Profile"],
-    [<PeopleScreen key="people" />, "People"],
-    [<NotificationsScreen key="notifications" />, "Notifications"],
-    [<SettingsScreen key="settings" />, "Settings"],
-    [<ReportProblemScreen key="report" />, "Report a problem"],
-    [<DataEntryScreen key="data-entry" role="ADMIN" />, "Data entry"],
-    [<UploadsScreen key="uploads" />, "Uploads"],
-  ])("renders %s", async (component, heading) => {
+    ["auth", <AuthScreen />, "Account access"],
+    ["profile", <ProfileScreen />, "Profile"],
+    ["people", <PeopleScreen />, "People"],
+    ["notifications", <NotificationsScreen />, "Notifications"],
+    ["settings", <SettingsScreen />, "Settings"],
+    ["report problem", <ReportProblemScreen />, "Report a problem"],
+    ["data entry", <DataEntryScreen role="ADMIN" />, "Data entry"],
+    ["uploads", <UploadsScreen />, "Uploads"],
+  ])("renders %s", async (_name, component, heading) => {
     renderWithRuntime(component);
 
     expect(await screen.findByRole("heading", { name: heading })).toBeTruthy();
@@ -57,9 +60,13 @@ describe("@moritzbrantner/foundation-ui", () => {
     const followPerson = vi.spyOn(backend, "followPerson");
 
     renderWithRuntime(<PeopleScreen />, backend);
-    fireEvent.click(await screen.findAllByRole("button", { name: "Follow" }).then((buttons) => buttons[0] as HTMLElement));
+    fireEvent.click(
+      await screen
+        .findAllByRole("button", { name: "Follow" })
+        .then((buttons) => buttons[0] as HTMLElement),
+    );
 
-    expect(followPerson).toHaveBeenCalledWith("user-alex");
+    await waitFor(() => expect(followPerson).toHaveBeenCalledWith("user-alex"));
   });
 
   test("settings actions call backend adapter methods", async () => {
@@ -80,7 +87,9 @@ describe("@moritzbrantner/foundation-ui", () => {
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Alex Mercer" } });
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "alex@example.com" } });
     fireEvent.change(screen.getByLabelText("Affected page"), { target: { value: "/people" } });
-    fireEvent.change(screen.getByLabelText("Subject"), { target: { value: "Follow button issue" } });
+    fireEvent.change(screen.getByLabelText("Subject"), {
+      target: { value: "Follow button issue" },
+    });
     fireEvent.change(screen.getByLabelText("Details"), {
       target: { value: "The follow button did not update after tapping it twice." },
     });

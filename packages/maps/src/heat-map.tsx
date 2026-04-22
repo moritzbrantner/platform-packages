@@ -21,11 +21,7 @@ import {
   type PointAggregationIndexOptions,
   type ViewportAggregationQuery,
 } from "./aggregation";
-import {
-  defaultRasterMapStyle,
-  type MapViewState,
-  type RasterMapStyle,
-} from "./clustered-map";
+import { defaultRasterMapStyle, type MapViewState, type RasterMapStyle } from "./clustered-map";
 
 const HEAT_MAP_WEIGHT_METRIC = "__moritzbrantnerHeatMapWeight";
 

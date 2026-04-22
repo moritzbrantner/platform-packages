@@ -198,21 +198,15 @@ describe("@moritzbrantner/maps TemporalClusteredMap", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Courier timeline").getAttribute("data-map-ready")).toBe(
-      "false",
-    );
+    expect(screen.getByLabelText("Courier timeline").getAttribute("data-map-ready")).toBe("false");
     expect((screen.getByRole("button", { name: "Play" }) as HTMLButtonElement).disabled).toBe(
       false,
     );
     expect(screen.getByText("T5")).toBeTruthy();
-    expect(
-      (screen.getByRole("slider", { name: "Timeline" }) as HTMLInputElement).value,
-    ).toBe("5");
+    expect((screen.getByRole("slider", { name: "Timeline" }) as HTMLInputElement).value).toBe("5");
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Courier timeline").getAttribute("data-map-ready")).toBe(
-        "true",
-      );
+      expect(screen.getByLabelText("Courier timeline").getAttribute("data-map-ready")).toBe("true");
     });
 
     const pointMarker = leafletMock
@@ -256,9 +250,9 @@ describe("@moritzbrantner/maps TemporalClusteredMap", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByLabelText("Interactive timeline map").getAttribute("data-map-ready"),
-      ).toBe("true");
+      expect(screen.getByLabelText("Interactive timeline map").getAttribute("data-map-ready")).toBe(
+        "true",
+      );
     });
 
     fireEvent.change(screen.getByRole("slider", { name: "Timeline" }), {
@@ -267,9 +261,7 @@ describe("@moritzbrantner/maps TemporalClusteredMap", () => {
       },
     });
 
-    expect(
-      (screen.getByRole("slider", { name: "Timeline" }) as HTMLInputElement).value,
-    ).toBe("10");
+    expect((screen.getByRole("slider", { name: "Timeline" }) as HTMLInputElement).value).toBe("10");
     expect(screen.getByText("Minute 10")).toBeTruthy();
     await waitFor(() => {
       expect(onTimeChange).toHaveBeenLastCalledWith(10);

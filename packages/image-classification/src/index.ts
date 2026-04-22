@@ -36,9 +36,7 @@ export type CreateImageClassificationPipelineOptions = Omit<
 export function createImageClassificationPipeline<
   Input = ImageClassificationInput,
   Output = ImageClassificationOutput,
->(
-  options: CreateImageClassificationPipelineOptions,
-): ImageClassificationPipeline<Input, Output> {
+>(options: CreateImageClassificationPipelineOptions): ImageClassificationPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

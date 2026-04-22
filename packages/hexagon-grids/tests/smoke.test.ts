@@ -46,10 +46,7 @@ describe("@moritzbrantner/hexagon-grids", () => {
       [13.39, 52.55],
     ]);
 
-    const polygonCells = getHexCellsForPolygon(
-      { type: "Polygon", coordinates: [outer] },
-      8,
-    );
+    const polygonCells = getHexCellsForPolygon({ type: "Polygon", coordinates: [outer] }, 8);
     const polygonWithHoleCells = getHexCellsForPolygon(
       { type: "Polygon", coordinates: [outer, hole] },
       8,

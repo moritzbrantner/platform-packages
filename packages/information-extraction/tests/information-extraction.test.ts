@@ -35,7 +35,9 @@ describe("@moritzbrantner/information-extraction", () => {
     });
 
     expect(result.relations.some((relation) => relation.subject === "Alice")).toBe(true);
-    expect(result.events.some((event) => event.trigger.toLocaleLowerCase() === "founded")).toBe(true);
+    expect(result.events.some((event) => event.trigger.toLocaleLowerCase() === "founded")).toBe(
+      true,
+    );
     expect(result.events[0]?.time).toBe("January 5, 2025");
     expect(result.graph?.nodes.length).toBeGreaterThan(1);
     expect(result.relations[0]?.evidenceSpan.start).toBeTypeOf("number");
@@ -66,7 +68,9 @@ describe("@moritzbrantner/information-extraction", () => {
     const result = await pipeline.extract("Maya joined Zenith Corp yesterday.");
 
     expect(result.relations.some((relation) => relation.subject === "Maya")).toBe(true);
-    expect(result.events.some((event) => event.trigger.toLocaleLowerCase() === "joined")).toBe(true);
+    expect(result.events.some((event) => event.trigger.toLocaleLowerCase() === "joined")).toBe(
+      true,
+    );
     expect(result.events[0]?.time?.toLocaleLowerCase()).toBe("yesterday");
   });
 
@@ -98,7 +102,8 @@ describe("@moritzbrantner/information-extraction", () => {
       },
     });
 
-    const text = "Nova acquired Luma in 2024. Later, Nova acquired Luma again in a follow-up announcement.";
+    const text =
+      "Nova acquired Luma in 2024. Later, Nova acquired Luma again in a follow-up announcement.";
     const result = await pipeline.extract(text);
 
     const acquired = result.relations.filter((relation) => relation.relation === "acquired");

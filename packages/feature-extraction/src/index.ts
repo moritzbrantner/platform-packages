@@ -36,9 +36,7 @@ export type CreateFeatureExtractionPipelineOptions = Omit<
 export function createFeatureExtractionPipeline<
   Input = FeatureExtractionInput,
   Output = FeatureExtractionOutput,
->(
-  options: CreateFeatureExtractionPipelineOptions,
-): FeatureExtractionPipeline<Input, Output> {
+>(options: CreateFeatureExtractionPipelineOptions): FeatureExtractionPipeline<Input, Output> {
   return createUniversalTaskPipeline({
     ...options,
     descriptor: huggingFaceTaskDescriptor,

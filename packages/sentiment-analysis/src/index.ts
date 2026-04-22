@@ -48,9 +48,7 @@ export interface SentimentAnalysisPipeline<
 
 export function createSentimentAnalysisPipeline<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  options: CreateSentimentAnalysisPipelineOptions<Metadata>,
-): SentimentAnalysisPipeline<Metadata> {
+>(options: CreateSentimentAnalysisPipelineOptions<Metadata>): SentimentAnalysisPipeline<Metadata> {
   return {
     async analyze(input, analysisOptions = {}) {
       const chunks = chunkTextForInference(input, analysisOptions.chunking ?? options.chunking);
@@ -110,9 +108,7 @@ function toSentimentScores(
   return scores;
 }
 
-function resolveSentiment(
-  scores: Record<CanonicalSentiment, number>,
-): CanonicalSentiment {
+function resolveSentiment(scores: Record<CanonicalSentiment, number>): CanonicalSentiment {
   const positive = scores.positive;
   const negative = scores.negative;
   const neutral = scores.neutral;
@@ -223,7 +219,11 @@ function resolveLabelSentiment(
     return "negative";
   }
 
-  if (normalized.includes("neutral") || normalized.includes("neu") || normalized.includes("3 stars")) {
+  if (
+    normalized.includes("neutral") ||
+    normalized.includes("neu") ||
+    normalized.includes("3 stars")
+  ) {
     return "neutral";
   }
 

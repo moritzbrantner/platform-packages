@@ -46,11 +46,7 @@ describe("@moritzbrantner/word-prediction", () => {
 
   test("backs off to a shorter context when the full phrase is unseen", () => {
     const model = createWordPredictionModel({
-      texts: [
-        "Please call me later.",
-        "Please call me tomorrow.",
-        "Can you call me later?",
-      ],
+      texts: ["Please call me later.", "Please call me tomorrow.", "Can you call me later?"],
     });
 
     const predictions = model.predictNextWords("They call me");
@@ -73,10 +69,7 @@ describe("@moritzbrantner/word-prediction", () => {
       word: "way",
       contextSize: 2,
     });
-    expect(words(model.predictForInput("On my way ", { limit: 2 }))).toEqual([
-      "home",
-      "now",
-    ]);
+    expect(words(model.predictForInput("On my way ", { limit: 2 }))).toEqual(["home", "now"]);
   });
 
   test("resets context at sentence and newline boundaries", () => {
@@ -105,11 +98,7 @@ describe("@moritzbrantner/word-prediction", () => {
 
   test("returns the most common surface form for lowercase-matched words", () => {
     const model = createWordPredictionModel({
-      texts: [
-        "NASA launch now.",
-        "nasa landing soon.",
-        "NASA mission ready.",
-      ],
+      texts: ["NASA launch now.", "nasa landing soon.", "NASA mission ready."],
     });
 
     expect(model.predictForInput("na")[0]).toMatchObject({
@@ -131,8 +120,9 @@ describe("@moritzbrantner/word-prediction", () => {
 
   test("floors and clamps the configured context window", () => {
     expect(createWordPredictionModel({ maxContextSize: 2.9 }).maxContextSize).toBe(2);
-    expect(createWordPredictionModel({ maxContextSize: Number.POSITIVE_INFINITY }).maxContextSize)
-      .toBe(1);
+    expect(
+      createWordPredictionModel({ maxContextSize: Number.POSITIVE_INFINITY }).maxContextSize,
+    ).toBe(1);
     expect(createWordPredictionModel({ maxContextSize: 0 }).maxContextSize).toBe(1);
   });
 
@@ -148,9 +138,7 @@ describe("@moritzbrantner/word-prediction", () => {
     });
 
     expect(model.predictNextWords("Call me", { limit: 0 })).toHaveLength(1);
-    expect(words(model.predictNextWords("Call me", { minScore: 5 }))).toEqual([
-      "tomorrow",
-    ]);
+    expect(words(model.predictNextWords("Call me", { minScore: 5 }))).toEqual(["tomorrow"]);
   });
 
   test("loads the built-in default corpus", () => {
@@ -209,7 +197,9 @@ describe("@moritzbrantner/word-prediction", () => {
 
     expect(model.predictForInput("Helo")).toEqual([]);
     expect(
-      model.predictForInput("Helo", { fuzzyPrefixDistance: 1 }).map((prediction) => prediction.word),
+      model
+        .predictForInput("Helo", { fuzzyPrefixDistance: 1 })
+        .map((prediction) => prediction.word),
     ).toContain("Hello");
   });
 
@@ -244,10 +234,7 @@ describe("@moritzbrantner/word-prediction", () => {
       texts: ["quiet harbor"],
     });
     const vectorModel = createWordVectorModel({
-      texts: [
-        "Harbor lights glow softly.",
-        "Harbor workers gather early.",
-      ],
+      texts: ["Harbor lights glow softly.", "Harbor workers gather early."],
     });
 
     expect(

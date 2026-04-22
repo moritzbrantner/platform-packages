@@ -22,7 +22,12 @@ export function normalizeProviderResponse(
   );
   const segments = normalizeSegments(payloadRecord, request, source);
   const words = normalizeWords(payloadRecord?.words, request.startedAt ?? 0, request.endedAt);
-  const derivedText = text || segments.map((segment) => segment.text).join(" ").trim();
+  const derivedText =
+    text ||
+    segments
+      .map((segment) => segment.text)
+      .join(" ")
+      .trim();
 
   return {
     text: derivedText,
@@ -111,7 +116,11 @@ export function numberFromSeconds(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? Math.round(value * 1000) : undefined;
 }
 
-export function coerceTimestamp(value: number | undefined, fallback: number, startTimeMs?: number): number {
+export function coerceTimestamp(
+  value: number | undefined,
+  fallback: number,
+  startTimeMs?: number,
+): number {
   if (value === undefined) {
     return fallback;
   }

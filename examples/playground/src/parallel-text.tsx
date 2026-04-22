@@ -52,22 +52,22 @@ function ParallelTextPage() {
             </Badge>
             <CardTitle>What to inspect on this page</CardTitle>
             <CardDescription>
-              The first example switches between translations. The second keeps
-              explicit sentence mappings when the translation reorders the source.
+              The first example switches between translations. The second keeps explicit sentence
+              mappings when the translation reorders the source.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
-              Hover a word and confirm the text itself carries the interaction:
-              word highlighting inside sentence and phrase outlines, on both sides.
+              Hover a word and confirm the text itself carries the interaction: word highlighting
+              inside sentence and phrase outlines, on both sides.
             </p>
             <p>
-              Switch translations and make sure the right panel updates without
-              disturbing the source text or the hover behavior.
+              Switch translations and make sure the right panel updates without disturbing the
+              source text or the hover behavior.
             </p>
             <p>
-              Move across whitespace inside a sentence and confirm phrase and
-              sentence-level alignment remains visible even when no token is active.
+              Move across whitespace inside a sentence and confirm phrase and sentence-level
+              alignment remains visible even when no token is active.
             </p>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Compare with storytelling demo</a>
@@ -80,8 +80,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Multiple translations</CardTitle>
               <CardDescription>
-                Automatic alignment still works, but the reader can now swap between
-                different translations of the same source without leaving the layout.
+                Automatic alignment still works, but the reader can now swap between different
+                translations of the same source without leaving the layout.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -111,8 +111,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Manual sentence alignment</CardTitle>
               <CardDescription>
-                This example reverses the sentence order in translation, so explicit
-                alignment metadata keeps the inline phrase and sentence outlines meaningful.
+                This example reverses the sentence order in translation, so explicit alignment
+                metadata keeps the inline phrase and sentence outlines meaningful.
               </CardDescription>
             </CardHeader>
             <CardContent>

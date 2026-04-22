@@ -105,7 +105,9 @@ interface SegmentedDocument {
   sentences: ParallelTextSentence[];
 }
 
-export function createParallelTextModel(options: CreateParallelTextModelOptions): ParallelTextModel {
+export function createParallelTextModel(
+  options: CreateParallelTextModelOptions,
+): ParallelTextModel {
   return createAlignmentModel({
     original: options.originalText,
     translated: options.translatedText,
@@ -128,10 +130,7 @@ export function createAlignmentModel({
         originalDocument.sentences.length,
         translatedDocument.sentences.length,
       )
-    : createAutomaticRows(
-        originalDocument.sentences.length,
-        translatedDocument.sentences.length,
-      );
+    : createAutomaticRows(originalDocument.sentences.length, translatedDocument.sentences.length);
 
   const rows = rowSeeds.map((row, index) => {
     const rowOriginalSentences = row.originalSentenceIndices.map(
@@ -174,53 +173,57 @@ export function serializeAlignment(
         tokenAlignments?: TokenAlignmentInput[];
       },
 ): string {
-  const payload: SerializedAlignment = "rows" in value
-    ? {
-        version: 1,
-        sentenceAlignments: value.rows
-          .filter((row) => row.source === "manual")
-          .map((row) => ({
-            original: row.originalSentenceIndices,
-            translated: row.translatedSentenceIndices,
-            confidence: row.confidence,
-          })),
-        tokenAlignments: value.rows.flatMap((row) => {
-          const alignments: TokenAlignmentInput[] = [];
+  const payload: SerializedAlignment =
+    "rows" in value
+      ? {
+          version: 1,
+          sentenceAlignments: value.rows
+            .filter((row) => row.source === "manual")
+            .map((row) => ({
+              original: row.originalSentenceIndices,
+              translated: row.translatedSentenceIndices,
+              confidence: row.confidence,
+            })),
+          tokenAlignments: value.rows.flatMap((row) => {
+            const alignments: TokenAlignmentInput[] = [];
 
-          for (const link of row.tokenLinks.filter((candidate) => candidate.source === "manual")) {
-            const originalToken = row.originalSentences
-              .flatMap((sentence) => sentence.tokens)
-              .find((token) => token.id === link.originalTokenId);
-            const translatedToken = row.translatedSentences
-              .flatMap((sentence) => sentence.tokens)
-              .find((token) => token.id === link.translatedTokenId);
+            for (const link of row.tokenLinks.filter(
+              (candidate) => candidate.source === "manual",
+            )) {
+              const originalToken = row.originalSentences
+                .flatMap((sentence) => sentence.tokens)
+                .find((token) => token.id === link.originalTokenId);
+              const translatedToken = row.translatedSentences
+                .flatMap((sentence) => sentence.tokens)
+                .find((token) => token.id === link.translatedTokenId);
 
-            if (
-              originalToken?.wordIndex === null ||
-              translatedToken?.wordIndex === null ||
-              originalToken === undefined ||
-              translatedToken === undefined
-            ) {
-              continue;
+              if (
+                originalToken?.wordIndex === null ||
+                translatedToken?.wordIndex === null ||
+                originalToken === undefined ||
+                translatedToken === undefined
+              ) {
+                continue;
+              }
+
+              alignments.push({
+                originalSentence: originalToken.sentenceIndex,
+                translatedSentence: translatedToken.sentenceIndex,
+                originalToken: originalToken.wordIndex,
+                translatedToken: translatedToken.wordIndex,
+                confidence: link.confidence,
+              });
             }
 
-            alignments.push({
-              originalSentence: originalToken.sentenceIndex,
-              translatedSentence: translatedToken.sentenceIndex,
-              originalToken: originalToken.wordIndex,
-              translatedToken: translatedToken.wordIndex,
-              confidence: link.confidence,
-            });
-          }
-
-          return alignments;
-        }),
-      }
-    : {
-        version: 1,
-        sentenceAlignments: value.sentenceAlignments?.map((alignment) => ({ ...alignment })) ?? [],
-        tokenAlignments: value.tokenAlignments?.map((alignment) => ({ ...alignment })) ?? [],
-      };
+            return alignments;
+          }),
+        }
+      : {
+          version: 1,
+          sentenceAlignments:
+            value.sentenceAlignments?.map((alignment) => ({ ...alignment })) ?? [],
+          tokenAlignments: value.tokenAlignments?.map((alignment) => ({ ...alignment })) ?? [],
+        };
 
   return `${JSON.stringify(payload, null, 2)}\n`;
 }
@@ -230,17 +233,12 @@ export function parseAlignment(input: string): SerializedAlignment {
 
   return {
     version: 1,
-    sentenceAlignments: Array.isArray(parsed.sentenceAlignments)
-      ? parsed.sentenceAlignments
-      : [],
+    sentenceAlignments: Array.isArray(parsed.sentenceAlignments) ? parsed.sentenceAlignments : [],
     tokenAlignments: Array.isArray(parsed.tokenAlignments) ? parsed.tokenAlignments : [],
   };
 }
 
-export function segmentText(
-  text: string,
-  side: "original" | "translated",
-): ParallelTextSentence[] {
+export function segmentText(text: string, side: "original" | "translated"): ParallelTextSentence[] {
   return segmentDocument(text, side).sentences;
 }
 
@@ -357,10 +355,7 @@ function createManualRows(
   return rows;
 }
 
-function createAutomaticRows(
-  originalCount: number,
-  translatedCount: number,
-): AlignmentRowSeed[] {
+function createAutomaticRows(originalCount: number, translatedCount: number): AlignmentRowSeed[] {
   if (originalCount === 0 && translatedCount === 0) {
     return [];
   }
@@ -576,10 +571,7 @@ function flattenWordTokens(sentences: ParallelTextSentence[]) {
   return sentences.flatMap((sentence) => sentence.tokens.filter((token) => token.isWord));
 }
 
-function getWordTokenByIndex(
-  sentence: ParallelTextSentence | undefined,
-  wordIndex: number,
-) {
+function getWordTokenByIndex(sentence: ParallelTextSentence | undefined, wordIndex: number) {
   return sentence?.tokens.find((token) => token.wordIndex === wordIndex);
 }
 

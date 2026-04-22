@@ -1,12 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
   BellIcon,
   CalendarIcon,
@@ -462,9 +457,7 @@ function CatalogPreview() {
             <Alert>
               <InfoIcon />
               <AlertTitle>Verification ready</AlertTitle>
-              <AlertDescription>
-                Shared package styles are available in Storybook.
-              </AlertDescription>
+              <AlertDescription>Shared package styles are available in Storybook.</AlertDescription>
               <AlertAction>
                 <Badge variant="secondary">Live</Badge>
               </AlertAction>
@@ -692,9 +685,7 @@ function CatalogPreview() {
                 <ContextMenuCheckboxItem checked>Show grid</ContextMenuCheckboxItem>
                 <ContextMenuSeparator />
                 <ContextMenuRadioGroup value="comfortable">
-                  <ContextMenuRadioItem value="comfortable">
-                    Comfortable
-                  </ContextMenuRadioItem>
+                  <ContextMenuRadioItem value="comfortable">Comfortable</ContextMenuRadioItem>
                 </ContextMenuRadioGroup>
               </ContextMenuContent>
             </ContextMenu>
@@ -855,19 +846,12 @@ function CatalogPreview() {
               </InputGroupAddon>
             </InputGroup>
             <InputGroup className="mt-3">
-              <InputGroupTextarea
-                aria-label="Input group textarea"
-                placeholder="Notes"
-              />
+              <InputGroupTextarea aria-label="Input group textarea" placeholder="Notes" />
             </InputGroup>
           </CatalogSection>
 
           <CatalogSection id="input-otp" title="Input OTP">
-            <InputOTP
-              aria-label="Package verification code"
-              maxLength={6}
-              value="123456"
-            >
+            <InputOTP aria-label="Package verification code" maxLength={6} value="123456">
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -893,7 +877,9 @@ function CatalogPreview() {
                   <ItemDescription>Reusable platform primitives.</ItemDescription>
                 </ItemContent>
                 <ItemActions>
-                  <Button size="sm" variant="outline">Open</Button>
+                  <Button size="sm" variant="outline">
+                    Open
+                  </Button>
                 </ItemActions>
                 <ItemFooter>
                   <Badge variant="secondary">Ready</Badge>
@@ -972,7 +958,9 @@ function CatalogPreview() {
                   <PaginationPrevious href="#" />
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationLink href="#" isActive>1</PaginationLink>
+                  <PaginationLink href="#" isActive>
+                    1
+                  </PaginationLink>
                 </PaginationItem>
                 <PaginationItem>
                   <PaginationEllipsis />
@@ -1023,10 +1011,7 @@ function CatalogPreview() {
           </CatalogSection>
 
           <CatalogSection id="resizable" title="Resizable">
-            <ResizablePanelGroup
-              orientation="horizontal"
-              className="h-28 border border-border/60"
-            >
+            <ResizablePanelGroup orientation="horizontal" className="h-28 border border-border/60">
               <ResizablePanel defaultSize={55} className="grid place-items-center">
                 List
               </ResizablePanel>
@@ -1041,12 +1026,7 @@ function CatalogPreview() {
             <ScrollArea className="h-28 border border-border/60 p-3">
               <div className="grid gap-2">
                 {Array.from({ length: 8 }, (_, index) => (
-                  <Button
-                    key={index}
-                    size="sm"
-                    variant="ghost"
-                    className="justify-start"
-                  >
+                  <Button key={index} size="sm" variant="ghost" className="justify-start">
                     Package row {index + 1}
                   </Button>
                 ))}
@@ -1142,7 +1122,9 @@ function CatalogPreview() {
                 </SidebarFooter>
               </Sidebar>
               <SidebarInset className="p-4">
-                <Badge variant="outline" className="w-fit">Inset</Badge>
+                <Badge variant="outline" className="w-fit">
+                  Inset
+                </Badge>
               </SidebarInset>
             </SidebarProvider>
           </CatalogSection>
@@ -1276,9 +1258,7 @@ function CatalogPreview() {
             <div className="grid gap-3">
               <TypographyH2>Documentation heading</TypographyH2>
               <TypographyH3>Release notes</TypographyH3>
-              <TypographyP>
-                Typography primitives keep long-form docs readable.
-              </TypographyP>
+              <TypographyP>Typography primitives keep long-form docs readable.</TypographyP>
               <TypographyBlockquote>
                 Components are owned, styled, and tested locally.
               </TypographyBlockquote>

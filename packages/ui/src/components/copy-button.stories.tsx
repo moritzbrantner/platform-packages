@@ -24,9 +24,7 @@ export const Default: Story = {
 
     await expect(canvas.getByRole("button", { name: "Copied" })).toBeVisible();
     await expect(args.copy).toHaveBeenCalledWith("bun add @moritzbrantner/ui");
-    await expect(args.onCopied).toHaveBeenCalledWith(
-      "bun add @moritzbrantner/ui",
-    );
+    await expect(args.onCopied).toHaveBeenCalledWith("bun add @moritzbrantner/ui");
   },
 };
 
@@ -38,4 +36,3 @@ export const Compact: Story = {
     value: "pk_live_example",
   },
 };
-

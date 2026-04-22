@@ -20,7 +20,12 @@ import {
   normalizeTranscriptText,
 } from "./transcript";
 
-export type SpeechCaptureStatus = "idle" | "requesting-permission" | "recording" | "stopping" | "error";
+export type SpeechCaptureStatus =
+  | "idle"
+  | "requesting-permission"
+  | "recording"
+  | "stopping"
+  | "error";
 
 export interface SpeechTranscriptChangeDetail {
   reason: "manual" | "reset" | "transcription";
@@ -37,7 +42,10 @@ export interface MediaRecorderLike {
   readonly mimeType: string;
   addEventListener(type: "dataavailable", listener: (event: Event & { data: Blob }) => void): void;
   addEventListener(type: "stop", listener: () => void): void;
-  removeEventListener(type: "dataavailable", listener: (event: Event & { data: Blob }) => void): void;
+  removeEventListener(
+    type: "dataavailable",
+    listener: (event: Event & { data: Blob }) => void,
+  ): void;
   removeEventListener(type: "stop", listener: () => void): void;
   requestData(): void;
   start(timeslice?: number): void;
@@ -75,7 +83,8 @@ export interface UseSpeechTranscriberResult {
 }
 
 export interface SpeechTranscriberPanelProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange">,
+  extends
+    Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange">,
     UseSpeechTranscriberOptions {
   startLabel?: string;
   stopLabel?: string;
@@ -84,7 +93,10 @@ export interface SpeechTranscriberPanelProps
   helperText?: string;
   unsupportedText?: string;
   showSegments?: boolean;
-  textareaProps?: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "defaultValue" | "onChange">;
+  textareaProps?: Omit<
+    TextareaHTMLAttributes<HTMLTextAreaElement>,
+    "value" | "defaultValue" | "onChange"
+  >;
 }
 
 interface RecorderListeners {
@@ -92,7 +104,9 @@ interface RecorderListeners {
   handleStop: () => void;
 }
 
-export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseSpeechTranscriberResult {
+export function useSpeechTranscriber(
+  options: UseSpeechTranscriberOptions,
+): UseSpeechTranscriberResult {
   const [status, setStatus] = useState<SpeechCaptureStatus>("idle");
   const [transcript, setTranscriptState] = useState(options.initialTranscript ?? "");
   const [segments, setSegments] = useState<TranscriptSegment[]>([]);
@@ -283,7 +297,9 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
 
     if (
       options.streamingTranscriber &&
-      (streamingSessionRef.current || streamingSessionPromiseRef.current || closingStreamingSessionRef.current)
+      (streamingSessionRef.current ||
+        streamingSessionPromiseRef.current ||
+        closingStreamingSessionRef.current)
     ) {
       if (!closingStreamingSessionRef.current) {
         closingStreamingSessionRef.current = closeStreamingSession()
@@ -474,7 +490,9 @@ export function useSpeechTranscriber(options: UseSpeechTranscriberOptions): UseS
         await ensureStreamingSession();
       }
 
-      recorder.start(options.timesliceMs && options.timesliceMs > 0 ? options.timesliceMs : undefined);
+      recorder.start(
+        options.timesliceMs && options.timesliceMs > 0 ? options.timesliceMs : undefined,
+      );
       setIsRecording(true);
       setStatus("recording");
     } catch (cause) {
@@ -545,7 +563,8 @@ export function SpeechTranscriberPanel({
   ...divProps
 }: SpeechTranscriberPanelProps) {
   const supported =
-    (mediaDevices !== undefined || typeof globalThis.navigator?.mediaDevices?.getUserMedia === "function") &&
+    (mediaDevices !== undefined ||
+      typeof globalThis.navigator?.mediaDevices?.getUserMedia === "function") &&
     (mediaRecorderFactory !== undefined || typeof globalThis.MediaRecorder === "function");
   const {
     status,
@@ -594,12 +613,19 @@ export function SpeechTranscriberPanel({
         </div>
         <div style={styles.statusGroup}>
           <span style={styles.statusPill}>{formatStatus(status)}</span>
-          {isTranscribing ? <span style={styles.pendingPill}>{pendingRequestCount} pending</span> : null}
+          {isTranscribing ? (
+            <span style={styles.pendingPill}>{pendingRequestCount} pending</span>
+          ) : null}
         </div>
       </div>
 
       <div style={styles.actions}>
-        <Button type="button" onClick={() => void startRecording()} disabled={isStartDisabled} style={buttonStyle(isStartDisabled)}>
+        <Button
+          type="button"
+          onClick={() => void startRecording()}
+          disabled={isStartDisabled}
+          style={buttonStyle(isStartDisabled)}
+        >
           {startLabel}
         </Button>
         <Button
@@ -637,7 +663,8 @@ export function SpeechTranscriberPanel({
             <div key={segment.id} style={styles.segmentCard}>
               <p style={styles.segmentText}>{segment.text}</p>
               <p style={styles.segmentMeta}>
-                {segment.final ? "Final" : "Interim"} · {formatTime(segment.startTimeMs)}-{formatTime(segment.endTimeMs)}
+                {segment.final ? "Final" : "Interim"} · {formatTime(segment.startTimeMs)}-
+                {formatTime(segment.endTimeMs)}
               </p>
             </div>
           ))}
@@ -647,10 +674,12 @@ export function SpeechTranscriberPanel({
   );
 }
 
-export function isSpeechCaptureSupported(environment: {
-  navigator?: { mediaDevices?: { getUserMedia?: unknown } };
-  MediaRecorder?: unknown;
-} = globalThis): boolean {
+export function isSpeechCaptureSupported(
+  environment: {
+    navigator?: { mediaDevices?: { getUserMedia?: unknown } };
+    MediaRecorder?: unknown;
+  } = globalThis,
+): boolean {
   return (
     typeof environment.navigator?.mediaDevices?.getUserMedia === "function" &&
     typeof environment.MediaRecorder === "function"
@@ -672,7 +701,8 @@ function normalizeResultSegments(
       text: normalizeTranscriptText(segment.text),
       final: segment.final ?? result.isFinal ?? true,
       startTimeMs: segment.startTimeMs ?? request?.startedAt ?? 0,
-      endTimeMs: segment.endTimeMs ?? request?.endedAt ?? request?.startedAt ?? segment.startTimeMs ?? 0,
+      endTimeMs:
+        segment.endTimeMs ?? request?.endedAt ?? request?.startedAt ?? segment.startTimeMs ?? 0,
       confidence: segment.confidence,
       chunkIndex: segment.chunkIndex ?? request?.chunkIndex,
       source: segment.source ?? (request ? "live-chunk" : "live-stream"),

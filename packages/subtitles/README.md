@@ -12,11 +12,7 @@ Timed-text parsing, editing, validation, overlap detection, and roundtripping fo
 ## Example
 
 ```ts
-import {
-  detectCueOverlaps,
-  parseAss,
-  serializeTimedText,
-} from "@moritzbrantner/subtitles";
+import { detectCueOverlaps, parseAss, serializeTimedText } from "@moritzbrantner/subtitles";
 
 const document = parseAss(`[Script Info]
 ScriptType: v4.00+

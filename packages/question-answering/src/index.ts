@@ -101,9 +101,7 @@ export interface QuestionAnsweringPipeline<
 
 export function createQuestionAnsweringPipeline<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(
-  options: CreateQuestionAnsweringPipelineOptions<Metadata>,
-): QuestionAnsweringPipeline<Metadata> {
+>(options: CreateQuestionAnsweringPipelineOptions<Metadata>): QuestionAnsweringPipeline<Metadata> {
   return {
     async answer(question, context, answerOptions = {}) {
       const limit = clampLimit(answerOptions.limit ?? options.defaultLimit ?? DEFAULT_MAX_ANSWERS);
@@ -143,11 +141,16 @@ export function createQuestionAnsweringPipeline<
         }),
       );
 
-      return dedupeAnswers(answers.filter((answer): answer is QuestionAnswer => answer !== null)).slice(0, limit);
+      return dedupeAnswers(
+        answers.filter((answer): answer is QuestionAnswer => answer !== null),
+      ).slice(0, limit);
     },
     async answerMany(questions, context, answerOptions) {
       const entries = await Promise.all(
-        Array.from(questions, async (question) => [question, await this.answer(question, context, answerOptions)]),
+        Array.from(questions, async (question) => [
+          question,
+          await this.answer(question, context, answerOptions),
+        ]),
       );
 
       return Object.fromEntries(entries);

@@ -61,19 +61,7 @@ export type TimelineOperationOptions = {
 };
 
 const tickIntervalsMs = [
-  100,
-  250,
-  500,
-  1_000,
-  2_000,
-  5_000,
-  10_000,
-  15_000,
-  30_000,
-  60_000,
-  120_000,
-  300_000,
-  600_000,
+  100, 250, 500, 1_000, 2_000, 5_000, 10_000, 15_000, 30_000, 60_000, 120_000, 300_000, 600_000,
 ];
 
 export const defaultMinClipDurationMs = 250;
@@ -122,8 +110,9 @@ export function getTimelineTicks(durationMs: number, pixelsPerSecond: number, mi
   const safeDurationMs = Math.max(0, durationMs);
   const safePixelsPerSecond = Math.max(1, pixelsPerSecond);
   const intervalMs =
-    tickIntervalsMs.find((candidate) => (candidate / 1_000) * safePixelsPerSecond >= minTickPixels) ??
-    tickIntervalsMs[tickIntervalsMs.length - 1]!;
+    tickIntervalsMs.find(
+      (candidate) => (candidate / 1_000) * safePixelsPerSecond >= minTickPixels,
+    ) ?? tickIntervalsMs[tickIntervalsMs.length - 1]!;
   const majorIntervalMs = intervalMs * 2;
   const ticks: TimelineTick[] = [];
 

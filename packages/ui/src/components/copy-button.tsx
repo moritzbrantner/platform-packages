@@ -6,10 +6,7 @@ import { CheckIcon, ClipboardIcon } from "lucide-react";
 import { cn } from "../lib/cn";
 import { Button } from "./button";
 
-type CopyButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
-  "children" | "onClick"
-> & {
+type CopyButtonProps = Omit<React.ComponentProps<typeof Button>, "children" | "onClick"> & {
   value: string;
   idleLabel?: React.ReactNode;
   copiedLabel?: React.ReactNode;
@@ -107,4 +104,3 @@ function CopyButton({
 }
 
 export { CopyButton, copyText };
-

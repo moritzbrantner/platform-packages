@@ -20,7 +20,7 @@ export const base = [
     rules: {
       "array-callback-return": "error",
       "consistent-return": "error",
-      "eqeqeq": ["error", "always", { null: "ignore" }],
+      eqeqeq: ["error", "always", { null: "ignore" }],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-constant-binary-expression": "error",
       "no-duplicate-imports": "error",
@@ -109,7 +109,8 @@ export const library = [
           patterns: [
             {
               group: ["@/*", "next/*"],
-              message: "Published packages must not depend on app-local aliases or Next.js runtime modules.",
+              message:
+                "Published packages must not depend on app-local aliases or Next.js runtime modules.",
             },
           ],
         },

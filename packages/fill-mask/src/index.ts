@@ -15,14 +15,8 @@ export const huggingFaceTask = createHuggingFaceTaskPackage("fill-mask");
 
 export type FillMaskInput = UniversalTaskInput<"fill-mask">;
 export type FillMaskOutput = UniversalTaskOutput<"fill-mask">;
-export type FillMaskRequest<Input = FillMaskInput> = UniversalTaskRequest<
-  "fill-mask",
-  Input
->;
-export type FillMaskResult<Output = FillMaskOutput> = UniversalTaskResult<
-  "fill-mask",
-  Output
->;
+export type FillMaskRequest<Input = FillMaskInput> = UniversalTaskRequest<"fill-mask", Input>;
+export type FillMaskResult<Output = FillMaskOutput> = UniversalTaskResult<"fill-mask", Output>;
 export type FillMaskPipeline<
   Input = FillMaskInput,
   Output = FillMaskOutput,
@@ -33,10 +27,7 @@ export type CreateFillMaskPipelineOptions = Omit<
   "descriptor"
 >;
 
-export function createFillMaskPipeline<
-  Input = FillMaskInput,
-  Output = FillMaskOutput,
->(
+export function createFillMaskPipeline<Input = FillMaskInput, Output = FillMaskOutput>(
   options: CreateFillMaskPipelineOptions,
 ): FillMaskPipeline<Input, Output> {
   return createUniversalTaskPipeline({

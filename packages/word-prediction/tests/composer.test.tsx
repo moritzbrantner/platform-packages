@@ -6,11 +6,7 @@ import { WordPredictionComposer, createWordPredictionModel } from "@moritzbrantn
 describe("@moritzbrantner/word-prediction composer", () => {
   test("shows suggestion words without score or context by default", () => {
     const model = createWordPredictionModel({
-      texts: [
-        "See you soon.",
-        "See you tomorrow.",
-        "See you soon.",
-      ],
+      texts: ["See you soon.", "See you tomorrow.", "See you soon."],
     });
 
     render(<WordPredictionComposer model={model} defaultValue="See you " />);
@@ -23,11 +19,7 @@ describe("@moritzbrantner/word-prediction composer", () => {
 
   test("reveals score and context when the toggles are enabled", () => {
     const model = createWordPredictionModel({
-      texts: [
-        "See you soon.",
-        "See you tomorrow.",
-        "See you soon.",
-      ],
+      texts: ["See you soon.", "See you tomorrow.", "See you soon."],
     });
 
     render(<WordPredictionComposer model={model} defaultValue="See you " />);
@@ -41,11 +33,7 @@ describe("@moritzbrantner/word-prediction composer", () => {
 
   test("accepts the indexed suggestion with ctrl plus number", () => {
     const model = createWordPredictionModel({
-      texts: [
-        "On my way now.",
-        "On my way home.",
-        "On my wall art.",
-      ],
+      texts: ["On my way now.", "On my way home.", "On my wall art."],
     });
 
     render(<WordPredictionComposer model={model} defaultValue="On my wa" />);

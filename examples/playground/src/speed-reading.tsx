@@ -141,12 +141,15 @@ function SpeedReadingPlaygroundPage() {
             </Badge>
             <CardTitle>Paste text or extract it from a PDF</CardTitle>
             <CardDescription>
-              The text area is always editable. PDF extraction fills it with cleaned
-              content so you can review or trim the OCR output before reading.
+              The text area is always editable. PDF extraction fills it with cleaned content so you
+              can review or trim the OCR output before reading.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <Tabs value={readerMode} onValueChange={(value) => setReaderMode(value as "text" | "pdf")}>
+            <Tabs
+              value={readerMode}
+              onValueChange={(value) => setReaderMode(value as "text" | "pdf")}
+            >
               <TabsList variant="line">
                 <TabsTrigger value="text">Paste text</TabsTrigger>
                 <TabsTrigger value="pdf">Upload PDF</TabsTrigger>
@@ -205,13 +208,13 @@ function SpeedReadingPlaygroundPage() {
                   <AlertTitle>OCR behavior</AlertTitle>
                   <AlertDescription>
                     <p>
-                      <code>OCR pass</code> renders pages to images and runs Tesseract
-                      across them. <code>Smart hybrid</code> keeps embedded PDF text
-                      when it is strong enough and falls back to OCR for image-heavy pages.
+                      <code>OCR pass</code> renders pages to images and runs Tesseract across them.{" "}
+                      <code>Smart hybrid</code> keeps embedded PDF text when it is strong enough and
+                      falls back to OCR for image-heavy pages.
                     </p>
                     <p>
-                      Both modes filter margin artifacts so page numbers and repeated
-                      running headers stay out of the reading stream.
+                      Both modes filter margin artifacts so page numbers and repeated running
+                      headers stay out of the reading stream.
                     </p>
                   </AlertDescription>
                 </Alert>
@@ -245,8 +248,9 @@ function SpeedReadingPlaygroundPage() {
                     <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       <Badge variant="outline">{extractionProgress.stage}</Badge>
                       <span>
-                        Page {Math.min(extractionProgress.pageIndex + 1, extractionProgress.pageCount)} of{" "}
-                        {extractionProgress.pageCount}
+                        Page{" "}
+                        {Math.min(extractionProgress.pageIndex + 1, extractionProgress.pageCount)}{" "}
+                        of {extractionProgress.pageCount}
                       </span>
                     </div>
                     <Progress value={Math.max(4, extractionProgress.progress * 100)} />
@@ -275,8 +279,8 @@ function SpeedReadingPlaygroundPage() {
               </Badge>
               <CardTitle>Run the speed reader against the current text</CardTitle>
               <CardDescription>
-                Adjust pace and chunk size, then use play/pause and skip controls to
-                inspect the package behavior over the extracted text.
+                Adjust pace and chunk size, then use play/pause and skip controls to inspect the
+                package behavior over the extracted text.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -321,9 +325,7 @@ function SpeedReadingPlaygroundPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() =>
-                    setCurrentChunkIndex((current) => Math.max(0, current - 10))
-                  }
+                  onClick={() => setCurrentChunkIndex((current) => Math.max(0, current - 10))}
                   disabled={chunkCount === 0}
                 >
                   Back 10
@@ -383,8 +385,8 @@ function SpeedReadingPlaygroundPage() {
               </Badge>
               <CardTitle>What the PDF pipeline kept and removed</CardTitle>
               <CardDescription>
-                This section helps verify that OCR cleanup dropped obvious pagination
-                artifacts before the text reached the reader.
+                This section helps verify that OCR cleanup dropped obvious pagination artifacts
+                before the text reached the reader.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

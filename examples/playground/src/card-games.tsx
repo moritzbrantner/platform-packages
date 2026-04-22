@@ -401,15 +401,11 @@ function CardGamesPage() {
                 <ContextMenuItem onSelect={() => runDefaultAction(activeCard)}>
                   Play card
                 </ContextMenuItem>
-                <ContextMenuItem
-                  onSelect={() => setLastAction(`Held ${activeCard.headline}`)}
-                >
+                <ContextMenuItem onSelect={() => setLastAction(`Held ${activeCard.headline}`)}>
                   Hold card
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem
-                  onSelect={() => setLastAction(`Discarded ${activeCard.headline}`)}
-                >
+                <ContextMenuItem onSelect={() => setLastAction(`Discarded ${activeCard.headline}`)}>
                   Discard card
                 </ContextMenuItem>
               </ContextMenuContent>
@@ -498,13 +494,12 @@ function CardGamesPage() {
             <div className="grid gap-3 md:grid-cols-3">
               {fieldSlots.map((slot) => {
                 const card = fieldCards[slot.id];
-                const isSelected = selectedMove?.zone === "field" && selectedMove.slotId === slot.id;
+                const isSelected =
+                  selectedMove?.zone === "field" && selectedMove.slotId === slot.id;
 
                 return (
                   <div key={slot.id} className="grid gap-2">
-                    <p className="text-center text-sm font-bold text-white/82">
-                      {slot.label}
-                    </p>
+                    <p className="text-center text-sm font-bold text-white/82">{slot.label}</p>
                     <Button
                       type="button"
                       variant="ghost"
@@ -544,9 +539,7 @@ function CardGamesPage() {
                             >
                               Inspect card
                             </ContextMenuItem>
-                            <ContextMenuItem
-                              onSelect={() => returnFieldCardToHand(slot.id, card)}
-                            >
+                            <ContextMenuItem onSelect={() => returnFieldCardToHand(slot.id, card)}>
                               Return to hand
                             </ContextMenuItem>
                             <ContextMenuSeparator />
@@ -574,7 +567,10 @@ function CardGamesPage() {
                   {fieldHand.length}
                 </span>
               </div>
-              <PlayerHand aria-label="Playing field hand" className="min-h-[14rem] rounded-lg border border-white/14 bg-white/8">
+              <PlayerHand
+                aria-label="Playing field hand"
+                className="min-h-[14rem] rounded-lg border border-white/14 bg-white/8"
+              >
                 {fieldHand.length > 0 ? (
                   fieldHand.map((card) => (
                     <ContextMenu key={card.id}>
@@ -604,9 +600,7 @@ function CardGamesPage() {
                       </ContextMenuTrigger>
                       <ContextMenuContent>
                         <ContextMenuLabel>{card.headline}</ContextMenuLabel>
-                        <ContextMenuItem
-                          onSelect={() => inspectCard(card, "Playing field hand")}
-                        >
+                        <ContextMenuItem onSelect={() => inspectCard(card, "Playing field hand")}>
                           Inspect card
                         </ContextMenuItem>
                         <ContextMenuSeparator />

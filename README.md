@@ -24,97 +24,97 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - generated task wrapper: typed Hugging Face task package generated around `@moritzbrantner/huggingface-universal`.
 - experimental: valid workspace package, but not part of the first publish expansion.
 
-| Package | Status | Notes |
-| --- | --- | --- |
-| `@moritzbrantner/any-to-any` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/audio-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/audio-text-to-text` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/audio-to-audio` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/auth-contract` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/automatic-speech-recognition` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/card-games` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/charts` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/collaboration` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/data-density` | release-ready | Included in the first standalone install wave. |
-| `@moritzbrantner/depth-estimation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/document-analysis` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/document-question-answering` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/document-structure-extraction` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/eslint-config` | scaffold-critical | Shared scaffold contract surface. |
-| `@moritzbrantner/extraction-schema` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/feature-extraction` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/fill-mask` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/flat-design` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/foundation-contract` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/foundation-ui` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/graphs` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/hexagon-grids` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/huggingface-universal` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/image-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-feature-extraction` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-segmentation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-text-to-image` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-text-to-text` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-text-to-video` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-to-3d` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-to-image` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-to-text` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/image-to-video` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/information-extraction` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/keyboard` | experimental | Browser-safe shortcut registry and matching helpers. |
-| `@moritzbrantner/keypoint-detection` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/linguistics-core` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/linguistics-corpus` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/linguistics-learning` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/maps` | release-ready | Included in the first standalone install wave. |
-| `@moritzbrantner/mask-generation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/media-editor` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/object-detection` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/ocr` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/parallel-text` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/pipeline-core` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/question-answering` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/reinforcement-learning` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/sentence-similarity` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/sentiment-analysis` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/source-ingestion` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/speech` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/speed-reading` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/storytelling` | scaffold-critical | Shared scaffold contract surface. |
-| `@moritzbrantner/subtitles` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/summarization` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/syntax-analysis` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/table-question-answering` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/tables` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/tabular-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/tabular-regression` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-analysis` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/text-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-generation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-inference` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/text-ranking` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-summarization` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/text-to-3d` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-to-image` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-to-speech` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/text-to-video` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/token-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/translation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/tree-structures` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/typescript-config` | scaffold-critical | Shared scaffold contract surface. |
-| `@moritzbrantner/ui` | scaffold-critical | Shared scaffold contract surface. |
-| `@moritzbrantner/unconditional-image-generation` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/upload-playbook` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/video-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/video-text-to-text` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/video-to-video` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/visual-document-retrieval` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/visual-question-answering` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/word-prediction` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/word-vectors` | experimental | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/zero-shot-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/zero-shot-image-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
-| `@moritzbrantner/zero-shot-object-detection` | generated task wrapper | Thin typed Hugging Face universal task wrapper. |
+| Package                                          | Status                 | Notes                                                                       |
+| ------------------------------------------------ | ---------------------- | --------------------------------------------------------------------------- |
+| `@moritzbrantner/any-to-any`                     | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/audio-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/audio-text-to-text`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/audio-to-audio`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/auth-contract`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/automatic-speech-recognition`   | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/card-games`                     | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/charts`                         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/collaboration`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/data-density`                   | release-ready          | Included in the first standalone install wave.                              |
+| `@moritzbrantner/depth-estimation`               | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/document-analysis`              | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/document-question-answering`    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/document-structure-extraction`  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/eslint-config`                  | scaffold-critical      | Shared scaffold contract surface.                                           |
+| `@moritzbrantner/extraction-schema`              | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/feature-extraction`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/fill-mask`                      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/flat-design`                    | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/foundation-contract`            | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/foundation-ui`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/graphs`                         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/hexagon-grids`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/huggingface-universal`          | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/image-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-feature-extraction`       | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-segmentation`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-text-to-image`            | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-text-to-text`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-text-to-video`            | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-to-3d`                    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-to-image`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-to-text`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/image-to-video`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/information-extraction`         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/keyboard`                       | experimental           | Browser-safe shortcut registry and matching helpers.                        |
+| `@moritzbrantner/keypoint-detection`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/linguistics-core`               | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/linguistics-corpus`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/linguistics-learning`           | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/maps`                           | release-ready          | Included in the first standalone install wave.                              |
+| `@moritzbrantner/mask-generation`                | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/media-editor`                   | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/object-detection`               | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/ocr`                            | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/parallel-text`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/pipeline-core`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/question-answering`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/reinforcement-learning`         | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/sentence-similarity`            | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/sentiment-analysis`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/source-ingestion`               | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/speech`                         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/speed-reading`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/storytelling`                   | scaffold-critical      | Shared scaffold contract surface.                                           |
+| `@moritzbrantner/subtitles`                      | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/summarization`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/syntax-analysis`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/table-question-answering`       | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/tables`                         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/tabular-classification`         | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/tabular-regression`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-analysis`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/text-classification`            | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-generation`                | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-inference`                 | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/text-ranking`                   | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-summarization`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/text-to-3d`                     | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-to-image`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-to-speech`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/text-to-video`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/token-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/translation`                    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/tree-structures`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/typescript-config`              | scaffold-critical      | Shared scaffold contract surface.                                           |
+| `@moritzbrantner/ui`                             | scaffold-critical      | Shared scaffold contract surface.                                           |
+| `@moritzbrantner/unconditional-image-generation` | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/upload-playbook`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/video-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/video-text-to-text`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/video-to-video`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/visual-document-retrieval`      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/visual-question-answering`      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/word-prediction`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/word-vectors`                   | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/zero-shot-classification`       | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/zero-shot-image-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/zero-shot-object-detection`     | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 
 ## Packages
 
@@ -196,7 +196,12 @@ This inventory is the source-of-truth view for release readiness. Status values 
 2. Scaffold a new package with `bun run create:package <name>`.
 3. Start the example pages with `bun run dev:playground`.
 4. Build packages and the playground with `bun run build`.
-5. Run checks with `bun run lint`, `bun run typecheck`, and `bun run test`.
+5. Apply formatting with `bun run format`.
+6. Run checks with `bun run format:check`, `bun run lint`, `bun run typecheck`, and `bun run test`.
+
+Oxlint and Oxfmt are the active local linting and formatting tools for this repository. The published `@moritzbrantner/eslint-config` package remains part of the scaffold-facing compatibility surface for now.
+
+The custom verifier scripts still run through `bun run lint` and enforce package-specific style exports, forbidden package imports, and shared UI component usage.
 
 ## Publishing
 

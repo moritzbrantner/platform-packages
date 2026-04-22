@@ -92,7 +92,17 @@ export interface ChunkIngestedDocumentOptions {
   preset?: ChunkingPreset;
 }
 
-const STRIP_BLOCK_TAGS = ["script", "style", "noscript", "svg", "nav", "footer", "header", "aside", "form"];
+const STRIP_BLOCK_TAGS = [
+  "script",
+  "style",
+  "noscript",
+  "svg",
+  "nav",
+  "footer",
+  "header",
+  "aside",
+  "form",
+];
 
 const FEED_TEXT_FIELDS: ReadonlyArray<keyof JsonFeedItem> = [
   "content",
@@ -258,7 +268,11 @@ function buildIngestedTextDocument(input: {
   const normalized = normalizeText(input.cleanedText, {
     form: "NFKC",
   });
-  const normalizationOffsets = remapOffsetsForNormalizedText(input.cleanedText, normalized, input.sourceOffsets);
+  const normalizationOffsets = remapOffsetsForNormalizedText(
+    input.cleanedText,
+    normalized,
+    input.sourceOffsets,
+  );
   const cleaned = cleanBoilerplate(normalized, normalizationOffsets);
 
   const metadata: IngestionMetadata = {
@@ -275,7 +289,9 @@ function buildIngestedTextDocument(input: {
     },
   };
 
-  const id = sanitizeDocumentId(input.id ?? input.source.sourceId ?? input.source.url ?? `${input.connector}-source`);
+  const id = sanitizeDocumentId(
+    input.id ?? input.source.sourceId ?? input.source.url ?? `${input.connector}-source`,
+  );
 
   const document = segmentTextDocument(
     createTextDocument({
@@ -315,7 +331,11 @@ function parseJsonFeed(feed: IngestJsonFeedInput["feed"]): JsonFeedItem[] {
 }
 
 function resolveFeedItemText(item: JsonFeedItem): string {
-  return FEED_TEXT_FIELDS.map((field) => item[field]).find((value): value is string => typeof value === "string") ?? "";
+  return (
+    FEED_TEXT_FIELDS.map((field) => item[field]).find(
+      (value): value is string => typeof value === "string",
+    ) ?? ""
+  );
 }
 
 function reduceHtmlToText(html: string): { text: string; offsets: number[] } {
@@ -332,14 +352,17 @@ function removeTaggedSections(
   offsets: number[],
   tags: readonly string[],
 ): { text: string; offsets: number[] };
-function removeTaggedSections(input: string, tags: readonly string[]): { text: string; offsets: number[] };
+function removeTaggedSections(
+  input: string,
+  tags: readonly string[],
+): { text: string; offsets: number[] };
 function removeTaggedSections(
   input: string,
   arg2: number[] | readonly string[],
   arg3?: readonly string[],
 ): { text: string; offsets: number[] } {
   const offsets = Array.isArray(arg2) ? arg2 : Array.from(input, (_, index) => index);
-  const tags = Array.isArray(arg2) ? arg3 ?? [] : arg2;
+  const tags = Array.isArray(arg2) ? (arg3 ?? []) : arg2;
   const escaped = tags.map((tag) => tag.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|");
 
   if (!escaped) {
@@ -373,7 +396,10 @@ function removeTaggedSections(
   return { text: output.join(""), offsets: outputOffsets };
 }
 
-function injectLineBreakHints(input: string, offsets: number[]): { text: string; offsets: number[] } {
+function injectLineBreakHints(
+  input: string,
+  offsets: number[],
+): { text: string; offsets: number[] } {
   const pattern = /<(?:\/)?(?:article|section|div|p|br|li|h[1-6]|main)\b[^>]*>/giu;
   const output: string[] = [];
   const outputOffsets: number[] = [];
@@ -509,7 +535,11 @@ function collapseWhitespace(input: string, offsets: number[]): { text: string; o
   };
 }
 
-function remapOffsetsForNormalizedText(source: string, normalized: string, offsets: number[]): number[] {
+function remapOffsetsForNormalizedText(
+  source: string,
+  normalized: string,
+  offsets: number[],
+): number[] {
   if (source === normalized) {
     return offsets;
   }
@@ -532,7 +562,10 @@ function remapOffsetsForNormalizedText(source: string, normalized: string, offse
   return normalizedOffsets;
 }
 
-function cleanBoilerplate(input: string, offsets: number[]): { text: string; offsets: number[]; removedLineCount: number } {
+function cleanBoilerplate(
+  input: string,
+  offsets: number[],
+): { text: string; offsets: number[]; removedLineCount: number } {
   const lines = input.split("\n");
   const lineOffsets = splitOffsetsByLine(input, offsets);
   const frequency = new Map<string, number>();
@@ -556,9 +589,7 @@ function cleanBoilerplate(input: string, offsets: number[]): { text: string; off
     const key = normalizeForBoilerplate(line);
 
     const shouldRemove =
-      !line ||
-      (key.length > 0 && (frequency.get(key) ?? 0) > 1) ||
-      isBoilerplateLine(line);
+      !line || (key.length > 0 && (frequency.get(key) ?? 0) > 1) || isBoilerplateLine(line);
 
     if (shouldRemove) {
       removedLineCount += 1;
@@ -601,7 +632,10 @@ function splitOffsetsByLine(text: string, offsets: number[]): number[][] {
 }
 
 function normalizeForBoilerplate(line: string): string {
-  return line.replace(/[^\p{L}\p{N}]+/gu, " ").trim().toLowerCase();
+  return line
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function isBoilerplateLine(line: string): boolean {
@@ -717,7 +751,9 @@ function looksLikeJsonFeed(value: string): boolean {
     return false;
   }
 
-  return trimmed.includes("\"items\"") || trimmed.includes("\"content\"") || trimmed.includes("\"summary\"");
+  return (
+    trimmed.includes('"items"') || trimmed.includes('"content"') || trimmed.includes('"summary"')
+  );
 }
 
 function sanitizeDocumentId(id: string): string {

@@ -15,8 +15,10 @@ export interface BufferedStreamingReconnectOptions {
   delayMs?: number;
 }
 
-export interface CreateBufferedStreamingSessionOptions
-  extends Omit<SpeechStreamingSessionOptions, "onClose" | "onResult"> {
+export interface CreateBufferedStreamingSessionOptions extends Omit<
+  SpeechStreamingSessionOptions,
+  "onClose" | "onResult"
+> {
   transcriber: SpeechStreamingTranscriber;
   onClose?: () => void;
   onResult: (result: SpeechTranscriptionResult) => void;
@@ -102,7 +104,9 @@ export async function createBufferedStreamingSession(
       await new Promise<void>((resolve, reject) => {
         pending.push({ request, resolve, reject });
 
-        while (pending.length > Math.max(1, options.maxPendingChunks ?? DEFAULT_MAX_PENDING_CHUNKS)) {
+        while (
+          pending.length > Math.max(1, options.maxPendingChunks ?? DEFAULT_MAX_PENDING_CHUNKS)
+        ) {
           pending.shift()?.resolve();
         }
 
@@ -238,10 +242,9 @@ function updateSegments(
     interimUpdatedAt.set(segment.id, now);
   }
 
-  const merged = mergeTranscriptSegments(
-    existingSegments,
-    incomingSegments.map(copySegment),
-  ).map(copySegment);
+  const merged = mergeTranscriptSegments(existingSegments, incomingSegments.map(copySegment)).map(
+    copySegment,
+  );
 
   if (dropInterimAfterMs === undefined) {
     return merged;

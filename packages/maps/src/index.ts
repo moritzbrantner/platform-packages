@@ -77,10 +77,7 @@ export {
   type TemporalGeoJsonSupportedGeometry,
   type TemporalGeoJsonTrack,
 } from "./temporal-geojson-geometries";
-export {
-  TemporalClusteredMap,
-  type TemporalClusteredMapProps,
-} from "./temporal-map";
+export { TemporalClusteredMap, type TemporalClusteredMapProps } from "./temporal-map";
 export {
   TemporalHeatMap,
   getTemporalHeatMapMaxWeight,

@@ -64,9 +64,7 @@ function MapEdgeCasesPage() {
   const [filter, setFilter] = useState<EdgeMapFilter>("all");
   const [heatMetric, setHeatMetric] = useState<HeatMetric>("risk");
   const [summary, setSummary] = useState<VisibleAggregationSummary | null>(null);
-  const [selection, setSelection] = useState<
-    AggregatedMapFeature<EdgeMapProperties> | null
-  >(null);
+  const [selection, setSelection] = useState<AggregatedMapFeature<EdgeMapProperties> | null>(null);
   const filterPoint = useMemo(() => createFilterPredicate(filter), [filter]);
   const finitePointCount = useMemo(() => points.filter(isFinitePoint).length, [points]);
   const filteredPointCount = useMemo(
@@ -111,9 +109,8 @@ function MapEdgeCasesPage() {
               <div className="space-y-2">
                 <CardTitle>Clustered operational edge map</CardTitle>
                 <CardDescription className="max-w-3xl text-sm leading-6">
-                  The source mixes Pacific dateline crossings, repeated Singapore
-                  coordinates, high-latitude sensors, a zero-value control point,
-                  and intentionally invalid rows.
+                  The source mixes Pacific dateline crossings, repeated Singapore coordinates,
+                  high-latitude sensors, a zero-value control point, and intentionally invalid rows.
                 </CardDescription>
               </div>
             </CardHeader>
@@ -170,7 +167,9 @@ function MapEdgeCasesPage() {
                   />
                   <MetricCard
                     label="Risk total"
-                    value={summary ? formatInteger(Math.round(summary.metrics.risk ?? 0)) : "\u2014"}
+                    value={
+                      summary ? formatInteger(Math.round(summary.metrics.risk ?? 0)) : "\u2014"
+                    }
                     hint="Finite risk metrics accumulated in the viewport."
                   />
                 </div>
@@ -189,8 +188,8 @@ function MapEdgeCasesPage() {
                   <SelectionDetails selection={selection} />
                 ) : (
                   <p>
-                    Select a cluster or point to inspect edge-case properties and
-                    normalized metric totals.
+                    Select a cluster or point to inspect edge-case properties and normalized metric
+                    totals.
                   </p>
                 )}
               </CardContent>
@@ -212,8 +211,8 @@ function MapEdgeCasesPage() {
               <div className="space-y-2">
                 <CardTitle>Metric-weighted incident density</CardTitle>
                 <CardDescription className="max-w-3xl text-sm leading-6">
-                  Switch between metric keys to check normalization when some rows
-                  have zero, negative, missing, or non-finite weights.
+                  Switch between metric keys to check normalization when some rows have zero,
+                  negative, missing, or non-finite weights.
                 </CardDescription>
               </div>
             </CardHeader>
@@ -306,9 +305,8 @@ function MapEdgeCasesPage() {
               <div className="space-y-2">
                 <CardTitle>Sparse signal timeline</CardTitle>
                 <CardDescription className="max-w-3xl text-sm leading-6">
-                  Tracks appear late, disappear with explicit invisible frames, cross
-                  the dateline, and reuse positions so temporal slicing and heat
-                  scaling can be checked together.
+                  Tracks appear late, disappear with explicit invisible frames, cross the dateline,
+                  and reuse positions so temporal slicing and heat scaling can be checked together.
                 </CardDescription>
               </div>
             </CardHeader>
@@ -346,16 +344,16 @@ function MapEdgeCasesPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
               <p>
-                Pacific corridor crosses from 179.7E to 179.8W while retaining a
-                consistent heat scale.
+                Pacific corridor crosses from 179.7E to 179.8W while retaining a consistent heat
+                scale.
               </p>
               <p>
-                Singapore duplicate tracks occupy the same coordinate at different
-                risk levels to exercise weighted aggregation.
+                Singapore duplicate tracks occupy the same coordinate at different risk levels to
+                exercise weighted aggregation.
               </p>
               <p>
-                Recovery frames set <code>visible: false</code> so empty slices and
-                disappearing tracks are represented in the playback.
+                Recovery frames set <code>visible: false</code> so empty slices and disappearing
+                tracks are represented in the playback.
               </p>
             </CardContent>
           </Card>
@@ -365,37 +363,19 @@ function MapEdgeCasesPage() {
   );
 }
 
-function MetricCard({
-  hint,
-  label,
-  value,
-}: {
-  hint: string;
-  label: string;
-  value: string;
-}) {
+function MetricCard({ hint, label, value }: { hint: string; label: string; value: string }) {
   return (
     <Item variant="muted" className="items-start bg-card/70 p-4">
       <ItemContent>
-        <ItemDescription className="text-xs uppercase tracking-[0.2em]">
-          {label}
-        </ItemDescription>
-        <ItemTitle className="mt-1 text-3xl font-semibold tracking-tight">
-          {value}
-        </ItemTitle>
-        <ItemDescription className="line-clamp-none leading-6">
-          {hint}
-        </ItemDescription>
+        <ItemDescription className="text-xs uppercase tracking-[0.2em]">{label}</ItemDescription>
+        <ItemTitle className="mt-1 text-3xl font-semibold tracking-tight">{value}</ItemTitle>
+        <ItemDescription className="line-clamp-none leading-6">{hint}</ItemDescription>
       </ItemContent>
     </Item>
   );
 }
 
-function SelectionDetails({
-  selection,
-}: {
-  selection: AggregatedMapFeature<EdgeMapProperties>;
-}) {
+function SelectionDetails({ selection }: { selection: AggregatedMapFeature<EdgeMapProperties> }) {
   if (selection.kind === "cluster") {
     return (
       <div className="space-y-3">

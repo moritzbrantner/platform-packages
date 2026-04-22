@@ -63,9 +63,7 @@ export type MediaTimelineHotkeyAction =
   | "trim-selected-start-left"
   | "trim-selected-start-right";
 
-export type MediaTimelineHotkeyMap = Partial<
-  Record<MediaTimelineHotkeyAction, string | string[]>
->;
+export type MediaTimelineHotkeyMap = Partial<Record<MediaTimelineHotkeyAction, string | string[]>>;
 
 export type MediaTimelineClipContextMenuContext = {
   clip: MediaTimelineClip;
@@ -174,7 +172,10 @@ export function MediaTimeline({
   const [activeDragClipId, setActiveDragClipId] = useState<string | undefined>();
   const durationMs = durationMsProp ?? getTimelineDurationMs(tracks, 30_000);
   const safePixelsPerSecond = Math.max(24, pixelsPerSecond);
-  const timelineWidth = Math.max(720, (durationMs / 1_000) * safePixelsPerSecond + timelinePaddingPx);
+  const timelineWidth = Math.max(
+    720,
+    (durationMs / 1_000) * safePixelsPerSecond + timelinePaddingPx,
+  );
   const ticks = useMemo(
     () => getTimelineTicks(durationMs, safePixelsPerSecond),
     [durationMs, safePixelsPerSecond],
@@ -375,10 +376,7 @@ export function MediaTimeline({
     setActiveDragClipId(undefined);
   };
 
-  const findAdjacentTrackForClip = (
-    clip: MediaTimelineClip,
-    direction: -1 | 1,
-  ) => {
+  const findAdjacentTrackForClip = (clip: MediaTimelineClip, direction: -1 | 1) => {
     const trackIndex = tracks.findIndex((track) => track.id === clip.trackId);
 
     for (
@@ -396,10 +394,7 @@ export function MediaTimeline({
     return undefined;
   };
 
-  const moveSelectedClipToTrack = (
-    clip: MediaTimelineClip,
-    direction: -1 | 1,
-  ) => {
+  const moveSelectedClipToTrack = (clip: MediaTimelineClip, direction: -1 | 1) => {
     const candidate = findAdjacentTrackForClip(clip, direction);
 
     if (candidate) {
@@ -527,10 +522,7 @@ export function MediaTimeline({
       0,
       orderedClips.findIndex((clip) => clip.id === selectedClipId),
     );
-    const nextIndex = Math.min(
-      Math.max(selectedIndex + offset, 0),
-      orderedClips.length - 1,
-    );
+    const nextIndex = Math.min(Math.max(selectedIndex + offset, 0), orderedClips.length - 1);
     onSelectedClipChange?.(orderedClips[nextIndex]?.id);
   };
 
@@ -594,10 +586,7 @@ export function MediaTimeline({
     }
 
     if (action === "move-selected-up" || action === "move-selected-down") {
-      nextTracks = moveSelectedClipToTrack(
-        clip,
-        action === "move-selected-up" ? -1 : 1,
-      );
+      nextTracks = moveSelectedClipToTrack(clip, action === "move-selected-up" ? -1 : 1);
     }
 
     if (action === "trim-selected-start-left" || action === "trim-selected-start-right") {
@@ -684,7 +673,9 @@ export function MediaTimeline({
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{formatTimelineTime(currentTimeMs)}</span>
-          {selectedClip ? <span className="hidden sm:inline">Selected: {selectedClip.name}</span> : null}
+          {selectedClip ? (
+            <span className="hidden sm:inline">Selected: {selectedClip.name}</span>
+          ) : null}
         </div>
       </div>
 
@@ -772,17 +763,17 @@ export function MediaTimeline({
                           ),
                           canMoveDown: Boolean(
                             onTracksChange &&
-                              !readOnly &&
-                              !track.locked &&
-                              !clip.locked &&
-                              findAdjacentTrackForClip(clip, 1),
+                            !readOnly &&
+                            !track.locked &&
+                            !clip.locked &&
+                            findAdjacentTrackForClip(clip, 1),
                           ),
                           canMoveUp: Boolean(
                             onTracksChange &&
-                              !readOnly &&
-                              !track.locked &&
-                              !clip.locked &&
-                              findAdjacentTrackForClip(clip, -1),
+                            !readOnly &&
+                            !track.locked &&
+                            !clip.locked &&
+                            findAdjacentTrackForClip(clip, -1),
                           ),
                           onDelete: () => deleteClip(clip.id),
                           onDuplicate: () => duplicateClip(clip.id),
@@ -892,7 +883,9 @@ function TimelineClipButton({
             "hover:-translate-y-1 hover:shadow-lg active:translate-y-0 active:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             selected ? "border-white ring-2 ring-ring" : "border-white/35",
             dragging ? "opacity-80" : undefined,
-            readOnly || clip.locked ? "cursor-default opacity-70" : "cursor-grab active:cursor-grabbing",
+            readOnly || clip.locked
+              ? "cursor-default opacity-70"
+              : "cursor-grab active:cursor-grabbing",
           )}
           style={style}
           onClick={(event) => {
@@ -1083,10 +1076,7 @@ function parseHotkey(shortcut: string, action: MediaTimelineHotkeyAction) {
   return entry.key ? entry : undefined;
 }
 
-function findHotkeyAction(
-  event: KeyboardEvent,
-  entries: NormalizedHotkeyEntry[],
-) {
+function findHotkeyAction(event: KeyboardEvent, entries: NormalizedHotkeyEntry[]) {
   const key = normalizeHotkeyKey(event.key);
 
   return entries.find(

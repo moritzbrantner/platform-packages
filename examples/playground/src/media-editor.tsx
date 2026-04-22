@@ -179,8 +179,7 @@ function MediaEditorPage() {
   const clipSequenceRef = useRef(0);
   const durationMs = Math.max(15_000, getTimelineDurationMs(tracks, 15_000));
   const selectedClip = useMemo(
-    () =>
-      tracks.flatMap((track) => track.clips).find((clip) => clip.id === selectedClipId),
+    () => tracks.flatMap((track) => track.clips).find((clip) => clip.id === selectedClipId),
     [selectedClipId, tracks],
   );
   const overlaps = useMemo(() => detectTimelineOverlaps(tracks), [tracks]);
