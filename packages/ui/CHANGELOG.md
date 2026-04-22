@@ -5,6 +5,7 @@
 ### Minor Changes
 
 - Document the UI package, add theme and component subpath exports, verify built package exports, and standardize motion imports.
+- Remove Foundation UI stories and Storybook-only Foundation package aliases from the UI package Storybook.
 
 ## 0.3.1
 

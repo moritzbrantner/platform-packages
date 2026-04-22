@@ -6,14 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 import { mergeConfig } from "vite";
 
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
-const workspaceRoot = path.resolve(packageRoot, "../..");
 
 const config: StorybookConfig = {
-  stories: [
-    "../src/**/*.mdx",
-    "../src/**/*.stories.@(ts|tsx)",
-    "../../foundation-ui/src/**/*.stories.@(ts|tsx)",
-  ],
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
   addons: ["@storybook/addon-docs", "@storybook/addon-a11y", "@storybook/addon-vitest"],
   framework: {
     name: "@storybook/react-vite",
@@ -40,29 +35,8 @@ const config: StorybookConfig = {
             find: /^@moritzbrantner\/ui\/lib\/cn$/,
             replacement: path.resolve(packageRoot, "src/lib/cn.ts"),
           },
-          {
-            find: /^@moritzbrantner\/auth-contract$/,
-            replacement: path.resolve(workspaceRoot, "packages/auth-contract/src/index.ts"),
-          },
-          {
-            find: /^@moritzbrantner\/foundation-contract$/,
-            replacement: path.resolve(workspaceRoot, "packages/foundation-contract/src/index.ts"),
-          },
-          {
-            find: /^@moritzbrantner\/foundation-ui$/,
-            replacement: path.resolve(workspaceRoot, "packages/foundation-ui/src/index.tsx"),
-          },
-          {
-            find: /^@moritzbrantner\/upload-playbook$/,
-            replacement: path.resolve(workspaceRoot, "packages/upload-playbook/src/index.ts"),
-          },
         ],
         dedupe: ["react", "react-dom"],
-      },
-      server: {
-        fs: {
-          allow: [workspaceRoot],
-        },
       },
       optimizeDeps: {
         include: [
