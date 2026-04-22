@@ -30,6 +30,26 @@ const calendarIcsData = [
       ],
       [],
     ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "product-summit"],
+        ["summary", {}, "text", "Product summit"],
+        ["dtstart", {}, "date", "2026-04-21"],
+        ["dtend", {}, "date", "2026-04-24"],
+      ],
+      [],
+    ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "company-holiday"],
+        ["summary", {}, "text", "Company holiday"],
+        ["dtstart", {}, "date", "2026-04-27"],
+        ["dtend", {}, "date", "2026-04-28"],
+      ],
+      [],
+    ],
   ],
 ] as const satisfies CalendarIcsData;
 
@@ -64,6 +84,7 @@ export const CardDays: Story = {
   play: async ({ canvas }) => {
     await expect(canvas.getAllByText(/Design sync/).length).toBeGreaterThan(0);
     await expect(canvas.getAllByText("All day").length).toBeGreaterThan(0);
+    await expect(canvas.getAllByText("Product summit").length).toBe(3);
   },
 };
 

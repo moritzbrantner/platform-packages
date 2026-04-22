@@ -51,6 +51,8 @@ type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   maxEventsPerDay?: number;
 };
 
+type CalendarEventSegment = "single" | "start" | "middle" | "end";
+
 function Calendar({
   className,
   classNames,
@@ -346,7 +348,7 @@ function CalendarCardDayButton({
       data-range-middle={modifiers.range_middle}
       data-has-events={events.length > 0 || undefined}
       className={cn(
-        "relative isolate z-10 flex h-full min-h-36 w-full min-w-0 flex-col items-stretch justify-start gap-3 overflow-hidden rounded-(--cell-radius) border border-border/70 bg-card p-3 text-left leading-none font-normal text-card-foreground shadow-xs group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 hover:border-border hover:bg-accent/20 data-[range-end=true]:border-primary data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-(--cell-radius) data-[range-middle=true]:border-primary/40 data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:border-primary data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:border-primary data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground",
+        "relative isolate z-10 flex h-full min-h-36 w-full min-w-0 flex-col items-stretch justify-start gap-3 overflow-visible rounded-(--cell-radius) border border-border/70 bg-card p-3 text-left leading-none font-normal text-card-foreground shadow-xs group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 hover:border-border hover:bg-accent/20 data-[range-end=true]:border-primary data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-(--cell-radius) data-[range-middle=true]:border-primary/40 data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:border-primary data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:border-primary data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground",
         defaultClassNames.day_button,
         className,
       )}
@@ -366,22 +368,39 @@ function CalendarCardDayButton({
         ) : null}
       </div>
 
-      <div className="flex w-full min-w-0 flex-1 flex-col gap-2 overflow-hidden">
+      <div className="flex w-full min-w-0 flex-1 flex-col gap-2 overflow-visible">
         {visibleEvents.length > 0 ? (
-          visibleEvents.map((event) => (
-            <span
-              key={getCalendarEventKey(event)}
-              className="block min-w-0 rounded-sm border border-border/60 bg-background/70 px-2 py-1.5 text-left"
-              title={getCalendarEventLabel(event, locale)}
-            >
-              <span className="block truncate text-xs leading-tight font-medium">
-                {event.summary ?? "Untitled event"}
+          visibleEvents.map((event) => {
+            const segment = getCalendarEventSegment(event, day.date);
+            const isMultiDaySegment = segment !== "single";
+
+            return (
+              <span
+                key={getCalendarEventKey(event)}
+                data-calendar-event-segment={segment}
+                data-multi-day-event={isMultiDaySegment || undefined}
+                className={cn(
+                  "block min-w-0 rounded-sm border border-border/60 bg-background/70 px-2 py-1.5 text-left",
+                  isMultiDaySegment &&
+                    "relative z-20 rounded-none border-primary/35 bg-primary text-primary-foreground shadow-xs",
+                  getCalendarEventSegmentClassName(segment),
+                )}
+                title={getCalendarEventLabel(event, locale)}
+              >
+                <span className="block truncate text-xs leading-tight font-medium">
+                  {event.summary ?? "Untitled event"}
+                </span>
+                <span
+                  className={cn(
+                    "mt-1 block truncate text-[0.6875rem] leading-tight text-muted-foreground",
+                    isMultiDaySegment && "text-primary-foreground/80",
+                  )}
+                >
+                  {getCalendarEventMeta(event, locale)}
+                </span>
               </span>
-              <span className="mt-1 block truncate text-[0.6875rem] leading-tight text-muted-foreground">
-                {getCalendarEventMeta(event, locale)}
-              </span>
-            </span>
-          ))
+            );
+          })
         ) : (
           <span className="block rounded-sm border border-dashed border-border/70 px-2 py-1.5 text-[0.6875rem] leading-tight text-muted-foreground">
             No events
@@ -586,6 +605,46 @@ function getCalendarEventKey(event: CalendarEvent) {
   return `${event.uid ?? event.summary ?? "event"}-${event.start.toISOString()}`;
 }
 
+function getCalendarEventSegment(event: CalendarEvent, date: Date): CalendarEventSegment {
+  if (!isMultiDayEvent(event)) {
+    return "single";
+  }
+
+  const dayKey = getDayKey(date);
+  const startKey = getDayKey(startOfDay(event.start));
+  const endKey = getDayKey(startOfDay(getEventDisplayEnd(event)));
+
+  if (dayKey === startKey) {
+    return "start";
+  }
+
+  if (dayKey === endKey) {
+    return "end";
+  }
+
+  return "middle";
+}
+
+function getCalendarEventSegmentClassName(segment: CalendarEventSegment) {
+  if (segment === "start") {
+    return "ml-[calc(-0.75rem+1px)] mr-[calc(-1rem-1px)] pl-5 pr-4 [clip-path:polygon(0_50%,0.75rem_0,100%_0,100%_100%,0.75rem_100%)]";
+  }
+
+  if (segment === "middle") {
+    return "mx-[calc(-1rem-1px)] px-4 [clip-path:polygon(0_0,100%_0,100%_100%,0_100%)]";
+  }
+
+  if (segment === "end") {
+    return "ml-[calc(-1rem-1px)] mr-[calc(-0.75rem+1px)] pl-4 pr-5 [clip-path:polygon(0_0,calc(100%_-_0.75rem)_0,100%_50%,calc(100%_-_0.75rem)_100%,0_100%)]";
+  }
+
+  return "";
+}
+
+function isMultiDayEvent(event: CalendarEvent) {
+  return getDayKey(startOfDay(event.start)) !== getDayKey(startOfDay(getEventDisplayEnd(event)));
+}
+
 function getCalendarEventLabel(event: CalendarEvent, locale?: Partial<Locale>) {
   const summary = event.summary ?? "Untitled event";
 
@@ -600,6 +659,10 @@ function getCalendarEventLabel(event: CalendarEvent, locale?: Partial<Locale>) {
 }
 
 function getCalendarEventMeta(event: CalendarEvent, locale?: Partial<Locale>) {
+  if (isMultiDayEvent(event)) {
+    return getCalendarEventDateRangeLabel(event, locale);
+  }
+
   const time = event.isAllDay
     ? "All day"
     : event.start.toLocaleTimeString(locale?.code, {
@@ -608,4 +671,17 @@ function getCalendarEventMeta(event: CalendarEvent, locale?: Partial<Locale>) {
       });
 
   return event.location ? `${time} - ${event.location}` : time;
+}
+
+function getCalendarEventDateRangeLabel(event: CalendarEvent, locale?: Partial<Locale>) {
+  const start = event.start;
+  const end = getEventDisplayEnd(event);
+  const startLabel = start.toLocaleDateString(locale?.code, { month: "short", day: "numeric" });
+  const endLabel = end.toLocaleDateString(locale?.code, {
+    month: start.getMonth() === end.getMonth() ? undefined : "short",
+    day: "numeric",
+  });
+  const dateRange = `${startLabel} - ${endLabel}`;
+
+  return event.location ? `${dateRange} - ${event.location}` : dateRange;
 }

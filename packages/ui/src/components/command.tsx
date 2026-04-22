@@ -3,6 +3,7 @@ import { Command as CommandPrimitive } from "cmdk";
 
 import { cn } from "../lib/cn";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
+import { type HotkeyHintProps, useHotkeyShortcut } from "./hotkey-visibility";
 import { InputGroup, InputGroupAddon } from "./input-group";
 import { SearchIcon, CheckIcon } from "lucide-react";
 
@@ -146,7 +147,19 @@ function CommandItem({
   );
 }
 
-function CommandShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function CommandShortcut({
+  alwaysShowShortcut,
+  children,
+  className,
+  shortcut,
+  ...props
+}: React.ComponentProps<"span"> & HotkeyHintProps) {
+  const hotkeyShortcut = useHotkeyShortcut(shortcut, children, alwaysShowShortcut);
+
+  if (!hotkeyShortcut.visible) {
+    return null;
+  }
+
   return (
     <span
       data-slot="command-shortcut"
@@ -155,7 +168,9 @@ function CommandShortcut({ className, ...props }: React.ComponentProps<"span">) 
         className,
       )}
       {...props}
-    />
+    >
+      {hotkeyShortcut.children}
+    </span>
   );
 }
 

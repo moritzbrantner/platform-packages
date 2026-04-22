@@ -4,6 +4,7 @@ import * as React from "react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 
 import { cn } from "../lib/cn";
+import { type HotkeyHintProps, useHotkeyShortcut } from "./hotkey-visibility";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -174,7 +175,19 @@ function DropdownMenuSeparator({
   );
 }
 
-function DropdownMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function DropdownMenuShortcut({
+  alwaysShowShortcut,
+  children,
+  className,
+  shortcut,
+  ...props
+}: React.ComponentProps<"span"> & HotkeyHintProps) {
+  const hotkeyShortcut = useHotkeyShortcut(shortcut, children, alwaysShowShortcut);
+
+  if (!hotkeyShortcut.visible) {
+    return null;
+  }
+
   return (
     <span
       data-slot="dropdown-menu-shortcut"
@@ -183,7 +196,9 @@ function DropdownMenuShortcut({ className, ...props }: React.ComponentProps<"spa
         className,
       )}
       {...props}
-    />
+    >
+      {hotkeyShortcut.children}
+    </span>
   );
 }
 

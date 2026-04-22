@@ -4,6 +4,7 @@ import * as React from "react";
 import { Menubar as MenubarPrimitive } from "radix-ui";
 
 import { cn } from "../lib/cn";
+import { type HotkeyHintProps, useHotkeyShortcut } from "./hotkey-visibility";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 
 function Menubar({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.Root>) {
@@ -183,7 +184,19 @@ function MenubarSeparator({
   );
 }
 
-function MenubarShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function MenubarShortcut({
+  alwaysShowShortcut,
+  children,
+  className,
+  shortcut,
+  ...props
+}: React.ComponentProps<"span"> & HotkeyHintProps) {
+  const hotkeyShortcut = useHotkeyShortcut(shortcut, children, alwaysShowShortcut);
+
+  if (!hotkeyShortcut.visible) {
+    return null;
+  }
+
   return (
     <span
       data-slot="menubar-shortcut"
@@ -192,7 +205,9 @@ function MenubarShortcut({ className, ...props }: React.ComponentProps<"span">) 
         className,
       )}
       {...props}
-    />
+    >
+      {hotkeyShortcut.children}
+    </span>
   );
 }
 

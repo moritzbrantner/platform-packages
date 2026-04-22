@@ -2,6 +2,7 @@ import * as React from "react";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
 
 import { cn } from "../lib/cn";
+import { type HotkeyHintProps, useHotkeyShortcut } from "./hotkey-visibility";
 import { ChevronRightIcon, CheckIcon } from "lucide-react";
 
 function ContextMenu({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Root>) {
@@ -213,7 +214,19 @@ function ContextMenuSeparator({
   );
 }
 
-function ContextMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function ContextMenuShortcut({
+  alwaysShowShortcut,
+  children,
+  className,
+  shortcut,
+  ...props
+}: React.ComponentProps<"span"> & HotkeyHintProps) {
+  const hotkeyShortcut = useHotkeyShortcut(shortcut, children, alwaysShowShortcut);
+
+  if (!hotkeyShortcut.visible) {
+    return null;
+  }
+
   return (
     <span
       data-slot="context-menu-shortcut"
@@ -222,7 +235,9 @@ function ContextMenuShortcut({ className, ...props }: React.ComponentProps<"span
         className,
       )}
       {...props}
-    />
+    >
+      {hotkeyShortcut.children}
+    </span>
   );
 }
 

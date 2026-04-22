@@ -41,9 +41,11 @@ import {
   CodeBlockContent,
   CodeBlockHeader,
   CodeBlockTitle,
+  CommandShortcut,
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuShortcut,
   ContextMenuTrigger,
   cn,
   CopyButton,
@@ -70,6 +72,7 @@ import {
   DropzoneIcon,
   DropzoneInput,
   DropzoneTitle,
+  DropdownMenuShortcut,
   Empty,
   EmptyDescription,
   EmptyTitle,
@@ -77,6 +80,7 @@ import {
   type InspectorPanelSectionData,
   Kbd,
   LoadingBar,
+  MenubarShortcut,
   MobileSlide,
   MobileSlideBody,
   MobileSlideClose,
@@ -249,6 +253,26 @@ const calendarIcsData = [
         ["summary", {}, "text", "Release window"],
         ["dtstart", {}, "date", "2026-04-18"],
         ["dtend", {}, "date", "2026-04-20"],
+      ],
+      [],
+    ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "product-summit"],
+        ["summary", {}, "text", "Product summit"],
+        ["dtstart", {}, "date", "2026-04-21"],
+        ["dtend", {}, "date", "2026-04-24"],
+      ],
+      [],
+    ],
+    [
+      "vevent",
+      [
+        ["uid", {}, "text", "company-holiday"],
+        ["summary", {}, "text", "Company holiday"],
+        ["dtstart", {}, "date", "2026-04-27"],
+        ["dtend", {}, "date", "2026-04-28"],
       ],
       [],
     ],
@@ -570,6 +594,40 @@ describe("@moritzbrantner/ui", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
+  test("shows shortcut hints based on pressed modifiers", async () => {
+    render(
+      <>
+        <CommandShortcut data-testid="plain-command-shortcut" shortcut="r" />
+        <ContextMenuShortcut data-testid="child-plain-shortcut">O</ContextMenuShortcut>
+        <DropdownMenuShortcut data-testid="modified-dropdown-shortcut" shortcut="ctrl+k" />
+        <MenubarShortcut data-testid="child-modified-shortcut">Ctrl+N</MenubarShortcut>
+      </>,
+    );
+
+    expect(screen.getByTestId("plain-command-shortcut").textContent).toBe("R");
+    expect(screen.getByTestId("child-plain-shortcut").textContent).toBe("O");
+    expect(screen.queryByTestId("modified-dropdown-shortcut")).toBeNull();
+    expect(screen.queryByTestId("child-modified-shortcut")).toBeNull();
+
+    fireEvent.keyDown(window, { ctrlKey: true, key: "Control" });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("plain-command-shortcut")).toBeNull();
+      expect(screen.queryByTestId("child-plain-shortcut")).toBeNull();
+      expect(screen.getByTestId("modified-dropdown-shortcut").textContent).toBe("Ctrl+K");
+      expect(screen.getByTestId("child-modified-shortcut").textContent).toBe("Ctrl+N");
+    });
+
+    fireEvent.keyUp(window, { ctrlKey: false, key: "Control" });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("plain-command-shortcut").textContent).toBe("R");
+      expect(screen.getByTestId("child-plain-shortcut").textContent).toBe("O");
+      expect(screen.queryByTestId("modified-dropdown-shortcut")).toBeNull();
+      expect(screen.queryByTestId("child-modified-shortcut")).toBeNull();
+    });
+  });
+
   test("opens dialogs from triggers and renders accessible content", async () => {
     render(
       <Dialog>
@@ -758,7 +816,10 @@ describe("@moritzbrantner/ui", () => {
     );
 
     expect(screen.getByRole("button", { name: "Grid" }).className).toContain("rounded-md");
-    expect(screen.getByRole("switch", { name: "Notifications" }).className).toContain("rounded-md");
+    const notificationsSwitch = screen.getByRole("switch", { name: "Notifications" });
+    expect(notificationsSwitch.className).toContain("rounded-md");
+    expect(notificationsSwitch.className).toContain("data-[size=default]:h-6");
+    expect(notificationsSwitch.className).toContain("data-[size=default]:w-11");
   });
 
   test("renders a labeled toggle setting and reports checked changes", () => {
@@ -972,7 +1033,18 @@ describe("@moritzbrantner/ui", () => {
     expect(eventDay?.className).toContain("min-h-36");
     expect(screen.getAllByText(/Design sync/).length).toBeGreaterThan(0);
     expect(screen.getAllByText("All day").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Product summit").length).toBe(3);
     expect(screen.getAllByText("No events").length).toBeGreaterThan(0);
+
+    const multiDaySegments = container.querySelectorAll("[data-multi-day-event='true']");
+    const startSegment = container.querySelector("[data-calendar-event-segment='start']");
+    const middleSegment = container.querySelector("[data-calendar-event-segment='middle']");
+    const endSegment = container.querySelector("[data-calendar-event-segment='end']");
+
+    expect(multiDaySegments.length).toBeGreaterThan(2);
+    expect(startSegment?.className).toContain("[clip-path:polygon(0_50%");
+    expect(middleSegment).toBeTruthy();
+    expect(endSegment?.className).toContain("100%_50%");
   });
 
   test("exports the calendar card day component for custom layouts", () => {
@@ -1149,6 +1221,75 @@ describe("@moritzbrantner/ui", () => {
     expect(screen.getByText("paid")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Hide status" }));
     expect(screen.queryByText("paid")).toBeNull();
+  });
+
+  test("filters DataGrid columns from the header context menu", async () => {
+    type Row = {
+      name: string;
+      status: string;
+    };
+    const columns: ColumnDef<Row>[] = [
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "status", header: "Status" },
+    ];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[
+          { name: "Alpha", status: "paid" },
+          { name: "Beta", status: "pending" },
+          { name: "Charlie", status: "overdue" },
+        ]}
+      />,
+    );
+
+    fireEvent.contextMenu(screen.getByText("Status"));
+
+    expect(await screen.findByText("Filter Status")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Filter Status by paid" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Alpha")).toBeTruthy();
+      expect(screen.queryByText("Beta")).toBeNull();
+      expect(screen.queryByText("Charlie")).toBeNull();
+    });
+  });
+
+  test("uses numeric inputs for number column header filters", async () => {
+    type Row = {
+      name: string;
+      amount: number;
+    };
+    const columns: ColumnDef<Row>[] = [
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "amount", header: "Amount" },
+    ];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[
+          { name: "Small", amount: 15 },
+          { name: "Medium", amount: 40 },
+          { name: "Large", amount: 90 },
+        ]}
+      />,
+    );
+
+    fireEvent.contextMenu(screen.getByText("Amount"));
+
+    expect(await screen.findByText("Filter Amount")).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Minimum Amount"), { target: { value: "30" } });
+    fireEvent.change(screen.getByLabelText("Maximum Amount"), { target: { value: "80" } });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Small")).toBeNull();
+      expect(screen.getByText("Medium")).toBeTruthy();
+      expect(screen.queryByText("Large")).toBeNull();
+    });
   });
 
   test("renders DataGrid loading, empty, and error states", () => {
