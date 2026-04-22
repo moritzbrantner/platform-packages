@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/speech",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "type": "module",
   "repository": {
@@ -31,7 +31,7 @@
     "react": "^19.0.0"
   },
   "dependencies": {
-    "@moritzbrantner/ui": "^0.3.1"
+    "@moritzbrantner/ui": "^0.4.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",

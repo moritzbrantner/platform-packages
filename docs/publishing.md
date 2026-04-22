@@ -15,7 +15,7 @@ The current workflow validates and publishes every public package under `package
 
 1. Make your package changes.
 2. Run `bun run changeset`.
-3. Select the packages that changed and choose the appropriate version bump.
+3. Select the packages that changed and choose the appropriate version bump: use `minor` for significant changes and `patch` for minor adjustments.
 4. Commit the generated changeset file with your code changes.
 5. Merge to `main` and let the publish workflow publish packages whose current version is not already present in GitHub Packages.
 
@@ -56,7 +56,7 @@ Consumers need an `.npmrc` entry for the package scope you publish under and a t
 
 ```ini
 @moritzbrantner:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+//npm.pkg.github.com/:_authToken=${GH_PACKAGES_TOKEN}
 ```
 
 For the maintained scaffold family, consumer repos should adopt these first:

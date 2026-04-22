@@ -442,6 +442,40 @@ describe("@moritzbrantner/ui", () => {
     expect(button.className).toContain("active:brightness-110");
   });
 
+  test("mirrors hover styles for selected buttons and tap styles for Enter", () => {
+    const onKeyDown = vi.fn();
+    const onKeyUp = vi.fn();
+
+    render(
+      <>
+        <Button aria-pressed="true">Selected</Button>
+        <Button onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
+          Keyboard
+        </Button>
+      </>,
+    );
+
+    const selectedButton = screen.getByRole("button", { name: "Selected" });
+    const keyboardButton = screen.getByRole("button", { name: "Keyboard" });
+
+    expect(selectedButton.className).toContain("aria-[pressed=true]:-translate-y-[1px]");
+    expect(selectedButton.className).toContain("aria-[pressed=true]:scale-[1.055]");
+    expect(selectedButton.className).toContain("data-[state=on]:scale-[1.055]");
+    expect(selectedButton.className).toContain("aria-[pressed=true]:shadow-[0_22px");
+    expect(keyboardButton.className).toContain("data-[keyboard-active=true]:scale-[0.98]");
+    expect(keyboardButton.className).toContain("data-[keyboard-active=true]:brightness-110");
+
+    fireEvent.keyDown(keyboardButton, { key: "Enter" });
+
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(keyboardButton.getAttribute("data-keyboard-active")).toBe("true");
+
+    fireEvent.keyUp(keyboardButton, { key: "Enter" });
+
+    expect(onKeyUp).toHaveBeenCalledTimes(1);
+    expect(keyboardButton.getAttribute("data-keyboard-active")).toBeNull();
+  });
+
   test("preserves button contract details for downstream asChild usage", () => {
     render(
       <div>

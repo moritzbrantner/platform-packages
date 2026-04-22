@@ -6,8 +6,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const packagesRoot = path.join(repoRoot, "packages");
+const npmUserConfig = path.join(repoRoot, ".npmrc");
 const registry = "https://npm.pkg.github.com";
-const authToken = process.env.NODE_AUTH_TOKEN ?? process.env.GITHUB_TOKEN;
+const authToken = process.env.GH_PACKAGES_TOKEN;
 
 function readPackageJson(relativeDir) {
   const packageJsonPath = path.join(repoRoot, relativeDir, "package.json");
@@ -81,7 +82,8 @@ function getPublishedVersion(name) {
       stdio: ["ignore", "pipe", "pipe"],
       env: {
         ...process.env,
-        NODE_AUTH_TOKEN: authToken,
+        GH_PACKAGES_TOKEN: authToken,
+        npm_config_userconfig: npmUserConfig,
       },
     }).trim();
   } catch {
@@ -90,7 +92,7 @@ function getPublishedVersion(name) {
 }
 
 if (!authToken) {
-  console.error("NODE_AUTH_TOKEN or GITHUB_TOKEN is required to publish packages.");
+  console.error("GH_PACKAGES_TOKEN is required to publish packages.");
   process.exit(1);
 }
 
@@ -110,8 +112,9 @@ for (const { relativeDir, packageDir, packageJson: pkg } of releasePackages) {
     stdio: "inherit",
     env: {
       ...process.env,
-      NODE_AUTH_TOKEN: authToken,
+      GH_PACKAGES_TOKEN: authToken,
       npm_config_registry: registry,
+      npm_config_userconfig: npmUserConfig,
     },
   });
 }

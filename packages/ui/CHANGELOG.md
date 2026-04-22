@@ -1,5 +1,11 @@
 # @moritzbrantner/ui
 
+## 0.4.0
+
+### Minor Changes
+
+- Document the UI package, add theme and component subpath exports, verify built package exports, and standardize motion imports.
+
 ## 0.3.1
 
 ### Patch Changes
