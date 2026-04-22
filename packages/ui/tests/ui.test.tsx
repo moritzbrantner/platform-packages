@@ -319,6 +319,32 @@ const navigationGroups = [
   },
 ] as const satisfies PlatformNavbarGroup[];
 
+function createRect({
+  left,
+  top,
+  width,
+  height,
+}: {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}) {
+  return {
+    bottom: top + height,
+    height,
+    left,
+    right: left + width,
+    top,
+    width,
+    x: left,
+    y: top,
+    toJSON() {
+      return this;
+    },
+  } as DOMRect;
+}
+
 describe("@moritzbrantner/ui", () => {
   test("declares the reusable design-system package contract", () => {
     const packageJson = JSON.parse(readFileSync("packages/ui/package.json", "utf8"));
@@ -1085,6 +1111,43 @@ describe("@moritzbrantner/ui", () => {
     expect(submenu?.className).toContain("z-[100]");
     expect(screen.getByRole("link", { name: /People/ }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByText("Directory and profiles.")).toBeTruthy();
+  });
+
+  test("anchors the mobile navbar submenu to the centered navbar", async () => {
+    render(
+      <PlatformNavbar
+        brand="Platform"
+        groups={navigationGroups}
+        defaultOpenGroupId={null}
+        variant="mobile"
+      />,
+    );
+
+    const nav = screen.getByRole("navigation", { name: "Primary navigation" });
+    const container = nav.parentElement;
+    const trigger = screen.getByRole("button", { name: /Workspace/ });
+
+    expect(container).toBeTruthy();
+    vi.spyOn(container as HTMLElement, "getBoundingClientRect").mockReturnValue(
+      createRect({ left: 0, top: 0, width: 800, height: 80 }),
+    );
+    vi.spyOn(nav, "getBoundingClientRect").mockReturnValue(
+      createRect({ left: 176, top: 0, width: 448, height: 80 }),
+    );
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(
+      createRect({ left: 320, top: 24, width: 160, height: 48 }),
+    );
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      const submenu = screen
+        .getByText("Directory and profiles.")
+        .closest('[data-slot="platform-navbar-submenu"]') as HTMLElement | null;
+
+      expect(submenu?.style.left).toBe("184px");
+      expect(submenu?.style.width).toBe("432px");
+    });
   });
 
   test("keeps only the latest navbar submenu open across mounted navbars", async () => {

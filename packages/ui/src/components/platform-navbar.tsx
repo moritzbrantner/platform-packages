@@ -190,6 +190,7 @@ export function PlatformNavbar({
   const reduceMotion = useReducedMotion();
   const instanceId = React.useId();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const navRef = React.useRef<HTMLElement>(null);
   const submenuRef = React.useRef<HTMLDivElement>(null);
   const triggerRefs = React.useRef(new Map<string, HTMLButtonElement>());
   const [portalContainer, setPortalContainer] = React.useState<HTMLElement | null>(null);
@@ -252,14 +253,16 @@ export function PlatformNavbar({
     }
 
     const containerRect = container.getBoundingClientRect();
+    const navRect = navRef.current?.getBoundingClientRect() ?? containerRect;
     const triggerRect = trigger?.getBoundingClientRect();
     const submenuRect = submenuRef.current?.getBoundingClientRect();
     const { gap, margin, maxWidth } = submenuSizeConfig[variant];
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const availableWidth = Math.max(0, viewportWidth - margin * 2);
-    const containerWidth = containerRect.width || availableWidth;
-    const preferredMobileWidth = Math.min(containerWidth - margin * 2, maxWidth);
+    const anchorRect = variant === "mobile" ? navRect : containerRect;
+    const anchorWidth = anchorRect.width || availableWidth;
+    const preferredMobileWidth = Math.min(anchorWidth - margin * 2, maxWidth);
     const width =
       variant === "mobile"
         ? Math.min(Math.max(preferredMobileWidth, 0), availableWidth)
@@ -267,8 +270,8 @@ export function PlatformNavbar({
     const triggerCenter =
       triggerRect && triggerRect.width > 0
         ? triggerRect.left + triggerRect.width / 2
-        : containerRect.left + containerWidth / 2;
-    const rawLeft = variant === "mobile" ? containerRect.left + margin : triggerCenter - width / 2;
+        : anchorRect.left + anchorWidth / 2;
+    const rawLeft = variant === "mobile" ? anchorRect.left + margin : triggerCenter - width / 2;
     const left = clamp(rawLeft, margin, viewportWidth - width - margin);
     const belowTop = containerRect.bottom + gap;
     const availableBelow = viewportHeight - belowTop - margin;
@@ -485,6 +488,7 @@ export function PlatformNavbar({
         onBlurCapture={handleBlurCapture}
       >
         <nav
+          ref={navRef}
           aria-label={ariaLabel}
           data-slot="platform-navbar"
           data-variant={variant}

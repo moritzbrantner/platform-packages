@@ -34,7 +34,7 @@ function StepperItem({ className, status = "incomplete", ...props }: StepperItem
       data-slot="stepper-item"
       data-status={status}
       className={cn(
-        "group/stepper-item relative grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2",
+        "group/stepper-item relative grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 group-data-[orientation=horizontal]/stepper:grid-cols-1",
         className,
       )}
       {...props}
@@ -47,7 +47,7 @@ function StepperIndicator({ className, children, ...props }: React.ComponentProp
     <div
       data-slot="stepper-indicator"
       className={cn(
-        "flex size-7 items-center justify-center border border-border bg-background text-xs font-medium text-muted-foreground shadow-[var(--glass-interactive-shadow)] group-data-[status=complete]/stepper-item:border-primary/50 group-data-[status=complete]/stepper-item:bg-primary group-data-[status=complete]/stepper-item:text-primary-foreground group-data-[status=current]/stepper-item:border-primary group-data-[status=current]/stepper-item:text-primary group-data-[status=error]/stepper-item:border-destructive group-data-[status=error]/stepper-item:text-destructive",
+        "relative z-10 flex size-7 items-center justify-center border border-border bg-background text-xs font-medium text-muted-foreground shadow-[var(--glass-interactive-shadow)] group-data-[status=complete]/stepper-item:border-primary/50 group-data-[status=complete]/stepper-item:bg-primary group-data-[status=complete]/stepper-item:text-primary-foreground group-data-[status=current]/stepper-item:border-primary group-data-[status=current]/stepper-item:text-primary group-data-[status=error]/stepper-item:border-destructive group-data-[status=error]/stepper-item:text-destructive",
         className,
       )}
       {...props}
@@ -63,7 +63,13 @@ function StepperIndicator({ className, children, ...props }: React.ComponentProp
 }
 
 function StepperContent({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="stepper-content" className={cn("min-w-0 pt-0.5", className)} {...props} />;
+  return (
+    <div
+      data-slot="stepper-content"
+      className={cn("min-w-0 pt-0.5 group-data-[orientation=horizontal]/stepper:pt-0", className)}
+      {...props}
+    />
+  );
 }
 
 function StepperTitle({ className, ...props }: React.ComponentProps<"div">) {
@@ -95,7 +101,7 @@ function StepperConnector({ className, ...props }: React.ComponentProps<"div">) 
       aria-hidden="true"
       data-slot="stepper-connector"
       className={cn(
-        "bg-border group-data-[status=complete]/stepper-item:bg-primary group-data-[orientation=vertical]/stepper:col-start-1 group-data-[orientation=vertical]/stepper:row-start-2 group-data-[orientation=vertical]/stepper:min-h-5 group-data-[orientation=vertical]/stepper:w-px group-data-[orientation=vertical]/stepper:justify-self-center group-data-[orientation=horizontal]/stepper:absolute group-data-[orientation=horizontal]/stepper:left-9 group-data-[orientation=horizontal]/stepper:right-2 group-data-[orientation=horizontal]/stepper:top-3.5 group-data-[orientation=horizontal]/stepper:h-px",
+        "bg-border group-data-[status=complete]/stepper-item:bg-primary group-data-[orientation=vertical]/stepper:col-start-1 group-data-[orientation=vertical]/stepper:row-start-2 group-data-[orientation=vertical]/stepper:min-h-5 group-data-[orientation=vertical]/stepper:w-px group-data-[orientation=vertical]/stepper:justify-self-center group-data-[orientation=horizontal]/stepper:absolute group-data-[orientation=horizontal]/stepper:left-9 group-data-[orientation=horizontal]/stepper:right-2 group-data-[orientation=horizontal]/stepper:top-3.5 group-data-[orientation=horizontal]/stepper:z-0 group-data-[orientation=horizontal]/stepper:h-px",
         className,
       )}
       {...props}

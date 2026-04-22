@@ -1017,11 +1017,11 @@ function CatalogPreview({ designSystem = defaultUiThemeName }: CatalogPreviewPro
 
           <CatalogSection id="resizable" title="Resizable">
             <ResizablePanelGroup orientation="horizontal" className="h-28 border border-border/60">
-              <ResizablePanel defaultSize={55} className="grid place-items-center">
+              <ResizablePanel defaultSize="55%" className="grid place-items-center">
                 List
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={45} className="grid place-items-center">
+              <ResizablePanel defaultSize="45%" className="grid place-items-center">
                 Detail
               </ResizablePanel>
             </ResizablePanelGroup>

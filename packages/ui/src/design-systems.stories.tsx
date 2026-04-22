@@ -27,6 +27,7 @@ import { Label } from "./components/label";
 import { NativeSelect, NativeSelectOption } from "./components/native-select";
 import { Progress } from "./components/progress";
 import { RadioGroup, RadioGroupItem } from "./components/radio-group";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./components/resizable";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/select";
 import { Separator } from "./components/separator";
 import { Slider } from "./components/slider";
@@ -142,65 +143,111 @@ export const Paper: Story = {
 
 function DesignSystemShowcase({ systemId }: { systemId: UiThemeName }) {
   const system = systems.find((item) => item.id === systemId) ?? systems[0];
-  const Icon = system.icon;
 
   return (
     <UiTheme theme={system.id} className="min-h-screen bg-background text-foreground">
       <main className="mx-auto grid w-full max-w-7xl gap-8 px-6 py-8 lg:px-10">
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="grid content-center gap-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge variant="secondary">{system.label}</Badge>
-              <Badge variant="outline">{system.density}</Badge>
-            </div>
-            <div className="grid gap-3">
-              <h1 className="text-4xl font-semibold tracking-normal lg:text-5xl">{system.name}</h1>
-              <p className="max-w-3xl text-lg text-muted-foreground">{system.description}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {system.bestFor.map((item) => (
-                <Badge key={item} variant="outline">
-                  {item}
-                </Badge>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Button>
-                <Icon />
-                Primary action
-              </Button>
-              <Button variant="secondary">
-                Review system
-                <ArrowRightIcon />
-              </Button>
-            </div>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>System profile</CardTitle>
-              <CardDescription>{system.surface}</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-5">
-              <TokenSwatches />
-              <Separator />
-              <div className="grid gap-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Completion</span>
-                  <span className="font-medium">72%</span>
-                </div>
-                <Progress value={72} aria-label="System profile completion" />
-              </div>
-            </CardContent>
-          </Card>
+        <section className="grid gap-6 lg:hidden">
+          <HeroPanel system={system} />
+          <SystemProfileCard system={system} />
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <ResizablePanelGroup orientation="horizontal" className="hidden min-h-[360px] lg:flex">
+          <ResizablePanel defaultSize="66%" minSize="48%" className="grid min-w-0 pr-6">
+            <HeroPanel system={system} />
+          </ResizablePanel>
+          <ResizableHandle
+            withHandle
+            aria-label="Resize system profile preview"
+            className="bg-border/80 transition-colors hover:bg-primary"
+          />
+          <ResizablePanel defaultSize="34%" minSize="24%" maxSize="45%" className="min-w-0 pl-6">
+            <SystemProfileCard system={system} className="h-full" />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+
+        <section className="grid gap-6 lg:hidden">
           <ComponentPreview />
           <DataPreview />
         </section>
+
+        <ResizablePanelGroup orientation="horizontal" className="hidden min-h-[620px] lg:flex">
+          <ResizablePanel defaultSize="56%" minSize="42%" className="min-w-0 pr-6">
+            <ComponentPreview className="h-full" />
+          </ResizablePanel>
+          <ResizableHandle
+            withHandle
+            aria-label="Resize component previews"
+            className="bg-border/80 transition-colors hover:bg-primary"
+          />
+          <ResizablePanel defaultSize="44%" minSize="32%" className="min-w-0 pl-6">
+            <DataPreview className="h-full" />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </main>
     </UiTheme>
+  );
+}
+
+function HeroPanel({ system }: { system: SystemProfile }) {
+  const Icon = system.icon;
+
+  return (
+    <div className="grid content-center gap-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge variant="secondary">{system.label}</Badge>
+        <Badge variant="outline">{system.density}</Badge>
+      </div>
+      <div className="grid gap-3">
+        <h1 className="text-4xl font-semibold tracking-normal lg:text-5xl">{system.name}</h1>
+        <p className="max-w-3xl text-lg text-muted-foreground">{system.description}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {system.bestFor.map((item) => (
+          <Badge key={item} variant="outline">
+            {item}
+          </Badge>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <Button>
+          <Icon />
+          Primary action
+        </Button>
+        <Button variant="secondary">
+          Review system
+          <ArrowRightIcon />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function SystemProfileCard({
+  system,
+  className,
+}: {
+  system: SystemProfile;
+  className?: string;
+}) {
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>System profile</CardTitle>
+        <CardDescription>{system.surface}</CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-5">
+        <TokenSwatches />
+        <Separator />
+        <div className="grid gap-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Completion</span>
+            <span className="font-medium">72%</span>
+          </div>
+          <Progress value={72} aria-label="System profile completion" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -229,7 +276,7 @@ function TokenSwatches() {
   );
 }
 
-function ComponentPreview() {
+function ComponentPreview({ className }: { className?: string }) {
   const [confidence, setConfidence] = useState([72]);
   const [contrast, setContrast] = useState([36, 84]);
   const [density, setDensity] = useState("comfortable");
@@ -240,7 +287,7 @@ function ComponentPreview() {
   const [includeTables, setIncludeTables] = useState(false);
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Controls and status</CardTitle>
         <CardDescription>
@@ -416,7 +463,7 @@ function ComponentPreview() {
   );
 }
 
-function DataPreview() {
+function DataPreview({ className }: { className?: string }) {
   const rows = [
     ["Maps", "Atlas", "Dense"],
     ["Media editor", "Studio", "Creative"],
@@ -424,7 +471,7 @@ function DataPreview() {
   ];
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Data and product patterns</CardTitle>
         <CardDescription>Shared tokens across tabular, status, and workflow UI.</CardDescription>
