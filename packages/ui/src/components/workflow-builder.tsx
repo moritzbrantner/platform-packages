@@ -1,0 +1,706 @@
+"use client";
+
+import * as React from "react";
+import {
+  Maximize2Icon,
+  MinusIcon,
+  PlusIcon,
+  Trash2Icon,
+  WorkflowIcon,
+} from "lucide-react";
+
+import { cn } from "../lib/cn";
+import { Badge } from "./badge";
+import { Button } from "./button";
+import { Separator } from "./separator";
+
+type WorkflowBuilderPort = {
+  id: string;
+  label: string;
+  kind?: string;
+  required?: boolean;
+  metadata?: Record<string, unknown>;
+};
+
+type WorkflowBuilderNodeData = {
+  id: string;
+  label: string;
+  description?: string;
+  kind?: string;
+  status?: "idle" | "running" | "success" | "error" | "warning" | string;
+  x: number;
+  y: number;
+  inputs?: WorkflowBuilderPort[];
+  outputs?: WorkflowBuilderPort[];
+  metadata?: Record<string, unknown>;
+};
+
+type WorkflowBuilderEdge = {
+  id: string;
+  sourceNodeId: string;
+  sourcePortId: string;
+  targetNodeId: string;
+  targetPortId: string;
+  status?: "idle" | "running" | "success" | "error" | "warning" | string;
+  metadata?: Record<string, unknown>;
+};
+
+type WorkflowBuilderSelection =
+  | { type: "node"; id: string; node: WorkflowBuilderNodeData }
+  | { type: "edge"; id: string; edge: WorkflowBuilderEdge }
+  | null;
+
+type WorkflowBuilderConnectionValidityInput = {
+  nodes: WorkflowBuilderNodeData[];
+  edges: WorkflowBuilderEdge[];
+  sourceNodeId: string;
+  sourcePortId: string;
+  targetNodeId: string;
+  targetPortId: string;
+};
+
+type WorkflowBuilderConnectionValidity = {
+  valid: boolean;
+  reason?: "duplicate" | "kind-mismatch" | "missing-port" | "self-connection";
+};
+
+type WorkflowBuilderProps = Omit<React.ComponentProps<"div">, "onChange"> & {
+  nodes: WorkflowBuilderNodeData[];
+  edges: WorkflowBuilderEdge[];
+  onNodesChange?: (nodes: WorkflowBuilderNodeData[]) => void;
+  onEdgesChange?: (edges: WorkflowBuilderEdge[]) => void;
+  selectedNodeId?: string | null;
+  selectedEdgeId?: string | null;
+  onSelectionChange?: (selection: WorkflowBuilderSelection) => void;
+  readOnly?: boolean;
+  defaultZoom?: number;
+  zoom?: number;
+  onZoomChange?: (zoom: number) => void;
+  minZoom?: number;
+  maxZoom?: number;
+};
+
+type WorkflowBuilderNodeProps = Omit<React.ComponentProps<"div">, "onSelect"> & {
+  node: WorkflowBuilderNodeData;
+  selected?: boolean;
+  readOnly?: boolean;
+  pendingConnection?: PendingConnection | null;
+  onNodeSelect?: (node: WorkflowBuilderNodeData) => void;
+  onStartConnection?: (nodeId: string, portId: string) => void;
+  onCompleteConnection?: (nodeId: string, portId: string) => void;
+  onNodePointerDown?: (
+    event: React.PointerEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>,
+    node: WorkflowBuilderNodeData,
+  ) => void;
+};
+
+type WorkflowBuilderToolbarProps = React.ComponentProps<"div"> & {
+  zoom: number;
+  minZoom?: number;
+  maxZoom?: number;
+  readOnly?: boolean;
+  selectedLabel?: string;
+  onZoomChange?: (zoom: number) => void;
+  onFitView?: () => void;
+  onDeleteSelection?: () => void;
+};
+
+type WorkflowBuilderMiniMapProps = React.ComponentProps<"div"> & {
+  nodes: WorkflowBuilderNodeData[];
+  edges?: WorkflowBuilderEdge[];
+  selectedNodeId?: string | null;
+};
+
+type PendingConnection = {
+  sourceNodeId: string;
+  sourcePortId: string;
+};
+
+type DragState = {
+  nodeId: string;
+  startX: number;
+  startY: number;
+  originalX: number;
+  originalY: number;
+} | null;
+
+const workflowNodeWidth = 180;
+const workflowNodeHeight = 104;
+
+function WorkflowBuilder({
+  nodes,
+  edges,
+  onNodesChange,
+  onEdgesChange,
+  selectedNodeId,
+  selectedEdgeId,
+  onSelectionChange,
+  readOnly = false,
+  defaultZoom = 1,
+  zoom,
+  onZoomChange,
+  minZoom = 0.5,
+  maxZoom = 1.75,
+  className,
+  ...props
+}: WorkflowBuilderProps) {
+  const [internalZoom, setInternalZoom] = React.useState(defaultZoom);
+  const [internalSelectedNodeId, setInternalSelectedNodeId] = React.useState<string | null>(null);
+  const [internalSelectedEdgeId, setInternalSelectedEdgeId] = React.useState<string | null>(null);
+  const [pendingConnection, setPendingConnection] = React.useState<PendingConnection | null>(null);
+  const [dragState, setDragState] = React.useState<DragState>(null);
+  const currentZoom = zoom ?? internalZoom;
+  const currentSelectedNodeId = selectedNodeId ?? internalSelectedNodeId;
+  const currentSelectedEdgeId = selectedEdgeId ?? internalSelectedEdgeId;
+  const selectedNode = nodes.find((node) => node.id === currentSelectedNodeId);
+  const selectedEdge = edges.find((edge) => edge.id === currentSelectedEdgeId);
+
+  const commitZoom = (nextZoom: number) => {
+    const safeZoom = clampWorkflowValue(nextZoom, minZoom, maxZoom);
+    setInternalZoom(safeZoom);
+    onZoomChange?.(safeZoom);
+  };
+
+  const commitSelection = (selection: WorkflowBuilderSelection) => {
+    setInternalSelectedNodeId(selection?.type === "node" ? selection.id : null);
+    setInternalSelectedEdgeId(selection?.type === "edge" ? selection.id : null);
+    onSelectionChange?.(selection);
+  };
+
+  const selectNode = (node: WorkflowBuilderNodeData) => {
+    commitSelection({ type: "node", id: node.id, node });
+  };
+
+  const selectEdge = (edge: WorkflowBuilderEdge) => {
+    commitSelection({ type: "edge", id: edge.id, edge });
+  };
+
+  const deleteSelection = () => {
+    if (readOnly) {
+      return;
+    }
+
+    if (selectedNode) {
+      onNodesChange?.(nodes.filter((node) => node.id !== selectedNode.id));
+      onEdgesChange?.(
+        edges.filter(
+          (edge) => edge.sourceNodeId !== selectedNode.id && edge.targetNodeId !== selectedNode.id,
+        ),
+      );
+      commitSelection(null);
+      return;
+    }
+
+    if (selectedEdge) {
+      onEdgesChange?.(edges.filter((edge) => edge.id !== selectedEdge.id));
+      commitSelection(null);
+    }
+  };
+
+  const handlePointerMove = (
+    event: React.PointerEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>,
+  ) => {
+    if (!dragState || readOnly) {
+      return;
+    }
+    const pointer = getWorkflowPointer(event);
+    const nextNodes = nodes.map((node) =>
+      node.id === dragState.nodeId
+        ? {
+            ...node,
+            x: Math.round(dragState.originalX + (pointer.x - dragState.startX) / currentZoom),
+            y: Math.round(dragState.originalY + (pointer.y - dragState.startY) / currentZoom),
+          }
+        : node,
+    );
+    onNodesChange?.(nextNodes);
+  };
+
+  const handleNodePointerDown = (
+    event: React.PointerEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>,
+    node: WorkflowBuilderNodeData,
+  ) => {
+    selectNode(node);
+    if (
+      readOnly ||
+      (event.button !== 0 && event.button !== undefined) ||
+      isWorkflowPortEvent(event.target)
+    ) {
+      return;
+    }
+    const pointer = getWorkflowPointer(event);
+    setDragState({
+      nodeId: node.id,
+      startX: pointer.x,
+      startY: pointer.y,
+      originalX: node.x,
+      originalY: node.y,
+    });
+  };
+
+  const completeConnection = (targetNodeId: string, targetPortId: string) => {
+    if (!pendingConnection || readOnly) {
+      return;
+    }
+
+    const validity = getWorkflowBuilderConnectionValidity({
+      nodes,
+      edges,
+      sourceNodeId: pendingConnection.sourceNodeId,
+      sourcePortId: pendingConnection.sourcePortId,
+      targetNodeId,
+      targetPortId,
+    });
+
+    if (validity.valid) {
+      onEdgesChange?.([
+        ...edges,
+        {
+          id: `edge-${pendingConnection.sourceNodeId}-${pendingConnection.sourcePortId}-${targetNodeId}-${targetPortId}`,
+          sourceNodeId: pendingConnection.sourceNodeId,
+          sourcePortId: pendingConnection.sourcePortId,
+          targetNodeId,
+          targetPortId,
+        },
+      ]);
+    }
+
+    setPendingConnection(null);
+  };
+
+  const fitView = () => {
+    commitZoom(1);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Delete" || event.key === "Backspace") {
+      event.preventDefault();
+      deleteSelection();
+    }
+    if (event.key === "Escape") {
+      setPendingConnection(null);
+      commitSelection(null);
+    }
+  };
+
+  return (
+    <div
+      data-slot="workflow-builder"
+      data-read-only={readOnly ? "true" : undefined}
+      className={cn("space-y-3", className)}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      {...props}
+    >
+      <WorkflowBuilderToolbar
+        zoom={currentZoom}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        readOnly={readOnly}
+        selectedLabel={selectedNode?.label ?? selectedEdge?.id}
+        onZoomChange={commitZoom}
+        onFitView={fitView}
+        onDeleteSelection={deleteSelection}
+      />
+      <div
+        data-slot="workflow-builder-surface"
+        className="relative h-[32rem] overflow-auto rounded-md border bg-muted/20"
+        onPointerMove={handlePointerMove}
+        onPointerUp={() => setDragState(null)}
+        onPointerLeave={() => setDragState(null)}
+        onMouseMove={handlePointerMove}
+        onMouseUp={() => setDragState(null)}
+        onMouseLeave={() => setDragState(null)}
+      >
+        <div
+          data-slot="workflow-builder-viewport"
+          className="relative min-h-[52rem] min-w-[72rem] origin-top-left"
+          style={{ transform: `scale(${currentZoom})`, width: `${100 / currentZoom}%` }}
+        >
+          <svg
+            data-slot="workflow-builder-edges"
+            aria-label="Workflow connections"
+            className="pointer-events-none absolute inset-0 size-full overflow-visible"
+          >
+            {edges.map((edge) => {
+              const line = getWorkflowEdgeLine(nodes, edge);
+              const selected = edge.id === currentSelectedEdgeId;
+              return (
+                <g key={edge.id}>
+                  <path
+                    data-slot="workflow-builder-edge-hit"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Connection ${edge.id}`}
+                    d={line.path}
+                    className="pointer-events-auto cursor-pointer fill-none stroke-transparent"
+                    strokeWidth={16}
+                    onClick={() => selectEdge(edge)}
+                  />
+                  <path
+                    data-slot="workflow-builder-edge"
+                    data-status={edge.status}
+                    data-selected={selected ? "true" : undefined}
+                    d={line.path}
+                    className={cn(
+                      "fill-none stroke-border",
+                      selected && "stroke-primary",
+                      edge.status === "error" && "stroke-destructive",
+                      edge.status === "success" && "stroke-emerald-500",
+                      edge.status === "running" && "stroke-blue-500",
+                    )}
+                    strokeWidth={selected ? 3 : 2}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+          {nodes.map((node) => (
+            <WorkflowBuilderNode
+              key={node.id}
+              node={node}
+              selected={node.id === currentSelectedNodeId}
+              readOnly={readOnly}
+              pendingConnection={pendingConnection}
+              onNodeSelect={selectNode}
+              onStartConnection={(sourceNodeId, sourcePortId) =>
+                setPendingConnection({ sourceNodeId, sourcePortId })
+              }
+              onCompleteConnection={completeConnection}
+              onNodePointerDown={handleNodePointerDown}
+            />
+          ))}
+        </div>
+        <WorkflowBuilderMiniMap
+          nodes={nodes}
+          edges={edges}
+          selectedNodeId={currentSelectedNodeId}
+          className="absolute right-3 bottom-3"
+        />
+      </div>
+    </div>
+  );
+}
+
+function WorkflowBuilderNode({
+  node,
+  selected,
+  readOnly,
+  pendingConnection,
+  onNodeSelect,
+  onStartConnection,
+  onCompleteConnection,
+  onNodePointerDown,
+  className,
+  ...props
+}: WorkflowBuilderNodeProps) {
+  return (
+    <div
+      data-slot="workflow-builder-node"
+      data-node-id={node.id}
+      data-selected={selected ? "true" : undefined}
+      data-status={node.status}
+      className={cn(
+        "absolute w-[180px] rounded-md border bg-card p-3 text-left text-card-foreground shadow-sm transition-colors hover:bg-muted/30 data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
+        className,
+      )}
+      style={{ left: node.x, top: node.y }}
+      onPointerDown={(event) => onNodePointerDown?.(event, node)}
+      onMouseDown={(event) => onNodePointerDown?.(event, node)}
+      {...props}
+    >
+      <button
+        type="button"
+        data-slot="workflow-builder-node-select"
+        aria-label={node.label}
+        className="flex w-full items-start justify-between gap-2 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        onClick={(event) => {
+          event.stopPropagation();
+          onNodeSelect?.(node);
+        }}
+      >
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold">{node.label}</div>
+          {node.description ? (
+            <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">{node.description}</div>
+          ) : null}
+        </div>
+        {node.status ? <Badge variant={getWorkflowStatusVariant(node.status)}>{node.status}</Badge> : null}
+      </button>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+        <div className="space-y-1">
+          {(node.inputs ?? []).map((port) => (
+            <button
+              key={port.id}
+              type="button"
+              data-slot="workflow-builder-port"
+              data-port-direction="input"
+              disabled={readOnly || !pendingConnection}
+              aria-label={`Connect to ${node.label} ${port.label}`}
+              className="block max-w-full rounded-md px-1.5 py-0.5 text-left text-muted-foreground outline-none hover:bg-muted focus-visible:ring-[2px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60"
+              onClick={(event) => {
+                event.stopPropagation();
+                onCompleteConnection?.(node.id, port.id);
+              }}
+            >
+              <span className="mr-1 text-primary">in</span>
+              {port.label}
+            </button>
+          ))}
+        </div>
+        <div className="space-y-1 text-right">
+          {(node.outputs ?? []).map((port) => (
+            <button
+              key={port.id}
+              type="button"
+              data-slot="workflow-builder-port"
+              data-port-direction="output"
+              disabled={readOnly}
+              aria-label={`Start ${node.label} ${port.label}`}
+              className="ml-auto block max-w-full rounded-md px-1.5 py-0.5 text-right text-muted-foreground outline-none hover:bg-muted focus-visible:ring-[2px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60"
+              onClick={(event) => {
+                event.stopPropagation();
+                onStartConnection?.(node.id, port.id);
+              }}
+            >
+              {port.label}
+              <span className="ml-1 text-primary">out</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WorkflowBuilderToolbar({
+  zoom,
+  minZoom = 0.5,
+  maxZoom = 1.75,
+  readOnly,
+  selectedLabel,
+  onZoomChange,
+  onFitView,
+  onDeleteSelection,
+  className,
+  ...props
+}: WorkflowBuilderToolbarProps) {
+  return (
+    <div
+      data-slot="workflow-builder-toolbar"
+      role="toolbar"
+      aria-label="Workflow builder controls"
+      className={cn("flex flex-wrap items-center justify-between gap-2", className)}
+      {...props}
+    >
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <WorkflowIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+        Workflow
+        {selectedLabel ? <Badge variant="secondary">{selectedLabel}</Badge> : null}
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          aria-label="Zoom out"
+          disabled={zoom <= minZoom}
+          onClick={() => onZoomChange?.(zoom - 0.1)}
+        >
+          <MinusIcon />
+        </Button>
+        <span className="min-w-12 text-center text-xs text-muted-foreground">
+          {Math.round(zoom * 100)}%
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          aria-label="Zoom in"
+          disabled={zoom >= maxZoom}
+          onClick={() => onZoomChange?.(zoom + 0.1)}
+        >
+          <PlusIcon />
+        </Button>
+        <Button type="button" variant="outline" size="icon-sm" aria-label="Fit view" onClick={onFitView}>
+          <Maximize2Icon />
+        </Button>
+        <Separator orientation="vertical" className="h-6" />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          aria-label="Delete selected"
+          disabled={readOnly || !selectedLabel}
+          onClick={onDeleteSelection}
+        >
+          <Trash2Icon />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function WorkflowBuilderMiniMap({
+  nodes,
+  edges: _edges,
+  selectedNodeId,
+  className,
+  ...props
+}: WorkflowBuilderMiniMapProps) {
+  void _edges;
+  const bounds = getWorkflowBounds(nodes);
+
+  return (
+    <div
+      data-slot="workflow-builder-minimap"
+      role="img"
+      aria-label="Workflow minimap"
+      className={cn("h-24 w-36 rounded-md border bg-background/90 p-2 shadow-sm", className)}
+      {...props}
+    >
+      <div className="relative size-full">
+        {nodes.map((node) => {
+          const left = ((node.x - bounds.x) / bounds.width) * 100;
+          const top = ((node.y - bounds.y) / bounds.height) * 100;
+          return (
+            <span
+              key={node.id}
+              data-slot="workflow-builder-minimap-node"
+              data-selected={node.id === selectedNodeId ? "true" : undefined}
+              className="absolute size-2 rounded-sm bg-muted-foreground data-[selected=true]:bg-primary"
+              style={{ left: `${left}%`, top: `${top}%` }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function getWorkflowBuilderConnectionValidity({
+  nodes,
+  edges,
+  sourceNodeId,
+  sourcePortId,
+  targetNodeId,
+  targetPortId,
+}: WorkflowBuilderConnectionValidityInput): WorkflowBuilderConnectionValidity {
+  const sourceNode = nodes.find((node) => node.id === sourceNodeId);
+  const targetNode = nodes.find((node) => node.id === targetNodeId);
+  const sourcePort = sourceNode?.outputs?.find((port) => port.id === sourcePortId);
+  const targetPort = targetNode?.inputs?.find((port) => port.id === targetPortId);
+
+  if (!sourceNode || !targetNode || !sourcePort || !targetPort) {
+    return { valid: false, reason: "missing-port" };
+  }
+
+  if (sourceNodeId === targetNodeId) {
+    return { valid: false, reason: "self-connection" };
+  }
+
+  if (sourcePort.kind && targetPort.kind && sourcePort.kind !== targetPort.kind) {
+    return { valid: false, reason: "kind-mismatch" };
+  }
+
+  const duplicate = edges.some(
+    (edge) =>
+      edge.sourceNodeId === sourceNodeId &&
+      edge.sourcePortId === sourcePortId &&
+      edge.targetNodeId === targetNodeId &&
+      edge.targetPortId === targetPortId,
+  );
+
+  if (duplicate) {
+    return { valid: false, reason: "duplicate" };
+  }
+
+  return { valid: true };
+}
+
+function getWorkflowEdgeLine(nodes: WorkflowBuilderNodeData[], edge: WorkflowBuilderEdge) {
+  const sourceNode = nodes.find((node) => node.id === edge.sourceNodeId);
+  const targetNode = nodes.find((node) => node.id === edge.targetNodeId);
+  const source = sourceNode
+    ? { x: sourceNode.x + workflowNodeWidth, y: sourceNode.y + workflowNodeHeight / 2 }
+    : { x: 0, y: 0 };
+  const target = targetNode
+    ? { x: targetNode.x, y: targetNode.y + workflowNodeHeight / 2 }
+    : { x: 0, y: 0 };
+  const handle = Math.max(48, Math.abs(target.x - source.x) / 2);
+
+  return {
+    path: `M ${source.x} ${source.y} C ${source.x + handle} ${source.y}, ${target.x - handle} ${target.y}, ${target.x} ${target.y}`,
+  };
+}
+
+function getWorkflowBounds(nodes: WorkflowBuilderNodeData[]) {
+  const xs = nodes.map((node) => node.x);
+  const ys = nodes.map((node) => node.y);
+  const minX = Math.min(...xs, 0);
+  const minY = Math.min(...ys, 0);
+  const maxX = Math.max(...xs.map((x) => x + workflowNodeWidth), workflowNodeWidth);
+  const maxY = Math.max(...ys.map((y) => y + workflowNodeHeight), workflowNodeHeight);
+
+  return {
+    x: minX,
+    y: minY,
+    width: Math.max(maxX - minX, 1),
+    height: Math.max(maxY - minY, 1),
+  };
+}
+
+function getWorkflowStatusVariant(status: string): React.ComponentProps<typeof Badge>["variant"] {
+  if (status === "error") {
+    return "destructive";
+  }
+  if (status === "success" || status === "running") {
+    return "secondary";
+  }
+  return "outline";
+}
+
+function isWorkflowPortEvent(target: EventTarget) {
+  return target instanceof HTMLElement && Boolean(target.closest("[data-slot='workflow-builder-port']"));
+}
+
+function getWorkflowPointer(event: React.PointerEvent<HTMLElement> | React.MouseEvent<HTMLElement>) {
+  const nativeEvent = event.nativeEvent as (PointerEvent | MouseEvent) & {
+    pageX?: number;
+    pageY?: number;
+    x?: number;
+    y?: number;
+  };
+  const x = [nativeEvent.clientX, nativeEvent.pageX, nativeEvent.x, event.clientX].find(
+    (value) => typeof value === "number" && Number.isFinite(value),
+  );
+  const y = [nativeEvent.clientY, nativeEvent.pageY, nativeEvent.y, event.clientY].find(
+    (value) => typeof value === "number" && Number.isFinite(value),
+  );
+
+  return {
+    x: x ?? 0,
+    y: y ?? 0,
+  };
+}
+
+function clampWorkflowValue(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+export {
+  WorkflowBuilder,
+  WorkflowBuilderMiniMap,
+  WorkflowBuilderNode,
+  WorkflowBuilderToolbar,
+  getWorkflowBuilderConnectionValidity,
+};
+export type {
+  WorkflowBuilderConnectionValidity,
+  WorkflowBuilderConnectionValidityInput,
+  WorkflowBuilderEdge,
+  WorkflowBuilderNodeData,
+  WorkflowBuilderPort,
+  WorkflowBuilderProps,
+  WorkflowBuilderSelection,
+};
