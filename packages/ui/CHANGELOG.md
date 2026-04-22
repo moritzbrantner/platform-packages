@@ -1,5 +1,12 @@
 # @moritzbrantner/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- Add the newest UI workflow components, including data grids, asset browsers, annotation canvases, document workflows, theme and language switchers, avatar initials, and image cropper components.
+- Move the foundation workflow components into the UI package and remove the separate Foundation UI package surface.
+
 ## 0.4.0
 
 ### Minor Changes

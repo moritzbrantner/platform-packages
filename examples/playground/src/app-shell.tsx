@@ -370,26 +370,12 @@ const playgroundGridClassName = cn(
   "[mask-image:linear-gradient(180deg,rgba(0,0,0,0.25),transparent_82%)]",
 );
 
-function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-    >
-      {isDark ? "Light mode" : "Dark mode"}
-    </Button>
-  );
-}
-
 function AppFrame({ activePage, title, description, children }: AppShellProps) {
+  const { resolvedTheme, setTheme } = useTheme();
   const navbarGroups = useMemo(() => createNavbarGroups(activePage), [activePage]);
   const activeExample = useMemo(() => getPlaygroundExample(activePage), [activePage]);
   const activeGroup = useMemo(() => getPlaygroundGroup(activePage), [activePage]);
+  const themeMode = resolvedTheme === "dark" ? "dark" : "light";
 
   return (
     <div className={playgroundFrameClassName}>
@@ -400,10 +386,44 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
             <PlatformNavbar
               activeGroupId={activeGroup?.id}
               activeItemId={activePage}
-              actions={<ThemeToggle />}
+              accountMenu={{
+                user: {
+                  name: "Mira Brandt",
+                  email: "mira@example.com",
+                  initials: "MB",
+                },
+                items: [
+                  { id: "profile", label: "Profile" },
+                  { id: "settings", label: "Settings" },
+                  { id: "logout", label: "Sign out", destructive: true },
+                ],
+              }}
               brand="Platform packages"
               className="max-w-none"
               groups={navbarGroups}
+              notificationMenu={{
+                unreadCount: 2,
+                items: [
+                  {
+                    id: "workspace",
+                    title: "Workspace updated",
+                    description: "The playground package list was refreshed.",
+                    unread: true,
+                    meta: "2m",
+                  },
+                  {
+                    id: "release",
+                    title: "Release checks passed",
+                    description: "UI package verification finished successfully.",
+                    unread: true,
+                    meta: "1h",
+                  },
+                ],
+              }}
+              themeModeSwitch={{
+                mode: themeMode,
+                onModeChange: setTheme,
+              }}
               variant="desktop"
             />
             <div className="space-y-3">

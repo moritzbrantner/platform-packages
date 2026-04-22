@@ -6,10 +6,13 @@ import {
   FileTextIcon,
   HomeIcon,
   LayoutDashboardIcon,
+  LogOutIcon,
+  MessageCircleIcon,
   SettingsIcon,
+  UserCircleIcon,
+  UserPlusIcon,
 } from "lucide-react";
 
-import { Button } from "./button";
 import { PlatformNavbar, type PlatformNavbarGroup } from "./platform-navbar";
 
 const navigationGroups = [
@@ -77,7 +80,46 @@ const meta = {
     brand: "Platform",
     groups: navigationGroups,
     activeItemId: "components",
-    actions: <Button size="sm">Sign in</Button>,
+    accountMenu: {
+      user: {
+        name: "Mira Brandt",
+        email: "mira@example.com",
+        initials: "MB",
+      },
+      items: [
+        { id: "profile", label: "Profile", icon: <UserCircleIcon className="size-4" /> },
+        { id: "settings", label: "Settings", icon: <SettingsIcon className="size-4" /> },
+        {
+          id: "logout",
+          label: "Sign out",
+          destructive: true,
+          icon: <LogOutIcon className="size-4" />,
+        },
+      ],
+    },
+    notificationMenu: {
+      unreadCount: 2,
+      items: [
+        {
+          id: "follow",
+          title: "Jules followed you",
+          description: "Open the profile page to review their public activity.",
+          unread: true,
+          meta: "2m",
+          icon: <UserPlusIcon className="size-4" />,
+        },
+        {
+          id: "message",
+          title: "New workspace message",
+          description: "The product team mentioned you in the launch thread.",
+          unread: true,
+          meta: "1h",
+          icon: <MessageCircleIcon className="size-4" />,
+        },
+      ],
+      onMarkAllRead: () => {},
+    },
+    themeModeSwitch: true,
   },
   render: (args) => (
     <div className="min-h-[420px] bg-background p-6 text-foreground">

@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@moritzbrantner/data-density": "^0.1.1",
-    "@moritzbrantner/ui": "^0.4.0",
+    "@moritzbrantner/ui": "^0.5.0",
     "@turf/boolean-clockwise": "^7.3.5",
     "@turf/centroid": "^7.3.5",
     "@turf/helpers": "^7.3.5",

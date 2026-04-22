@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@moritzbrantner/linguistics-core": "^0.1.1",
-    "@moritzbrantner/ui": "^0.4.0"
+    "@moritzbrantner/ui": "^0.5.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

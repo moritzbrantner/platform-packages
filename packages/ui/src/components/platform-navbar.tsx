@@ -5,6 +5,9 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "../lib/cn";
+import { AccountMenu, type AccountMenuProps } from "./account-menu";
+import { NotificationMenu, type NotificationMenuProps } from "./notification-menu";
+import { ThemeModeSwitch, type ThemeModeSwitchProps } from "./theme-mode-switch";
 
 export type PlatformNavbarItem = {
   id: string;
@@ -41,6 +44,9 @@ type PlatformNavbarProps = Omit<React.ComponentPropsWithoutRef<"nav">, "children
   brand: React.ReactNode;
   groups: PlatformNavbarGroup[];
   actions?: React.ReactNode;
+  accountMenu?: AccountMenuProps;
+  notificationMenu?: NotificationMenuProps;
+  themeModeSwitch?: ThemeModeSwitchProps | boolean;
   variant?: PlatformNavbarVariant;
   activeItemId?: string;
   activeGroupId?: string;
@@ -175,6 +181,9 @@ export function PlatformNavbar({
   brand,
   groups,
   actions,
+  accountMenu,
+  notificationMenu,
+  themeModeSwitch,
   variant = "web",
   activeItemId,
   activeGroupId,
@@ -202,6 +211,7 @@ export function PlatformNavbar({
   const currentOpenGroupId = openGroupId !== undefined ? openGroupId : uncontrolledOpenGroupId;
   const openGroup =
     groups.find((group) => group.id === currentOpenGroupId && group.items.length > 0) ?? null;
+  const hasActions = Boolean(actions || accountMenu || notificationMenu || themeModeSwitch);
 
   const resolvedActiveGroupId =
     activeGroupId ??
@@ -479,6 +489,19 @@ export function PlatformNavbar({
       ) : null}
     </AnimatePresence>
   );
+  const renderedActions = hasActions ? (
+    <div
+      data-slot="platform-navbar-actions"
+      className="flex shrink-0 items-center justify-end gap-2"
+    >
+      {actions}
+      {themeModeSwitch ? (
+        <ThemeModeSwitch {...(themeModeSwitch === true ? {} : themeModeSwitch)} />
+      ) : null}
+      {notificationMenu ? <NotificationMenu {...notificationMenu} /> : null}
+      {accountMenu ? <AccountMenu {...accountMenu} /> : null}
+    </div>
+  ) : null;
 
   return (
     <LayoutGroup>
@@ -507,7 +530,7 @@ export function PlatformNavbar({
           >
             <div className={cn("flex min-w-0 items-center gap-2", config.brand)}>
               <div className="min-w-0 truncate text-sm font-semibold">{brand}</div>
-              {variant === "mobile" && actions ? <div className="shrink-0">{actions}</div> : null}
+              {variant === "mobile" ? renderedActions : null}
             </div>
 
             <div className={config.groups}>
@@ -561,7 +584,7 @@ export function PlatformNavbar({
               })}
             </div>
 
-            {variant !== "mobile" && actions ? <div className="shrink-0">{actions}</div> : null}
+            {variant !== "mobile" ? renderedActions : null}
           </motion.div>
         </nav>
       </div>

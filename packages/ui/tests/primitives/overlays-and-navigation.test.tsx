@@ -368,7 +368,6 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-
   test("shows shortcut hints based on pressed modifiers", async () => {
     render(
       <>
@@ -403,7 +402,6 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     });
   });
 
-
   test("opens dialogs from triggers and renders accessible content", async () => {
     render(
       <Dialog>
@@ -425,7 +423,6 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     expect(screen.getByText("Package details")).toBeTruthy();
     expect(screen.getByText("Stable downstream dialog contract.")).toBeTruthy();
   });
-
 
   test("opens a mobile slide with accessible drawer content", async () => {
     Object.defineProperty(window, "matchMedia", {
@@ -470,7 +467,6 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     expect(screen.getByText("Only show blockers.")).toBeTruthy();
   });
 
-
   test("renders an animated glass navbar with an open submenu", () => {
     render(
       <PlatformNavbar
@@ -496,6 +492,30 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     expect(screen.getByText("Directory and profiles.")).toBeTruthy();
   });
 
+  test("renders the composed theme, notification, and avatar actions", () => {
+    render(
+      <PlatformNavbar
+        brand="Platform"
+        groups={navigationGroups}
+        defaultOpenGroupId={null}
+        variant="web"
+        accountMenu={{
+          user: { name: "Mira Brandt", email: "mira@example.com", initials: "MB" },
+          items: [{ id: "profile", label: "Profile" }],
+        }}
+        notificationMenu={{
+          unreadCount: 3,
+          items: [{ id: "mention", title: "New mention", unread: true }],
+        }}
+        themeModeSwitch={{ defaultMode: "dark" }}
+      />,
+    );
+
+    expect(screen.getByRole("switch", { name: "Color mode" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Notifications, 3 unread" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Open account menu" })).toBeTruthy();
+    expect(screen.getByText("MB")).toBeTruthy();
+  });
 
   test("anchors the mobile navbar submenu to the centered navbar", async () => {
     render(
@@ -534,7 +554,6 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     });
   });
 
-
   test("keeps only the latest navbar submenu open across mounted navbars", async () => {
     render(
       <>
@@ -570,7 +589,6 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     expect(screen.queryByText("Directory and profiles.")).toBeNull();
   });
 
-
   test("opens submenus and reports selected navbar items", () => {
     const onNavigate = vi.fn();
 
@@ -595,5 +613,4 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
       expect.objectContaining({ id: "discover" }),
     );
   });
-
 });
