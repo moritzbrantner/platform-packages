@@ -37,6 +37,7 @@ export * from "./components/dropdown-menu";
 export * from "./components/empty";
 export * from "./components/field";
 export * from "./components/hover-card";
+export * from "./components/image-cropper";
 export * from "./components/input";
 export * from "./components/input-group";
 export * from "./components/input-otp";

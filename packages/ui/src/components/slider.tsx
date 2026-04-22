@@ -5,18 +5,41 @@ import { Slider as SliderPrimitive } from "radix-ui";
 
 import { cn } from "../lib/cn";
 
+type SliderProps = React.ComponentProps<typeof SliderPrimitive.Root> & {
+  thumbAriaLabel?: string;
+  thumbAriaLabelledBy?: string;
+};
+
 function Slider({
   className,
   defaultValue,
   value,
   min = 0,
   max = 100,
+  thumbAriaLabel,
+  thumbAriaLabelledBy,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: SliderProps) {
+  const rootAriaLabel = typeof props["aria-label"] === "string" ? props["aria-label"] : undefined;
   const _values = React.useMemo(
     () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
     [value, defaultValue, min, max],
   );
+  const getThumbAriaLabel = (index: number) => {
+    if (thumbAriaLabelledBy) {
+      return undefined;
+    }
+
+    if (thumbAriaLabel) {
+      return _values.length > 1 ? `${thumbAriaLabel} ${index + 1}` : thumbAriaLabel;
+    }
+
+    if (rootAriaLabel) {
+      return _values.length > 1 ? `${rootAriaLabel} ${index + 1}` : `${rootAriaLabel} handle`;
+    }
+
+    return _values.length > 1 ? `Slider thumb ${index + 1}` : "Slider thumb";
+  };
 
   return (
     <SliderPrimitive.Root
@@ -44,6 +67,8 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
+          aria-label={getThumbAriaLabel(index)}
+          aria-labelledby={thumbAriaLabelledBy}
           className="relative block size-3 shrink-0 rounded-full border border-ring bg-white ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
         />
       ))}
@@ -51,4 +76,4 @@ function Slider({
   );
 }
 
-export { Slider };
+export { Slider, type SliderProps };
