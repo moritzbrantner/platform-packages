@@ -4,7 +4,19 @@ import * as React from "react";
 
 import { cn } from "./lib/cn";
 
-type UiThemeName = "zleek" | "bobba" | "atlas" | "studio" | "paper";
+const uiThemeNames = ["bobba", "zleek", "atlas", "studio", "paper"] as const;
+
+type UiThemeName = (typeof uiThemeNames)[number];
+
+const defaultUiThemeName = "bobba" as const satisfies UiThemeName;
+
+const uiThemeLabels = {
+  bobba: "Bobba",
+  zleek: "Zleek",
+  atlas: "Atlas",
+  studio: "Studio",
+  paper: "Paper",
+} as const satisfies Record<UiThemeName, string>;
 
 type UiThemeConfig = {
   name: UiThemeName;
@@ -95,9 +107,12 @@ export {
   ZleekTheme,
   atlasTheme,
   bobbaTheme,
+  defaultUiThemeName,
   paperTheme,
   studioTheme,
   themeConfig,
+  uiThemeLabels,
+  uiThemeNames,
   zleekTheme,
 };
 export type { UiThemeConfig, UiThemeName, UiThemeProps };

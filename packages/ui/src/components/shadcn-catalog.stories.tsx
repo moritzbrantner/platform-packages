@@ -307,6 +307,9 @@ import {
   TypographyTableHead,
   TypographyTableHeader,
   TypographyTableRow,
+  defaultUiThemeName,
+  uiThemeLabels,
+  type UiThemeName,
 } from "../index";
 
 const catalogComponents = [
@@ -411,6 +414,10 @@ type CatalogSectionProps = {
   children: React.ReactNode;
 };
 
+type CatalogPreviewProps = {
+  designSystem?: UiThemeName;
+};
+
 function CatalogSection({ id, title, children }: CatalogSectionProps) {
   return (
     <section
@@ -427,18 +434,16 @@ function CatalogSection({ id, title, children }: CatalogSectionProps) {
   );
 }
 
-function CatalogPreview() {
+function CatalogPreview({ designSystem = defaultUiThemeName }: CatalogPreviewProps) {
   return (
     <TooltipProvider>
       <div className="mx-auto grid w-full max-w-7xl gap-6 p-6">
         <div className="grid gap-2">
           <Badge variant="outline" className="w-fit">
-            shadcn/ui catalog
+            {uiThemeLabels[designSystem]}
           </Badge>
           <TypographyH1 className="text-3xl">Basic components</TypographyH1>
-          <TypographyLead>
-            Glass styled primitives with sharp edges and motion-ready interaction states.
-          </TypographyLead>
+          <TypographyLead>Interactive primitives for package surfaces.</TypographyLead>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -1297,6 +1302,15 @@ const meta = {
   title: "Components/Shadcn catalog",
   component: CatalogPreview,
   tags: ["autodocs", "test"],
+  args: {
+    designSystem: defaultUiThemeName,
+  },
+  argTypes: {
+    designSystem: {
+      control: false,
+      table: { disable: true },
+    },
+  },
   parameters: {
     layout: "fullscreen",
   },
@@ -1306,10 +1320,48 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+const assertCatalogSections: Story["play"] = async ({ canvas }) => {
+  for (const component of catalogComponents) {
+    await expect(canvas.getByTestId(`catalog-${component}`)).toBeVisible();
+  }
+};
+
 export const FullCatalog: Story = {
-  play: async ({ canvas }) => {
-    for (const component of catalogComponents) {
-      await expect(canvas.getByTestId(`catalog-${component}`)).toBeVisible();
-    }
+  globals: { designSystem: defaultUiThemeName },
+  play: assertCatalogSections,
+};
+
+export const Bobba: Story = {
+  args: { designSystem: "bobba" },
+  globals: { designSystem: "bobba" },
+  play: assertCatalogSections,
+};
+
+export const Zleek: Story = {
+  args: { designSystem: "zleek" },
+  globals: { designSystem: "zleek" },
+  play: assertCatalogSections,
+};
+
+export const Atlas: Story = {
+  args: { designSystem: "atlas" },
+  globals: { designSystem: "atlas" },
+  play: assertCatalogSections,
+};
+
+export const Studio: Story = {
+  args: { designSystem: "studio" },
+  globals: { designSystem: "studio" },
+  play: assertCatalogSections,
+};
+
+export const Paper: Story = {
+  args: { designSystem: "paper" },
+  globals: { designSystem: "paper" },
+  parameters: {
+    a11y: {
+      test: "todo",
+    },
   },
+  play: assertCatalogSections,
 };

@@ -240,6 +240,7 @@
         "@moritzbrantner/upload-playbook": "workspace:*",
       },
       "devDependencies": {
+        "@storybook/react-vite": "^10.3.5",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
         "react": "^19.2.0",

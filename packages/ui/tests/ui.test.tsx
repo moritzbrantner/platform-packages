@@ -91,30 +91,21 @@ import {
   ToolbarGroup,
   ToolbarSpacer,
   ToolbarTitle,
+  defaultUiThemeName,
   themeConfig,
+  uiThemeLabels,
+  uiThemeNames,
   type UiThemeName,
 } from "../src";
-import {
-  AtlasTheme,
-  atlasTheme,
-  uiTheme as atlasUiTheme,
-} from "../src/atlas";
+import { AtlasTheme, atlasTheme, uiTheme as atlasUiTheme } from "../src/atlas";
 import {
   BobbaTheme,
   Button as BobbaButton,
   bobbaTheme,
   uiTheme as bobbaUiTheme,
 } from "../src/bobba";
-import {
-  PaperTheme,
-  paperTheme,
-  uiTheme as paperUiTheme,
-} from "../src/paper";
-import {
-  StudioTheme,
-  studioTheme,
-  uiTheme as studioUiTheme,
-} from "../src/studio";
+import { PaperTheme, paperTheme, uiTheme as paperUiTheme } from "../src/paper";
+import { StudioTheme, studioTheme, uiTheme as studioUiTheme } from "../src/studio";
 import {
   Button as ZleekButton,
   ZleekTheme,
@@ -265,8 +256,8 @@ describe("@moritzbrantner/ui", () => {
     expect(packageJson.peerDependencies.react).toBeTruthy();
     expect(packageJson.peerDependencies["react-dom"]).toBeTruthy();
     expect(packageJson.files).toEqual(
-        expect.arrayContaining(["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"]),
-      );
+      expect.arrayContaining(["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"]),
+    );
     expect(packageJson.sideEffects).toEqual(expect.arrayContaining(["*.css"]));
     expect(packageJson.exports["./styles.css"]).toBe("./styles.css");
     expect(packageJson.exports["./zleek/styles.css"]).toBe("./zleek/styles.css");
@@ -343,6 +334,9 @@ describe("@moritzbrantner/ui", () => {
     expect(screen.getByRole("button", { name: "Studio action" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Paper action" })).toBeTruthy();
     expect(Object.keys(themeConfig).sort()).toEqual([...allThemeNames].sort());
+    expect(uiThemeNames).toEqual(["bobba", "zleek", "atlas", "studio", "paper"]);
+    expect(defaultUiThemeName).toBe("bobba");
+    expect(uiThemeLabels.paper).toBe("Paper");
     expect(zleekTheme.name).toBe("zleek");
     expect(bobbaTheme.name).toBe("bobba");
     expect(atlasTheme.name).toBe("atlas");

@@ -103,13 +103,15 @@ export function Shell({ theme }: { theme: UiThemeName }) {
 Theme metadata is also available from subpaths:
 
 ```ts
-import { themeConfig } from "@moritzbrantner/ui/themes";
+import { themeConfig, uiThemeNames } from "@moritzbrantner/ui/themes";
 import { uiTheme as zleekTheme } from "@moritzbrantner/ui/zleek";
 import { uiTheme as bobbaTheme } from "@moritzbrantner/ui/bobba";
 import { uiTheme as atlasTheme } from "@moritzbrantner/ui/atlas";
 import { uiTheme as studioTheme } from "@moritzbrantner/ui/studio";
 import { uiTheme as paperTheme } from "@moritzbrantner/ui/paper";
 ```
+
+Storybook uses the same theme registry for its design-system toolbar and for the per-style component catalog stories.
 
 ## Contributing
 
