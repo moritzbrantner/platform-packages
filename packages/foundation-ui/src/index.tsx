@@ -22,6 +22,7 @@ import {
   validateReportProblemPayload,
   type AppRole,
   type AppSettings,
+  type NotificationFeedItem,
   type NotificationsPageData,
   type ProblemArea,
   type ProfileDirectoryEntry,
@@ -39,7 +40,21 @@ import {
   uploadTypeGroups,
   type UploadPlatform,
 } from "@moritzbrantner/upload-playbook";
-import { Button, PlatformNavbar, type PlatformNavbarRenderLinkProps } from "@moritzbrantner/ui";
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  PlatformNavbar,
+  type PlatformNavbarRenderLinkProps,
+} from "@moritzbrantner/ui";
 
 export type FoundationPlatform = "web" | "electron" | "tauri";
 
@@ -99,6 +114,14 @@ type SettingsLabelKey =
   | "workflow"
   | "notifications"
   | "preview";
+type AvatarMenuLabelKey =
+  | "open"
+  | "signedInAs"
+  | "guest"
+  | "profile"
+  | "social"
+  | "settings"
+  | "logout";
 type ReportProblemLabelKey =
   | "title"
   | "description"
@@ -121,6 +144,7 @@ export type FoundationLabels = {
   people?: Partial<Record<PeopleLabelKey, string>>;
   notifications?: Partial<Record<NotificationsLabelKey, string>>;
   settings?: Partial<Record<SettingsLabelKey, string>>;
+  avatarMenu?: Partial<Record<AvatarMenuLabelKey, string>>;
   reportProblem?: Partial<Record<ReportProblemLabelKey, string>>;
   dataEntry?: Partial<Record<DataEntryLabelKey, string>>;
   uploads?: Partial<Record<UploadsLabelKey, string>>;
@@ -135,6 +159,7 @@ type ResolvedFoundationLabels = {
   people: Record<PeopleLabelKey, string>;
   notifications: Record<NotificationsLabelKey, string>;
   settings: Record<SettingsLabelKey, string>;
+  avatarMenu: Record<AvatarMenuLabelKey, string>;
   reportProblem: Record<ReportProblemLabelKey, string>;
   dataEntry: Record<DataEntryLabelKey, string>;
   uploads: Record<UploadsLabelKey, string>;
@@ -258,6 +283,15 @@ const defaultLabels: ResolvedFoundationLabels = {
     notifications: "Notifications",
     preview: "Preview",
   },
+  avatarMenu: {
+    open: "Open account menu",
+    signedInAs: "Signed in as",
+    guest: "Guest",
+    profile: "Profile",
+    social: "Social",
+    settings: "Settings",
+    logout: "Sign out",
+  },
   reportProblem: {
     title: "Report a problem",
     description: "Send a structured issue report to the host application backend.",
@@ -355,9 +389,257 @@ export function FoundationNavbar({ activeRouteId }: { activeRouteId?: Foundation
           })),
         },
       ]}
+      actions={<FoundationNavbarActions />}
       onNavigate={(item) => runtime.navigate(item.id as FoundationRouteId)}
       renderLink={(props) => renderFoundationLink(runtime, props)}
     />
+  );
+}
+
+export function FoundationNavbarActions() {
+  return (
+    <div style={navbarActionsStyle}>
+      <FoundationNotificationsMenu />
+      <FoundationAvatarMenu />
+    </div>
+  );
+}
+
+export function FoundationAvatarMenu({
+  align = "end",
+  sideOffset = 8,
+}: {
+  align?: "start" | "center" | "end";
+  sideOffset?: number;
+}) {
+  const runtime = useFoundationRuntime();
+  const labels = resolveLabels(runtime.labels);
+  const [authState, setAuthState] = React.useState<AuthState | null>(null);
+  const [profile, setProfile] = React.useState<FoundationProfile | null>(null);
+  const [pendingLogout, setPendingLogout] = React.useState(false);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    Promise.all([
+      readAuthState(runtime.backend),
+      Promise.resolve(runtime.backend.getProfile?.() ?? defaultProfile()),
+    ]).then(([nextAuthState, nextProfile]) => {
+      if (mounted) {
+        setAuthState(nextAuthState);
+        setProfile(nextProfile);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [runtime.backend]);
+
+  const user = authState?.session?.user ?? null;
+  const displayName = profile?.displayName ?? user?.displayName ?? labels.avatarMenu.guest;
+  const imageUrl = profile?.imageUrl ?? null;
+  const headline = profile?.headline ?? user?.email ?? "";
+
+  function navigate(routeId: FoundationRouteId) {
+    runtime.navigate(routeId);
+  }
+
+  async function handleLogout() {
+    setPendingLogout(true);
+    try {
+      await runtime.backend.logout();
+      setAuthState(await readAuthState(runtime.backend));
+
+      if (isRouteEnabled(runtime, "auth")) {
+        runtime.navigate("auth");
+      }
+    } finally {
+      setPendingLogout(false);
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={labels.avatarMenu.open}
+          title={labels.avatarMenu.open}
+          style={avatarTriggerStyle}
+        >
+          <Avatar size="default">
+            {imageUrl ? <AvatarImage src={imageUrl} alt={displayName} /> : null}
+            <AvatarFallback name={displayName} />
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={align} sideOffset={sideOffset} style={avatarMenuContentStyle}>
+        <DropdownMenuLabel style={menuHeaderStyle}>
+          <span style={menuHeaderKickerStyle}>{labels.avatarMenu.signedInAs}</span>
+          <span style={menuHeaderTitleStyle}>{displayName}</span>
+          {headline ? <span style={menuHeaderMetaStyle}>{headline}</span> : null}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!isRouteEnabled(runtime, "profile")}
+          onSelect={() => navigate("profile")}
+        >
+          <ProfileIcon />
+          {labels.avatarMenu.profile}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!isRouteEnabled(runtime, "people")}
+          onSelect={() => navigate("people")}
+        >
+          <SocialIcon />
+          {labels.avatarMenu.social}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!isRouteEnabled(runtime, "settings")}
+          onSelect={() => navigate("settings")}
+        >
+          <SettingsIcon />
+          {labels.avatarMenu.settings}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          disabled={pendingLogout}
+          onSelect={() => {
+            void handleLogout();
+          }}
+        >
+          <LogoutIcon />
+          {labels.avatarMenu.logout}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function FoundationNotificationsMenu({
+  align = "end",
+  sideOffset = 8,
+  maxItems = 5,
+}: {
+  align?: "start" | "center" | "end";
+  sideOffset?: number;
+  maxItems?: number;
+}) {
+  const runtime = useFoundationRuntime();
+  const labels = resolveLabels(runtime.labels);
+  const [data, setData] = React.useState<NotificationsPageData | null>(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    Promise.resolve(runtime.backend.getNotifications?.() ?? createNotificationsPageData()).then(
+      (nextData) => {
+        if (mounted) {
+          setData(nextData);
+        }
+      },
+    );
+
+    return () => {
+      mounted = false;
+    };
+  }, [runtime.backend]);
+
+  async function markRead(notificationId: string) {
+    const nextData = await Promise.resolve(
+      runtime.backend.markNotificationRead?.(notificationId) ??
+        markNotificationRead(data ?? createNotificationsPageData(), notificationId),
+    );
+    setData(nextData);
+  }
+
+  async function markAllRead() {
+    const nextData = await Promise.resolve(
+      runtime.backend.markAllNotificationsRead?.() ??
+        markAllNotificationsRead(data ?? createNotificationsPageData()),
+    );
+    setData(nextData);
+  }
+
+  async function handleNotificationSelect(item: NotificationFeedItem) {
+    if (item.status !== "read") {
+      await markRead(item.id);
+    }
+
+    const routeId = getRouteIdFromHref(item.href);
+    if (routeId && isRouteEnabled(runtime, routeId)) {
+      runtime.navigate(routeId);
+    }
+  }
+
+  const visibleItems = (data?.items ?? []).slice(0, maxItems);
+  const unreadCount = data?.unreadCount ?? 0;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={labels.notifications.title}
+          title={labels.notifications.title}
+          style={notificationTriggerStyle}
+        >
+          <BellIcon />
+          {unreadCount > 0 ? (
+            <span aria-hidden="true" style={notificationBadgeStyle}>
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          ) : null}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align={align}
+        sideOffset={sideOffset}
+        style={notificationsMenuContentStyle}
+      >
+        <DropdownMenuLabel style={notificationsHeaderStyle}>
+          <span>{labels.notifications.title}</span>
+          <span style={notificationsUnreadStyle}>
+            {unreadCount} {labels.notifications.unread}
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {visibleItems.length === 0 ? (
+          <DropdownMenuLabel style={emptyMenuLabelStyle}>
+            {labels.notifications.empty}
+          </DropdownMenuLabel>
+        ) : (
+          visibleItems.map((item) => (
+            <DropdownMenuItem
+              key={item.id}
+              onSelect={() => {
+                void handleNotificationSelect(item);
+              }}
+              style={notificationItemStyle}
+            >
+              <span style={notificationItemContentStyle}>
+                <span style={notificationTitleRowStyle}>
+                  <span style={notificationTitleStyle}>{item.title}</span>
+                  {item.status === "unread" ? (
+                    <Avatar size="xs" aria-hidden="true" style={notificationDotAvatarStyle}>
+                      <AvatarBadge style={notificationDotStyle} />
+                    </Avatar>
+                  ) : null}
+                </span>
+                <span style={notificationBodyStyle}>{item.body}</span>
+              </span>
+            </DropdownMenuItem>
+          ))
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled={unreadCount === 0} onSelect={() => void markAllRead()}>
+          <CheckAllIcon />
+          {labels.notifications.markAllRead}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -1169,6 +1451,7 @@ function resolveLabels(labels?: FoundationLabels): ResolvedFoundationLabels {
     people: { ...defaultLabels.people, ...labels?.people },
     notifications: { ...defaultLabels.notifications, ...labels?.notifications },
     settings: { ...defaultLabels.settings, ...labels?.settings },
+    avatarMenu: { ...defaultLabels.avatarMenu, ...labels?.avatarMenu },
     reportProblem: { ...defaultLabels.reportProblem, ...labels?.reportProblem },
     dataEntry: { ...defaultLabels.dataEntry, ...labels?.dataEntry },
     uploads: { ...defaultLabels.uploads, ...labels?.uploads },
@@ -1176,9 +1459,33 @@ function resolveLabels(labels?: FoundationLabels): ResolvedFoundationLabels {
 }
 
 function getEnabledRoutes(runtime: FoundationRuntime) {
-  return routeOrder.filter(
-    (routeId) => runtime.capabilities?.[routeCapabilities[routeId]] !== false,
-  );
+  return routeOrder.filter((routeId) => isRouteEnabled(runtime, routeId));
+}
+
+function isRouteEnabled(runtime: FoundationRuntime, routeId: FoundationRouteId) {
+  return runtime.capabilities?.[routeCapabilities[routeId]] !== false;
+}
+
+function getRouteIdFromHref(href: string | null): FoundationRouteId | null {
+  if (!href) {
+    return null;
+  }
+
+  const route = href.replace(/^#/, "").replace(/^\//, "").split("/")[0];
+
+  switch (route) {
+    case "auth":
+    case "profile":
+    case "people":
+    case "notifications":
+    case "settings":
+    case "report-problem":
+    case "data-entry":
+    case "uploads":
+      return route;
+    default:
+      return null;
+  }
 }
 
 async function readAuthState(backend: FoundationBackend): Promise<AuthState> {
@@ -1251,6 +1558,129 @@ function InputField({
   );
 }
 
+function BellIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      {...props}
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+    </svg>
+  );
+}
+
+function ProfileIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      {...props}
+    >
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+    </svg>
+  );
+}
+
+function SocialIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      {...props}
+    >
+      <path d="M16 11a4 4 0 1 0-8 0" />
+      <path d="M3 21a7 7 0 0 1 14 0" />
+      <path d="M17 7a3 3 0 0 1 0 6" />
+      <path d="M19 21a5 5 0 0 0-3-4.6" />
+    </svg>
+  );
+}
+
+function SettingsIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      {...props}
+    >
+      <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 1 1-4 0V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.4 7a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 20.2 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.6 1Z" />
+    </svg>
+  );
+}
+
+function LogoutIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      {...props}
+    >
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </svg>
+  );
+}
+
+function CheckAllIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      {...props}
+    >
+      <path d="m3 12 3 3 6-7" />
+      <path d="m12 15 2 2 7-9" />
+    </svg>
+  );
+}
+
 const shellStyle: React.CSSProperties = {
   display: "grid",
   gap: 24,
@@ -1296,4 +1726,143 @@ const panelStyle: React.CSSProperties = {
   border: "1px solid currentColor",
   borderRadius: 8,
   padding: 16,
+};
+
+const navbarActionsStyle: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+};
+
+const avatarTriggerStyle: React.CSSProperties = {
+  appearance: "none",
+  width: 40,
+  height: 40,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: 0,
+  borderRadius: "999px",
+  background: "transparent",
+  color: "inherit",
+  cursor: "pointer",
+  padding: 4,
+};
+
+const notificationTriggerStyle: React.CSSProperties = {
+  appearance: "none",
+  width: 40,
+  height: 40,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: 0,
+  borderRadius: "999px",
+  background: "transparent",
+  color: "inherit",
+  cursor: "pointer",
+  position: "relative",
+};
+
+const notificationBadgeStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 3,
+  right: 3,
+  minWidth: 16,
+  height: 16,
+  borderRadius: "999px",
+  padding: "0 4px",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "currentColor",
+  color: "Canvas",
+  fontSize: 10,
+  fontWeight: 700,
+  lineHeight: 1,
+};
+
+const avatarMenuContentStyle: React.CSSProperties = {
+  width: 240,
+};
+
+const notificationsMenuContentStyle: React.CSSProperties = {
+  width: 360,
+  maxWidth: "calc(100vw - 32px)",
+};
+
+const menuHeaderStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 2,
+  whiteSpace: "normal",
+};
+
+const menuHeaderKickerStyle: React.CSSProperties = {
+  fontSize: 11,
+  opacity: 0.72,
+};
+
+const menuHeaderTitleStyle: React.CSSProperties = {
+  fontSize: 14,
+  fontWeight: 700,
+};
+
+const menuHeaderMetaStyle: React.CSSProperties = {
+  fontSize: 12,
+  opacity: 0.72,
+};
+
+const notificationsHeaderStyle: React.CSSProperties = {
+  display: "flex",
+  gap: 12,
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+const notificationsUnreadStyle: React.CSSProperties = {
+  fontSize: 11,
+  opacity: 0.72,
+};
+
+const emptyMenuLabelStyle: React.CSSProperties = {
+  padding: "12px 6px",
+  whiteSpace: "normal",
+};
+
+const notificationItemStyle: React.CSSProperties = {
+  alignItems: "flex-start",
+  whiteSpace: "normal",
+};
+
+const notificationItemContentStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+  minWidth: 0,
+};
+
+const notificationTitleRowStyle: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+  minWidth: 0,
+};
+
+const notificationTitleStyle: React.CSSProperties = {
+  fontWeight: 700,
+};
+
+const notificationBodyStyle: React.CSSProperties = {
+  fontSize: 12,
+  lineHeight: 1.45,
+  opacity: 0.72,
+};
+
+const notificationDotAvatarStyle: React.CSSProperties = {
+  overflow: "visible",
+};
+
+const notificationDotStyle: React.CSSProperties = {
+  top: 0,
+  right: 0,
+  bottom: "auto",
 };

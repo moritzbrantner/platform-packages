@@ -6,6 +6,8 @@ import {
   AuthScreen,
   DataEntryScreen,
   FoundationAppShell,
+  FoundationAvatarMenu,
+  FoundationNotificationsMenu,
   FoundationProvider,
   NotificationsScreen,
   PeopleScreen,
@@ -21,12 +23,14 @@ import {
 function renderWithRuntime(
   ui: React.ReactElement,
   backend: FoundationBackend = createMemoryFoundationBackend(),
+  runtimeOverrides: Partial<FoundationRuntime> = {},
 ) {
   const runtime: FoundationRuntime = {
     platform: "web",
     locale: "en-US",
     backend,
     navigate: vi.fn(),
+    ...runtimeOverrides,
   };
 
   return render(<FoundationProvider runtime={runtime}>{ui}</FoundationProvider>);
@@ -79,6 +83,38 @@ describe("@moritzbrantner/foundation-ui", () => {
     await waitFor(() => expect(updateSettings).toHaveBeenCalledWith({ compactSpacing: true }));
   });
 
+  test("avatar menu navigates account routes and logs out", async () => {
+    const backend = createMemoryFoundationBackend();
+    const logout = vi.spyOn(backend, "logout");
+    const navigate = vi.fn();
+
+    renderWithRuntime(<FoundationAvatarMenu />, backend, { navigate });
+
+    openDropdown(await screen.findByRole("button", { name: "Open account menu" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Social/ }));
+    expect(navigate).toHaveBeenCalledWith("people");
+
+    openDropdown(await screen.findByRole("button", { name: "Open account menu" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Sign out/ }));
+
+    await waitFor(() => expect(logout).toHaveBeenCalled());
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith("auth"));
+  });
+
+  test("notifications menu marks a notification read", async () => {
+    const backend = createMemoryFoundationBackend();
+    const markNotificationRead = vi.spyOn(backend, "markNotificationRead");
+    const navigate = vi.fn();
+
+    renderWithRuntime(<FoundationNotificationsMenu />, backend, { navigate });
+
+    openDropdown(await screen.findByRole("button", { name: "Notifications" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Jules followed you/ }));
+
+    await waitFor(() => expect(markNotificationRead).toHaveBeenCalledWith("notif-follow"));
+    expect(navigate).toHaveBeenCalledWith("people");
+  });
+
   test("report problem validates and submits through the backend", async () => {
     const backend = createMemoryFoundationBackend();
     const submitReportProblem = vi.spyOn(backend, "submitReportProblem");
@@ -110,3 +146,7 @@ describe("@moritzbrantner/foundation-ui", () => {
     expect(await screen.findByText(/launch-photo\.heic/)).toBeTruthy();
   });
 });
+
+function openDropdown(trigger: HTMLElement) {
+  fireEvent.keyDown(trigger, { key: "Enter", code: "Enter" });
+}
