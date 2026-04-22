@@ -36,6 +36,16 @@ The Bobba subpath is an alias for the default stylesheet:
 import "@moritzbrantner/ui/bobba/styles.css";
 ```
 
+Additional visual systems are available for specific product surfaces:
+
+```ts
+import "@moritzbrantner/ui/atlas/styles.css";
+import "@moritzbrantner/ui/studio/styles.css";
+import "@moritzbrantner/ui/paper/styles.css";
+```
+
+Use `atlas` for dense dashboards and analytics, `studio` for creative tooling, and `paper` for document or research-heavy interfaces.
+
 ## Components
 
 Root imports are the stable default for application code:
@@ -76,7 +86,7 @@ Public components should accept `className`, forward standard DOM props, expose 
 
 ## Theme Metadata
 
-`UiTheme`, `BobbaTheme`, and `ZleekTheme` add theme metadata classes and `data-ui-theme` attributes around a subtree. They do not scope CSS tokens by themselves; the active visual theme still comes from the single stylesheet imported by the app.
+`UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add theme metadata classes and `data-ui-theme` attributes around a subtree. They do not scope CSS tokens by themselves; the active visual theme still comes from the single stylesheet imported by the app.
 
 ```tsx
 import { UiTheme, type UiThemeName } from "@moritzbrantner/ui";
@@ -96,6 +106,9 @@ Theme metadata is also available from subpaths:
 import { themeConfig } from "@moritzbrantner/ui/themes";
 import { uiTheme as zleekTheme } from "@moritzbrantner/ui/zleek";
 import { uiTheme as bobbaTheme } from "@moritzbrantner/ui/bobba";
+import { uiTheme as atlasTheme } from "@moritzbrantner/ui/atlas";
+import { uiTheme as studioTheme } from "@moritzbrantner/ui/studio";
+import { uiTheme as paperTheme } from "@moritzbrantner/ui/paper";
 ```
 
 ## Contributing

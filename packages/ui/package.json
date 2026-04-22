@@ -13,7 +13,10 @@
     "dist",
     "styles.css",
     "zleek",
-    "bobba"
+    "bobba",
+    "atlas",
+    "studio",
+    "paper"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -30,6 +33,18 @@
       "types": "./dist/bobba.d.ts",
       "import": "./dist/bobba.js"
     },
+    "./atlas": {
+      "types": "./dist/atlas.d.ts",
+      "import": "./dist/atlas.js"
+    },
+    "./studio": {
+      "types": "./dist/studio.d.ts",
+      "import": "./dist/studio.js"
+    },
+    "./paper": {
+      "types": "./dist/paper.d.ts",
+      "import": "./dist/paper.js"
+    },
     "./themes": {
       "types": "./dist/themes.d.ts",
       "import": "./dist/themes.js"
@@ -44,7 +59,10 @@
     },
     "./styles.css": "./styles.css",
     "./zleek/styles.css": "./zleek/styles.css",
-    "./bobba/styles.css": "./bobba/styles.css"
+    "./bobba/styles.css": "./bobba/styles.css",
+    "./atlas/styles.css": "./atlas/styles.css",
+    "./studio/styles.css": "./studio/styles.css",
+    "./paper/styles.css": "./paper/styles.css"
   },
   "sideEffects": [
     "*.css"

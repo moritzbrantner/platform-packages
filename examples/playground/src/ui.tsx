@@ -120,18 +120,33 @@ const glassPanelClass =
 const glassTileClass =
   "rounded-none border border-border/40 bg-muted/25 supports-backdrop-filter:backdrop-blur-md";
 const uiStyleStorageKey = "platform-playground-ui-style";
-const zleekStylesheetElementId = "platform-playground-zleek-stylesheet";
+const themeStylesheetElementId = "platform-playground-theme-stylesheet";
 
 const uiStyleOptions = [
   {
     value: "bobba",
     label: "Bobba",
-    description: "Default glass UI style",
+    description: "Default package UI style",
   },
   {
     value: "zleek",
     label: "Zleek",
     description: "Sharper Zleek package style",
+  },
+  {
+    value: "atlas",
+    label: "Atlas",
+    description: "Dense dashboard and data style",
+  },
+  {
+    value: "studio",
+    label: "Studio",
+    description: "Creative tooling and media style",
+  },
+  {
+    value: "paper",
+    label: "Paper",
+    description: "Document and research style",
   },
 ] as const satisfies ReadonlyArray<{
   value: UiThemeName;
@@ -139,8 +154,24 @@ const uiStyleOptions = [
   description: string;
 }>;
 
+const uiStyleLoaders = {
+  zleek: () => import("@moritzbrantner/ui/zleek/styles.css?inline"),
+  atlas: () => import("@moritzbrantner/ui/atlas/styles.css?inline"),
+  studio: () => import("@moritzbrantner/ui/studio/styles.css?inline"),
+  paper: () => import("@moritzbrantner/ui/paper/styles.css?inline"),
+} as const satisfies Record<
+  Exclude<UiThemeName, "bobba">,
+  () => Promise<{ default: string }>
+>;
+
 function isUiThemeName(value: string | null): value is UiThemeName {
-  return value === "bobba" || value === "zleek";
+  return (
+    value === "bobba" ||
+    value === "zleek" ||
+    value === "atlas" ||
+    value === "studio" ||
+    value === "paper"
+  );
 }
 
 function getInitialUiStyle(): UiThemeName {
@@ -160,35 +191,33 @@ function usePlaygroundUiStyle(style: UiThemeName) {
     document.documentElement.dataset.uiStyle = style;
 
     const existingStyleElement = document.getElementById(
-      zleekStylesheetElementId,
+      themeStylesheetElementId,
     ) as HTMLStyleElement | null;
 
-    if (style === "zleek") {
-      const styleElement = existingStyleElement ?? document.createElement("style");
-      styleElement.id = zleekStylesheetElementId;
-
-      if (!existingStyleElement) {
-        document.head.append(styleElement);
-      }
-
-      void import("@moritzbrantner/ui/zleek/styles.css?inline").then(
-        ({ default: zleekStylesheetCss }) => {
-          if (!cancelled) {
-            styleElement.textContent = zleekStylesheetCss;
-          }
-        },
-      );
+    if (style === "bobba") {
+      existingStyleElement?.remove();
 
       return () => {
-        cancelled = true;
-        styleElement.remove();
         delete document.documentElement.dataset.uiStyle;
       };
     }
 
-    existingStyleElement?.remove();
+    const styleElement = existingStyleElement ?? document.createElement("style");
+    styleElement.id = themeStylesheetElementId;
+
+    if (!existingStyleElement) {
+      document.head.append(styleElement);
+    }
+
+    void uiStyleLoaders[style]().then(({ default: stylesheetCss }) => {
+      if (!cancelled) {
+        styleElement.textContent = stylesheetCss;
+      }
+    });
 
     return () => {
+      cancelled = true;
+      styleElement.remove();
       delete document.documentElement.dataset.uiStyle;
     };
   }, [style]);

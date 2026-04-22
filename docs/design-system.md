@@ -26,6 +26,9 @@ The package also exposes theme-specific stylesheets:
 ```tsx
 import "@moritzbrantner/ui/zleek/styles.css";
 import "@moritzbrantner/ui/bobba/styles.css";
+import "@moritzbrantner/ui/atlas/styles.css";
+import "@moritzbrantner/ui/studio/styles.css";
+import "@moritzbrantner/ui/paper/styles.css";
 ```
 
 Use root component imports by default:
@@ -72,7 +75,15 @@ Avoid:
 
 Tokens are semantic CSS custom properties in `packages/ui/styles.css`. Public component styling should use tokens such as `--primary`, `--muted`, `--border`, and `--ring`, not raw color names.
 
-Theme wrappers such as `UiTheme`, `BobbaTheme`, and `ZleekTheme` add metadata classes and `data-ui-theme` attributes. They do not scope CSS variables by themselves, so multiple visual themes are not intended to coexist in one document unless the stylesheets are changed to support scoped tokens.
+Theme wrappers such as `UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add metadata classes and `data-ui-theme` attributes. They do not scope CSS variables by themselves, so multiple visual themes are not intended to coexist in one document unless the stylesheets are changed to support scoped tokens.
+
+The current visual systems are:
+
+- `bobba`: the default package style.
+- `zleek`: a sharper glass-styled package style.
+- `atlas`: a dense dashboard and data style for maps, tables, charts, and analytics.
+- `studio`: a creative tooling style for media, storytelling, image, and video workflows.
+- `paper`: a document and research style for OCR, reading, translation, linguistics, and text-heavy tools.
 
 ## Adding components
 

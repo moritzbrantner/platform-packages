@@ -91,13 +91,30 @@ import {
   ToolbarGroup,
   ToolbarSpacer,
   ToolbarTitle,
+  themeConfig,
+  type UiThemeName,
 } from "../src";
+import {
+  AtlasTheme,
+  atlasTheme,
+  uiTheme as atlasUiTheme,
+} from "../src/atlas";
 import {
   BobbaTheme,
   Button as BobbaButton,
   bobbaTheme,
   uiTheme as bobbaUiTheme,
 } from "../src/bobba";
+import {
+  PaperTheme,
+  paperTheme,
+  uiTheme as paperUiTheme,
+} from "../src/paper";
+import {
+  StudioTheme,
+  studioTheme,
+  uiTheme as studioUiTheme,
+} from "../src/studio";
 import {
   Button as ZleekButton,
   ZleekTheme,
@@ -248,12 +265,18 @@ describe("@moritzbrantner/ui", () => {
     expect(packageJson.peerDependencies.react).toBeTruthy();
     expect(packageJson.peerDependencies["react-dom"]).toBeTruthy();
     expect(packageJson.files).toEqual(
-      expect.arrayContaining(["dist", "styles.css", "zleek", "bobba"]),
-    );
+        expect.arrayContaining(["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"]),
+      );
     expect(packageJson.sideEffects).toEqual(expect.arrayContaining(["*.css"]));
     expect(packageJson.exports["./styles.css"]).toBe("./styles.css");
     expect(packageJson.exports["./zleek/styles.css"]).toBe("./zleek/styles.css");
     expect(packageJson.exports["./bobba/styles.css"]).toBe("./bobba/styles.css");
+    expect(packageJson.exports["./atlas"].import).toBe("./dist/atlas.js");
+    expect(packageJson.exports["./studio"].import).toBe("./dist/studio.js");
+    expect(packageJson.exports["./paper"].import).toBe("./dist/paper.js");
+    expect(packageJson.exports["./atlas/styles.css"]).toBe("./atlas/styles.css");
+    expect(packageJson.exports["./studio/styles.css"]).toBe("./studio/styles.css");
+    expect(packageJson.exports["./paper/styles.css"]).toBe("./paper/styles.css");
     expect(packageJson.exports["./components/*"].import).toBe("./dist/components/*.js");
     expect(packageJson.exports["./lib/cn"].import).toBe("./dist/lib/cn.js");
     expect(consumerExample).toContain('import "@moritzbrantner/ui/styles.css";');
@@ -285,7 +308,15 @@ describe("@moritzbrantner/ui", () => {
     expect(screen.getByText("Shared UI")).toBeTruthy();
   });
 
-  test("exports zleek and bobba component entrypoints", () => {
+  test("exports design-system component entrypoints", () => {
+    const allThemeNames = [
+      "zleek",
+      "bobba",
+      "atlas",
+      "studio",
+      "paper",
+    ] as const satisfies readonly UiThemeName[];
+
     render(
       <>
         <ZleekTheme>
@@ -294,15 +325,34 @@ describe("@moritzbrantner/ui", () => {
         <BobbaTheme>
           <BobbaButton>Bobba action</BobbaButton>
         </BobbaTheme>
+        <AtlasTheme>
+          <Button>Atlas action</Button>
+        </AtlasTheme>
+        <StudioTheme>
+          <Button>Studio action</Button>
+        </StudioTheme>
+        <PaperTheme>
+          <Button>Paper action</Button>
+        </PaperTheme>
       </>,
     );
 
     expect(screen.getByRole("button", { name: "Zleek action" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Bobba action" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Atlas action" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Studio action" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Paper action" })).toBeTruthy();
+    expect(Object.keys(themeConfig).sort()).toEqual([...allThemeNames].sort());
     expect(zleekTheme.name).toBe("zleek");
     expect(bobbaTheme.name).toBe("bobba");
+    expect(atlasTheme.name).toBe("atlas");
+    expect(studioTheme.name).toBe("studio");
+    expect(paperTheme.name).toBe("paper");
     expect(zleekUiTheme).toBe(zleekTheme);
     expect(bobbaUiTheme).toBe(bobbaTheme);
+    expect(atlasUiTheme).toBe(atlasTheme);
+    expect(studioUiTheme).toBe(studioTheme);
+    expect(paperUiTheme).toBe(paperTheme);
   });
 
   test("renders an app layout page shell with semantic content", () => {

@@ -43,6 +43,9 @@ function verifyPackageMetadata() {
   expectArrayIncludes(packageJson.files, "styles.css", "package files must include styles.css");
   expectArrayIncludes(packageJson.files, "zleek", "package files must include zleek styles");
   expectArrayIncludes(packageJson.files, "bobba", "package files must include bobba styles");
+  expectArrayIncludes(packageJson.files, "atlas", "package files must include atlas styles");
+  expectArrayIncludes(packageJson.files, "studio", "package files must include studio styles");
+  expectArrayIncludes(packageJson.files, "paper", "package files must include paper styles");
   expectArrayIncludes(packageJson.sideEffects, "*.css", "CSS files must be retained by bundlers");
   expectObject(packageJson.peerDependencies, "peerDependencies must be declared");
   expectObject(packageJson.dependencies, "dependencies must be declared");
@@ -58,6 +61,9 @@ function verifyPackageMetadata() {
   expectExport(".", "./dist/index.js", "./dist/index.d.ts");
   expectExport("./zleek", "./dist/zleek.js", "./dist/zleek.d.ts");
   expectExport("./bobba", "./dist/bobba.js", "./dist/bobba.d.ts");
+  expectExport("./atlas", "./dist/atlas.js", "./dist/atlas.d.ts");
+  expectExport("./studio", "./dist/studio.js", "./dist/studio.d.ts");
+  expectExport("./paper", "./dist/paper.js", "./dist/paper.d.ts");
   expectExport("./themes", "./dist/themes.js", "./dist/themes.d.ts");
   expectExport("./lib/cn", "./dist/lib/cn.js", "./dist/lib/cn.d.ts");
   expectExport("./components/*", "./dist/components/*.js", "./dist/components/*.d.ts");
@@ -76,6 +82,21 @@ function verifyPackageMetadata() {
     packageJson.exports["./bobba/styles.css"],
     "./bobba/styles.css",
     "bobba stylesheet must be exported",
+  );
+  expectEqual(
+    packageJson.exports["./atlas/styles.css"],
+    "./atlas/styles.css",
+    "atlas stylesheet must be exported",
+  );
+  expectEqual(
+    packageJson.exports["./studio/styles.css"],
+    "./studio/styles.css",
+    "studio stylesheet must be exported",
+  );
+  expectEqual(
+    packageJson.exports["./paper/styles.css"],
+    "./paper/styles.css",
+    "paper stylesheet must be exported",
   );
 }
 
