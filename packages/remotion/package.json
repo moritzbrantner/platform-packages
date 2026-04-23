@@ -1,0 +1,48 @@
+{
+  "name": "@moritzbrantner/remotion",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moritzbrantner/platform-packages.git",
+    "directory": "packages/remotion"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.379"
+  },
+  "dependencies": {
+    "@moritzbrantner/maps": "^0.1.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.379"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm --dts --clean --out-dir dist",
+    "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
+    "prepack": "bun run build",
+    "check-types": "tsc --noEmit",
+    "test": "cd ../.. && vitest run packages/remotion/tests/remotion.test.tsx"
+  }
+}

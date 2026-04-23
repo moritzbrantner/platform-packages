@@ -74,6 +74,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/parallel-text`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/pipeline-core`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/question-answering`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/remotion`                       | experimental           | Remotion adapters that compose runtime packages into frame-based renderers.  |
 | `@moritzbrantner/reinforcement-learning`         | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/sentence-similarity`            | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/sentiment-analysis`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
@@ -135,6 +136,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - `@moritzbrantner/parallel-text`: side-by-side original/translation viewer with sentence grouping and token-level alignment highlights.
 - `@moritzbrantner/pipeline-core`: provider-neutral pipeline primitives, typed artifacts, ports, provenance, batching, mapping, tapping, and step composition.
 - `@moritzbrantner/sentiment-analysis`: label-normalized sentiment scoring on top of text-classification models, with chunk aggregation for longer texts.
+- `@moritzbrantner/remotion`: dedicated Remotion adapters for package-level render surfaces such as maps, keeping Remotion-specific hooks and timing logic out of base runtime packages.
 - `@moritzbrantner/speech`: microphone capture, chunked speech-to-text orchestration, and Whisper-compatible HTTP transcription adapters for live or batch transcription flows.
   Includes local Python and Bun websocket server examples for the default streaming protocol.
 - `@moritzbrantner/subtitles`: SRT/VTT/transcript timed-text parsing, editing, validation, overlap detection, and word-level timing preservation.
@@ -167,6 +169,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - `@moritzbrantner/graphs` consumes data-density windows and metric reductions for node-link graph subgraphs.
 - `@moritzbrantner/tables` consumes data-density windows for virtualized row slices and metric-preserving table summaries.
 - `@moritzbrantner/maps` consumes data-density for clustering while keeping MapLibre rendering and map-specific interaction in the maps package.
+- `@moritzbrantner/remotion` depends on runtime packages such as `@moritzbrantner/maps` and keeps frame-to-time orchestration centralized for Remotion compositions.
 - `@moritzbrantner/tree-structures` is dependency-free hierarchy infrastructure for packages that need validated parent/child indexes or traversal without taking on graph semantics.
 - The playground is intended to validate those layers in order: core and corpus pages establish the text model, vectors and learning consume corpus data, and speech exercises prediction with vector-backed backoff.
 
