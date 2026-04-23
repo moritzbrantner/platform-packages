@@ -63,5 +63,5 @@ For the maintained scaffold family, consumer repos should adopt these first:
 
 - `@moritzbrantner/ui`
 - `@moritzbrantner/storytelling`
-- `@moritzbrantner/eslint-config`
+- `@moritzbrantner/oxfmt-config`
 - `@moritzbrantner/typescript-config`

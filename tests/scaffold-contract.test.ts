@@ -39,10 +39,10 @@ const scaffoldCriticalPackages = [
     scripts: ["build", "lint", "check-types", "test"],
   },
   {
-    dir: "eslint-config",
-    name: "@moritzbrantner/eslint-config",
+    dir: "oxfmt-config",
+    name: "@moritzbrantner/oxfmt-config",
     version: "0.1.1",
-    files: ["index.js"],
+    files: ["oxfmt.json"],
     exports: ["."],
     scripts: [],
   },
@@ -69,7 +69,7 @@ test("readme marks the scaffold-critical package set explicitly", () => {
   expect(readme).toContain("## Scaffold-critical package set");
   expect(readme).toContain("`@moritzbrantner/ui`");
   expect(readme).toContain("`@moritzbrantner/storytelling`");
-  expect(readme).toContain("`@moritzbrantner/eslint-config`");
+  expect(readme).toContain("`@moritzbrantner/oxfmt-config`");
   expect(readme).toContain("`@moritzbrantner/typescript-config`");
   expect(readme).toContain("Everything else in this repository remains valid");
   expect(readme).toContain("Do not move `@repo/auth-contract` or `@repo/upload-playbook`");
@@ -142,17 +142,16 @@ test("scaffold-critical packages keep their public package contracts", () => {
 });
 
 test("config packages import and parse from their package roots", async () => {
-  const eslintConfig = await import(
-    `file://${path.join(packagesRoot, "eslint-config", "index.js")}`
+  const oxfmtConfig = JSON.parse(
+    readFileSync(path.join(packagesRoot, "oxfmt-config", "oxfmt.json"), "utf8"),
   );
 
-  expect(Array.isArray(eslintConfig.default)).toBe(true);
-  expect(Array.isArray(eslintConfig.base)).toBe(true);
-  expect(Array.isArray(eslintConfig.typescript)).toBe(true);
-  expect(Array.isArray(eslintConfig.react)).toBe(true);
-  expect(Array.isArray(eslintConfig.next)).toBe(true);
-  expect(Array.isArray(eslintConfig.library)).toBe(true);
-  expect(eslintConfig.default).toBe(eslintConfig.library);
+  expect(oxfmtConfig.printWidth).toBe(100);
+  expect(oxfmtConfig.sortPackageJson).toBe(false);
+  expect(oxfmtConfig.tabWidth).toBe(2);
+  expect(oxfmtConfig.semi).toBe(true);
+  expect(oxfmtConfig.singleQuote).toBe(false);
+  expect(oxfmtConfig.trailingComma).toBe("all");
 
   const typescriptConfigs = Object.fromEntries(
     ["base.json", "react-library.json", "next-app.json", "node.json"].map((configFile) => [

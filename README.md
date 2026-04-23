@@ -8,7 +8,7 @@ The maintained template family should converge on these packages first:
 
 - `@moritzbrantner/ui`
 - `@moritzbrantner/storytelling`
-- `@moritzbrantner/eslint-config`
+- `@moritzbrantner/oxfmt-config`
 - `@moritzbrantner/typescript-config`
 
 These four packages are the current scaffold-facing contract for `monorepo`, `next-template`, `expo-template`, and `electron-template`.
@@ -41,7 +41,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/document-analysis`              | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/document-question-answering`    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/document-structure-extraction`  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/eslint-config`                  | scaffold-critical      | Shared scaffold contract surface.                                           |
+| `@moritzbrantner/oxfmt-config`                   | scaffold-critical      | Shared scaffold contract surface.                                           |
 | `@moritzbrantner/extraction-schema`              | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/feature-extraction`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/fill-mask`                      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
@@ -181,7 +181,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 ## Repository scope
 
 - The repository remains broad and can host shared runtime, tooling, and domain packages.
-- The scaffold-critical set is limited to `ui`, `storytelling`, `eslint-config`, and `typescript-config`.
+- The scaffold-critical set is limited to `ui`, `storytelling`, `oxfmt-config`, and `typescript-config`.
 - Unrelated packages stay in place and are not blocked on the template-family release cadence.
 - GitHub Packages publishing is configured through Changesets.
 - Includes a local playground app for manually testing package behavior.
@@ -202,7 +202,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 5. Apply formatting with `bun run format`.
 6. Run checks with `bun run format:check`, `bun run lint`, `bun run typecheck`, and `bun run test`.
 
-Oxlint and Oxfmt are the active local linting and formatting tools for this repository. The published `@moritzbrantner/eslint-config` package remains part of the scaffold-facing compatibility surface for now.
+Oxlint and Oxfmt are the active local linting and formatting tools for this repository. The published `@moritzbrantner/oxfmt-config` package mirrors the shared formatter defaults for scaffold consumers.
 
 The custom verifier scripts still run through `bun run lint` and enforce package-specific style exports, forbidden package imports, and shared UI component usage.
 

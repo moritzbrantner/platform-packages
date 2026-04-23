@@ -1,22 +1,18 @@
 {
-  "name": "@moritzbrantner/eslint-config",
+  "name": "@moritzbrantner/oxfmt-config",
   "version": "0.1.1",
   "private": false,
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moritzbrantner/platform-packages.git",
-    "directory": "packages/eslint-config"
+    "directory": "packages/oxfmt-config"
   },
   "files": [
-    "index.js"
+    "oxfmt.json"
   ],
-  "main": "./index.js",
   "exports": {
-    ".": "./index.js"
-  },
-  "peerDependencies": {
-    "eslint": "^9.0.0"
+    ".": "./oxfmt.json"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

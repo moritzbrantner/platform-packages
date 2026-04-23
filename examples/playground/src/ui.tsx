@@ -321,8 +321,8 @@ const releaseRows = [
     status: "Preview",
   },
   {
-    packageName: "@moritzbrantner/eslint-config",
-    version: "0.1.0",
+    packageName: "@moritzbrantner/oxfmt-config",
+    version: "0.1.1",
     status: "Infra",
   },
 ] as const;

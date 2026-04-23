@@ -1,4 +1,4 @@
-# @moritzbrantner/eslint-config
+# @moritzbrantner/oxfmt-config
 
 ## 0.1.1
 
