@@ -222,7 +222,7 @@ export function PlayingCard({
       ref={rootRef}
       aria-label={label}
       className={cx(
-        "mb-playing-card relative isolate aspect-[5/7] w-[var(--mb-card-width)] max-w-full select-none overflow-hidden rounded-[1.65rem] border [transform-style:preserve-3d] transition-[transform,box-shadow,border-color] duration-200 ease-out [transform:perspective(1100px)_translateY(var(--mb-card-lift))_rotateX(var(--mb-card-rotate-x))_rotateY(var(--mb-card-rotate-y))_scale(var(--mb-card-scale))]",
+        "mb-playing-card relative isolate aspect-[5/7] w-[var(--mb-card-width)] max-w-full min-w-0 select-none overflow-hidden whitespace-normal break-words rounded-[1.65rem] border [transform-style:preserve-3d] transition-[transform,box-shadow,border-color] duration-200 ease-out [transform:perspective(1100px)_translateY(var(--mb-card-lift))_rotateX(var(--mb-card-rotate-x))_rotateY(var(--mb-card-rotate-y))_scale(var(--mb-card-scale))]",
         interactive ? "cursor-pointer hover:[--mb-card-scale:1.015]" : null,
         selected
           ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_24px_58px_rgba(16,20,31,0.24)]"
@@ -300,7 +300,7 @@ export function PlayingCard({
           </div>
         ) : null}
 
-        <div className="mb-playing-card__body grid h-full min-h-0 w-full place-items-center gap-[0.9rem]">
+        <div className="mb-playing-card__body grid h-full min-h-0 w-full min-w-0 place-items-center gap-[0.9rem]">
           {face === "back" ? (
             <div
               className="mb-playing-card__back relative grid min-h-40 w-full place-items-center rounded-[1.1rem] border p-4 [transform:translateZ(48px)]"
@@ -370,7 +370,7 @@ export function PlayingCard({
               </div>
 
               {headline || subtitle || description || children ? (
-                <div className="mb-playing-card__content grid w-full gap-[0.45rem] text-center [transform:translateZ(42px)]">
+                <div className="mb-playing-card__content grid w-full min-w-0 gap-[0.45rem] text-center [transform:translateZ(42px)]">
                   {headline ? (
                     <p className="mb-playing-card__headline text-[1.18rem] font-extrabold leading-[1.2]">
                       {headline}

@@ -60,3 +60,31 @@ test("renders the card games playground preview and updates the focus card", asy
   await discardZone.click();
   await expect(discardZone).toContainText("Ember ace");
 });
+
+test("keeps playing-field cards inside their slots", async ({ page }) => {
+  await page.goto("/card-games.html");
+
+  await page.getByRole("button", { name: "Draw card" }).click();
+  await page.getByRole("button", { name: "Vanguard field slot" }).click();
+  await page.getByRole("button", { name: "Draw card" }).click();
+  await page.getByRole("button", { name: "Support field slot" }).click();
+  await page.getByRole("button", { name: "Draw card" }).click();
+  await page.getByRole("button", { name: "Reserve field slot" }).click();
+
+  const cardsFitSlots = await page.evaluate(() =>
+    Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label$="field slot"]')).map(
+      (slot) => {
+        const card = slot.querySelector<HTMLElement>(".mb-playing-card");
+
+        if (!card) return false;
+
+        const slotRect = slot.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+
+        return cardRect.left >= slotRect.left - 1 && cardRect.right <= slotRect.right + 1;
+      },
+    ),
+  );
+
+  expect(cardsFitSlots).toEqual([true, true, true]);
+});

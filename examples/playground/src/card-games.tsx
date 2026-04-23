@@ -308,9 +308,8 @@ function CardGamesPage() {
             {openingHand.map((card, index) => (
               <ContextMenu key={`${card.rank}-${card.suit}`}>
                 <ContextMenuTrigger asChild>
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
                     aria-label={`Select ${card.headline}`}
                     className="block h-auto select-none rounded-[1.8rem] bg-transparent p-0 text-left shadow-none outline-none transition-transform duration-200 ease-out hover:bg-transparent focus-visible:ring-2 focus-visible:ring-white/80"
                     onClick={() => setSelectedCard(index)}
@@ -327,7 +326,7 @@ function CardGamesPage() {
                       badge={card.badge}
                       selected={selectedCard === index}
                     />
-                  </Button>
+                  </button>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   <ContextMenuLabel>{card.headline}</ContextMenuLabel>
@@ -366,9 +365,8 @@ function CardGamesPage() {
           <div className="grid justify-items-center gap-4">
             <ContextMenu>
               <ContextMenuTrigger asChild>
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
                   aria-label={`Play ${activeCard.headline}`}
                   className="block h-auto select-none rounded-[1.8rem] bg-transparent p-0 text-left shadow-none outline-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-white/80"
                   onClick={() => runDefaultAction(activeCard)}
@@ -390,7 +388,7 @@ function CardGamesPage() {
                       </div>
                     }
                   />
-                </Button>
+                </button>
               </ContextMenuTrigger>
               <ContextMenuContent>
                 <ContextMenuLabel>{activeCard.headline}</ContextMenuLabel>
@@ -424,7 +422,7 @@ function CardGamesPage() {
         subtitle="Deck lanes, a hand rail, named board slots, and a discard column share one table state."
         tone="emerald"
       >
-        <div className="grid gap-5 xl:grid-cols-[0.75fr_1.5fr_0.85fr]">
+        <div className="grid gap-5 xl:grid-cols-[0.62fr_minmax(39rem,1.6fr)_0.78fr]">
           <div className="grid gap-4 content-start">
             <div>
               <div className="mb-3 flex items-center justify-between gap-3">
@@ -433,9 +431,8 @@ function CardGamesPage() {
                   {drawPile.length}
                 </span>
               </div>
-              <Button
+              <button
                 type="button"
-                variant="ghost"
                 aria-label="Draw card"
                 className="grid h-auto min-h-[19rem] w-full select-none place-items-center rounded-lg border border-white/18 bg-white/8 p-3 shadow-none outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-55"
                 onClick={drawCard}
@@ -458,7 +455,7 @@ function CardGamesPage() {
                 ) : (
                   <span className="text-sm font-bold text-white/62">Empty</span>
                 )}
-              </Button>
+              </button>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -500,9 +497,8 @@ function CardGamesPage() {
                 return (
                   <div key={slot.id} className="grid gap-2">
                     <p className="text-center text-sm font-bold text-white/82">{slot.label}</p>
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
                       aria-label={`${slot.label} field slot`}
                       className="grid h-auto min-h-[19rem] w-full select-none place-items-center rounded-lg border border-dashed border-white/24 bg-black/10 p-3 shadow-none outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/80"
                       onClick={() => {
@@ -517,7 +513,7 @@ function CardGamesPage() {
                       {card ? (
                         <ContextMenu>
                           <ContextMenuTrigger asChild>
-                            <span className="block rounded-[1.8rem] outline-none focus-visible:ring-2 focus-visible:ring-white/80">
+                            <span className="grid w-full max-w-[12rem] place-items-center rounded-[1.8rem] outline-none focus-visible:ring-2 focus-visible:ring-white/80">
                               <PlayingCard
                                 rank={card.rank}
                                 suit={card.suit}
@@ -554,7 +550,7 @@ function CardGamesPage() {
                       ) : (
                         <span className="text-sm font-bold text-white/58">Open</span>
                       )}
-                    </Button>
+                    </button>
                   </div>
                 );
               })}
@@ -575,9 +571,8 @@ function CardGamesPage() {
                   fieldHand.map((card) => (
                     <ContextMenu key={card.id}>
                       <ContextMenuTrigger asChild>
-                        <Button
+                        <button
                           type="button"
-                          variant="ghost"
                           aria-label={`Select ${card.headline}`}
                           className="block h-auto select-none rounded-[1.8rem] bg-transparent p-0 text-left shadow-none outline-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-white/80"
                           onClick={() => selectHandCard(card)}
@@ -596,7 +591,7 @@ function CardGamesPage() {
                             }
                             interactive={false}
                           />
-                        </Button>
+                        </button>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
                         <ContextMenuLabel>{card.headline}</ContextMenuLabel>
@@ -638,9 +633,8 @@ function CardGamesPage() {
                 {discardPile.length}
               </span>
             </div>
-            <Button
+            <button
               type="button"
-              variant="ghost"
               aria-label="Discard selected card"
               className="grid h-auto min-h-[19rem] w-full select-none place-items-center rounded-lg border border-white/18 bg-white/8 p-3 shadow-none outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-55"
               onClick={discardSelectedCard}
@@ -668,7 +662,7 @@ function CardGamesPage() {
               ) : (
                 <span className="text-sm font-bold text-white/62">Empty</span>
               )}
-            </Button>
+            </button>
           </div>
         </div>
       </CardTable>

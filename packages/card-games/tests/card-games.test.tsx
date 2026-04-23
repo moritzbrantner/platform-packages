@@ -28,6 +28,7 @@ describe("@moritzbrantner/card-games", () => {
     expect(card.className).toContain("rounded-[1.65rem]");
     expect(card.className).toContain("aspect-[5/7]");
     expect(card.className).toContain("select-none");
+    expect(card.className).toContain("whitespace-normal");
     expect(card.className).toContain("w-[var(--mb-card-width)]");
   });
 

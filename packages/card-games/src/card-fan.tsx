@@ -31,7 +31,7 @@ export function CardFan({
     <div
       {...divProps}
       className={cx(
-        "mb-card-fan flex max-w-full items-end justify-center px-4 pb-[1.2rem] pt-[0.7rem] max-sm:justify-start max-sm:overflow-x-auto max-sm:pb-[0.8rem]",
+        "mb-card-fan flex max-w-full items-end justify-center px-14 pb-[1.2rem] pt-[0.7rem] sm:px-16 max-sm:justify-start max-sm:overflow-x-auto max-sm:pb-[0.8rem]",
         className,
       )}
       style={style}
