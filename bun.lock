@@ -460,6 +460,28 @@
         "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
+    "packages/remotion": {
+      "name": "@moritzbrantner/remotion",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/maps": "^0.1.2",
+      },
+      "devDependencies": {
+        "@remotion/player": "^4.0.379",
+        "@storybook/react-vite": "^10.3.5",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "remotion": "^4.0.379",
+        "storybook": "^10.3.5",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "remotion": "^4.0.379",
+      },
+    },
     "packages/sentence-similarity": {
       "name": "@moritzbrantner/sentence-similarity",
       "version": "0.1.1",
@@ -1168,6 +1190,8 @@
 
     "@moritzbrantner/reinforcement-learning": ["@moritzbrantner/reinforcement-learning@workspace:packages/reinforcement-learning"],
 
+    "@moritzbrantner/remotion": ["@moritzbrantner/remotion@workspace:packages/remotion"],
+
     "@moritzbrantner/sentence-similarity": ["@moritzbrantner/sentence-similarity@workspace:packages/sentence-similarity"],
 
     "@moritzbrantner/sentiment-analysis": ["@moritzbrantner/sentiment-analysis@workspace:packages/sentiment-analysis"],
@@ -1499,6 +1523,8 @@
     "@react-three/fiber": ["@react-three/fiber@9.6.0", "", { "dependencies": { "@babel/runtime": "7.29.2", "@types/webxr": "0.5.24", "base64-js": "1.5.1", "buffer": "6.0.3", "its-fine": "2.0.0", "react-use-measure": "2.1.7", "scheduler": "0.27.0", "suspend-react": "0.1.3", "use-sync-external-store": "1.6.0", "zustand": "5.0.12" }, "optionalDependencies": { "react-dom": "19.2.4" }, "peerDependencies": { "react": "19.2.4", "three": "0.180.0" } }, "sha512-90abYK2q5/qDM+GACs9zRvc5KhEEpEWqWlHSd64zTPNxg+9wCJvTfyD9x2so7hlQhjRYO1Fa6flR3BC/kpTFkA=="],
 
     "@reduxjs/toolkit": ["@reduxjs/toolkit@2.11.2", "", { "dependencies": { "@standard-schema/spec": "1.1.0", "@standard-schema/utils": "0.3.0", "immer": "11.1.4", "redux": "5.0.1", "redux-thunk": "3.1.0", "reselect": "5.1.1" }, "optionalDependencies": { "react": "19.2.4", "react-redux": "9.2.0" } }, "sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ=="],
+
+    "@remotion/player": ["@remotion/player@4.0.451", "", { "dependencies": { "remotion": "4.0.451" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-mJSaWHsMQuDXVVVh6UVBySBzzzqeSI+MHUuS+6hk/CrqZwBz1CQnsrtFZcjcnBpY40ao+ZqMA6uTEgs9n34YlQ=="],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.0.0-rc.15", "", { "os": "android", "cpu": "arm64" }, "sha512-YYe6aWruPZDtHNpwu7+qAHEMbQ/yRl6atqb/AhznLTnD3UY99Q1jE7ihLSahNWkF4EqRPVC4SiR4O0UkLK02tA=="],
 
@@ -2915,6 +2941,8 @@
     "@modelcontextprotocol/sdk/ajv": ["ajv@8.18.0", "", { "dependencies": { "fast-deep-equal": "3.1.3", "fast-uri": "3.1.0", "json-schema-traverse": "1.0.0", "require-from-string": "2.0.2" } }, "sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A=="],
 
     "@reduxjs/toolkit/immer": ["immer@11.1.4", "", {}, "sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw=="],
+
+    "@remotion/player/remotion": ["remotion@4.0.451", "", { "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-uTku1RmytCk50ZtPEoTdmB/4Erb+nH85vT3jkCLWQCaG9qWXxp2XAJ+eL7EfsCUyast2umZm4vdrdKXVxbeDMQ=="],
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 

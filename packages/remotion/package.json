@@ -28,11 +28,14 @@
     "@moritzbrantner/maps": "^0.1.2"
   },
   "devDependencies": {
+    "@remotion/player": "^4.0.379",
+    "@storybook/react-vite": "^10.3.5",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "remotion": "^4.0.379"
+    "remotion": "^4.0.379",
+    "storybook": "^10.3.5"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
@@ -40,9 +43,11 @@
   },
   "scripts": {
     "build": "tsup src/index.tsx --format esm --dts --clean --out-dir dist",
+    "build-storybook": "storybook build --output-dir storybook-static",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
+    "storybook": "storybook dev -p 6008 --no-open",
     "test": "cd ../.. && vitest run packages/remotion/tests/remotion.test.tsx"
   }
 }
