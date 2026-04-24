@@ -11,3 +11,5 @@ packages/*/test-results/
 storybook-static/
 packages/*/storybook-static/
 packages/*/*.tgz
+
+/backups/
