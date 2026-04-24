@@ -6,6 +6,8 @@ import {
   createWordVectorBackoffSource,
   createWordVectorModel,
   deserializeWordVectorModel,
+  initWordVectorsKernel,
+  isWordVectorsKernelReady,
   serializeWordVectorModel,
   trainFromCorpus,
   trainWordVectorModel,
@@ -147,5 +149,14 @@ describe("@moritzbrantner/word-vectors", () => {
         }),
       ]),
     );
+  });
+
+  test("initializes the shared Rust text kernel for token extraction", async () => {
+    await initWordVectorsKernel();
+
+    expect(isWordVectorsKernelReady()).toBe(true);
+    const model = trainWordVectorModel(["Cafe\u0301 lights glow.", "Café mornings arrive."]);
+
+    expect(model.words()).toContain("café");
   });
 });

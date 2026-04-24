@@ -3,6 +3,8 @@ export {
   createDefaultWordPredictionModel,
   createWordPredictionModel,
   deserializeWordPredictionModel,
+  initWordPredictionKernel,
+  isWordPredictionKernelReady,
   serializeWordPredictionModel,
   trainWordPredictionModel,
   type CreateWordPredictionModelOptions,

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Loader2Icon } from "lucide-react";
 
 import { cn } from "../lib/cn";
 
@@ -93,6 +92,10 @@ type PulseSpinnerProps = React.ComponentProps<"span"> &
   VariantProps<typeof pulseSpinnerVariants> &
   SpinnerAccessibilityProps;
 
+const TRIQUETRA_LOOP_PATH =
+  "M32 10C40 10 46 16 46 24C46 33 39 42 32 52C25 42 18 33 18 24C18 16 24 10 32 10Z";
+const TRIQUETRA_ROTATIONS = [0, 120, 240] as const;
+
 function getLoadingA11yProps({
   ariaLabel,
   decorative,
@@ -114,17 +117,37 @@ function Spinner({
   label = "Loading",
   decorative,
   "aria-label": ariaLabel,
+  strokeWidth = 4,
   ...props
 }: SpinnerProps) {
   return (
-    <Loader2Icon
+    <svg
       data-slot="spinner"
       data-size={size}
       data-variant={variant}
       className={cn(spinnerVariants({ size, variant }), className)}
+      viewBox="0 0 64 64"
+      fill="none"
       {...getLoadingA11yProps({ ariaLabel, decorative, label })}
       {...props}
-    />
+    >
+      <g
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {TRIQUETRA_ROTATIONS.map((rotation) => (
+          <path
+            key={rotation}
+            d={TRIQUETRA_LOOP_PATH}
+            transform={rotation === 0 ? undefined : `rotate(${rotation} 32 32)`}
+            opacity={rotation === 0 ? 1 : 0.8}
+          />
+        ))}
+        <circle cx="32" cy="32" r="7" opacity="0.32" />
+      </g>
+    </svg>
   );
 }
 

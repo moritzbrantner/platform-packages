@@ -4,6 +4,9 @@ import {
   anchorSpan,
   chunkTextDocument,
   createTextDocument,
+  extractWordTexts,
+  initLinguisticsKernel,
+  isLinguisticsKernelReady,
   normalizeText,
   reanchorSpan,
   segmentTextDocument,
@@ -144,5 +147,20 @@ describe("@moritzbrantner/linguistics-core", () => {
       end: "Before. Caf\u00E9".length,
       text: "Café",
     });
+  });
+
+  test("initializes the Rust text kernel for fallback segmentation helpers", async () => {
+    await initLinguisticsKernel();
+
+    expect(isLinguisticsKernelReady()).toBe(true);
+    expect(extractWordTexts("Hello café world", { lowercase: true, normalizeUnicode: false })).toEqual(
+      ["hello", "café", "world"],
+    );
+    expect(
+      segmentTextDocument(createTextDocument({ id: "kernel", text: "One sentence. Two words!" }), {
+        granularity: "word",
+        useIntlSegmenter: false,
+      }).sentences.map((sentence) => sentence.text),
+    ).toEqual(["One sentence.", "Two words!"]);
   });
 });

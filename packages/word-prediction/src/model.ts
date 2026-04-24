@@ -1,4 +1,10 @@
 import { DEFAULT_WORD_PREDICTION_TEXTS } from "./default-data";
+import {
+  extractWordTexts,
+  initLinguisticsKernel,
+  isLinguisticsKernelReady,
+  splitTextSentences,
+} from "@moritzbrantner/linguistics-core";
 
 const TRAINING_TOKEN_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*|[.!?\n]+/gu;
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
@@ -141,6 +147,14 @@ export function createWordPredictionModel(
 
   modelInternals.set(model, { options: modelOptions, trainingData });
   return model;
+}
+
+export async function initWordPredictionKernel(input?: unknown): Promise<void> {
+  await initLinguisticsKernel(input);
+}
+
+export function isWordPredictionKernelReady(): boolean {
+  return isLinguisticsKernelReady();
 }
 
 export function trainWordPredictionModel(
@@ -357,6 +371,11 @@ function* iterateTrainingTokens(
   text: string,
   options: ModelOptions,
 ): Generator<{ normalized: string; surface: string; type: "word" } | { type: "boundary" }> {
+  if (isWordPredictionKernelReady()) {
+    yield* iterateKernelTrainingTokens(text, options);
+    return;
+  }
+
   for (const match of text.matchAll(TRAINING_TOKEN_PATTERN)) {
     const value = match[0];
 
@@ -374,8 +393,47 @@ function* iterateTrainingTokens(
 }
 
 function extractWords(text: string, options: ModelOptions): string[] {
+  if (isWordPredictionKernelReady()) {
+    return extractWordTexts(text, {
+      lowercase: options.lowercase,
+      normalizeUnicode: false,
+    });
+  }
+
   const words = text.match(WORD_PATTERN) ?? [];
   return words.map((word) => normalizeWord(word, options));
+}
+
+function* iterateKernelTrainingTokens(
+  text: string,
+  options: ModelOptions,
+): Generator<{ normalized: string; surface: string; type: "word" } | { type: "boundary" }> {
+  const segments = text.split(/\n+/u).filter((segment) => segment.trim().length > 0);
+
+  for (let segmentIndex = 0; segmentIndex < segments.length; segmentIndex += 1) {
+    const segment = segments[segmentIndex]!;
+    const sentences = splitTextSentences(segment).filter((sentence) => sentence.trim().length > 0);
+
+    for (let sentenceIndex = 0; sentenceIndex < sentences.length; sentenceIndex += 1) {
+      const sentence = sentences[sentenceIndex]!;
+      const words = extractWordTexts(sentence, {
+        lowercase: false,
+        normalizeUnicode: false,
+      });
+
+      for (const word of words) {
+        yield {
+          type: "word",
+          normalized: normalizeWord(word, options),
+          surface: word,
+        };
+      }
+
+      if (sentenceIndex < sentences.length - 1 || segmentIndex < segments.length - 1) {
+        yield { type: "boundary" };
+      }
+    }
+  }
 }
 
 function parseInput(

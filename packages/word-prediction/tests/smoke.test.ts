@@ -7,6 +7,8 @@ import {
   createSemanticBackoffFromWordVectors,
   createWordPredictionModel,
   deserializeWordPredictionModel,
+  initWordPredictionKernel,
+  isWordPredictionKernelReady,
   serializeWordPredictionModel,
   trainWordPredictionModel,
 } from "@moritzbrantner/word-prediction";
@@ -213,6 +215,17 @@ describe("@moritzbrantner/word-prediction", () => {
       words: ["you", "soon"],
       score: expect.any(Number),
     });
+  });
+
+  test("initializes the shared Rust text kernel without changing prediction APIs", async () => {
+    await initWordPredictionKernel();
+
+    expect(isWordPredictionKernelReady()).toBe(true);
+    const model = createWordPredictionModel({
+      texts: ["See you soon.", "See you tomorrow."],
+    });
+
+    expect(words(model.predictNextWords("See you"))).toContain("soon");
   });
 
   test("accepts optional semantic backoff suggestions", () => {

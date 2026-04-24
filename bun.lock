@@ -337,6 +337,9 @@
     "packages/linguistics-core": {
       "name": "@moritzbrantner/linguistics-core",
       "version": "0.1.1",
+      "dependencies": {
+        "@mb-rust/text-core-wasm": "file:../../../rust-packages/packages/text-core-wasm",
+      },
     },
     "packages/linguistics-corpus": {
       "name": "@moritzbrantner/linguistics-corpus",
@@ -793,6 +796,7 @@
       "name": "@moritzbrantner/word-prediction",
       "version": "0.1.2",
       "dependencies": {
+        "@moritzbrantner/linguistics-core": "^0.1.1",
         "@moritzbrantner/ui": "^0.5.0",
         "@moritzbrantner/word-vectors": "^0.1.1",
       },
@@ -2838,6 +2842,8 @@
     "@manypkg/get-packages/@changesets/types": ["@changesets/types@4.1.0", "", {}, "sha512-LDQvVDv5Kb50ny2s25Fhm3d9QSZimsoUGBsUioj6MC3qbMUCuC8GPIvk/M6IvXx3lYhAs0lwWUQLb+VIEUCECw=="],
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "4.2.11", "jsonfile": "4.0.0", "universalify": "0.1.2" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
+
+    "@moritzbrantner/linguistics-core/@mb-rust/text-core-wasm": ["@mb-rust/text-core-wasm@file:../rust-packages/packages/text-core-wasm", {}],
 
     "@reduxjs/toolkit/immer": ["immer@11.1.4", "", {}, "sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw=="],
 

@@ -1,4 +1,9 @@
-import type { TextDocument } from "@moritzbrantner/linguistics-core";
+import {
+  extractWordTexts,
+  initLinguisticsKernel,
+  isLinguisticsKernelReady,
+  type TextDocument,
+} from "@moritzbrantner/linguistics-core";
 import type { CorpusIndex } from "@moritzbrantner/linguistics-corpus";
 
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
@@ -109,6 +114,14 @@ export function createWordVectorModel(options: CreateWordVectorModelOptions = {}
 
   trainTexts(trainingData, vectorCache, options.texts, modelOptions);
   return createModel(trainingData, vectorCache, modelOptions);
+}
+
+export async function initWordVectorsKernel(input?: unknown): Promise<void> {
+  await initLinguisticsKernel(input);
+}
+
+export function isWordVectorsKernelReady(): boolean {
+  return isLinguisticsKernelReady();
 }
 
 export function trainWordVectorModel(
@@ -451,7 +464,12 @@ function trainText(trainingData: TrainingData, text: string, options: ModelOptio
 }
 
 function extractWords(text: string, options: ModelOptions): Array<{ normalized: string }> {
-  const matches = text.match(WORD_PATTERN) ?? [];
+  const matches = isWordVectorsKernelReady()
+    ? extractWordTexts(text, {
+        lowercase: options.lowercase,
+        normalizeUnicode: false,
+      })
+    : (text.match(WORD_PATTERN) ?? []);
 
   return matches.map((word) => ({
     normalized: normalizeWord(word, options),

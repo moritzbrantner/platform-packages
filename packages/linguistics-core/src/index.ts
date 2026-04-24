@@ -1,3 +1,14 @@
+import {
+  extractWordTextsWithKernel,
+  initLinguisticsKernel,
+  isLinguisticsKernelReady,
+  segmentTextDocumentWithKernel,
+  splitTextSentencesWithKernel,
+  type RawKernelSegmentedDocument,
+  type RawKernelSpan,
+  type RawKernelToken,
+} from "./kernel";
+
 export type LanguageTag = string;
 
 export interface TextSpan {
@@ -106,6 +117,12 @@ export interface ChunkTextDocumentOptions {
   overlapCharacters?: number;
 }
 
+export interface ExtractWordTextsOptions {
+  lowercase?: boolean;
+  normalizeUnicode?: boolean;
+  stripDiacritics?: boolean;
+}
+
 interface SegmentSlice {
   index: number;
   segment: string;
@@ -142,6 +159,14 @@ export function createTextDocument<
 export function segmentTextDocument<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
 >(document: TextDocument<Metadata>, options: SegmentTextDocumentOptions): TextDocument<Metadata> {
+  if (options.useIntlSegmenter === false && isLinguisticsKernelReady()) {
+    const kernelDocument = segmentTextDocumentFromKernel(document, options);
+
+    if (kernelDocument) {
+      return kernelDocument;
+    }
+  }
+
   const paragraphs =
     document.paragraphs.length > 0
       ? cloneParagraphs(document.paragraphs)
@@ -233,6 +258,35 @@ export function normalizeText(text: string, options: NormalizeTextOptions): stri
   }
 
   return normalized;
+}
+
+export { initLinguisticsKernel, isLinguisticsKernelReady };
+
+export function extractWordTexts(
+  text: string,
+  options: ExtractWordTextsOptions = {},
+): string[] {
+  const surfaces = extractWordTextsWithKernel(text) ?? fallbackExtractWordTexts(text);
+
+  return surfaces.map((surface) => {
+    let value = options.normalizeUnicode === false ? surface : surface.normalize("NFKC");
+
+    if (options.lowercase) {
+      value = value.toLocaleLowerCase();
+    }
+
+    if (options.stripDiacritics) {
+      value = value.normalize("NFKD").replace(/\p{M}/gu, "").normalize("NFKC");
+    }
+
+    return value;
+  });
+}
+
+export function splitTextSentences(text: string): string[] {
+  return splitTextSentencesWithKernel(text) ?? segmentSentences(text, undefined, false).map(
+    (segment) => segment.segment,
+  );
 }
 
 export function anchorSpan(
@@ -478,6 +532,195 @@ function trimSegmentSlices(segments: SegmentSlice[]): SegmentSlice[] {
       };
     })
     .filter((segment) => segment.segment.length > 0);
+}
+
+function fallbackExtractWordTexts(text: string): string[] {
+  return Array.from(text.matchAll(FALLBACK_TOKEN_PATTERN), (match) => match[0]).filter((token) =>
+    /[\p{L}\p{N}]/u.test(token),
+  );
+}
+
+function segmentTextDocumentFromKernel<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+>(document: TextDocument<Metadata>, options: SegmentTextDocumentOptions): TextDocument<Metadata> | null {
+  try {
+    const raw = segmentTextDocumentWithKernel(document.text, {
+      includePunctuation: options.granularity === "word",
+      includeTokens: options.granularity === "word",
+      keepApostrophes: true,
+    });
+
+    if (!raw) {
+      return null;
+    }
+
+    return materializeKernelDocument(document, options, raw);
+  } catch {
+    return null;
+  }
+}
+
+function materializeKernelDocument<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+>(
+  document: TextDocument<Metadata>,
+  options: SegmentTextDocumentOptions,
+  raw: RawKernelSegmentedDocument,
+): TextDocument<Metadata> {
+  const paragraphs = raw.paragraphs.map((paragraph, paragraphIndex) => ({
+    id: `${document.id}-paragraph-${paragraphIndex}`,
+    index: paragraphIndex,
+    span: toSpan(paragraph),
+    text: paragraph.text,
+    sentences: [] as TextSentence[],
+  }));
+
+  if (options.granularity === "paragraph") {
+    return {
+      ...document,
+      paragraphs,
+      sentences: [],
+      tokens: [],
+    };
+  }
+
+  const sentences: TextSentence[] = [];
+  const tokens: TextToken[] = [];
+  let tokenCursor = 0;
+
+  raw.sentences.forEach((rawSentence, sentenceIndex) => {
+    const paragraphIndex = findOwningParagraphIndex(paragraphs, rawSentence);
+    const paragraph = paragraphs[paragraphIndex];
+    const sentenceId = `${document.id}-sentence-${sentenceIndex}`;
+    const tokenContext = {
+      cursor: tokenCursor,
+      tokens,
+    };
+    const sentenceTokens =
+      options.granularity === "word"
+        ? materializeSentenceTokens(
+            document,
+            rawSentence,
+            paragraph,
+            sentenceId,
+            sentenceIndex,
+            raw.tokens,
+            tokenContext,
+          )
+        : [];
+
+    tokenCursor = tokenContext.cursor;
+
+    const sentence: TextSentence = {
+      id: sentenceId,
+      index: sentenceIndex,
+      paragraphId: paragraph.id,
+      paragraphIndex,
+      span: toSpan(rawSentence),
+      text: rawSentence.text,
+      tokens: sentenceTokens,
+      trailingText:
+        sentenceTokens.length > 0
+          ? rawSentence.text.slice(
+              (sentenceTokens.at(-1)?.span.end ?? rawSentence.start) - rawSentence.start,
+            )
+          : "",
+    };
+
+    sentences.push(sentence);
+    paragraph.sentences.push(sentence);
+  });
+
+  return {
+    ...document,
+    paragraphs,
+    sentences,
+    tokens,
+  };
+}
+
+function materializeSentenceTokens<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+>(
+  document: TextDocument<Metadata>,
+  sentence: RawKernelSpan,
+  paragraph: TextParagraph,
+  sentenceId: string,
+  sentenceIndex: number,
+  rawTokens: RawKernelToken[],
+  context: {
+    cursor: number;
+    tokens: TextToken[];
+  },
+): TextToken[] {
+  const sentenceTokens: TextToken[] = [];
+  let wordIndex = 0;
+  let lastBoundary = 0;
+
+  while (
+    context.cursor < rawTokens.length &&
+    rawTokens[context.cursor]!.end <= sentence.end
+  ) {
+    const rawToken = rawTokens[context.cursor]!;
+    context.cursor += 1;
+
+    if (rawToken.start < sentence.start) {
+      continue;
+    }
+
+    const isWordLike = isWordLikeToken(rawToken.kind);
+    const token: TextToken = {
+      id: `${sentenceId}-token-${sentenceTokens.length}`,
+      index: context.tokens.length,
+      wordIndex: isWordLike ? wordIndex++ : null,
+      paragraphId: paragraph.id,
+      paragraphIndex: paragraph.index,
+      sentenceId,
+      sentenceIndex,
+      span: toSpan(rawToken),
+      text: rawToken.text,
+      normalized: normalizeText(rawToken.text, {
+        form: "NFKC",
+        lowercase: true,
+        stripDiacritics: true,
+      }),
+      leadingText: sentence.text.slice(lastBoundary, rawToken.start - sentence.start),
+      isWordLike,
+    };
+
+    lastBoundary = rawToken.end - sentence.start;
+    sentenceTokens.push(token);
+    context.tokens.push(token);
+  }
+
+  return sentenceTokens;
+}
+
+function findOwningParagraphIndex(paragraphs: TextParagraph[], sentence: RawKernelSpan): number {
+  const foundIndex = paragraphs.findIndex(
+    (paragraph) => paragraph.span.start <= sentence.start && sentence.end <= paragraph.span.end,
+  );
+
+  return foundIndex === -1 ? Math.max(paragraphs.length - 1, 0) : foundIndex;
+}
+
+function isWordLikeToken(kind: string): boolean {
+  return (
+    kind === "word" ||
+    kind === "number" ||
+    kind === "url" ||
+    kind === "email" ||
+    kind === "mention" ||
+    kind === "hashtag"
+  );
+}
+
+function toSpan(value: RawKernelSpan | RawKernelToken): TextSpan {
+  return {
+    start: value.start,
+    end: value.end,
+    text: value.text,
+  };
 }
 
 function fallbackTokens(text: string): SegmentSlice[] {

@@ -19,6 +19,9 @@
       "import": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@mb-rust/text-core-wasm": "file:../../../rust-packages/packages/text-core-wasm"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
