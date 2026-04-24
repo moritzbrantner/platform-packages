@@ -139,7 +139,8 @@ export const Web: Story = {
     languageSwitcher: true,
   },
   play: async ({ canvas }) => {
-    await expect(canvas.getByText("Mira Brandt")).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Open account menu" })).toBeVisible();
+    await expect(canvas.getByText("MB")).toBeVisible();
   },
 };
 

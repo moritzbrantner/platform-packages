@@ -2,12 +2,13 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   BellIcon,
+  HomeIcon,
   KeyRoundIcon,
-  LockKeyholeIcon,
   LogInIcon,
   MessageCircleIcon,
   SearchIcon,
   SendIcon,
+  SettingsIcon,
   UserCircleIcon,
   UserPlusIcon,
   UsersIcon,
@@ -51,13 +52,18 @@ import { Textarea } from "./components/textarea";
 import { cn } from "./lib/cn";
 
 type WorkflowRoute =
+  | "home"
   | "login"
   | "register"
   | "password"
+  | "social"
   | "people"
   | "profile"
+  | "followers"
+  | "chats"
   | "chat"
-  | "notifications";
+  | "notifications"
+  | "settings";
 
 type PlatformWorkflowDemoProps = {
   initialRoute?: WorkflowRoute;
@@ -114,32 +120,25 @@ const people: Person[] = [
 
 const workflowNavigationGroups = [
   {
-    id: "access",
-    label: "Access",
-    eyebrow: "Account",
-    description: "Entry points for signing in and account recovery.",
-    icon: <LockKeyholeIcon className="size-4" />,
+    id: "workspace",
+    label: "Workspace",
+    eyebrow: "Dashboard",
+    description: "Signed-in landing and workspace preferences.",
+    icon: <HomeIcon className="size-4" />,
     items: [
       {
-        id: "login",
-        label: "Login",
-        href: "#login",
-        description: "Return to an existing workspace.",
-        icon: <LogInIcon className="size-4" />,
+        id: "home",
+        label: "Home",
+        href: "#home",
+        description: "Review activity, social updates, and next actions.",
+        icon: <HomeIcon className="size-4" />,
       },
       {
-        id: "register",
-        label: "Register",
-        href: "#register",
-        description: "Create a workspace profile.",
-        icon: <UserPlusIcon className="size-4" />,
-      },
-      {
-        id: "password",
-        label: "Password forgotten",
-        href: "#password",
-        description: "Send a recovery link.",
-        icon: <KeyRoundIcon className="size-4" />,
+        id: "settings",
+        label: "Settings",
+        href: "#settings",
+        description: "Adjust workspace notifications and profile defaults.",
+        icon: <SettingsIcon className="size-4" />,
       },
     ],
   },
@@ -147,15 +146,29 @@ const workflowNavigationGroups = [
     id: "social",
     label: "Social",
     eyebrow: "Directory",
-    description: "People discovery, follows, and public profiles.",
+    description: "Discovery, relationships, and public profile flows.",
     icon: <UsersIcon className="size-4" />,
     items: [
+      {
+        id: "social",
+        label: "Overview",
+        href: "#social",
+        description: "Open the combined social activity hub.",
+        icon: <UsersIcon className="size-4" />,
+      },
       {
         id: "people",
         label: "People",
         href: "#people",
         description: "Find and follow platform users.",
         icon: <SearchIcon className="size-4" />,
+      },
+      {
+        id: "followers",
+        label: "Followers",
+        href: "#followers",
+        description: "Review the profiles you currently follow.",
+        icon: <UserPlusIcon className="size-4" />,
       },
       {
         id: "profile",
@@ -170,12 +183,19 @@ const workflowNavigationGroups = [
     id: "messaging",
     label: "Messaging",
     eyebrow: "Inbox",
-    description: "Chat and notification workflows.",
+    description: "Conversation lists, direct threads, and notification flows.",
     icon: <MessageCircleIcon className="size-4" />,
     items: [
       {
+        id: "chats",
+        label: "Chat overview",
+        href: "#chats",
+        description: "Review recent conversations and unread replies.",
+        icon: <MessageCircleIcon className="size-4" />,
+      },
+      {
         id: "chat",
-        label: "Chat",
+        label: "Thread",
         href: "#chat",
         description: "Open a direct message thread.",
         icon: <MessageCircleIcon className="size-4" />,
@@ -197,13 +217,26 @@ const meta = {
   component: PlatformWorkflowDemo,
   tags: ["autodocs", "test"],
   args: {
-    initialRoute: "login",
+    initialRoute: "home",
     initialProfileId: "mira",
   },
   argTypes: {
     initialRoute: {
       control: "select",
-      options: ["login", "register", "password", "people", "profile", "chat", "notifications"],
+      options: [
+        "home",
+        "login",
+        "register",
+        "password",
+        "social",
+        "people",
+        "profile",
+        "followers",
+        "chats",
+        "chat",
+        "notifications",
+        "settings",
+      ],
     },
     initialProfileId: {
       control: "select",
@@ -222,7 +255,34 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Home: Story = {
+  args: { initialRoute: "home" },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("heading", { name: "Home" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Open social overview" })).toBeVisible();
+  },
+};
+
 export const Login: Story = {
+  args: { initialRoute: "login" },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole("button", { name: "Create account instead" }));
+
+    await expect(canvas.getByRole("heading", { name: "Register" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Sign in instead" })).toBeVisible();
+  },
+};
+
+export const Register: Story = {
+  args: { initialRoute: "register" },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole("button", { name: "Sign in instead" }));
+
+    await expect(canvas.getByRole("heading", { name: "Login" })).toBeVisible();
+  },
+};
+
+export const SigningIn: Story = {
   args: { initialRoute: "login" },
   play: async ({ canvas, userEvent }) => {
     await userEvent.clear(canvas.getByLabelText("Email"));
@@ -234,7 +294,7 @@ export const Login: Story = {
   },
 };
 
-export const Register: Story = {
+export const CreatingAnAccount: Story = {
   args: { initialRoute: "register" },
   play: async ({ canvas, userEvent }) => {
     await userEvent.type(canvas.getByLabelText("Display name"), "Ada Lovelace");
@@ -256,6 +316,14 @@ export const PasswordForgotten: Story = {
     await expect(canvas.getByRole("alert")).toHaveTextContent(
       "Reset link sent to reset@example.com",
     );
+  },
+};
+
+export const SocialOverview: Story = {
+  args: { initialRoute: "social" },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("heading", { name: "Social overview" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Open followers overview" })).toBeVisible();
   },
 };
 
@@ -290,12 +358,36 @@ export const OpeningAProfile: Story = {
   },
 };
 
+export const ChatOverview: Story = {
+  args: { initialRoute: "chats" },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("heading", { name: "Chat overview" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Open chat with Mira Patel" })).toBeVisible();
+  },
+};
+
+export const FollowersOverview: Story = {
+  args: { initialRoute: "followers" },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("heading", { name: "Followers overview" })).toBeVisible();
+    await expect(canvas.getByText("Sofia Nguyen")).toBeVisible();
+  },
+};
+
 export const Notifications: Story = {
   args: { initialRoute: "notifications" },
 };
 
+export const Settings: Story = {
+  args: { initialRoute: "settings" },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("heading", { name: "Settings" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Save settings" })).toBeVisible();
+  },
+};
+
 function PlatformWorkflowDemo({
-  initialRoute = "login",
+  initialRoute = "home",
   initialProfileId = "mira",
 }: PlatformWorkflowDemoProps) {
   const [activeRoute, setActiveRoute] = React.useState<WorkflowRoute>(initialRoute);
@@ -403,12 +495,33 @@ function PlatformWorkflowDemo({
             <WorkflowSummary followingCount={followingCount} selectedProfile={selectedProfile} />
           )}
           {notice ? <WorkflowNotice message={notice} /> : null}
-          {activeRoute === "login" ? <LoginWorkflow onNotice={setNotice} /> : null}
-          {activeRoute === "register" ? <RegisterWorkflow onNotice={setNotice} /> : null}
-          {activeRoute === "password" ? <PasswordWorkflow onNotice={setNotice} /> : null}
+          {activeRoute === "home" ? (
+            <HomeWorkflow followingCount={followingCount} onNavigate={navigate} />
+          ) : null}
+          {activeRoute === "login" ? (
+            <LoginWorkflow onNavigate={navigate} onNotice={setNotice} />
+          ) : null}
+          {activeRoute === "register" ? (
+            <RegisterWorkflow onNavigate={navigate} onNotice={setNotice} />
+          ) : null}
+          {activeRoute === "password" ? (
+            <PasswordWorkflow onNavigate={navigate} onNotice={setNotice} />
+          ) : null}
+          {activeRoute === "social" ? (
+            <SocialOverviewWorkflow followingCount={followingCount} onNavigate={navigate} />
+          ) : null}
           {activeRoute === "people" ? (
             <PeopleWorkflow
               followingIds={followingIds}
+              onOpenChat={openChat}
+              onOpenProfile={openProfile}
+              onToggleFollow={toggleFollow}
+            />
+          ) : null}
+          {activeRoute === "followers" ? (
+            <FollowersWorkflow
+              followingIds={followingIds}
+              onNavigate={navigate}
               onOpenChat={openChat}
               onOpenProfile={openProfile}
               onToggleFollow={toggleFollow}
@@ -422,15 +535,116 @@ function PlatformWorkflowDemo({
               onToggleFollow={toggleFollow}
             />
           ) : null}
+          {activeRoute === "chats" ? (
+            <ChatOverviewWorkflow onOpenChat={openChat} selectedProfile={selectedProfile} />
+          ) : null}
           {activeRoute === "chat" && selectedProfile ? (
             <ChatWorkflow person={selectedProfile} />
           ) : null}
           {activeRoute === "notifications" ? (
             <NotificationsWorkflow followingCount={followingCount} />
           ) : null}
+          {activeRoute === "settings" ? <SettingsWorkflow onNotice={setNotice} /> : null}
         </main>
       </div>
     </div>
+  );
+}
+
+function HomeWorkflow({
+  followingCount,
+  onNavigate,
+}: {
+  followingCount: number;
+  onNavigate: (route: WorkflowRoute) => void;
+}) {
+  return (
+    <section className="grid gap-6">
+      <div className="grid gap-4 rounded-xl border bg-card p-6 text-card-foreground lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="grid gap-3">
+          <Badge variant="outline" className="w-fit">
+            Workspace home
+          </Badge>
+          <h1 className="text-3xl font-semibold tracking-tight">Home</h1>
+          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            Start from a signed-in dashboard with quick access to social discovery, active
+            conversations, and workspace settings.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={() => onNavigate("social")}>
+              <UsersIcon />
+              Open social overview
+            </Button>
+            <Button type="button" variant="outline" onClick={() => onNavigate("chats")}>
+              <MessageCircleIcon />
+              Open chat overview
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => onNavigate("settings")}>
+              <SettingsIcon />
+              Open settings
+            </Button>
+          </div>
+        </div>
+        <div className="grid content-start gap-3 rounded-lg border bg-muted/35 p-4">
+          <h2 className="text-base font-medium">Today</h2>
+          <div className="grid gap-2 text-sm text-muted-foreground">
+            <p>2 direct messages need a reply.</p>
+            <p>{followingCount} followed profiles posted updates this morning.</p>
+            <p>Notifications and password recovery are configured for this workspace.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Social pulse</CardTitle>
+            <CardDescription>People discovery, follows, and profile reviews.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-sm text-muted-foreground">
+              Browse the wider directory or focus on the followed profiles that matter most.
+            </p>
+            <Button type="button" variant="outline" className="w-fit" onClick={() => onNavigate("followers")}>
+              <UserPlusIcon />
+              Open followers overview
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Conversation queue</CardTitle>
+            <CardDescription>Recent replies and direct-message handoffs.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-sm text-muted-foreground">
+              Review open chat threads before switching into a focused conversation.
+            </p>
+            <Button type="button" variant="outline" className="w-fit" onClick={() => onNavigate("chats")}>
+              <MessageCircleIcon />
+              Review chats
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Workspace controls</CardTitle>
+            <CardDescription>Preferences, delivery settings, and profile defaults.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-sm text-muted-foreground">
+              Adjust notifications, session behavior, and saved profile details.
+            </p>
+            <Button type="button" variant="outline" className="w-fit" onClick={() => onNavigate("settings")}>
+              <SettingsIcon />
+              Manage settings
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
   );
 }
 
@@ -469,7 +683,13 @@ function WorkflowNotice({ message }: { message: string }) {
   );
 }
 
-function LoginWorkflow({ onNotice }: { onNotice: (message: string) => void }) {
+function LoginWorkflow({
+  onNavigate,
+  onNotice,
+}: {
+  onNavigate: (route: WorkflowRoute) => void;
+  onNotice: (message: string) => void;
+}) {
   const [email, setEmail] = React.useState("mira@example.com");
 
   return (
@@ -505,11 +725,27 @@ function LoginWorkflow({ onNotice }: { onNotice: (message: string) => void }) {
           </Button>
         </form>
       </CardContent>
+      <CardFooter className="flex-wrap justify-between gap-2">
+        <Button type="button" variant="ghost" onClick={() => onNavigate("register")}>
+          <UserPlusIcon />
+          Create account instead
+        </Button>
+        <Button type="button" variant="outline" onClick={() => onNavigate("password")}>
+          <KeyRoundIcon />
+          Forgot password?
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
 
-function RegisterWorkflow({ onNotice }: { onNotice: (message: string) => void }) {
+function RegisterWorkflow({
+  onNavigate,
+  onNotice,
+}: {
+  onNavigate: (route: WorkflowRoute) => void;
+  onNotice: (message: string) => void;
+}) {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("new-user@example.com");
 
@@ -548,11 +784,24 @@ function RegisterWorkflow({ onNotice }: { onNotice: (message: string) => void })
           </Button>
         </form>
       </CardContent>
+      <CardFooter className="justify-between gap-2">
+        <span className="text-sm text-muted-foreground">Already have a workspace profile?</span>
+        <Button type="button" variant="ghost" onClick={() => onNavigate("login")}>
+          <LogInIcon />
+          Sign in instead
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
 
-function PasswordWorkflow({ onNotice }: { onNotice: (message: string) => void }) {
+function PasswordWorkflow({
+  onNavigate,
+  onNotice,
+}: {
+  onNavigate: (route: WorkflowRoute) => void;
+  onNotice: (message: string) => void;
+}) {
   const [email, setEmail] = React.useState("mira@example.com");
 
   return (
@@ -583,7 +832,82 @@ function PasswordWorkflow({ onNotice }: { onNotice: (message: string) => void })
           </Button>
         </form>
       </CardContent>
+      <CardFooter className="justify-between gap-2">
+        <span className="text-sm text-muted-foreground">Remembered your credentials?</span>
+        <Button type="button" variant="ghost" onClick={() => onNavigate("login")}>
+          <LogInIcon />
+          Back to sign in
+        </Button>
+      </CardFooter>
     </Card>
+  );
+}
+
+function SocialOverviewWorkflow({
+  followingCount,
+  onNavigate,
+}: {
+  followingCount: number;
+  onNavigate: (route: WorkflowRoute) => void;
+}) {
+  return (
+    <section className="grid gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Social overview</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            A single entry point for directory discovery, followed profiles, public profile review,
+            and message handoff workflows.
+          </p>
+        </div>
+        <Badge variant="outline">{followingCount} followed profiles</Badge>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <OverviewCard
+          title="People directory"
+          description="Browse all platform profiles and jump into a profile or thread."
+          actionLabel="Open people"
+          onAction={() => onNavigate("people")}
+        />
+        <OverviewCard
+          title="Followers"
+          description="Review the people you already follow and adjust the list in one place."
+          actionLabel="Open followers overview"
+          onAction={() => onNavigate("followers")}
+        />
+        <OverviewCard
+          title="Chat inbox"
+          description="Switch from social discovery into recent conversations without losing context."
+          actionLabel="Open chat overview"
+          onAction={() => onNavigate("chats")}
+        />
+        <OverviewCard
+          title="Notifications"
+          description="Check follows, replies, and account events from the same signed-in flow."
+          actionLabel="Open notifications"
+          onAction={() => onNavigate("notifications")}
+        />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent social signals</CardTitle>
+          <CardDescription>Representative activity for this Storybook workflow demo.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          {[
+            "Mira Patel shared a systems note for the onboarding flow.",
+            "Jordan Ellis replied to a collaboration thread and is available to chat.",
+            "Sofia Nguyen published a frontend update and remains in your followed list.",
+          ].map((message) => (
+            <div key={message} className="rounded-lg border bg-muted/35 px-4 py-3 text-sm">
+              {message}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </section>
   );
 }
 
@@ -764,6 +1088,69 @@ function ProfileWorkflow({
   );
 }
 
+function FollowersWorkflow({
+  followingIds,
+  onNavigate,
+  onOpenChat,
+  onOpenProfile,
+  onToggleFollow,
+}: {
+  followingIds: string[];
+  onNavigate: (route: WorkflowRoute) => void;
+  onOpenChat: (personId: string) => void;
+  onOpenProfile: (personId: string) => void;
+  onToggleFollow: (personId: string) => void;
+}) {
+  const followedPeople = people.filter((person) => followingIds.includes(person.id));
+
+  if (followedPeople.length === 0) {
+    return (
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>Followers overview</CardTitle>
+          <CardDescription>No followed profiles yet.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <p className="text-sm text-muted-foreground">
+            Start from the people directory to build a list of profiles to watch.
+          </p>
+          <Button type="button" className="w-fit" onClick={() => onNavigate("people")}>
+            <SearchIcon />
+            Browse people
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <section className="grid gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Followers overview</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Profiles you already follow, with direct access to profile review and chat.
+          </p>
+        </div>
+        <Badge variant="outline">{followedPeople.length} active follows</Badge>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {followedPeople.map((person) => (
+          <PersonCard
+            key={person.id}
+            isFollowing
+            person={person}
+            onOpenChat={onOpenChat}
+            onOpenProfile={onOpenProfile}
+            onToggleFollow={onToggleFollow}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ProfileMetric({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -836,6 +1223,96 @@ function ChatWorkflow({ person }: { person: Person }) {
   );
 }
 
+function ChatOverviewWorkflow({
+  onOpenChat,
+  selectedProfile,
+}: {
+  onOpenChat: (personId: string) => void;
+  selectedProfile: Person | null;
+}) {
+  return (
+    <section className="grid gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Chat overview</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Move from a conversation list into a direct thread without leaving the signed-in
+            workflow demo.
+          </p>
+        </div>
+        <Badge variant="outline">3 recent threads</Badge>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_22rem]">
+        <div className="grid gap-3">
+          {people.map((person, index) => {
+            const unread = index === 0 ? 2 : index === 1 ? 1 : 0;
+
+            return (
+              <Card key={person.id}>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      size="lg"
+                      initials={person.initials}
+                      name={person.name}
+                      online={person.online}
+                    />
+                    <div className="min-w-0">
+                      <CardTitle className="truncate">{person.name}</CardTitle>
+                      <CardDescription className="truncate">
+                        {person.online ? "Available now" : "Away"} - Last note on social workflow
+                        handoff
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <CardAction>
+                    <Badge variant={unread > 0 ? "secondary" : "outline"}>
+                      {unread > 0 ? `${unread} unread` : "Read"}
+                    </Badge>
+                  </CardAction>
+                </CardHeader>
+                <CardContent className="grid gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {index === 0
+                      ? "Can you review the new workflow stories before the visual pass?"
+                      : index === 1
+                        ? "I added the profile and followers states for Storybook."
+                        : "The account and social surfaces are ready for review."}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-fit"
+                    aria-label={`Open chat with ${person.name}`}
+                    onClick={() => onOpenChat(person.id)}
+                  >
+                    <MessageCircleIcon />
+                    Open thread
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Current focus</CardTitle>
+            <CardDescription>
+              {selectedProfile ? `Ready to continue with ${selectedProfile.name}.` : "Select a thread."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 text-sm text-muted-foreground">
+            <p>Unread replies, followed profiles, and direct threads stay connected in this workflow.</p>
+            <p>Jumping into a thread keeps the selected profile aligned with the rest of the social flow.</p>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
 function NotificationsWorkflow({ followingCount }: { followingCount: number }) {
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -858,6 +1335,95 @@ function NotificationsWorkflow({ followingCount }: { followingCount: number }) {
         </p>
       </div>
     </section>
+  );
+}
+
+function SettingsWorkflow({ onNotice }: { onNotice: (message: string) => void }) {
+  const [displayName, setDisplayName] = React.useState("Platform reviewer");
+  const [email, setEmail] = React.useState("reviewer@example.com");
+
+  return (
+    <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_22rem]">
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+          <CardDescription>Workspace preferences for profile, delivery, and review defaults.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            className="grid gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              onNotice(`Settings saved for ${displayName || email}`);
+            }}
+          >
+            <Field label="Display name" id="workflow-settings-name">
+              <Input
+                id="workflow-settings-name"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+              />
+            </Field>
+            <Field label="Email" id="workflow-settings-email">
+              <Input
+                id="workflow-settings-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </Field>
+            <Field label="Status message" id="workflow-settings-status">
+              <Textarea
+                id="workflow-settings-status"
+                defaultValue="Available for UI workflow reviews this afternoon."
+              />
+            </Field>
+            <Button type="submit" className="w-fit">
+              <SettingsIcon />
+              Save settings
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Included</CardTitle>
+          <CardDescription>Primary settings areas covered by this workflow screen.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 text-sm text-muted-foreground">
+          <div className="rounded-lg border bg-muted/35 px-4 py-3">Profile identity and public status</div>
+          <div className="rounded-lg border bg-muted/35 px-4 py-3">Notification and direct-message delivery</div>
+          <div className="rounded-lg border bg-muted/35 px-4 py-3">Recovery email and account access controls</div>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
+function OverviewCard({
+  actionLabel,
+  description,
+  onAction,
+  title,
+}: {
+  actionLabel: string;
+  description: string;
+  onAction: () => void;
+  title: string;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button type="button" variant="outline" className="w-fit" onClick={onAction}>
+          {actionLabel}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
