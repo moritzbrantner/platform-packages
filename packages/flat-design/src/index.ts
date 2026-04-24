@@ -1,4 +1,25 @@
 export {
+  addMotionKeyframe,
+  clearFlatNodeMotion,
+  clampMotionKeyframes,
+  compileFlatMotion,
+  createEditableMotionFromPreset,
+  duplicateFlatNode,
+  findFlatNodeById,
+  getFlatNode,
+  listFlatNodes,
+  moveFlatNode,
+  normalizeEditableMotion,
+  removeFlatNode,
+  removeMotionKeyframe,
+  setFlatNodeMotion,
+  sortMotionKeyframes,
+  updateFlatNode,
+  updateMotionKeyframe,
+  type DuplicateFlatNodeOptions,
+  type FlatNodeInsertPosition,
+} from "./core";
+export {
   createBobbingAnimation,
   createDriftAnimation,
   createFloatAnimation,
@@ -11,7 +32,19 @@ export {
   type FlatMotionKeyframe,
   type FlatTimelineAnimationOptions,
 } from "./animation-presets";
-export { FlatScene, type FlatSceneProps } from "./flat-scene";
+export {
+  EditableFlatScene,
+  FlatMotionTimelineEditor,
+  useFlatSceneSelection,
+  type EditableFlatSceneProps,
+  type FlatMotionTimelineEditorProps,
+  type UseFlatSceneSelectionResult,
+} from "./react";
+export {
+  FlatScene,
+  type FlatSceneProps,
+  type FlatSceneShapeRenderContext,
+} from "./flat-scene";
 export {
   createFlatBadgeFigure,
   createFlatCardFigure,
@@ -39,6 +72,7 @@ export type {
   FlatCircle,
   FlatColorPalette,
   FlatDesignScene,
+  FlatEditableKeyframe,
   FlatEllipse,
   FlatGradient,
   FlatGradientStop,
@@ -46,9 +80,15 @@ export type {
   FlatLayer,
   FlatLength,
   FlatLine,
+  FlatMotionSpec,
+  FlatNodePath,
+  FlatNodeRef,
+  FlatNodeSummary,
   FlatPath,
   FlatPolygon,
+  FlatPresetMotionSpec,
   FlatRect,
   FlatShape,
+  FlatTimelineMotionSpec,
   FlatTransformAnimation,
 } from "./scene-types";

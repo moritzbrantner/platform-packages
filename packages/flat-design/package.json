@@ -17,6 +17,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
     }
   },
   "peerDependencies": {
@@ -34,10 +42,10 @@
     "access": "restricted"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
+    "build": "tsup src/index.ts src/core.ts src/react.tsx --format esm --dts --clean --out-dir dist",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/flat-design/tests/flat-design.test.tsx"
+    "test": "cd ../.. && vitest run packages/flat-design/tests"
   }
 }

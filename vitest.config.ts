@@ -55,6 +55,14 @@ export default defineConfig({
       ),
       "@moritzbrantner/fill-mask": path.resolve(rootDir, "packages/fill-mask/src/index.ts"),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
+      "@moritzbrantner/flat-design/core": path.resolve(
+        rootDir,
+        "packages/flat-design/src/core.ts",
+      ),
+      "@moritzbrantner/flat-design/react": path.resolve(
+        rootDir,
+        "packages/flat-design/src/react.tsx",
+      ),
       "@moritzbrantner/foundation-contract": path.resolve(
         rootDir,
         "packages/foundation-contract/src/index.ts",

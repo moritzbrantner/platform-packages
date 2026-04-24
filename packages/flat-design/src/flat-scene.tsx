@@ -1,5 +1,6 @@
-import { useId, type CSSProperties, type ReactNode } from "react";
+import { useId, type CSSProperties, type ReactNode, type SVGAttributes } from "react";
 
+import { compileFlatMotion } from "./core";
 import {
   formatAnimationValues,
   formatKeySplines,
@@ -12,8 +13,15 @@ import type {
   FlatDesignScene,
   FlatGradient,
   FlatLayer,
+  FlatNodeRef,
   FlatShape,
 } from "./scene-types";
+
+export type FlatSceneShapeRenderContext = {
+  shape: FlatShape;
+  ref: FlatNodeRef;
+  depth: number;
+};
 
 export type FlatSceneProps = {
   scene: FlatDesignScene;
@@ -22,6 +30,7 @@ export type FlatSceneProps = {
   width?: number | string;
   height?: number | string;
   preserveAspectRatio?: string;
+  getShapeProps?: (context: FlatSceneShapeRenderContext) => SVGAttributes<SVGElement> | undefined;
 };
 
 function renderAnimation(animation: FlatAnimation, key: string) {
@@ -95,10 +104,18 @@ function renderGradient(gradient: FlatGradient, key: string) {
   );
 }
 
-function getCommonShapeProps(shape: FlatShape) {
+function mergeClassNames(...classNames: Array<string | undefined>) {
+  return classNames.filter(Boolean).join(" ") || undefined;
+}
+
+function getCommonShapeProps(
+  shape: FlatShape,
+  extraProps?: SVGAttributes<SVGElement>,
+): SVGAttributes<SVGElement> {
   return {
-    id: shape.id,
-    className: shape.className,
+    ...extraProps,
+    id: extraProps?.id ?? shape.id,
+    className: mergeClassNames(shape.className, extraProps?.className),
     fill: shape.fill,
     stroke: shape.stroke,
     strokeWidth: shape.strokeWidth,
@@ -109,15 +126,44 @@ function getCommonShapeProps(shape: FlatShape) {
   };
 }
 
-function renderShape(shape: FlatShape, key: string): ReactNode {
-  const commonProps = getCommonShapeProps(shape);
-  const animations = renderAnimations(shape.animations);
+function getShapeAnimations(shape: FlatShape): FlatAnimation[] | undefined {
+  const motionAnimations = shape.motion ? compileFlatMotion(shape.motion) : [];
+  const animations = [...motionAnimations, ...(shape.animations ?? [])];
+
+  return animations.length > 0 ? animations : undefined;
+}
+
+function renderShape(
+  shape: FlatShape,
+  key: string,
+  ref: FlatNodeRef,
+  depth: number,
+  getShapeProps?: FlatSceneProps["getShapeProps"],
+): ReactNode {
+  const extraProps = getShapeProps?.({
+    shape,
+    ref,
+    depth,
+  });
+  const commonProps = getCommonShapeProps(shape, extraProps);
+  const animations = renderAnimations(getShapeAnimations(shape));
 
   switch (shape.kind) {
     case "group":
       return (
         <g key={key} {...commonProps}>
-          {shape.children.map((child, index) => renderShape(child, `${key}-${index}`))}
+          {shape.children.map((child, index) =>
+            renderShape(
+              child,
+              `${key}-${index}`,
+              {
+                layerIndex: ref.layerIndex,
+                path: [...ref.path, index],
+              },
+              depth + 1,
+              getShapeProps,
+            ),
+          )}
           {animations}
         </g>
       );
@@ -169,7 +215,12 @@ function renderShape(shape: FlatShape, key: string): ReactNode {
   }
 }
 
-function renderLayer(layer: FlatLayer, key: string) {
+function renderLayer(
+  layer: FlatLayer,
+  key: string,
+  layerIndex: number,
+  getShapeProps?: FlatSceneProps["getShapeProps"],
+) {
   return (
     <g
       key={key}
@@ -178,7 +229,18 @@ function renderLayer(layer: FlatLayer, key: string) {
       opacity={layer.opacity}
       transform={layer.transform}
     >
-      {layer.shapes.map((shape, index) => renderShape(shape, `${key}-shape-${index}`))}
+      {layer.shapes.map((shape, index) =>
+        renderShape(
+          shape,
+          `${key}-shape-${index}`,
+          {
+            layerIndex,
+            path: [index],
+          },
+          0,
+          getShapeProps,
+        ),
+      )}
     </g>
   );
 }
@@ -190,6 +252,7 @@ export function FlatScene({
   preserveAspectRatio = "xMidYMid meet",
   style,
   width,
+  getShapeProps,
 }: FlatSceneProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -219,7 +282,7 @@ export function FlatScene({
         </defs>
       ) : null}
       {scene.background ? <rect width="100%" height="100%" fill={scene.background} /> : null}
-      {scene.layers.map((layer, index) => renderLayer(layer, `layer-${index}`))}
+      {scene.layers.map((layer, index) => renderLayer(layer, `layer-${index}`, index, getShapeProps))}
     </svg>
   );
 }

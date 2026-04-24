@@ -11,6 +11,8 @@
       "@moritzbrantner/card-games": ["../../packages/card-games/src/index.ts"],
       "@moritzbrantner/data-density": ["../../packages/data-density/src/index.ts"],
       "@moritzbrantner/flat-design": ["../../packages/flat-design/src/index.ts"],
+      "@moritzbrantner/flat-design/core": ["../../packages/flat-design/src/core.ts"],
+      "@moritzbrantner/flat-design/react": ["../../packages/flat-design/src/react.tsx"],
       "@moritzbrantner/linguistics-core": ["../../packages/linguistics-core/src/index.ts"],
       "@moritzbrantner/linguistics-corpus": ["../../packages/linguistics-corpus/src/index.ts"],
       "@moritzbrantner/linguistics-learning": ["../../packages/linguistics-learning/src/index.ts"],

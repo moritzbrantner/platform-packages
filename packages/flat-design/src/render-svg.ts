@@ -1,3 +1,4 @@
+import { compileFlatMotion } from "./core";
 import {
   formatAnimationValues,
   formatKeySplines,
@@ -98,6 +99,13 @@ function serializeAnimations(animations?: FlatAnimation[]): string {
   return animations?.map(serializeAnimation).join("") ?? "";
 }
 
+function getShapeAnimations(shape: FlatShape): FlatAnimation[] | undefined {
+  const motionAnimations = shape.motion ? compileFlatMotion(shape.motion) : [];
+  const animations = [...motionAnimations, ...(shape.animations ?? [])];
+
+  return animations.length > 0 ? animations : undefined;
+}
+
 function serializeShape(shape: FlatShape): string {
   const common = {
     id: shape.id,
@@ -110,7 +118,7 @@ function serializeShape(shape: FlatShape): string {
     opacity: shape.opacity,
     transform: shape.transform,
   };
-  const animations = serializeAnimations(shape.animations);
+  const animations = serializeAnimations(getShapeAnimations(shape));
 
   switch (shape.kind) {
     case "group":

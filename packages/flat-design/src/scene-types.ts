@@ -1,3 +1,8 @@
+import type {
+  FlatBuiltInFigureAnimationPreset,
+  FlatFigureAnimationOptions,
+} from "./figures";
+
 export type FlatLength = number | string;
 
 export type FlatColorPalette = {
@@ -68,6 +73,49 @@ export type FlatTransformAnimation =
 
 export type FlatAnimation = FlatAttributeAnimation | FlatTransformAnimation;
 
+export type FlatEditableKeyframe = {
+  timeMs: number;
+  x?: number;
+  y?: number;
+  scale?: number | { x: number; y: number };
+  rotate?: number | { angle: number; cx?: number; cy?: number };
+  opacity?: number;
+};
+
+export type FlatPresetMotionSpec = {
+  kind: "preset";
+  preset: FlatBuiltInFigureAnimationPreset;
+  options?: FlatFigureAnimationOptions;
+};
+
+export type FlatTimelineMotionSpec = {
+  kind: "timeline";
+  durationMs: number;
+  repeatCount?: "indefinite" | number;
+  direction?: "normal" | "reverse" | "alternate";
+  keyframes: FlatEditableKeyframe[];
+  rotateCenter?: { cx: number; cy: number };
+};
+
+export type FlatMotionSpec = FlatPresetMotionSpec | FlatTimelineMotionSpec;
+
+export type FlatNodePath = readonly number[];
+
+export type FlatNodeRef = {
+  layerIndex: number;
+  path: FlatNodePath;
+};
+
+export type FlatNodeSummary = {
+  ref: FlatNodeRef;
+  id?: string;
+  kind: FlatShape["kind"];
+  depth: number;
+  hasMotion: boolean;
+  hasAnimations: boolean;
+  label: string;
+};
+
 type FlatRenderableBase = {
   id?: string;
   className?: string;
@@ -78,6 +126,7 @@ type FlatRenderableBase = {
   strokeLinejoin?: "bevel" | "miter" | "round";
   opacity?: number;
   transform?: string;
+  motion?: FlatMotionSpec;
   animations?: FlatAnimation[];
 };
 

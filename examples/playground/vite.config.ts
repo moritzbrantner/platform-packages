@@ -25,6 +25,14 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/flat-design/src/index.ts"),
       },
       {
+        find: /^@moritzbrantner\/flat-design\/core$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/core.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/react$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/react.tsx"),
+      },
+      {
         find: /^@moritzbrantner\/maps$/,
         replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
       },
@@ -123,6 +131,8 @@ export default defineConfig({
       "@moritzbrantner/card-games",
       "@moritzbrantner/data-density",
       "@moritzbrantner/flat-design",
+      "@moritzbrantner/flat-design/core",
+      "@moritzbrantner/flat-design/react",
       "@moritzbrantner/linguistics-core",
       "@moritzbrantner/linguistics-corpus",
       "@moritzbrantner/linguistics-learning",
