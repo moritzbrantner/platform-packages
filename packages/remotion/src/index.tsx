@@ -241,3 +241,14 @@ function modulo(value: number, divisor: number) {
 }
 
 export type { TemporalMapTimeRange, TemporalMapTrack };
+export {
+  RemotionFlatScene,
+  getRemotionFlatSceneTimeAtFrame,
+  sampleFlatSceneAtTime,
+  useRemotionFlatScene,
+  type RemotionFlatScenePlayback,
+  type RemotionFlatSceneProps,
+  type RemotionFlatSceneTimeAtFrameOptions,
+  type RemotionFlatSceneTimingProps,
+  type UseRemotionFlatSceneOptions,
+} from "./flat-scene";

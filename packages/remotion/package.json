@@ -25,6 +25,7 @@
     "remotion": "^4.0.379"
   },
   "dependencies": {
+    "@moritzbrantner/flat-design": "^0.1.1",
     "@moritzbrantner/maps": "^0.1.2"
   },
   "devDependencies": {
