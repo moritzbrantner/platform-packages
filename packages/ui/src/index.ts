@@ -47,6 +47,7 @@ export * from "./components/input-otp";
 export * from "./components/inspector-panel";
 export * from "./components/item";
 export * from "./components/kbd";
+export * from "./components/keyboard";
 export * from "./components/label";
 export * from "./components/language-switcher";
 export * from "./components/loading-bar";
