@@ -165,7 +165,9 @@ function verifyStoryCoverage() {
 
   for (const componentName of componentNames) {
     if (!coveredComponents.has(componentName)) {
-      errors.push(`${componentName}: missing Storybook coverage`);
+      errors.push(
+        `${componentName}: missing Storybook coverage; every public component in src/components must appear in Storybook`,
+      );
     }
   }
 }

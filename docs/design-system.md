@@ -95,7 +95,8 @@ Every new public component must have:
 
 - A root export from `src/index.ts`.
 - A component subpath from the generated `tsup` entry map.
-- Storybook coverage through either a dedicated story or an aggregate catalog story.
+- Storybook coverage so the component appears in Storybook.
+- A dedicated `*.stories.tsx` entry when the component should be directly discoverable on its own, not only through an aggregate catalog.
 - Tests for important rendering, accessibility, and variant behavior.
 - Styling based on existing tokens.
 

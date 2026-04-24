@@ -561,6 +561,7 @@ describe("@moritzbrantner/ui button-and-form", () => {
     expect(
       container.querySelector("[data-slot='pulse-spinner']")?.getAttribute("aria-hidden"),
     ).toBe("true");
+    expect(container.querySelectorAll("[data-slot='spinner-loop'] animate")).toHaveLength(3);
 
     const upload = screen.getByRole("progressbar", { name: "Upload progress" });
     const fetching = screen.getByRole("progressbar", { name: "Fetching package" });

@@ -39,7 +39,9 @@ Before exporting a component:
 
 ## Storybook checklist
 
-Every public component needs either a dedicated story file or aggregate catalog coverage.
+Every public component must appear in Storybook.
+
+Dedicated `*.stories.tsx` files are preferred for components that should be directly discoverable in the sidebar. Aggregate catalog stories can supplement coverage, but they should not be the only place a component is demonstrated when the component stands on its own.
 
 Cover these states when they apply:
 
