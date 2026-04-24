@@ -249,6 +249,7 @@
     [data-slot="avatar"],
     [data-slot="avatar-fallback"],
     [data-slot="avatar-badge"],
+    [data-slot="avatar-collection-count"],
     [data-slot="avatar-group-count"],
     [data-slot="kbd"],
     [data-slot="input-otp-slot"],

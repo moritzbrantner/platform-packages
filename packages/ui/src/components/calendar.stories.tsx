@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
 
-import { Calendar, type CalendarIcsData } from "./calendar";
+import { Calendar, CalendarCardDays, type CalendarIcsData } from "./calendar";
 
 const calendarIcsData = [
   "vcalendar",
@@ -77,10 +77,7 @@ export const WithEvents: Story = {
 };
 
 export const CardDays: Story = {
-  args: {
-    variant: "cards",
-    maxEventsPerDay: 4,
-  },
+  render: (args) => <CalendarCardDays {...args} maxEventsPerDay={4} />,
   play: async ({ canvas }) => {
     await expect(canvas.getAllByText(/Design sync/).length).toBeGreaterThan(0);
     await expect(canvas.getAllByText("All day").length).toBeGreaterThan(0);

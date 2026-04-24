@@ -197,7 +197,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 
 1. Install dependencies with `bun install`.
 2. Scaffold a new package with `bun run create:package <name>`.
-3. Start the example pages with `bun run dev:playground`.
+3. Start the app in development mode with `bun dev`, which runs the playground on `http://localhost:8703`.
 4. Build packages and the playground with `bun run build`.
 5. Apply formatting with `bun run format`.
 6. Run checks with `bun run format:check`, `bun run lint`, `bun run typecheck`, and `bun run test`.

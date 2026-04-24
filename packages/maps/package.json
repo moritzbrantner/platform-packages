@@ -52,6 +52,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
+    "bench:temporal-geojson": "bun run ./scripts/benchmark-temporal-geojson.mjs",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",

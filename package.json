@@ -13,6 +13,7 @@
     "build": "turbo run build",
     "changeset": "changeset",
     "create:package": "node scripts/create-package.mjs",
+    "dev": "bun run dev:playground",
     "dev:playground": "bun run --filter @moritzbrantner/playground dev",
     "format": "oxfmt",
     "format:check": "oxfmt --check",

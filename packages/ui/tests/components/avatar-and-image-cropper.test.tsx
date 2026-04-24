@@ -5,9 +5,9 @@ import { describe, expect, test, vi } from "vitest";
 import {
   Avatar,
   AvatarBadge,
+  AvatarCollection,
+  AvatarCollectionCount,
   AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
   ImageCropper,
   getAvatarInitials,
   getImageCropArea,
@@ -15,23 +15,37 @@ import {
 } from "../../src";
 
 describe("avatar", () => {
-  test("renders generated initials and grouped avatar affordances", () => {
+  test("renders single-user avatars and avatar collections with shape variants", () => {
     render(
-      <AvatarGroup>
-        <Avatar size="xl">
+      <>
+        <Avatar size="xl" shape="round">
           <AvatarFallback name="Mira Brandt" />
           <AvatarBadge />
         </Avatar>
-        <Avatar size="xl">
-          <AvatarFallback name="Platform Design" />
-        </Avatar>
-        <AvatarGroupCount>+4</AvatarGroupCount>
-      </AvatarGroup>,
+        <AvatarCollection>
+          <Avatar size="xl" shape="hexagonal">
+            <AvatarFallback name="Platform Design" />
+          </Avatar>
+          <AvatarCollectionCount shape="square">+4</AvatarCollectionCount>
+        </AvatarCollection>
+      </>,
     );
 
     expect(screen.getByText("MB")).toBeTruthy();
     expect(screen.getByText("PD")).toBeTruthy();
     expect(screen.getByText("+4")).toBeTruthy();
+    expect(screen.getByText("MB").closest('[data-slot="avatar"]')?.getAttribute("data-shape")).toBe(
+      "round",
+    );
+    expect(screen.getByText("PD").closest('[data-slot="avatar"]')?.getAttribute("data-shape")).toBe(
+      "hexagonal",
+    );
+    expect(
+      screen
+        .getByText("+4")
+        .closest('[data-slot="avatar-collection-count"]')
+        ?.getAttribute("data-shape"),
+    ).toBe("square");
   });
 
   test("creates initials from names", () => {

@@ -6,20 +6,24 @@ import { Avatar as AvatarPrimitive } from "radix-ui";
 import { cn } from "../lib/cn";
 
 type AvatarSize = "xs" | "sm" | "default" | "lg" | "xl";
+type AvatarShape = "round" | "square" | "hexagonal" | "octagonal";
 
 function Avatar({
   className,
   size = "default",
+  shape = "round",
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root> & {
   size?: AvatarSize;
+  shape?: AvatarShape;
 }) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
       data-size={size}
+      data-shape={shape}
       className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 data-[size=xl]:size-12 data-[size=xs]:size-5 dark:after:mix-blend-lighten",
+        "group/avatar relative flex size-8 shrink-0 select-none after:absolute after:inset-0 after:border after:border-border after:content-[''] after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 data-[size=xl]:size-12 data-[size=xs]:size-5 data-[shape=round]:after:rounded-full data-[shape=square]:after:rounded-md data-[shape=hexagonal]:after:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] data-[shape=octagonal]:after:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)] dark:after:mix-blend-lighten",
         className,
       )}
       {...props}
@@ -31,7 +35,10 @@ function AvatarImage({ className, ...props }: React.ComponentProps<typeof Avatar
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn("aspect-square size-full rounded-full object-cover", className)}
+      className={cn(
+        "aspect-square size-full object-cover group-data-[shape=round]/avatar:rounded-full group-data-[shape=square]/avatar:rounded-md group-data-[shape=hexagonal]/avatar:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] group-data-[shape=octagonal]/avatar:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)]",
+        className,
+      )}
       {...props}
     />
   );
@@ -57,7 +64,7 @@ function AvatarFallback({
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground group-data-[size=lg]/avatar:text-base group-data-[size=sm]/avatar:text-xs group-data-[size=xl]/avatar:text-base group-data-[size=xs]/avatar:text-[10px]",
+        "flex size-full items-center justify-center bg-muted text-sm font-medium text-muted-foreground group-data-[size=lg]/avatar:text-base group-data-[size=sm]/avatar:text-xs group-data-[size=xl]/avatar:text-base group-data-[size=xs]/avatar:text-[10px] group-data-[shape=round]/avatar:rounded-full group-data-[shape=square]/avatar:rounded-md group-data-[shape=hexagonal]/avatar:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] group-data-[shape=octagonal]/avatar:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)]",
         className,
       )}
       {...props}
@@ -85,12 +92,12 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
+function AvatarCollection({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="avatar-group"
+      data-slot="avatar-collection"
       className={cn(
-        "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
+        "group/avatar-collection flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
         className,
       )}
       {...props}
@@ -98,17 +105,32 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function AvatarGroupCount({ className, ...props }: React.ComponentProps<"div">) {
+function AvatarCollectionCount({
+  className,
+  shape = "round",
+  ...props
+}: React.ComponentProps<"div"> & {
+  shape?: AvatarShape;
+}) {
   return (
     <div
-      data-slot="avatar-group-count"
+      data-slot="avatar-collection-count"
+      data-shape={shape}
       className={cn(
-        "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 group-has-data-[size=xl]/avatar-group:size-12 group-has-data-[size=xs]/avatar-group:size-5 group-has-data-[size=sm]/avatar-group:text-xs group-has-data-[size=xl]/avatar-group:text-base group-has-data-[size=xs]/avatar-group:text-[10px] [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3 group-has-data-[size=xl]/avatar-group:[&>svg]:size-5 group-has-data-[size=xs]/avatar-group:[&>svg]:size-2.5",
+        "relative flex size-8 shrink-0 items-center justify-center bg-muted text-sm font-medium text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-collection:size-10 group-has-data-[size=sm]/avatar-collection:size-6 group-has-data-[size=xl]/avatar-collection:size-12 group-has-data-[size=xs]/avatar-collection:size-5 group-has-data-[size=sm]/avatar-collection:text-xs group-has-data-[size=xl]/avatar-collection:text-base group-has-data-[size=xs]/avatar-collection:text-[10px] data-[shape=round]:rounded-full data-[shape=square]:rounded-md data-[shape=hexagonal]:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] data-[shape=octagonal]:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)] [&>svg]:size-4 group-has-data-[size=lg]/avatar-collection:[&>svg]:size-5 group-has-data-[size=sm]/avatar-collection:[&>svg]:size-3 group-has-data-[size=xl]/avatar-collection:[&>svg]:size-5 group-has-data-[size=xs]/avatar-collection:[&>svg]:size-2.5",
         className,
       )}
       {...props}
     />
   );
+}
+
+function AvatarGroup(props: React.ComponentProps<typeof AvatarCollection>) {
+  return <AvatarCollection {...props} />;
+}
+
+function AvatarGroupCount(props: React.ComponentProps<typeof AvatarCollectionCount>) {
+  return <AvatarCollectionCount {...props} />;
 }
 
 function getAvatarInitials(
@@ -140,9 +162,12 @@ export {
   Avatar,
   AvatarImage,
   AvatarFallback,
+  AvatarCollection,
+  AvatarCollectionCount,
   AvatarGroup,
   AvatarGroupCount,
   AvatarBadge,
   getAvatarInitials,
   type AvatarSize,
+  type AvatarShape,
 };

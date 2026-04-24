@@ -267,7 +267,9 @@ function NavbarVariantPreview({ variant }: { variant: PlatformNavbarVariant }) {
           variant={variant}
           activeItemId={activeItemId}
           defaultOpenGroupId={config.open}
+          languageSwitcher={variant === "web" ? true : undefined}
           renderLink={DemoLink}
+          themeModeSwitch={variant === "web" ? true : undefined}
           actions={
             <div className="flex items-center gap-2">
               <Button type="button" variant="outline" size="icon-sm" aria-label="Search">

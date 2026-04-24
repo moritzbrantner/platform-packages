@@ -48,6 +48,7 @@ import { Label } from "./components/label";
 import { PlatformNavbar, type PlatformNavbarGroup } from "./components/platform-navbar";
 import { Separator } from "./components/separator";
 import { Textarea } from "./components/textarea";
+import { cn } from "./lib/cn";
 
 type WorkflowRoute =
   | "login"
@@ -252,7 +253,9 @@ export const PasswordForgotten: Story = {
     await userEvent.type(canvas.getByLabelText("Recovery email"), "reset@example.com");
     await userEvent.click(canvas.getByRole("button", { name: "Send reset link" }));
 
-    await expect(canvas.getByRole("alert")).toHaveTextContent("Reset link sent to reset@example.com");
+    await expect(canvas.getByRole("alert")).toHaveTextContent(
+      "Reset link sent to reset@example.com",
+    );
   },
 };
 
@@ -314,6 +317,8 @@ function PlatformWorkflowDemo({
     people.find((person) => person.id === selectedProfileId) ?? people[0] ?? null;
   const followingCount = followingIds.length;
   const activeItemId = activeRoute;
+  const isAuthRoute =
+    activeRoute === "login" || activeRoute === "register" || activeRoute === "password";
 
   const navigate = (route: WorkflowRoute) => {
     setNotice(null);
@@ -332,62 +337,71 @@ function PlatformWorkflowDemo({
 
   const toggleFollow = (personId: string) => {
     setFollowingIds((current) =>
-      current.includes(personId)
-        ? current.filter((id) => id !== personId)
-        : [...current, personId],
+      current.includes(personId) ? current.filter((id) => id !== personId) : [...current, personId],
     );
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-5 sm:px-6 lg:px-8">
-        <PlatformNavbar
-          brand={
-            <span className="inline-flex items-center gap-2">
-              <span className="grid size-6 place-items-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-                P
+      <div
+        className={cn(
+          "mx-auto w-full px-4 py-5 sm:px-6 lg:px-8",
+          isAuthRoute
+            ? "flex min-h-screen max-w-xl items-center justify-center"
+            : "grid max-w-7xl gap-8",
+        )}
+      >
+        {isAuthRoute ? null : (
+          <PlatformNavbar
+            brand={
+              <span className="inline-flex items-center gap-2">
+                <span className="grid size-6 place-items-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+                  P
+                </span>
+                Platform
               </span>
-              Platform
-            </span>
-          }
-          groups={workflowNavigationGroups.map((group) => ({
-            ...group,
-            items: group.items.map((item) => ({
-              ...item,
-              active: item.id === activeItemId,
-            })),
-          }))}
-          activeItemId={activeItemId}
-          actions={
-            <Button
-              type="button"
-              size="sm"
-              variant={activeRoute === "chat" ? "secondary" : "outline"}
-              onClick={() => openChat(selectedProfile?.id ?? "mira")}
-            >
-              <MessageCircleIcon />
-              Chat
-            </Button>
-          }
-          defaultOpenGroupId={null}
-          onNavigate={(item) => navigate(item.id as WorkflowRoute)}
-          renderLink={({ className, children, href, onClick, "aria-current": ariaCurrent }) => (
-            <a
-              href={href}
-              className={className}
-              aria-current={ariaCurrent}
-              onClick={(event) => {
-                event.preventDefault();
-                onClick();
-              }}
-            >
-              {children}
-            </a>
-          )}
-        />
+            }
+            groups={workflowNavigationGroups.map((group) => ({
+              ...group,
+              items: group.items.map((item) => ({
+                ...item,
+                active: item.id === activeItemId,
+              })),
+            }))}
+            activeItemId={activeItemId}
+            actions={
+              <Button
+                type="button"
+                size="sm"
+                variant={activeRoute === "chat" ? "secondary" : "outline"}
+                onClick={() => openChat(selectedProfile?.id ?? "mira")}
+              >
+                <MessageCircleIcon />
+                Chat
+              </Button>
+            }
+            defaultOpenGroupId={null}
+            onNavigate={(item) => navigate(item.id as WorkflowRoute)}
+            renderLink={({ className, children, href, onClick, "aria-current": ariaCurrent }) => (
+              <a
+                href={href}
+                className={className}
+                aria-current={ariaCurrent}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onClick();
+                }}
+              >
+                {children}
+              </a>
+            )}
+          />
+        )}
 
-        <main className="grid gap-6">
-          <WorkflowSummary followingCount={followingCount} selectedProfile={selectedProfile} />
+        <main className={cn("grid gap-6", isAuthRoute && "w-full")}>
+          {isAuthRoute ? null : (
+            <WorkflowSummary followingCount={followingCount} selectedProfile={selectedProfile} />
+          )}
           {notice ? <WorkflowNotice message={notice} /> : null}
           {activeRoute === "login" ? <LoginWorkflow onNotice={setNotice} /> : null}
           {activeRoute === "register" ? <RegisterWorkflow onNotice={setNotice} /> : null}
@@ -462,7 +476,9 @@ function LoginWorkflow({ onNotice }: { onNotice: (message: string) => void }) {
     <Card className="max-w-xl">
       <CardHeader>
         <CardTitle>Login</CardTitle>
-        <CardDescription>Continue recent workspace activity with an existing account.</CardDescription>
+        <CardDescription>
+          Continue recent workspace activity with an existing account.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -771,7 +787,9 @@ function ChatWorkflow({ person }: { person: Person }) {
           </Avatar>
           <div className="min-w-0">
             <ChatTitle>Chat with {person.name}</ChatTitle>
-            <ChatDescription>{person.online ? "Online now" : "Last active yesterday"}</ChatDescription>
+            <ChatDescription>
+              {person.online ? "Online now" : "Last active yesterday"}
+            </ChatDescription>
           </div>
         </div>
         <ChatActions>
@@ -831,10 +849,7 @@ function NotificationsWorkflow({ followingCount }: { followingCount: number }) {
           "Jordan Ellis sent a chat reply in Platform Workflows.",
           `${followingCount} followed profiles have updates ready.`,
         ].map((message) => (
-          <div
-            key={message}
-            className="rounded-lg border bg-card p-4 text-sm text-card-foreground"
-          >
+          <div key={message} className="rounded-lg border bg-card p-4 text-sm text-card-foreground">
             {message}
           </div>
         ))}
@@ -849,15 +864,7 @@ function NotificationsWorkflow({ followingCount }: { followingCount: number }) {
   );
 }
 
-function Field({
-  children,
-  id,
-  label,
-}: {
-  children: React.ReactNode;
-  id: string;
-  label: string;
-}) {
+function Field({ children, id, label }: { children: React.ReactNode; id: string; label: string }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  createTemporalGeoJsonPlaybackIndex,
   createTemporalGeoJsonTracksFromGeoJson,
   getTemporalGeoJsonFeatureCollectionAtTime,
   getTemporalGeoJsonTimeRange,
@@ -704,4 +705,417 @@ describe("@moritzbrantner/maps temporal GeoJSON geometries", () => {
     });
     expect(getTemporalGeoJsonFeatureCollectionAtTime(tracks, 12).features).toEqual([]);
   });
+
+  test("prepared playback index matches raw output for small geometries across strategies", () => {
+    const tracks: TemporalGeoJsonTrack[] = [
+      {
+        id: "point-track",
+        frames: [
+          {
+            geometry: {
+              coordinates: [0, 0],
+              type: "Point",
+            },
+            metrics: { load: 1 },
+            properties: { status: "start" },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [10, 10],
+              type: "Point",
+            },
+            metrics: { load: 5 },
+            properties: { status: "end" },
+            time: 10,
+          },
+        ],
+      },
+      {
+        id: "line-track",
+        frames: [
+          {
+            geometry: {
+              coordinates: [
+                [0, 0],
+                [4, 0],
+                [8, 0],
+              ],
+              type: "LineString",
+            },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [
+                [0, 6],
+                [4, 6],
+                [8, 6],
+              ],
+              type: "LineString",
+            },
+            time: 10,
+          },
+        ],
+      },
+      {
+        id: "polygon-track",
+        frames: [
+          {
+            geometry: {
+              coordinates: [
+                [
+                  [0, 0],
+                  [6, 0],
+                  [6, 6],
+                  [0, 6],
+                  [0, 0],
+                ],
+              ],
+              type: "Polygon",
+            },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [
+                [
+                  [2, 2],
+                  [8, 2],
+                  [8, 8],
+                  [2, 8],
+                  [2, 2],
+                ],
+              ],
+              type: "Polygon",
+            },
+            time: 10,
+          },
+        ],
+      },
+    ];
+
+    for (const strategy of ["compatible", "resample", "centroid-radial"] as const) {
+      const options =
+        strategy === "compatible"
+          ? { strategy }
+          : {
+              maxCoordinatesPerLine: 8,
+              maxCoordinatesPerRing: 8,
+              minResampleCoordinates: 4,
+              strategy,
+            };
+      const index = createTemporalGeoJsonPlaybackIndex(tracks, options);
+
+      expect(index.getFeatureCollectionAtTime(5)).toEqual(
+        getTemporalGeoJsonFeatureCollectionAtTime(tracks, 5, options),
+      );
+    }
+  });
+
+  test("prepared playback index resamples dense compatible polygons within the configured budget", () => {
+    const tracks: TemporalGeoJsonTrack[] = [
+      {
+        id: "dense-zone",
+        frames: [
+          {
+            geometry: {
+              coordinates: [createDenseRing(180, 10, 0, 0)],
+              type: "Polygon",
+            },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [createDenseRing(240, 12, 3, 2)],
+              type: "Polygon",
+            },
+            time: 10,
+          },
+        ],
+      },
+    ];
+
+    const feature = createTemporalGeoJsonPlaybackIndex(tracks, {
+      maxCoordinatesPerRing: 48,
+      minResampleCoordinates: 16,
+      strategy: "compatible",
+    }).getFeatureCollectionAtTime(5).features[0];
+
+    expect(feature?.geometry.type).toBe("Polygon");
+    const ring = feature?.geometry.type === "Polygon" ? feature.geometry.coordinates[0] : [];
+
+    expect(ring).toHaveLength(49);
+    expect(ring?.[0]).toEqual(ring?.at(-1));
+    expect(ring?.flat().every((value) => Number.isFinite(value))).toBe(true);
+  });
+
+  test("prepared playback index preserve mode keeps compatible fallback semantics for dense mismatched polygons", () => {
+    const tracks: TemporalGeoJsonTrack[] = [
+      {
+        id: "dense-preserve",
+        frames: [
+          {
+            geometry: {
+              coordinates: [createDenseRing(180, 10, 0, 0)],
+              type: "Polygon",
+            },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [createDenseRing(240, 12, 3, 2)],
+              type: "Polygon",
+            },
+            time: 10,
+          },
+        ],
+      },
+    ];
+    const options = {
+      denseGeometryBehavior: "preserve" as const,
+      maxCoordinatesPerRing: 48,
+      minResampleCoordinates: 16,
+      strategy: "compatible" as const,
+    };
+
+    expect(createTemporalGeoJsonPlaybackIndex(tracks, options).getFeatureCollectionAtTime(5)).toEqual(
+      getTemporalGeoJsonFeatureCollectionAtTime(tracks, 5, options),
+    );
+  });
+
+  test("prepared playback index interpolates multipolygons with holes by matching topology", () => {
+    const tracks: TemporalGeoJsonTrack[] = [
+      {
+        id: "holes",
+        frames: [
+          {
+            geometry: {
+              coordinates: [
+                [
+                  [
+                    [0, 0],
+                    [8, 0],
+                    [8, 8],
+                    [0, 8],
+                    [0, 0],
+                  ],
+                  [
+                    [2, 2],
+                    [2, 4],
+                    [4, 4],
+                    [4, 2],
+                    [2, 2],
+                  ],
+                ],
+              ],
+              type: "MultiPolygon",
+            },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [
+                [
+                  [
+                    [2, 2],
+                    [10, 2],
+                    [10, 10],
+                    [2, 10],
+                    [2, 2],
+                  ],
+                  [
+                    [4, 4],
+                    [4, 6],
+                    [6, 6],
+                    [6, 4],
+                    [4, 4],
+                  ],
+                ],
+              ],
+              type: "MultiPolygon",
+            },
+            time: 10,
+          },
+        ],
+      },
+    ];
+    const options = { strategy: "compatible" as const };
+
+    expect(createTemporalGeoJsonPlaybackIndex(tracks, options).getFeatureCollectionAtTime(5)).toEqual(
+      getTemporalGeoJsonFeatureCollectionAtTime(tracks, 5, options),
+    );
+  });
+
+  test("prepared playback index matches raw fallback semantics when topology changes", () => {
+    const tracks: TemporalGeoJsonTrack[] = [
+      {
+        id: "topology-change",
+        frames: [
+          {
+            geometry: {
+              coordinates: [
+                [
+                  [0, 0],
+                  [4, 0],
+                  [4, 4],
+                  [0, 4],
+                  [0, 0],
+                ],
+              ],
+              type: "Polygon",
+            },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [
+                [
+                  [0, 0],
+                  [4, 0],
+                  [4, 4],
+                  [0, 4],
+                  [0, 0],
+                ],
+                [
+                  [1, 1],
+                  [2, 1],
+                  [2, 2],
+                  [1, 2],
+                  [1, 1],
+                ],
+              ],
+              type: "Polygon",
+            },
+            time: 10,
+          },
+        ],
+      },
+    ];
+
+    expect(
+      createTemporalGeoJsonPlaybackIndex(tracks, {
+        fallback: "hold",
+      }).getFeatureCollectionAtTime(5),
+    ).toEqual(
+      getTemporalGeoJsonFeatureCollectionAtTime(tracks, 5, {
+        fallback: "hold",
+      }),
+    );
+    expect(
+      createTemporalGeoJsonPlaybackIndex(tracks, {
+        fallback: "hide",
+      }).getFeatureCollectionAtTime(5),
+    ).toEqual(
+      getTemporalGeoJsonFeatureCollectionAtTime(tracks, 5, {
+        fallback: "hide",
+      }),
+    );
+  });
+
+  test("prepared playback index matches visibility, time lookup, and invalid-time semantics", () => {
+    const tracks: TemporalGeoJsonTrack[] = [
+      {
+        id: "window",
+        frames: [
+          {
+            geometry: {
+              coordinates: [0, 0],
+              type: "Point",
+            },
+            time: 2,
+            visible: false,
+          },
+          {
+            geometry: {
+              coordinates: [4, 4],
+              type: "Point",
+            },
+            metrics: { load: 4 },
+            properties: { phase: "active" },
+            time: 6,
+          },
+          {
+            geometry: {
+              coordinates: [8, 8],
+              type: "Point",
+            },
+            metrics: { load: 8 },
+            properties: { phase: "done" },
+            time: 10,
+            visible: false,
+          },
+        ],
+      },
+    ];
+    const index = createTemporalGeoJsonPlaybackIndex(tracks);
+
+    expect(index.getFeatureCollectionAtTime(Number.NaN)).toEqual({ features: [], type: "FeatureCollection" });
+    expect(index.getFeatureCollectionAtTime(4)).toEqual(getTemporalGeoJsonFeatureCollectionAtTime(tracks, 4));
+    expect(index.getFeatureCollectionAtTime(6)).toEqual(getTemporalGeoJsonFeatureCollectionAtTime(tracks, 6));
+    expect(index.getFeatureCollectionAtTime(8)).toEqual(getTemporalGeoJsonFeatureCollectionAtTime(tracks, 8));
+    expect(index.getFeatureCollectionAtTime(12)).toEqual(getTemporalGeoJsonFeatureCollectionAtTime(tracks, 12));
+    expect(index.getTimeRange()).toEqual({ end: 10, start: 2 });
+  });
+
+  test("prepared playback index preserves interpolated metrics and merged properties", () => {
+    const tracks: TemporalGeoJsonTrack<{
+      stage?: string;
+      trackBase?: string;
+    }>[] = [
+      {
+        id: "metrics",
+        metrics: { fleet: 3 },
+        properties: { trackBase: "base" },
+        frames: [
+          {
+            geometry: {
+              coordinates: [
+                [0, 0],
+                [4, 0],
+              ],
+              type: "LineString",
+            },
+            metrics: { load: 2 },
+            properties: { stage: "start" },
+            time: 0,
+          },
+          {
+            geometry: {
+              coordinates: [
+                [0, 10],
+                [4, 10],
+              ],
+              type: "LineString",
+            },
+            metrics: { load: 6 },
+            properties: { stage: "end" },
+            time: 10,
+          },
+        ],
+      },
+    ];
+
+    expect(createTemporalGeoJsonPlaybackIndex(tracks).getFeatureCollectionAtTime(5)).toEqual(
+      getTemporalGeoJsonFeatureCollectionAtTime(tracks, 5),
+    );
+  });
 });
+
+function createDenseRing(pointCount: number, radius: number, offsetX: number, offsetY: number) {
+  const coordinates: Array<[number, number]> = [];
+
+  for (let index = 0; index < pointCount; index += 1) {
+    const angle = (index / pointCount) * Math.PI * 2;
+    const radialOffset = radius * (1 + 0.12 * Math.sin(angle * 5));
+
+    coordinates.push([
+      offsetX + Math.cos(angle) * radialOffset,
+      offsetY + Math.sin(angle) * radialOffset,
+    ]);
+  }
+
+  coordinates.push([...coordinates[0]!] as [number, number]);
+
+  return coordinates;
+}

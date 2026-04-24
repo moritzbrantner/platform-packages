@@ -140,6 +140,8 @@ export default defineConfig({
     ],
   },
   server: {
+    port: 8703,
+    strictPort: true,
     fs: {
       allow: [workspaceRoot],
     },

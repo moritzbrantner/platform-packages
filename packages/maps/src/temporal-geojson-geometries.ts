@@ -102,6 +102,12 @@ export type TemporalGeoJsonInterpolationOptions = {
   strategy?: TemporalGeoJsonInterpolationStrategy;
 };
 
+export type TemporalGeoJsonPlaybackIndexOptions = TemporalGeoJsonInterpolationOptions & {
+  denseGeometryBehavior?: "preserve" | "resample";
+  denseLineThreshold?: number;
+  denseRingThreshold?: number;
+};
+
 export type TemporalGeoJsonGeometryTrackOptions<
   TProperties extends Record<string, unknown> = Record<string, unknown>,
   TTrackProperties = TProperties,
@@ -149,6 +155,11 @@ export type TemporalGeoJsonOutputFeatureCollection<TProperties = Record<string, 
   type: "FeatureCollection";
 };
 
+export type TemporalGeoJsonPlaybackIndex<TProperties = Record<string, unknown>> = {
+  getFeatureCollectionAtTime(time: number): TemporalGeoJsonOutputFeatureCollection<TProperties>;
+  getTimeRange(): TemporalMapTimeRange | null;
+};
+
 type MutableTemporalGeoJsonTrack<TProperties> = Omit<
   TemporalGeoJsonTrack<TProperties>,
   "frames"
@@ -157,6 +168,64 @@ type MutableTemporalGeoJsonTrack<TProperties> = Omit<
 };
 
 type ResolvedInterpolationOptions = Required<TemporalGeoJsonInterpolationOptions>;
+
+type ResolvedPlaybackIndexOptions = ResolvedInterpolationOptions & {
+  denseGeometryBehavior: "preserve" | "resample";
+  denseLineThreshold: number;
+  denseRingThreshold: number;
+};
+
+type PreparedTemporalGeoJsonFrame<TProperties> = Omit<
+  TemporalGeoJsonFrame<TProperties>,
+  "geometry"
+> & {
+  geometry: TemporalGeoJsonSupportedGeometry;
+};
+
+type PreparedFlatCoordinates = {
+  coordinateCount: number;
+  delta: Float64Array;
+  start: Float64Array;
+};
+
+type PreparedGeometryInterpolator =
+  | {
+      point: PreparedFlatCoordinates;
+      type: "Point";
+    }
+  | {
+      line: PreparedFlatCoordinates;
+      type: "LineString";
+    }
+  | {
+      lines: PreparedFlatCoordinates[];
+      type: "MultiLineString";
+    }
+  | {
+      rings: PreparedFlatCoordinates[];
+      type: "Polygon";
+    }
+  | {
+      polygons: PreparedFlatCoordinates[][];
+      type: "MultiPolygon";
+    };
+
+type PreparedSegmentMode = "hide" | "hold" | "interpolate";
+
+type PreparedTemporalGeoJsonSegment<TProperties> = {
+  interpolator: PreparedGeometryInterpolator | null;
+  mode: PreparedSegmentMode;
+  nextFrame: PreparedTemporalGeoJsonFrame<TProperties>;
+  previousFrame: PreparedTemporalGeoJsonFrame<TProperties>;
+};
+
+type PreparedTemporalGeoJsonTrack<TProperties> = {
+  frames: PreparedTemporalGeoJsonFrame<TProperties>[];
+  index: number;
+  segments: PreparedTemporalGeoJsonSegment<TProperties>[];
+  sourceTrack: TemporalGeoJsonTrack<TProperties>;
+  times: number[];
+};
 
 const DEFAULT_INTERPOLATION_OPTIONS: ResolvedInterpolationOptions = {
   fallback: "hold",
@@ -232,16 +301,42 @@ export function getTemporalGeoJsonTimeRange<TProperties = Record<string, unknown
   return getTemporalTrackTimeRange(tracks);
 }
 
+export function createTemporalGeoJsonPlaybackIndex<TProperties = Record<string, unknown>>(
+  tracks: readonly TemporalGeoJsonTrack<TProperties>[],
+  options: TemporalGeoJsonPlaybackIndexOptions = {},
+): TemporalGeoJsonPlaybackIndex<TProperties> {
+  const resolvedOptions = resolvePlaybackIndexOptions(options);
+  const preparedTracks = tracks.map((track, index) =>
+    prepareTemporalGeoJsonTrack(track, index, resolvedOptions),
+  );
+  const timeRange = getPreparedTemporalGeoJsonTimeRange(preparedTracks);
+
+  return {
+    getFeatureCollectionAtTime(time) {
+      if (!Number.isFinite(time)) {
+        return createEmptyFeatureCollection();
+      }
+
+      return {
+        features: preparedTracks
+          .map((track) => resolvePreparedTrackAtTime(track, time))
+          .filter((feature): feature is TemporalGeoJsonOutputFeature<TProperties> => feature !== null),
+        type: "FeatureCollection",
+      };
+    },
+    getTimeRange() {
+      return timeRange;
+    },
+  };
+}
+
 export function getTemporalGeoJsonFeatureCollectionAtTime<TProperties = Record<string, unknown>>(
   tracks: readonly TemporalGeoJsonTrack<TProperties>[],
   time: number,
   options: TemporalGeoJsonInterpolationOptions = {},
 ): TemporalGeoJsonOutputFeatureCollection<TProperties> {
   if (!Number.isFinite(time)) {
-    return {
-      features: [],
-      type: "FeatureCollection",
-    };
+    return createEmptyFeatureCollection();
   }
 
   return {
@@ -282,27 +377,469 @@ export function interpolateTemporalGeoJsonGeometry(
   return geometry ?? applyInterpolationFallback(previousGeometry, resolvedOptions);
 }
 
+function createEmptyFeatureCollection<TProperties = Record<string, unknown>>() {
+  return {
+    features: [],
+    type: "FeatureCollection",
+  } satisfies TemporalGeoJsonOutputFeatureCollection<TProperties>;
+}
+
+function getSortedValidFrames<TProperties>(
+  track: TemporalGeoJsonTrack<TProperties>,
+): PreparedTemporalGeoJsonFrame<TProperties>[] {
+  return track.frames
+    .flatMap((frame) => {
+      if (!Number.isFinite(frame.time)) {
+        return [];
+      }
+
+      const geometry = normalizeSupportedGeometry(frame.geometry);
+
+      if (!geometry) {
+        return [];
+      }
+
+      return [{ ...frame, geometry }];
+    })
+    .sort((left, right) => left.time - right.time);
+}
+
+function getPreparedTemporalGeoJsonTimeRange<TProperties>(
+  tracks: readonly PreparedTemporalGeoJsonTrack<TProperties>[],
+): TemporalMapTimeRange | null {
+  return getTemporalTrackTimeRange(tracks);
+}
+
+function prepareTemporalGeoJsonTrack<TProperties>(
+  track: TemporalGeoJsonTrack<TProperties>,
+  index: number,
+  options: ResolvedPlaybackIndexOptions,
+): PreparedTemporalGeoJsonTrack<TProperties> {
+  const frames = getSortedValidFrames(track);
+
+  return {
+    frames,
+    index,
+    segments: frames.slice(0, -1).map((previousFrame, segmentIndex) =>
+      prepareTemporalGeoJsonSegment(previousFrame, frames[segmentIndex + 1]!, options),
+    ),
+    sourceTrack: track,
+    times: frames.map((frame) => frame.time),
+  };
+}
+
+function prepareTemporalGeoJsonSegment<TProperties>(
+  previousFrame: PreparedTemporalGeoJsonFrame<TProperties>,
+  nextFrame: PreparedTemporalGeoJsonFrame<TProperties>,
+  options: ResolvedPlaybackIndexOptions,
+): PreparedTemporalGeoJsonSegment<TProperties> {
+  if (options.strategy === "hold") {
+    return {
+      interpolator: null,
+      mode: "hold",
+      nextFrame,
+      previousFrame,
+    };
+  }
+
+  if (previousFrame.geometry.type !== nextFrame.geometry.type) {
+    return {
+      interpolator: null,
+      mode: options.fallback === "hide" ? "hide" : "hold",
+      nextFrame,
+      previousFrame,
+    };
+  }
+
+  const interpolator = prepareMatchingGeometryInterpolator(
+    previousFrame.geometry,
+    nextFrame.geometry,
+    options,
+  );
+
+  return {
+    interpolator,
+    mode: interpolator ? "interpolate" : options.fallback === "hide" ? "hide" : "hold",
+    nextFrame,
+    previousFrame,
+  };
+}
+
+function resolvePreparedTrackAtTime<TProperties>(
+  track: PreparedTemporalGeoJsonTrack<TProperties>,
+  time: number,
+): TemporalGeoJsonOutputFeature<TProperties> | null {
+  if (track.frames.length === 0) {
+    return null;
+  }
+
+  const firstFrameAfterTime = findFirstTimeIndexAfter(track.times, time);
+
+  if (firstFrameAfterTime === 0) {
+    return null;
+  }
+
+  if (firstFrameAfterTime === track.frames.length) {
+    const lastFrame = track.frames[track.frames.length - 1]!;
+
+    return lastFrame.visible === false ? null : toFeature(track.sourceTrack, track.index, lastFrame);
+  }
+
+  const previousFrame = track.frames[firstFrameAfterTime - 1]!;
+
+  if (previousFrame.time === time) {
+    return previousFrame.visible === false
+      ? null
+      : toFeature(track.sourceTrack, track.index, previousFrame);
+  }
+
+  if (previousFrame.visible === false) {
+    return null;
+  }
+
+  const nextFrame = track.frames[firstFrameAfterTime]!;
+  const progress = clampProgress((time - previousFrame.time) / (nextFrame.time - previousFrame.time));
+  const segment = track.segments[firstFrameAfterTime - 1]!;
+  const geometry = resolvePreparedSegmentGeometry(segment, progress);
+
+  if (!geometry) {
+    return null;
+  }
+
+  return toFeature(track.sourceTrack, track.index, {
+    geometry,
+    label: previousFrame.label,
+    metrics: interpolateMetrics(
+      mergeMetrics(track.sourceTrack.metrics, previousFrame.metrics),
+      mergeMetrics(track.sourceTrack.metrics, nextFrame.metrics),
+      progress,
+    ),
+    properties: mergeProperties(track.sourceTrack.properties, previousFrame.properties),
+    time,
+    visible: true,
+  });
+}
+
+function resolvePreparedSegmentGeometry<TProperties>(
+  segment: PreparedTemporalGeoJsonSegment<TProperties>,
+  progress: number,
+): TemporalGeoJsonSupportedGeometry | null {
+  if (segment.mode === "hide") {
+    return null;
+  }
+
+  if (segment.mode === "hold" || !segment.interpolator) {
+    return cloneGeometry(segment.previousFrame.geometry);
+  }
+
+  return materializePreparedGeometry(segment.interpolator, progress);
+}
+
+function prepareMatchingGeometryInterpolator(
+  previousGeometry: TemporalGeoJsonSupportedGeometry,
+  nextGeometry: TemporalGeoJsonSupportedGeometry,
+  options: ResolvedPlaybackIndexOptions,
+): PreparedGeometryInterpolator | null {
+  switch (previousGeometry.type) {
+    case "Point":
+      return {
+        point: createPreparedFlatCoordinates(
+          [previousGeometry.coordinates],
+          [(nextGeometry as GeoJsonPointGeometry).coordinates],
+        ),
+        type: "Point",
+      };
+    case "LineString": {
+      const line = prepareLineInterpolator(
+        previousGeometry.coordinates,
+        (nextGeometry as GeoJsonLineStringGeometry).coordinates,
+        options,
+      );
+
+      return line ? { line, type: "LineString" } : null;
+    }
+    case "MultiLineString": {
+      const nextLines = (nextGeometry as GeoJsonMultiLineStringGeometry).coordinates;
+
+      if (previousGeometry.coordinates.length !== nextLines.length) {
+        return null;
+      }
+
+      const lines = previousGeometry.coordinates.map((line, index) =>
+        prepareLineInterpolator(line, nextLines[index]!, options),
+      );
+
+      return lines.some((line) => line === null)
+        ? null
+        : { lines: lines as PreparedFlatCoordinates[], type: "MultiLineString" };
+    }
+    case "Polygon": {
+      const rings = preparePolygonInterpolators(
+        previousGeometry.coordinates,
+        (nextGeometry as GeoJsonPolygonGeometry).coordinates,
+        options,
+      );
+
+      return rings ? { rings, type: "Polygon" } : null;
+    }
+    case "MultiPolygon": {
+      const nextPolygons = (nextGeometry as GeoJsonMultiPolygonGeometry).coordinates;
+
+      if (previousGeometry.coordinates.length !== nextPolygons.length) {
+        return null;
+      }
+
+      const polygons = previousGeometry.coordinates.map((polygon, index) =>
+        preparePolygonInterpolators(polygon, nextPolygons[index]!, options),
+      );
+
+      return polygons.some((polygon) => polygon === null)
+        ? null
+        : { polygons: polygons as PreparedFlatCoordinates[][], type: "MultiPolygon" };
+    }
+  }
+}
+
+function prepareLineInterpolator(
+  previousCoordinates: readonly GeoJsonPosition[],
+  nextCoordinates: readonly GeoJsonPosition[],
+  options: ResolvedPlaybackIndexOptions,
+): PreparedFlatCoordinates | null {
+  const shouldForceResample =
+    options.denseGeometryBehavior === "resample" &&
+    Math.max(previousCoordinates.length, nextCoordinates.length) > Math.max(2, options.denseLineThreshold);
+
+  if (options.strategy === "compatible" && !shouldForceResample) {
+    if (previousCoordinates.length !== nextCoordinates.length || previousCoordinates.length < 2) {
+      return null;
+    }
+
+    return createPreparedFlatCoordinates(previousCoordinates, nextCoordinates);
+  }
+
+  if (
+    options.strategy !== "resample" &&
+    options.strategy !== "centroid-radial" &&
+    !(options.strategy === "compatible" && shouldForceResample)
+  ) {
+    return null;
+  }
+
+  const coordinateCount = clampInteger(
+    Math.max(previousCoordinates.length, nextCoordinates.length, options.minResampleCoordinates, 2),
+    2,
+    options.maxCoordinatesPerLine,
+  );
+
+  return createPreparedFlatCoordinates(
+    resampleLine(previousCoordinates, coordinateCount),
+    resampleLine(nextCoordinates, coordinateCount),
+  );
+}
+
+function preparePolygonInterpolators(
+  previousCoordinates: readonly GeoJsonPosition[][],
+  nextCoordinates: readonly GeoJsonPosition[][],
+  options: ResolvedPlaybackIndexOptions,
+): PreparedFlatCoordinates[] | null {
+  if (previousCoordinates.length !== nextCoordinates.length) {
+    return null;
+  }
+
+  const rings = previousCoordinates.map((ring, index) =>
+    preparePolygonRingInterpolator(ring, nextCoordinates[index]!, options),
+  );
+
+  return rings.some((ring) => ring === null) ? null : (rings as PreparedFlatCoordinates[]);
+}
+
+function preparePolygonRingInterpolator(
+  previousRing: readonly GeoJsonPosition[],
+  nextRing: readonly GeoJsonPosition[],
+  options: ResolvedPlaybackIndexOptions,
+): PreparedFlatCoordinates | null {
+  const previousOpenRing = getOpenRing(previousRing);
+  const nextOpenRing = getOpenRing(nextRing);
+
+  if (!previousOpenRing || !nextOpenRing) {
+    return null;
+  }
+
+  const shouldForceResample =
+    options.denseGeometryBehavior === "resample" &&
+    Math.max(previousOpenRing.length, nextOpenRing.length) > Math.max(3, options.denseRingThreshold);
+
+  if (options.strategy === "compatible" && !shouldForceResample) {
+    if (previousOpenRing.length !== nextOpenRing.length) {
+      return null;
+    }
+
+    return createPreparedFlatCoordinates(previousOpenRing, nextOpenRing);
+  }
+
+  if (options.strategy === "compatible" && shouldForceResample) {
+    return createPreparedFlatCoordinates(
+      ...prepareResampledRingPair(previousOpenRing, nextOpenRing, options),
+    );
+  }
+
+  if (options.strategy === "resample") {
+    return createPreparedFlatCoordinates(
+      ...prepareResampledRingPair(previousOpenRing, nextOpenRing, options),
+    );
+  }
+
+  if (options.strategy === "centroid-radial") {
+    const coordinateCount = clampInteger(
+      Math.max(previousOpenRing.length, nextOpenRing.length, options.minResampleCoordinates, 3),
+      3,
+      options.maxCoordinatesPerRing,
+    );
+
+    return createPreparedFlatCoordinates(
+      sampleRingByAngle(previousOpenRing, coordinateCount),
+      sampleRingByAngle(nextOpenRing, coordinateCount),
+    );
+  }
+
+  return null;
+}
+
+function prepareResampledRingPair(
+  previousOpenRing: readonly GeoJsonPosition[],
+  nextOpenRing: readonly GeoJsonPosition[],
+  options: ResolvedPlaybackIndexOptions,
+): [GeoJsonPosition[], GeoJsonPosition[]] {
+  const orientedNextRing = orientRingLike(nextOpenRing, previousOpenRing);
+  const alignedNextRing = alignRingStart(orientedNextRing, previousOpenRing[0]!);
+  const coordinateCount = clampInteger(
+    Math.max(previousOpenRing.length, alignedNextRing.length, options.minResampleCoordinates, 3),
+    3,
+    options.maxCoordinatesPerRing,
+  );
+
+  return [
+    resampleRing(previousOpenRing, coordinateCount),
+    resampleRing(alignedNextRing, coordinateCount),
+  ];
+}
+
+function materializePreparedGeometry(
+  interpolator: PreparedGeometryInterpolator,
+  progress: number,
+): TemporalGeoJsonSupportedGeometry {
+  switch (interpolator.type) {
+    case "Point":
+      return {
+        coordinates: materializePreparedPositions(interpolator.point, progress)[0]!,
+        type: "Point",
+      };
+    case "LineString":
+      return {
+        coordinates: materializePreparedPositions(interpolator.line, progress),
+        type: "LineString",
+      };
+    case "MultiLineString":
+      return {
+        coordinates: interpolator.lines.map((line) => materializePreparedPositions(line, progress)),
+        type: "MultiLineString",
+      };
+    case "Polygon":
+      return {
+        coordinates: interpolator.rings.map((ring) =>
+          closeRing(materializePreparedPositions(ring, progress)),
+        ),
+        type: "Polygon",
+      };
+    case "MultiPolygon":
+      return {
+        coordinates: interpolator.polygons.map((polygon) =>
+          polygon.map((ring) => closeRing(materializePreparedPositions(ring, progress))),
+        ),
+        type: "MultiPolygon",
+      };
+  }
+}
+
+function createPreparedFlatCoordinates(
+  previousCoordinates: readonly GeoJsonPosition[],
+  nextCoordinates: readonly GeoJsonPosition[],
+): PreparedFlatCoordinates {
+  const coordinateCount = previousCoordinates.length;
+  const start = new Float64Array(coordinateCount * 2);
+  const delta = new Float64Array(coordinateCount * 2);
+
+  for (let index = 0; index < coordinateCount; index += 1) {
+    const offset = index * 2;
+    const previousPosition = previousCoordinates[index]!;
+    const nextPosition = nextCoordinates[index]!;
+
+    start[offset] = previousPosition[0];
+    start[offset + 1] = previousPosition[1];
+    delta[offset] = nextPosition[0] - previousPosition[0];
+    delta[offset + 1] = nextPosition[1] - previousPosition[1];
+  }
+
+  return {
+    coordinateCount,
+    delta,
+    start,
+  };
+}
+
+function materializePreparedPositions(
+  coordinates: PreparedFlatCoordinates,
+  progress: number,
+): GeoJsonPosition[] {
+  return Array.from({ length: coordinates.coordinateCount }, (_, index) => {
+    const offset = index * 2;
+
+    return [
+      coordinates.start[offset]! + coordinates.delta[offset]! * progress,
+      coordinates.start[offset + 1]! + coordinates.delta[offset + 1]! * progress,
+    ];
+  });
+}
+
+function findFirstTimeIndexAfter(times: readonly number[], time: number) {
+  let low = 0;
+  let high = times.length;
+
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+
+    if (times[middle]! <= time) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+
+  return low;
+}
+
 function resolveTrackAtTime<TProperties>(
   track: TemporalGeoJsonTrack<TProperties>,
   index: number,
   time: number,
   options: TemporalGeoJsonInterpolationOptions,
 ): TemporalGeoJsonOutputFeature<TProperties> | null {
-  const frames = [...track.frames]
-    .filter((frame) => Number.isFinite(frame.time) && normalizeSupportedGeometry(frame.geometry))
-    .sort((left, right) => left.time - right.time);
+  const frames = getSortedValidFrames(track);
 
   if (frames.length === 0) {
     return null;
   }
 
-  const firstFrameAfterTime = frames.findIndex((frame) => frame.time > time);
+  const firstFrameAfterTime = findFirstTimeIndexAfter(
+    frames.map((frame) => frame.time),
+    time,
+  );
 
   if (firstFrameAfterTime === 0) {
     return null;
   }
 
-  if (firstFrameAfterTime === -1) {
+  if (firstFrameAfterTime === frames.length) {
     return frames[frames.length - 1]?.visible === false
       ? null
       : toFeature(track, index, frames[frames.length - 1]!);
@@ -928,6 +1465,26 @@ function resolveInterpolationOptions(
   };
 }
 
+function resolvePlaybackIndexOptions(
+  options: TemporalGeoJsonPlaybackIndexOptions,
+): ResolvedPlaybackIndexOptions {
+  const interpolationOptions = resolveInterpolationOptions(options);
+
+  return {
+    ...interpolationOptions,
+    denseGeometryBehavior:
+      options.denseGeometryBehavior === "preserve" ? "preserve" : "resample",
+    denseLineThreshold: sanitizePositiveInteger(
+      options.denseLineThreshold,
+      interpolationOptions.maxCoordinatesPerLine,
+    ),
+    denseRingThreshold: sanitizePositiveInteger(
+      options.denseRingThreshold,
+      interpolationOptions.maxCoordinatesPerRing,
+    ),
+  };
+}
+
 function applyInterpolationFallback(
   previousGeometry: TemporalGeoJsonSupportedGeometry,
   options: ResolvedInterpolationOptions,
@@ -1162,7 +1719,7 @@ function alignRingStart(ring: readonly GeoJsonPosition[], targetPosition: GeoJso
   return [...ring.slice(bestIndex), ...ring.slice(0, bestIndex)];
 }
 
-function getOpenRing(ring: GeoJsonPosition[]) {
+function getOpenRing(ring: readonly GeoJsonPosition[]) {
   const normalizedRing = normalizeRing(ring);
 
   return normalizedRing ? removeClosingPosition(normalizedRing) : null;

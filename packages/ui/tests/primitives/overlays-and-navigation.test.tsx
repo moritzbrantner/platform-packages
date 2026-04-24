@@ -507,10 +507,12 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
           unreadCount: 3,
           items: [{ id: "mention", title: "New mention", unread: true }],
         }}
+        languageSwitcher={{ defaultValue: "de" }}
         themeModeSwitch={{ defaultMode: "dark" }}
       />,
     );
 
+    expect(screen.getByRole("button", { name: "Language: Deutsch" })).toBeTruthy();
     expect(screen.getByRole("switch", { name: "Color mode" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Notifications, 3 unread" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open account menu" })).toBeTruthy();

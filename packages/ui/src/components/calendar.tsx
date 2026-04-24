@@ -51,6 +51,8 @@ type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   maxEventsPerDay?: number;
 };
 
+type CalendarCardDaysProps = CalendarProps;
+
 type CalendarEventSegment = "single" | "start" | "middle" | "end";
 
 function Calendar({
@@ -239,6 +241,10 @@ function Calendar({
   );
 }
 
+function CalendarCardDays(props: CalendarCardDaysProps) {
+  return <Calendar {...props} variant="cards" />;
+}
+
 function CalendarDayButton({
   className,
   children,
@@ -416,9 +422,10 @@ function CalendarCardDayButton({
   );
 }
 
-export { Calendar, CalendarDayButton, CalendarCardDayButton };
+export { Calendar, CalendarCardDays, CalendarDayButton, CalendarCardDayButton };
 export type {
   CalendarProps,
+  CalendarCardDaysProps,
   CalendarVariant,
   CalendarDayComponentProps,
   CalendarCellComponentProps,

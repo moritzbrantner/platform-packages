@@ -14,6 +14,7 @@ import {
   ButtonGroup,
   ButtonGroupText,
   Calendar,
+  CalendarCardDays,
   CalendarCardDayButton,
   CalendarDayButton,
   type CalendarCellComponentProps,
@@ -373,7 +374,6 @@ describe("@moritzbrantner/ui calendar", () => {
     expect(screen.getByTestId("design-sync-event")).toBeTruthy();
   });
 
-
   test("renders a custom calendar day component through the day component API", () => {
     function CustomDay(props: CalendarDayComponentProps) {
       return (
@@ -399,7 +399,6 @@ describe("@moritzbrantner/ui calendar", () => {
     );
   });
 
-
   test("marks range endpoints for rounded range styling", () => {
     const { container } = render(
       <Calendar
@@ -422,7 +421,6 @@ describe("@moritzbrantner/ui calendar", () => {
     expect(rangeEnd?.className).toContain("data-[range-end=true]:rounded-r-(--cell-radius)");
   });
 
-
   test("renders event summaries from jcal data", () => {
     render(
       <Calendar
@@ -437,14 +435,12 @@ describe("@moritzbrantner/ui calendar", () => {
     expect(screen.getAllByText("Release window").length).toBeGreaterThan(1);
   });
 
-
-  test("renders calendar cards with listed events", () => {
+  test("renders the dedicated card-day calendar component with listed events", () => {
     const { container } = render(
-      <Calendar
+      <CalendarCardDays
         defaultMonth={new Date(2026, 3, 1)}
         mode="single"
         showOutsideDays={false}
-        variant="cards"
         icsData={calendarIcsData}
       />,
     );
@@ -471,7 +467,6 @@ describe("@moritzbrantner/ui calendar", () => {
     expect(endSegment?.className).toContain("100%_50%");
   });
 
-
   test("exports the calendar card day component for custom layouts", () => {
     const { container } = render(
       <Calendar
@@ -486,5 +481,4 @@ describe("@moritzbrantner/ui calendar", () => {
     expect(container.querySelector("[data-has-events='true']")?.className).toContain("bg-card");
     expect(screen.getAllByText(/Design sync/).length).toBeGreaterThan(0);
   });
-
 });

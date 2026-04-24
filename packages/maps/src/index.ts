@@ -57,6 +57,7 @@ export {
 } from "./temporal-geojson";
 export {
   createTemporalGeoJsonTracksFromGeoJson,
+  createTemporalGeoJsonPlaybackIndex,
   getTemporalGeoJsonFeatureCollectionAtTime,
   getTemporalGeoJsonTimeRange,
   interpolateTemporalGeoJsonGeometry,
@@ -74,6 +75,8 @@ export {
   type TemporalGeoJsonInterpolationStrategy,
   type TemporalGeoJsonOutputFeature,
   type TemporalGeoJsonOutputFeatureCollection,
+  type TemporalGeoJsonPlaybackIndex,
+  type TemporalGeoJsonPlaybackIndexOptions,
   type TemporalGeoJsonSupportedGeometry,
   type TemporalGeoJsonTrack,
 } from "./temporal-geojson-geometries";

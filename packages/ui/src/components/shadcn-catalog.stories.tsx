@@ -49,9 +49,9 @@ import {
   AspectRatio,
   Avatar,
   AvatarBadge,
+  AvatarCollection,
+  AvatarCollectionCount,
   AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
   Badge,
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -505,16 +505,18 @@ function CatalogPreview({ designSystem = defaultUiThemeName }: CatalogPreviewPro
           </CatalogSection>
 
           <CatalogSection id="avatar" title="Avatar">
-            <AvatarGroup>
+            <div className="grid gap-4">
               <Avatar>
                 <AvatarFallback>MB</AvatarFallback>
                 <AvatarBadge />
               </Avatar>
-              <Avatar>
-                <AvatarFallback>UI</AvatarFallback>
-              </Avatar>
-              <AvatarGroupCount>+4</AvatarGroupCount>
-            </AvatarGroup>
+              <AvatarCollection>
+                <Avatar>
+                  <AvatarFallback>UI</AvatarFallback>
+                </Avatar>
+                <AvatarCollectionCount>+4</AvatarCollectionCount>
+              </AvatarCollection>
+            </div>
           </CatalogSection>
 
           <CatalogSection id="badge" title="Badge">

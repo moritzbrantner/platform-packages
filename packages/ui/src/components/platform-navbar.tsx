@@ -6,6 +6,7 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/r
 
 import { cn } from "../lib/cn";
 import { AccountMenu, type AccountMenuProps } from "./account-menu";
+import { LanguageSwitcher, type LanguageSwitcherProps } from "./language-switcher";
 import { NotificationMenu, type NotificationMenuProps } from "./notification-menu";
 import { ThemeModeSwitch, type ThemeModeSwitchProps } from "./theme-mode-switch";
 
@@ -46,6 +47,7 @@ type PlatformNavbarProps = Omit<React.ComponentPropsWithoutRef<"nav">, "children
   actions?: React.ReactNode;
   accountMenu?: AccountMenuProps;
   notificationMenu?: NotificationMenuProps;
+  languageSwitcher?: LanguageSwitcherProps | boolean;
   themeModeSwitch?: ThemeModeSwitchProps | boolean;
   variant?: PlatformNavbarVariant;
   activeItemId?: string;
@@ -183,6 +185,7 @@ export function PlatformNavbar({
   actions,
   accountMenu,
   notificationMenu,
+  languageSwitcher,
   themeModeSwitch,
   variant = "web",
   activeItemId,
@@ -211,7 +214,9 @@ export function PlatformNavbar({
   const currentOpenGroupId = openGroupId !== undefined ? openGroupId : uncontrolledOpenGroupId;
   const openGroup =
     groups.find((group) => group.id === currentOpenGroupId && group.items.length > 0) ?? null;
-  const hasActions = Boolean(actions || accountMenu || notificationMenu || themeModeSwitch);
+  const hasActions = Boolean(
+    actions || accountMenu || notificationMenu || languageSwitcher || themeModeSwitch,
+  );
 
   const resolvedActiveGroupId =
     activeGroupId ??
@@ -495,6 +500,9 @@ export function PlatformNavbar({
       className="flex shrink-0 items-center justify-end gap-2"
     >
       {actions}
+      {languageSwitcher ? (
+        <LanguageSwitcher {...(languageSwitcher === true ? {} : languageSwitcher)} />
+      ) : null}
       {themeModeSwitch ? (
         <ThemeModeSwitch {...(themeModeSwitch === true ? {} : themeModeSwitch)} />
       ) : null}

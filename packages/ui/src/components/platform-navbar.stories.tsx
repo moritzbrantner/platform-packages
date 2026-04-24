@@ -136,6 +136,7 @@ export const Web: Story = {
   args: {
     variant: "web",
     defaultOpenGroupId: "workspace",
+    languageSwitcher: true,
   },
 };
 

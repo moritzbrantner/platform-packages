@@ -12,9 +12,9 @@ import {
   AlertTitle,
   Avatar,
   AvatarBadge,
+  AvatarCollection,
+  AvatarCollectionCount,
   AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
   Badge,
   Breadcrumb,
   BreadcrumbItem,
@@ -162,10 +162,7 @@ const uiStyleLoaders = {
   atlas: () => import("@moritzbrantner/ui/atlas/styles.css?inline"),
   studio: () => import("@moritzbrantner/ui/studio/styles.css?inline"),
   paper: () => import("@moritzbrantner/ui/paper/styles.css?inline"),
-} as const satisfies Record<
-  Exclude<UiThemeName, "bobba">,
-  () => Promise<{ default: string }>
->;
+} as const satisfies Record<Exclude<UiThemeName, "bobba">, () => Promise<{ default: string }>>;
 
 function isUiThemeName(value: string | null): value is UiThemeName {
   return (
@@ -1055,10 +1052,10 @@ function UiPage() {
                 <div>
                   <p className="text-sm font-medium">Maintainers</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Avatar groups help validate overlap, badges, and small-size rendering.
+                    Avatar collections help validate overlap, badges, and small-size rendering.
                   </p>
                 </div>
-                <AvatarGroup>
+                <AvatarCollection>
                   <Avatar>
                     <AvatarFallback>MB</AvatarFallback>
                     <AvatarBadge />
@@ -1069,8 +1066,8 @@ function UiPage() {
                   <Avatar>
                     <AvatarFallback>LK</AvatarFallback>
                   </Avatar>
-                  <AvatarGroupCount>+2</AvatarGroupCount>
-                </AvatarGroup>
+                  <AvatarCollectionCount>+2</AvatarCollectionCount>
+                </AvatarCollection>
               </div>
 
               <Alert>
