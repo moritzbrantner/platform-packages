@@ -4,10 +4,7 @@ import { describe, expect, test, vi } from "vitest";
 
 import {
   Avatar,
-  AvatarBadge,
   AvatarCollection,
-  AvatarCollectionCount,
-  AvatarFallback,
   ImageCropper,
   getAvatarInitials,
   getImageCropArea,
@@ -18,16 +15,18 @@ describe("avatar", () => {
   test("renders single-user avatars and avatar collections with shape variants", () => {
     render(
       <>
-        <Avatar size="xl" shape="round">
-          <AvatarFallback name="Mira Brandt" />
-          <AvatarBadge />
-        </Avatar>
-        <AvatarCollection>
-          <Avatar size="xl" shape="hexagonal">
-            <AvatarFallback name="Platform Design" />
-          </Avatar>
-          <AvatarCollectionCount shape="square">+4</AvatarCollectionCount>
-        </AvatarCollection>
+        <Avatar size="xl" shape="round" name="Mira Brandt" online />
+        <AvatarCollection
+          users={[
+            { name: "Platform Design", size: "xl", shape: "hexagonal" },
+            { name: "Release Crew", size: "xl", shape: "square" },
+            { name: "Operations", size: "xl", shape: "round" },
+            { name: "Support", size: "xl", shape: "round" },
+            { name: "People Ops", size: "xl", shape: "round" },
+          ]}
+          maxVisible={1}
+          overflowShape="square"
+        />
       </>,
     );
 

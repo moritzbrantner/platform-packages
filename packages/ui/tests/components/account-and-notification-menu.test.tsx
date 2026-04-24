@@ -49,6 +49,19 @@ describe("account menu", () => {
     expect(await screen.findByText("Signed out")).toBeTruthy();
   });
 
+  test("renders an inline user trigger when requested", () => {
+    render(
+      <AccountMenu
+        user={{ name: "Ada Lovelace", email: "ada@example.com" }}
+        triggerVariant="inline"
+      />,
+    );
+
+    expect(screen.getByText("Ada Lovelace")).toBeTruthy();
+    expect(screen.getByText("ada@example.com")).toBeTruthy();
+    expect(screen.getByText("AL")).toBeTruthy();
+  });
+
   test("applies destructive item variant without owning logout behavior", async () => {
     const onSelect = vi.fn();
 

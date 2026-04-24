@@ -9,6 +9,7 @@ export * from "./components/app-layout";
 export * from "./components/aspect-ratio";
 export * from "./components/asset-browser";
 export * from "./components/avatar";
+export * from "./components/avatar-collection";
 export * from "./components/badge";
 export * from "./components/breadcrumb";
 export * from "./components/button";

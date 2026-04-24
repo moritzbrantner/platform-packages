@@ -8,15 +8,27 @@ import { cn } from "../lib/cn";
 type AvatarSize = "xs" | "sm" | "default" | "lg" | "xl";
 type AvatarShape = "round" | "square" | "hexagonal" | "octagonal";
 
-function Avatar({
+type AvatarRootProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
+  size?: AvatarSize;
+  shape?: AvatarShape;
+};
+
+type AvatarProps = Omit<AvatarRootProps, "children"> & {
+  name?: string | null;
+  imageUrl?: string | null;
+  imageAlt?: string;
+  initials?: string;
+  maxInitials?: number;
+  online?: boolean;
+  fallback?: React.ReactNode;
+};
+
+function AvatarRoot({
   className,
   size = "default",
   shape = "round",
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
-  size?: AvatarSize;
-  shape?: AvatarShape;
-}) {
+}: AvatarRootProps) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
@@ -28,6 +40,30 @@ function Avatar({
       )}
       {...props}
     />
+  );
+}
+
+function Avatar({
+  className,
+  size = "default",
+  shape = "round",
+  name,
+  imageUrl,
+  imageAlt = "",
+  initials,
+  maxInitials = 2,
+  online = false,
+  fallback,
+  ...props
+}: AvatarProps) {
+  return (
+    <AvatarRoot className={className} size={size} shape={shape} {...props}>
+      {imageUrl ? <AvatarImage src={imageUrl} alt={imageAlt} /> : null}
+      <AvatarFallback name={name} initials={initials} maxInitials={maxInitials}>
+        {fallback}
+      </AvatarFallback>
+      {online ? <AvatarBadge /> : null}
+    </AvatarRoot>
   );
 }
 
@@ -45,7 +81,7 @@ function AvatarImage({ className, ...props }: React.ComponentProps<typeof Avatar
 }
 
 type AvatarFallbackProps = React.ComponentProps<typeof AvatarPrimitive.Fallback> & {
-  name?: string;
+  name?: string | null;
   initials?: string;
   maxInitials?: number;
 };
@@ -92,47 +128,6 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-function AvatarCollection({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="avatar-collection"
-      className={cn(
-        "group/avatar-collection flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function AvatarCollectionCount({
-  className,
-  shape = "round",
-  ...props
-}: React.ComponentProps<"div"> & {
-  shape?: AvatarShape;
-}) {
-  return (
-    <div
-      data-slot="avatar-collection-count"
-      data-shape={shape}
-      className={cn(
-        "relative flex size-8 shrink-0 items-center justify-center bg-muted text-sm font-medium text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-collection:size-10 group-has-data-[size=sm]/avatar-collection:size-6 group-has-data-[size=xl]/avatar-collection:size-12 group-has-data-[size=xs]/avatar-collection:size-5 group-has-data-[size=sm]/avatar-collection:text-xs group-has-data-[size=xl]/avatar-collection:text-base group-has-data-[size=xs]/avatar-collection:text-[10px] data-[shape=round]:rounded-full data-[shape=square]:rounded-md data-[shape=hexagonal]:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] data-[shape=octagonal]:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)] [&>svg]:size-4 group-has-data-[size=lg]/avatar-collection:[&>svg]:size-5 group-has-data-[size=sm]/avatar-collection:[&>svg]:size-3 group-has-data-[size=xl]/avatar-collection:[&>svg]:size-5 group-has-data-[size=xs]/avatar-collection:[&>svg]:size-2.5",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function AvatarGroup(props: React.ComponentProps<typeof AvatarCollection>) {
-  return <AvatarCollection {...props} />;
-}
-
-function AvatarGroupCount(props: React.ComponentProps<typeof AvatarCollectionCount>) {
-  return <AvatarCollectionCount {...props} />;
-}
-
 function getAvatarInitials(
   name: string | null | undefined,
   {
@@ -160,14 +155,12 @@ function getAvatarInitials(
 
 export {
   Avatar,
+  AvatarRoot,
   AvatarImage,
   AvatarFallback,
-  AvatarCollection,
-  AvatarCollectionCount,
-  AvatarGroup,
-  AvatarGroupCount,
   AvatarBadge,
   getAvatarInitials,
+  type AvatarProps,
   type AvatarSize,
   type AvatarShape,
 };

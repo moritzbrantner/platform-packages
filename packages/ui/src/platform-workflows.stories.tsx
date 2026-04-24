@@ -15,7 +15,7 @@ import {
 import { expect } from "storybook/test";
 
 import { Alert, AlertDescription, AlertTitle } from "./components/alert";
-import { Avatar, AvatarBadge, AvatarFallback } from "./components/avatar";
+import { Avatar } from "./components/avatar";
 import { Badge } from "./components/badge";
 import { Button } from "./components/button";
 import {
@@ -646,10 +646,7 @@ function PersonCard({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Avatar size="lg">
-            <AvatarFallback>{person.initials}</AvatarFallback>
-            {person.online ? <AvatarBadge /> : null}
-          </Avatar>
+          <Avatar size="lg" initials={person.initials} name={person.name} online={person.online} />
           <div className="min-w-0">
             <CardTitle className="truncate">{person.name}</CardTitle>
             <CardDescription className="truncate">{person.headline}</CardDescription>
@@ -719,10 +716,13 @@ function ProfileWorkflow({
       <div className="rounded-lg border bg-card p-6 text-card-foreground">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
-            <Avatar size="lg" className="size-14">
-              <AvatarFallback>{person.initials}</AvatarFallback>
-              {person.online ? <AvatarBadge /> : null}
-            </Avatar>
+            <Avatar
+              size="lg"
+              className="size-14"
+              initials={person.initials}
+              name={person.name}
+              online={person.online}
+            />
             <div className="min-w-0">
               <h1 className="truncate text-3xl font-semibold tracking-tight">{person.name}</h1>
               <p className="mt-1 text-muted-foreground">{person.headline}</p>
@@ -781,10 +781,7 @@ function ChatWorkflow({ person }: { person: Person }) {
     <Chat className="min-h-[36rem]">
       <ChatHeader>
         <div className="flex min-w-0 items-center gap-3">
-          <Avatar>
-            <AvatarFallback>{person.initials}</AvatarFallback>
-            {person.online ? <AvatarBadge /> : null}
-          </Avatar>
+          <Avatar initials={person.initials} name={person.name} online={person.online} />
           <div className="min-w-0">
             <ChatTitle>Chat with {person.name}</ChatTitle>
             <ChatDescription>

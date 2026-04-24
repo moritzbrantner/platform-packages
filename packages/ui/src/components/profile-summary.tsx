@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { cn } from "../lib/cn";
-import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "./avatar";
+import { Avatar } from "./avatar";
 
 type ProfileSummaryOrientation = "horizontal" | "vertical";
 
@@ -16,6 +16,7 @@ type ProfileSummaryAvatarProps = React.ComponentProps<typeof Avatar> & {
   initials?: string;
   name?: string;
   online?: boolean;
+  children?: React.ReactNode;
 };
 
 function ProfileSummary({ className, orientation = "horizontal", ...props }: ProfileSummaryProps) {
@@ -47,14 +48,13 @@ function ProfileSummaryAvatar({
       data-slot="profile-summary-avatar"
       size={size}
       className={cn("size-12", className)}
+      imageUrl={imageUrl}
+      initials={initials}
+      name={name}
+      online={online}
+      fallback={children}
       {...props}
-    >
-      {imageUrl ? <AvatarImage src={imageUrl} alt="" /> : null}
-      <AvatarFallback name={name} initials={initials}>
-        {children}
-      </AvatarFallback>
-      {online ? <AvatarBadge /> : null}
-    </Avatar>
+    />
   );
 }
 

@@ -517,6 +517,7 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
     expect(screen.getByRole("button", { name: "Notifications, 3 unread" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open account menu" })).toBeTruthy();
     expect(screen.getByText("MB")).toBeTruthy();
+    expect(screen.getByText("Mira Brandt")).toBeTruthy();
   });
 
   test("anchors the mobile navbar submenu to the centered navbar", async () => {

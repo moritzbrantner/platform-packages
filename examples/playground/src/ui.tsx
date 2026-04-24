@@ -13,8 +13,8 @@ import {
   Avatar,
   AvatarBadge,
   AvatarCollection,
-  AvatarCollectionCount,
   AvatarFallback,
+  AvatarRoot,
   Badge,
   Breadcrumb,
   BreadcrumbItem,
@@ -981,12 +981,12 @@ function UiPage() {
                     </HoverCardTrigger>
                     <HoverCardContent className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <Avatar>
+                        <AvatarRoot>
                           <AvatarFallback>MB</AvatarFallback>
                           <AvatarBadge>
                             <BellIcon className="size-2" />
                           </AvatarBadge>
-                        </Avatar>
+                        </AvatarRoot>
                         <div>
                           <p className="text-sm font-medium">Moritz Brantner</p>
                           <p className="text-xs text-muted-foreground">
@@ -1055,19 +1055,16 @@ function UiPage() {
                     Avatar collections help validate overlap, badges, and small-size rendering.
                   </p>
                 </div>
-                <AvatarCollection>
-                  <Avatar>
-                    <AvatarFallback>MB</AvatarFallback>
-                    <AvatarBadge />
-                  </Avatar>
-                  <Avatar>
-                    <AvatarFallback>AR</AvatarFallback>
-                  </Avatar>
-                  <Avatar>
-                    <AvatarFallback>LK</AvatarFallback>
-                  </Avatar>
-                  <AvatarCollectionCount>+2</AvatarCollectionCount>
-                </AvatarCollection>
+                <AvatarCollection
+                  users={[
+                    { initials: "MB", name: "Moritz Brantner", online: true },
+                    { initials: "AR", name: "Ari Reed" },
+                    { initials: "LK", name: "Lena Koch" },
+                    { initials: "VT", name: "Vera Tran" },
+                    { initials: "PN", name: "Priya Nair" },
+                  ]}
+                  maxVisible={3}
+                />
               </div>
 
               <Alert>

@@ -214,6 +214,7 @@ export function PlatformNavbar({
   const currentOpenGroupId = openGroupId !== undefined ? openGroupId : uncontrolledOpenGroupId;
   const openGroup =
     groups.find((group) => group.id === currentOpenGroupId && group.items.length > 0) ?? null;
+  const shouldUseInlineAccountTrigger = Boolean(accountMenu?.user) && variant !== "mobile";
   const hasActions = Boolean(
     actions || accountMenu || notificationMenu || languageSwitcher || themeModeSwitch,
   );
@@ -507,7 +508,12 @@ export function PlatformNavbar({
         <ThemeModeSwitch {...(themeModeSwitch === true ? {} : themeModeSwitch)} />
       ) : null}
       {notificationMenu ? <NotificationMenu {...notificationMenu} /> : null}
-      {accountMenu ? <AccountMenu {...accountMenu} /> : null}
+      {accountMenu ? (
+        <AccountMenu
+          triggerVariant={shouldUseInlineAccountTrigger ? "inline" : "icon"}
+          {...accountMenu}
+        />
+      ) : null}
     </div>
   ) : null;
 

@@ -138,6 +138,9 @@ export const Web: Story = {
     defaultOpenGroupId: "workspace",
     languageSwitcher: true,
   },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText("Mira Brandt")).toBeVisible();
+  },
 };
 
 export const Desktop: Story = {

@@ -48,10 +48,7 @@ import {
   AlertTitle,
   AspectRatio,
   Avatar,
-  AvatarBadge,
   AvatarCollection,
-  AvatarCollectionCount,
-  AvatarFallback,
   Badge,
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -506,16 +503,17 @@ function CatalogPreview({ designSystem = defaultUiThemeName }: CatalogPreviewPro
 
           <CatalogSection id="avatar" title="Avatar">
             <div className="grid gap-4">
-              <Avatar>
-                <AvatarFallback>MB</AvatarFallback>
-                <AvatarBadge />
-              </Avatar>
-              <AvatarCollection>
-                <Avatar>
-                  <AvatarFallback>UI</AvatarFallback>
-                </Avatar>
-                <AvatarCollectionCount>+4</AvatarCollectionCount>
-              </AvatarCollection>
+              <Avatar initials="MB" name="Mira Brandt" online />
+              <AvatarCollection
+                users={[
+                  { initials: "UI", name: "UI Team" },
+                  { initials: "DS", name: "Design Systems" },
+                  { initials: "RC", name: "Release Crew" },
+                  { initials: "QA", name: "Quality" },
+                  { initials: "OP", name: "Operations" },
+                ]}
+                maxVisible={1}
+              />
             </div>
           </CatalogSection>
 

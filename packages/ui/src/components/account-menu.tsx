@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { cn } from "../lib/cn";
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Avatar } from "./avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +35,7 @@ export type AccountMenuProps = {
   label?: string;
   guestLabel?: React.ReactNode;
   items?: AccountMenuItem[];
+  triggerVariant?: "icon" | "inline";
   align?: "start" | "center" | "end";
   sideOffset?: number;
   className?: string;
@@ -45,11 +46,14 @@ function AccountMenu({
   label = "Open account menu",
   guestLabel = "Guest",
   items = [],
+  triggerVariant = "icon",
   align = "end",
   sideOffset = 8,
   className,
 }: AccountMenuProps): React.ReactElement {
   const fallbackName = getAccountMenuText(user?.name) ?? getAccountMenuText(guestLabel) ?? label;
+  const secondaryText = user?.meta ?? user?.email;
+  const inlineUser = triggerVariant === "inline" ? user : null;
 
   return (
     <DropdownMenu>
@@ -59,14 +63,26 @@ function AccountMenu({
           aria-label={label}
           title={label}
           className={cn(
-            "inline-flex size-9 shrink-0 items-center justify-center rounded-full outline-none transition-[box-shadow,transform,background-color] hover:-translate-y-[1px] hover:bg-accent focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            inlineUser
+              ? "inline-flex h-10 max-w-56 shrink-0 items-center gap-2 rounded-full border border-border/60 bg-background/45 px-2.5 pr-3 text-left shadow-[var(--glass-shadow)] outline-none transition-[box-shadow,transform,background-color,border-color] hover:-translate-y-[1px] hover:border-border hover:bg-accent/45 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              : "inline-flex size-9 shrink-0 items-center justify-center rounded-full outline-none transition-[box-shadow,transform,background-color] hover:-translate-y-[1px] hover:bg-accent focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
             className,
           )}
         >
-          <Avatar>
-            {user?.imageUrl ? <AvatarImage src={user.imageUrl} alt="" /> : null}
-            <AvatarFallback name={fallbackName} initials={user?.initials} />
-          </Avatar>
+          <Avatar
+            size={inlineUser ? "sm" : "default"}
+            name={fallbackName}
+            initials={user?.initials}
+            imageUrl={user?.imageUrl}
+          />
+          {inlineUser ? (
+            <span className="grid min-w-0 flex-1 text-left leading-tight">
+              <span className="truncate text-sm font-medium text-foreground">{inlineUser.name}</span>
+              {secondaryText ? (
+                <span className="truncate text-xs text-muted-foreground">{secondaryText}</span>
+              ) : null}
+            </span>
+          ) : null}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} sideOffset={sideOffset} className="w-72">
