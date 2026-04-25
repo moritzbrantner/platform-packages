@@ -46,6 +46,11 @@ export type TimelineClipResize = {
   durationMs?: number;
 };
 
+export type TimelineClipSplit = {
+  clipId: string;
+  timeMs: number;
+};
+
 export type TimelineOverlap = {
   trackId: string;
   firstClipId: string;
@@ -306,6 +311,81 @@ export function resizeTimelineClip(
   );
 }
 
+export function splitTimelineClip(
+  tracks: MediaTimelineTrack[],
+  split: TimelineClipSplit,
+  options: TimelineOperationOptions = {},
+) {
+  const found = findTimelineClip(tracks, split.clipId);
+
+  if (!found || found.clip.locked || found.track.locked) {
+    return tracks;
+  }
+
+  const minClipDurationMs = options.minClipDurationMs ?? defaultMinClipDurationMs;
+  const clipEndMs = getClipEndMs(found.clip);
+
+  if (
+    split.timeMs <= found.clip.startMs + minClipDurationMs ||
+    split.timeMs >= clipEndMs - minClipDurationMs
+  ) {
+    return tracks;
+  }
+
+  const snapMs = options.snapMs ?? 0;
+  const splitTimeMs = clampTimelineTime(
+    snapTimelineTime(split.timeMs, snapMs),
+    found.clip.startMs + minClipDurationMs,
+    clipEndMs - minClipDurationMs,
+  );
+
+  if (
+    splitTimeMs <= found.clip.startMs + minClipDurationMs ||
+    splitTimeMs >= clipEndMs - minClipDurationMs
+  ) {
+    return tracks;
+  }
+
+  const secondClipDurationMs = clipEndMs - splitTimeMs;
+  const secondClipId = createSplitClipId(tracks, found.clip.id);
+  const secondClipSourceOffsetMs =
+    found.clip.sourceOffsetMs === undefined
+      ? undefined
+      : found.clip.sourceOffsetMs + (splitTimeMs - found.clip.startMs);
+
+  return normalizeTimelineTracks(
+    tracks.map((track) => {
+      if (track.id !== found.track.id) {
+        return track;
+      }
+
+      return {
+        ...track,
+        clips: track.clips.flatMap((clip) => {
+          if (clip.id !== found.clip.id) {
+            return [clip];
+          }
+
+          return [
+            {
+              ...clip,
+              durationMs: splitTimeMs - clip.startMs,
+            },
+            {
+              ...clip,
+              id: secondClipId,
+              startMs: splitTimeMs,
+              durationMs: secondClipDurationMs,
+              sourceOffsetMs: secondClipSourceOffsetMs,
+            },
+          ];
+        }),
+      };
+    }),
+    options,
+  );
+}
+
 export function detectTimelineOverlaps(tracks: MediaTimelineTrack[]) {
   const overlaps: TimelineOverlap[] = [];
 
@@ -331,4 +411,17 @@ export function detectTimelineOverlaps(tracks: MediaTimelineTrack[]) {
   }
 
   return overlaps;
+}
+
+function createSplitClipId(tracks: MediaTimelineTrack[], clipId: string) {
+  const existingIds = new Set(tracks.flatMap((track) => track.clips.map((clip) => clip.id)));
+  let candidate = `${clipId}-part-2`;
+  let splitIndex = 3;
+
+  while (existingIds.has(candidate)) {
+    candidate = `${clipId}-part-${splitIndex}`;
+    splitIndex += 1;
+  }
+
+  return candidate;
 }

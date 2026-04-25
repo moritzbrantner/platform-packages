@@ -8,6 +8,7 @@ import {
   getTimelineTicks,
   moveTimelineClip,
   resizeTimelineClip,
+  splitTimelineClip,
   type MediaTimelineTrack,
 } from "@moritzbrantner/media-editor";
 
@@ -105,6 +106,48 @@ describe("@moritzbrantner/media-editor timeline utilities", () => {
         },
       ]),
     ).toHaveLength(1);
+  });
+
+  test("splits clips at the requested time and preserves source offsets", () => {
+    const split = splitTimelineClip(
+      [
+        {
+          id: "video",
+          name: "Video",
+          kind: "video",
+          clips: [
+            {
+              id: "clip-1",
+              trackId: "video",
+              name: "Opening shot",
+              kind: "video",
+              startMs: 1_000,
+              durationMs: 4_000,
+              sourceOffsetMs: 500,
+            },
+          ],
+        },
+      ],
+      {
+        clipId: "clip-1",
+        timeMs: 3_000,
+      },
+    );
+
+    expect(split[0]?.clips).toEqual([
+      expect.objectContaining({
+        id: "clip-1",
+        startMs: 1_000,
+        durationMs: 2_000,
+        sourceOffsetMs: 500,
+      }),
+      expect.objectContaining({
+        id: "clip-1-part-2",
+        startMs: 3_000,
+        durationMs: 2_000,
+        sourceOffsetMs: 2_500,
+      }),
+    ]);
   });
 });
 
@@ -237,5 +280,68 @@ describe("@moritzbrantner/media-editor React timeline", () => {
 
     fireEvent.keyDown(timeline, { key: " " });
     expect(handlePlaybackToggle).toHaveBeenCalledTimes(1);
+  });
+
+  test("splits a selected clip at the playhead and exposes track mute and lock controls", () => {
+    const handleTracksChange = vi.fn();
+
+    render(
+      <MediaTimeline
+        tracks={tracks}
+        durationMs={10_000}
+        currentTimeMs={3_000}
+        selectedClipId="clip-1"
+        onTracksChange={handleTracksChange}
+      />,
+    );
+
+    const timeline = screen.getByRole("application", {
+      name: "Media timeline editor",
+    });
+
+    fireEvent.keyDown(timeline, { key: "s" });
+    expect(handleTracksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "video",
+          clips: expect.arrayContaining([
+            expect.objectContaining({
+              id: "clip-1",
+              startMs: 1_000,
+              durationMs: 2_000,
+            }),
+            expect.objectContaining({
+              id: "clip-1-part-2",
+              startMs: 3_000,
+              durationMs: 2_000,
+            }),
+          ]),
+        }),
+      ]),
+    );
+
+    handleTracksChange.mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mute Video" }));
+    expect(handleTracksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "video",
+          muted: true,
+        }),
+      ]),
+    );
+
+    handleTracksChange.mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: "Lock Video" }));
+    expect(handleTracksChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "video",
+          locked: true,
+        }),
+      ]),
+    );
   });
 });

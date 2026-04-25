@@ -47,6 +47,7 @@ const timelineHotkeys = {
   "seek-start": "Home",
   "select-next-clip": "]",
   "select-previous-clip": "[",
+  "split-selected-at-playhead": "S",
   "toggle-playback": "Space",
   "trim-selected-end-left": "Alt+Shift+ArrowLeft",
   "trim-selected-end-right": "Alt+Shift+ArrowRight",

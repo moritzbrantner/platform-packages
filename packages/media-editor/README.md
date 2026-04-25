@@ -5,7 +5,7 @@ Media timeline core utilities and a React timeline component for clip-based edit
 ## Main APIs
 
 - `MediaTimeline` and `defaultMediaTimelineHotkeys`
-- `normalizeTimelineTracks(...)`, `moveTimelineClip(...)`, and `resizeTimelineClip(...)`
+- `normalizeTimelineTracks(...)`, `moveTimelineClip(...)`, `resizeTimelineClip(...)`, and `splitTimelineClip(...)`
 - `detectTimelineOverlaps(...)` / `getTimelineDurationMs(...)`
 
 ## Notes

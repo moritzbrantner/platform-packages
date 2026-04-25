@@ -34,6 +34,7 @@ import {
   moveTimelineClip,
   normalizeTimelineTracks,
   resizeTimelineClip,
+  splitTimelineClip,
   snapTimelineTime,
   type MediaTimelineClip,
   type MediaTimelineTrack,
@@ -57,6 +58,7 @@ export type MediaTimelineHotkeyAction =
   | "seek-start"
   | "select-next-clip"
   | "select-previous-clip"
+  | "split-selected-at-playhead"
   | "toggle-playback"
   | "trim-selected-end-left"
   | "trim-selected-end-right"
@@ -77,6 +79,7 @@ export type MediaTimelineClipContextMenuContext = {
   onMoveToPlayhead: () => void;
   onMoveUp: () => void;
   onSelect: () => void;
+  onSplitAtPlayhead: () => void;
   onTrimEndToPlayhead: () => void;
   onTrimStartToPlayhead: () => void;
 };
@@ -138,6 +141,7 @@ export const defaultMediaTimelineHotkeys = {
   "seek-start": "Home",
   "select-next-clip": "]",
   "select-previous-clip": "[",
+  "split-selected-at-playhead": "S",
   "toggle-playback": "Space",
   "trim-selected-end-left": "Alt+Shift+ArrowLeft",
   "trim-selected-end-right": "Alt+Shift+ArrowRight",
@@ -408,6 +412,28 @@ export function MediaTimeline({
     return undefined;
   };
 
+  const updateTrack = (trackId: string, updater: (track: MediaTimelineTrack) => MediaTimelineTrack) => {
+    if (!onTracksChange || readOnly) {
+      return;
+    }
+
+    commitTracks(tracks.map((track) => (track.id === trackId ? updater(track) : track)));
+  };
+
+  const toggleTrackMuted = (trackId: string) => {
+    updateTrack(trackId, (track) => ({
+      ...track,
+      muted: !track.muted,
+    }));
+  };
+
+  const toggleTrackLocked = (trackId: string) => {
+    updateTrack(trackId, (track) => ({
+      ...track,
+      locked: !track.locked,
+    }));
+  };
+
   const deleteClip = (clipId: string) => {
     if (!onTracksChange || readOnly) {
       return;
@@ -513,6 +539,20 @@ export function MediaTimeline({
     );
   };
 
+  const splitClipAtPlayhead = (clipId: string) => {
+    if (!onTracksChange || readOnly) {
+      return;
+    }
+
+    commitTracks(
+      splitTimelineClip(
+        tracks,
+        { clipId, timeMs: currentTimeMs },
+        { durationMs, minClipDurationMs, snapMs },
+      ),
+    );
+  };
+
   const selectClipByOffset = (offset: -1 | 1) => {
     if (orderedClips.length === 0) {
       return;
@@ -587,6 +627,14 @@ export function MediaTimeline({
 
     if (action === "move-selected-up" || action === "move-selected-down") {
       nextTracks = moveSelectedClipToTrack(clip, action === "move-selected-up" ? -1 : 1);
+    }
+
+    if (action === "split-selected-at-playhead") {
+      nextTracks = splitTimelineClip(
+        tracks,
+        { clipId: clip.id, timeMs: currentTimeMs },
+        { durationMs, minClipDurationMs, snapMs },
+      );
     }
 
     if (action === "trim-selected-start-left" || action === "trim-selected-start-right") {
@@ -688,7 +736,37 @@ export function MediaTimeline({
               className="flex flex-col justify-center gap-1 border-b border-border px-3"
               style={{ height: track.height ?? defaultTrackHeight }}
             >
-              <div className="truncate text-sm font-medium">{track.name}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="truncate text-sm font-medium">{track.name}</div>
+                {onTracksChange && !readOnly ? (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant={track.muted ? "secondary" : "ghost"}
+                      aria-label={`${track.muted ? "Unmute" : "Mute"} ${track.name}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleTrackMuted(track.id);
+                      }}
+                    >
+                      M
+                    </Button>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant={track.locked ? "secondary" : "ghost"}
+                      aria-label={`${track.locked ? "Unlock" : "Lock"} ${track.name}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleTrackLocked(track.id);
+                      }}
+                    >
+                      L
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
               <div className="flex items-center gap-2 text-[11px] uppercase text-muted-foreground">
                 <span>{track.kind}</span>
                 {track.locked ? <span>Locked</span> : null}
@@ -793,6 +871,7 @@ export function MediaTimeline({
                             }
                           },
                           onSelect: () => onSelectedClipChange?.(clip.id),
+                          onSplitAtPlayhead: () => splitClipAtPlayhead(clip.id),
                           onTrimEndToPlayhead: () => trimClipToPlayhead(clip.id, "end"),
                           onTrimStartToPlayhead: () => trimClipToPlayhead(clip.id, "start"),
                         }}
@@ -946,6 +1025,10 @@ function ClipContextMenuContent({
         <ContextMenuSeparator />
         <ContextMenuItem disabled={!context.canEdit} onSelect={context.onMoveToPlayhead}>
           Move to playhead
+        </ContextMenuItem>
+        <ContextMenuItem disabled={!context.canEdit} onSelect={context.onSplitAtPlayhead}>
+          Split at playhead
+          <ContextMenuShortcut>S</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem disabled={!context.canEdit} onSelect={context.onTrimStartToPlayhead}>
           Trim start to playhead
