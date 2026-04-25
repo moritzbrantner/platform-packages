@@ -452,7 +452,6 @@ export function PlatformWorkflowDemo({
     setSelectedProfileId(initialProfileId);
   }, [initialProfileId]);
 
-  const currentHref = buildWorkflowHref(languageCode, activeRoute);
   const selectedProfile =
     people.find((person) => person.id === selectedProfileId) ?? people[0] ?? null;
   const followingCount = followingIds.length;
@@ -532,127 +531,94 @@ export function PlatformWorkflowDemo({
     >
       <div className="min-h-screen bg-background text-foreground">
         <div className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-5 sm:px-6 lg:px-8">
-        <PlatformNavbar
-          brand={
-            <span className="inline-flex items-center gap-2">
-              <span className="grid size-6 place-items-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-                P
+          <PlatformNavbar
+            brand={
+              <span className="inline-flex items-center gap-2">
+                <span className="grid size-6 place-items-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+                  P
+                </span>
+                Platform
               </span>
-              Platform
-            </span>
-          }
-          groups={groups}
-          activeItemId={activeRoute}
-          defaultOpenGroupId={getDefaultOpenGroupId(session, activeRoute)}
-          languageSwitcher={{
-            value: languageCode,
-            onValueChange: (nextLanguageCode) => {
-              setLanguageCode(nextLanguageCode);
-            },
-          }}
-          themeModeSwitch={{
-            mode: themeMode,
-            onModeChange: setThemeMode,
-          }}
-          actions={
-            isVisitor ? (
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" variant="outline" onClick={() => navigate("login")}>
-                  <LogInIcon />
-                  Login
-                </Button>
-                <Button type="button" size="sm" onClick={() => navigate("register")}>
-                  <UserPlusIcon />
-                  Create account
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={activeRoute === "chat" ? "secondary" : "outline"}
-                  onClick={() => openChat(selectedProfile?.id ?? "mira")}
-                >
-                  <MessageCircleIcon />
-                  Chat
-                </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={signOut}>
-                  <LogInIcon />
-                  Sign out
-                </Button>
-              </div>
-            )
-          }
-          onNavigate={(item) => navigate(item.id as WorkflowRoute)}
-          renderLink={({ className, children, href, onClick, "aria-current": ariaCurrent }) => (
-            <a
-              href={href}
-              className={className}
-              aria-current={ariaCurrent}
-              onClick={(event) => {
-                event.preventDefault();
-                onClick();
-              }}
-            >
-              {children}
-            </a>
-          )}
-        />
-
-        <main className="grid gap-6">
-          <WorkflowEnvironmentSummary
-            currentHref={currentHref}
-            languageCode={languageCode}
-            themeMode={themeMode}
+            }
+            groups={groups}
+            activeItemId={activeRoute}
+            defaultOpenGroupId={getDefaultOpenGroupId(session, activeRoute)}
+            languageSwitcher={{
+              value: languageCode,
+              onValueChange: (nextLanguageCode) => {
+                setLanguageCode(nextLanguageCode);
+              },
+            }}
+            themeModeSwitch={{
+              mode: themeMode,
+              onModeChange: setThemeMode,
+            }}
+            actions={
+              isVisitor ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate("login")}
+                  >
+                    <LogInIcon />
+                    Login
+                  </Button>
+                  <Button type="button" size="sm" onClick={() => navigate("register")}>
+                    <UserPlusIcon />
+                    Create account
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={activeRoute === "chat" ? "secondary" : "outline"}
+                    onClick={() => openChat(selectedProfile?.id ?? "mira")}
+                  >
+                    <MessageCircleIcon />
+                    Chat
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={signOut}>
+                    <LogInIcon />
+                    Sign out
+                  </Button>
+                </div>
+              )
+            }
+            onNavigate={(item) => navigate(item.id as WorkflowRoute)}
+            renderLink={({ className, children, href, onClick, "aria-current": ariaCurrent }) => (
+              <a
+                href={href}
+                className={className}
+                aria-current={ariaCurrent}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onClick();
+                }}
+              >
+                {children}
+              </a>
+            )}
           />
-          {isVisitor ? (
-            <VisitorSummary />
-          ) : (
-            <WorkflowSummary followingCount={followingCount} selectedProfile={selectedProfile} />
-          )}
 
-          {notice ? <WorkflowNotice message={notice} /> : null}
+          <main className="grid gap-6">
+            {notice ? <WorkflowNotice message={notice} /> : null}
 
-          <WorkflowScreen
-            actions={actions}
-            route={activeRoute}
-            selectedProfile={selectedProfile}
-            followingCount={followingCount}
-            followingIds={followingIds}
-            onNotice={setNotice}
-          />
-        </main>
+            <WorkflowScreen
+              actions={actions}
+              route={activeRoute}
+              selectedProfile={selectedProfile}
+              followingCount={followingCount}
+              followingIds={followingIds}
+              onNotice={setNotice}
+            />
+          </main>
         </div>
       </div>
     </div>
-  );
-}
-
-function WorkflowEnvironmentSummary({
-  currentHref,
-  languageCode,
-  themeMode,
-}: {
-  currentHref: string;
-  languageCode: string;
-  themeMode: "light" | "dark";
-}) {
-  return (
-    <section className="grid gap-3 sm:grid-cols-3">
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Current URL</p>
-        <p className="mt-1 break-all font-mono text-sm font-semibold">{currentHref}</p>
-      </div>
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Language</p>
-        <p className="mt-1 text-2xl font-semibold uppercase">{languageCode}</p>
-      </div>
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Appearance</p>
-        <p className="mt-1 text-2xl font-semibold capitalize">{themeMode} mode</p>
-      </div>
-    </section>
   );
 }
 
@@ -753,25 +719,6 @@ function WorkflowScreen({
   return <SettingsScreen onNotice={onNotice} />;
 }
 
-function VisitorSummary() {
-  return (
-    <section className="grid gap-3 sm:grid-cols-3">
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Workflow mode</p>
-        <p className="mt-1 text-2xl font-semibold">Visitor</p>
-      </div>
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Shared screens</p>
-        <p className="mt-1 text-2xl font-semibold">About + Auth</p>
-      </div>
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Next branch</p>
-        <p className="mt-1 text-2xl font-semibold">Login or explore</p>
-      </div>
-    </section>
-  );
-}
-
 function MainScreen({ onNavigate }: { onNavigate: (route: WorkflowRoute) => void }) {
   return (
     <section className="grid gap-6">
@@ -870,31 +817,6 @@ function AboutScreen({ onNavigate }: { onNavigate: (route: WorkflowRoute) => voi
             <li>Authenticated branching into people, profile, chat, followers, and settings.</li>
           </ul>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function WorkflowSummary({
-  followingCount,
-  selectedProfile,
-}: {
-  followingCount: number;
-  selectedProfile: Person | null;
-}) {
-  return (
-    <section className="grid gap-3 sm:grid-cols-3">
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Signed-in workspace</p>
-        <p className="mt-1 text-2xl font-semibold">Platform</p>
-      </div>
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Following</p>
-        <p className="mt-1 text-2xl font-semibold tabular-nums">{followingCount}</p>
-      </div>
-      <div className="rounded-lg border bg-card p-4 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Active profile</p>
-        <p className="mt-1 truncate text-2xl font-semibold">{selectedProfile?.name ?? "None"}</p>
       </div>
     </section>
   );
