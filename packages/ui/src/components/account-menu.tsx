@@ -54,6 +54,7 @@ function AccountMenu({
   const fallbackName = getAccountMenuText(user?.name) ?? getAccountMenuText(guestLabel) ?? label;
   const secondaryText = user?.meta ?? user?.email;
   const inlineUser = triggerVariant === "inline" ? user : null;
+  const iconTrigger = inlineUser === null;
 
   return (
     <DropdownMenu>
@@ -65,11 +66,16 @@ function AccountMenu({
           className={cn(
             inlineUser
               ? "inline-flex h-10 max-w-56 shrink-0 items-center gap-2 rounded-full border border-border/60 bg-background/45 px-2.5 pr-3 text-left shadow-[var(--glass-shadow)] outline-none transition-[box-shadow,transform,background-color,border-color] hover:-translate-y-[1px] hover:border-border hover:bg-accent/45 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              : "inline-flex size-9 shrink-0 items-center justify-center rounded-full outline-none transition-[box-shadow,transform,background-color] hover:-translate-y-[1px] hover:bg-accent focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              : "group/account-menu inline-flex shrink-0 rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
             className,
           )}
         >
           <Avatar
+            className={
+              iconTrigger
+                ? "shadow-[var(--glass-shadow)] transition-[box-shadow,transform,filter] group-hover/account-menu:-translate-y-[1px] group-hover/account-menu:brightness-[1.03] group-data-[state=open]/account-menu:-translate-y-[1px]"
+                : undefined
+            }
             size={inlineUser ? "sm" : "default"}
             name={fallbackName}
             initials={user?.initials}

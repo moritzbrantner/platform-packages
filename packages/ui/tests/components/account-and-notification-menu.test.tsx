@@ -18,8 +18,14 @@ describe("account menu", () => {
     );
 
     expect(screen.getByText("AL")).toBeTruthy();
+    const trigger = screen.getByRole("button", { name: "Open account menu" });
+    expect(trigger.className).not.toContain("size-9");
+    expect(trigger.className).not.toContain("hover:bg-accent");
+    expect(screen.getByText("AL").closest('[data-slot="avatar"]')?.className).toContain(
+      "group-hover/account-menu:-translate-y-[1px]",
+    );
 
-    openMenu(screen.getByRole("button", { name: "Open account menu" }));
+    openMenu(trigger);
 
     expect(await screen.findByRole("menuitem", { name: "Profile" })).toBeTruthy();
     expect(screen.getByText("ada@example.com")).toBeTruthy();
