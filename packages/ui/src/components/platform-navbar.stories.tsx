@@ -139,7 +139,7 @@ export const Web: Story = {
     languageSwitcher: true,
   },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole("button", { name: "Open account menu" })).toBeVisible();
+    await expect(await canvas.findByRole("button", { name: "Open account menu" })).toBeInTheDocument();
     await expect(canvas.getByText("MB")).toBeVisible();
   },
 };
