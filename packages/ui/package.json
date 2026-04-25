@@ -1,6 +1,6 @@
 {
   "name": "@moritzbrantner/ui",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Shared Tailwind 4 React UI primitives, themes, and layout components for platform packages.",
   "private": false,
   "type": "module",
