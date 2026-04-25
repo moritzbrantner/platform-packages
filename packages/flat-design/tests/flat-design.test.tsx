@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { useState } from "react";
 
 import {
+  FlatSceneEditor,
   FlatMotionTimelineEditor,
   FlatScene,
   EditableFlatScene,
@@ -26,13 +27,16 @@ import {
   createEditableMotionFromPreset,
   duplicateFlatNode,
   findFlatNodeById,
+  insertFlatNode,
   listFlatNodes,
   moveFlatNode,
   normalizeEditableMotion,
   removeFlatNode,
   setFlatNodeMotion,
+  updateFlatSceneMetadata,
   updateFlatNode,
 } from "../src/core";
+import { FlatDesignPlaygroundPage } from "../../../examples/playground/src/flat-design-page";
 
 describe("@moritzbrantner/flat-design", () => {
   test("renders a scene through the React component", () => {
@@ -357,13 +361,38 @@ describe("@moritzbrantner/flat-design", () => {
       "b-copy",
       "c",
     ]);
-    expect(moved.layers[0]!.shapes.map((shape) => shape.id)).toEqual([
-      "b-copy",
-      "a",
-      "b",
-      "c",
-    ]);
+    expect(moved.layers[0]!.shapes.map((shape) => shape.id)).toEqual(["b-copy", "a", "b", "c"]);
     expect(removed.layers[0]!.shapes.map((shape) => shape.id)).toEqual(["b-copy", "a", "c"]);
+  });
+
+  test("updates scene metadata and inserts nodes through public helpers", () => {
+    const scene: FlatDesignScene = {
+      width: 160,
+      height: 100,
+      title: "Before",
+      background: "#ffffff",
+      layers: [{ shapes: [] }],
+    };
+
+    const updated = updateFlatSceneMetadata(scene, {
+      title: "After",
+      width: 220,
+      height: 140,
+      background: "#f4f7ff",
+    });
+    const inserted = insertFlatNode(
+      updated,
+      { layerIndex: 0, index: 0 },
+      createFlatBadgeFigure({ id: "badge-1" }),
+    );
+
+    expect(updated).toMatchObject({
+      title: "After",
+      width: 220,
+      height: 140,
+      background: "#f4f7ff",
+    });
+    expect(inserted.layers[0]!.shapes[0]!.id).toBe("badge-1");
   });
 
   test("normalizes editable timeline motion and maps presets into editable motions", () => {
@@ -427,7 +456,9 @@ describe("@moritzbrantner/flat-design", () => {
             selectionClassName="selected-node"
           />
           <div data-testid="selected-node-ref">
-            {selectedNodeRef ? `${selectedNodeRef.layerIndex}:${selectedNodeRef.path.join(".")}` : "none"}
+            {selectedNodeRef
+              ? `${selectedNodeRef.layerIndex}:${selectedNodeRef.path.join(".")}`
+              : "none"}
           </div>
         </>
       );
@@ -530,5 +561,88 @@ describe("@moritzbrantner/flat-design", () => {
       durationMs: 1_200,
     });
     expect(renderFlatSceneToSvg(nextScene)).toContain('dur="1.2s"');
+  });
+
+  test("supports scene editing, node insertion, preset motion, and timeline editing through FlatSceneEditor", () => {
+    const initialScene: FlatDesignScene = {
+      width: 320,
+      height: 220,
+      title: "Editor Demo",
+      background: "#f5f8ff",
+      layers: [
+        {
+          shapes: [
+            createFlatCardFigure({
+              id: "hero-card",
+              x: 160,
+              y: 110,
+            }),
+          ],
+        },
+      ],
+    };
+
+    function Harness() {
+      const [scene, setScene] = useState(initialScene);
+
+      return (
+        <>
+          <FlatSceneEditor scene={scene} onSceneChange={setScene} />
+          <div data-testid="editor-summary">
+            {scene.title}:{scene.width}:{scene.layers[0]!.shapes.length}:
+            {scene.layers[0]!.shapes.map((shape) => shape.id ?? shape.kind).join(",")}:
+            {scene.layers[0]!.shapes.map((shape) =>
+              shape.motion ? shape.motion.kind : "none",
+            ).join(",")}
+            :{renderFlatSceneToSvg(scene).includes('dur="2.1s"') ? "dur-2.1" : "dur-other"}
+          </div>
+        </>
+      );
+    }
+
+    render(<Harness />);
+
+    fireEvent.change(screen.getByLabelText("Scene title"), {
+      target: { value: "Editor Updated" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add Sun" }));
+    fireEvent.click(screen.getByRole("button", { name: "pulse" }));
+    fireEvent.click(screen.getByRole("button", { name: "Use timeline" }));
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Motion duration" }), {
+      target: { value: "2100" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Scene root" }));
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Width" }), {
+      target: { value: "480" },
+    });
+
+    expect(screen.getByTestId("editor-summary").textContent).toBe(
+      "Editor Updated:480:2:hero-card,sun:none,timeline:dur-2.1",
+    );
+  });
+
+  test("renders the flat-design playground page through the package-backed editor", () => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener() {},
+        removeEventListener() {},
+        addListener() {},
+        removeListener() {},
+        dispatchEvent() {
+          return false;
+        },
+      }),
+    });
+
+    render(<FlatDesignPlaygroundPage />);
+
+    expect(screen.getByText("Scene-native SVG editor")).toBeTruthy();
+    expect(screen.getByText("Flat Scene Editor")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Add Cloud" })).toBeTruthy();
   });
 });

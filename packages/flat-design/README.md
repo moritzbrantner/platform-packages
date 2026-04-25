@@ -10,6 +10,7 @@ Typed SVG primitives for building flat-design illustrations, lightweight motion,
 - A high-level editable `motion` model for node animation authoring.
 - `@moritzbrantner/flat-design/core` for node traversal, immutable scene updates, and motion editing helpers.
 - `@moritzbrantner/flat-design/react` for `EditableFlatScene`, `FlatMotionTimelineEditor`, and `useFlatSceneSelection`.
+- `FlatSceneEditor` for a package-backed SVG scene editor that composes canvas, tree, inspector, motion timeline, and SVG export.
 - A `FlatScene` React component for direct rendering.
 - A `renderFlatSceneToSvg()` helper for exporting raw SVG strings.
 - A ready-made `createFlatShowcaseScene()` preset you can customize or use as a starting point.
@@ -63,6 +64,42 @@ const svg = renderFlatSceneToSvg(scene);
 
 export function Example() {
   return <FlatScene scene={scene} width={320} height={200} />;
+}
+```
+
+## Editing scenes
+
+```tsx
+import { useState } from "react";
+
+import {
+  FlatSceneEditor,
+  createFlatBadgeFigure,
+  type FlatDesignScene,
+} from "@moritzbrantner/flat-design";
+
+const initialScene: FlatDesignScene = {
+  width: 360,
+  height: 240,
+  title: "Editor demo",
+  background: "#F4F7FF",
+  layers: [
+    {
+      shapes: [
+        createFlatBadgeFigure({
+          id: "hero-badge",
+          x: 180,
+          y: 120,
+        }),
+      ],
+    },
+  ],
+};
+
+export function SceneEditorExample() {
+  const [scene, setScene] = useState(initialScene);
+
+  return <FlatSceneEditor scene={scene} onSceneChange={setScene} />;
 }
 ```
 

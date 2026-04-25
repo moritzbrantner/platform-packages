@@ -25,6 +25,10 @@ export type DuplicateFlatNodeOptions = {
   idSuffix?: string | ((id: string) => string);
 };
 
+export type FlatSceneMetadataPatch = Partial<
+  Pick<FlatDesignScene, "background" | "description" | "height" | "title" | "viewBox" | "width">
+>;
+
 const minimumMotionDurationMs = 100;
 const minimumScale = 0.2;
 const maximumScale = 3;
@@ -112,7 +116,9 @@ function humanizeIdentifier(id: string) {
 }
 
 function createNodeLabel(shape: FlatShape) {
-  return shape.id ? humanizeIdentifier(shape.id) : `${shape.kind.charAt(0).toUpperCase()}${shape.kind.slice(1)}`;
+  return shape.id
+    ? humanizeIdentifier(shape.id)
+    : `${shape.kind.charAt(0).toUpperCase()}${shape.kind.slice(1)}`;
 }
 
 function getNodeCollection(
@@ -238,11 +244,7 @@ function insertShapeAtPosition(
       if (!position.parentPath || position.parentPath.length === 0) {
         return {
           ...layer,
-          shapes: [
-            ...layer.shapes.slice(0, nextIndex),
-            shape,
-            ...layer.shapes.slice(nextIndex),
-          ],
+          shapes: [...layer.shapes.slice(0, nextIndex), shape, ...layer.shapes.slice(nextIndex)],
         };
       }
 
@@ -304,10 +306,7 @@ function remapShapeIds(shape: FlatShape, suffix: string | ((id: string) => strin
 }
 
 function createDefaultTimelineKeyframes(durationMs: number): FlatEditableKeyframe[] {
-  return [
-    { timeMs: 0 },
-    { timeMs: durationMs },
-  ];
+  return [{ timeMs: 0 }, { timeMs: durationMs }];
 }
 
 function clampEditableKeyframe(
@@ -352,9 +351,7 @@ function duplicateEndpoints(
   return createDefaultTimelineKeyframes(durationMs);
 }
 
-function expandMotionKeyframesForDirection(
-  motion: FlatTimelineMotionSpec,
-): FlatEditableKeyframe[] {
+function expandMotionKeyframesForDirection(motion: FlatTimelineMotionSpec): FlatEditableKeyframe[] {
   if (motion.direction === "reverse") {
     return motion.keyframes
       .map((keyframe) => ({
@@ -403,7 +400,12 @@ function toTimelineAnimationKeyframes(motion: FlatTimelineMotionSpec): FlatMotio
 export function listFlatNodes(scene: FlatDesignScene): FlatNodeSummary[] {
   const nodes: FlatNodeSummary[] = [];
 
-  function visitShapes(shapes: FlatShape[], layerIndex: number, parentPath: number[], depth: number) {
+  function visitShapes(
+    shapes: FlatShape[],
+    layerIndex: number,
+    parentPath: number[],
+    depth: number,
+  ) {
     shapes.forEach((shape, shapeIndex) => {
       const path = [...parentPath, shapeIndex];
       nodes.push({
@@ -465,6 +467,35 @@ export function findFlatNodeById(scene: FlatDesignScene, id: string): FlatNodeRe
   return listFlatNodes(scene).find((node) => node.id === id)?.ref;
 }
 
+export function updateFlatSceneMetadata(
+  scene: FlatDesignScene,
+  patch: FlatSceneMetadataPatch,
+): FlatDesignScene {
+  return {
+    ...scene,
+    title: patch.title ?? scene.title,
+    description: patch.description ?? scene.description,
+    viewBox: patch.viewBox ?? scene.viewBox,
+    background: patch.background ?? scene.background,
+    width:
+      patch.width === undefined
+        ? scene.width
+        : Math.max(1, Math.round(Number.isFinite(patch.width) ? patch.width : scene.width)),
+    height:
+      patch.height === undefined
+        ? scene.height
+        : Math.max(1, Math.round(Number.isFinite(patch.height) ? patch.height : scene.height)),
+  };
+}
+
+export function insertFlatNode(
+  scene: FlatDesignScene,
+  position: FlatNodeInsertPosition,
+  shape: FlatShape,
+): FlatDesignScene {
+  return insertShapeAtPosition(scene, position, cloneStructured(shape));
+}
+
 export function updateFlatNode(
   scene: FlatDesignScene,
   ref: FlatNodeRef,
@@ -488,8 +519,10 @@ export function removeFlatNode(scene: FlatDesignScene, ref: FlatNodeRef): FlatDe
     return scene;
   }
 
-  return updateSceneShapes(scene, ref.layerIndex, (shapes) =>
-    removeShapeAtPath(shapes, normalizePath(ref.path)).shapes,
+  return updateSceneShapes(
+    scene,
+    ref.layerIndex,
+    (shapes) => removeShapeAtPath(shapes, normalizePath(ref.path)).shapes,
   );
 }
 
@@ -508,12 +541,11 @@ export function duplicateFlatNode(
     options.idSuffix === undefined
       ? cloneStructured(source)
       : remapShapeIds(cloneStructured(source), options.idSuffix);
-  const destination =
-    options.destination ?? {
-      layerIndex: ref.layerIndex,
-      parentPath: ref.path.slice(0, -1),
-      index: ref.path[ref.path.length - 1]! + 1,
-    };
+  const destination = options.destination ?? {
+    layerIndex: ref.layerIndex,
+    parentPath: ref.path.slice(0, -1),
+    index: ref.path[ref.path.length - 1]! + 1,
+  };
 
   return insertShapeAtPosition(scene, destination, duplicatedShape);
 }
@@ -532,8 +564,7 @@ export function moveFlatNode(
   const sourceParentPath = ref.path.slice(0, -1);
   const sourceIndex = ref.path[ref.path.length - 1]!;
   const sameCollection =
-    ref.layerIndex === destination.layerIndex &&
-    samePath(sourceParentPath, destination.parentPath);
+    ref.layerIndex === destination.layerIndex && samePath(sourceParentPath, destination.parentPath);
 
   const withoutSource = removeFlatNode(scene, ref);
   const adjustedDestination =
@@ -712,9 +743,15 @@ export function createEditableMotionFromPreset(
         repeatCount: normalizeRepeatCount(options.repeatCount) ?? "indefinite",
         keyframes: [
           { timeMs: 0, scale: options.from ?? 1 },
-          { timeMs: Math.round(Number.parseFloat(options.dur ?? "3.2") * 350), scale: options.to ?? 1.12 },
+          {
+            timeMs: Math.round(Number.parseFloat(options.dur ?? "3.2") * 350),
+            scale: options.to ?? 1.12,
+          },
           { timeMs: Math.round(Number.parseFloat(options.dur ?? "3.2") * 680), scale: 0.98 },
-          { timeMs: Math.round(Number.parseFloat(options.dur ?? "3.2") * 1_000), scale: options.from ?? 1 },
+          {
+            timeMs: Math.round(Number.parseFloat(options.dur ?? "3.2") * 1_000),
+            scale: options.from ?? 1,
+          },
         ],
       });
     case "sway":
@@ -724,7 +761,10 @@ export function createEditableMotionFromPreset(
         repeatCount: normalizeRepeatCount(options.repeatCount) ?? "indefinite",
         keyframes: [
           { timeMs: 0, rotate: -(options.angle ?? 5) },
-          { timeMs: Math.round(Number.parseFloat(options.dur ?? "5.8") * 500), rotate: options.angle ?? 5 },
+          {
+            timeMs: Math.round(Number.parseFloat(options.dur ?? "5.8") * 500),
+            rotate: options.angle ?? 5,
+          },
           {
             timeMs: Math.round(Number.parseFloat(options.dur ?? "5.8") * 1_000),
             rotate: -(options.angle ?? 5),
@@ -738,7 +778,10 @@ export function createEditableMotionFromPreset(
         repeatCount: normalizeRepeatCount(options.repeatCount) ?? "indefinite",
         keyframes: [
           { timeMs: 0, rotate: 0 },
-          { timeMs: Math.round(Number.parseFloat(options.dur ?? "18") * 1_000), rotate: options.angle ?? 360 },
+          {
+            timeMs: Math.round(Number.parseFloat(options.dur ?? "18") * 1_000),
+            rotate: options.angle ?? 360,
+          },
         ],
       });
     case "blink":
@@ -748,7 +791,10 @@ export function createEditableMotionFromPreset(
         repeatCount: normalizeRepeatCount(options.repeatCount) ?? "indefinite",
         keyframes: [
           { timeMs: 0, opacity: options.maxOpacity ?? 1 },
-          { timeMs: Math.round(Number.parseFloat(options.dur ?? "3.8") * 500), opacity: options.minOpacity ?? 0.72 },
+          {
+            timeMs: Math.round(Number.parseFloat(options.dur ?? "3.8") * 500),
+            opacity: options.minOpacity ?? 0.72,
+          },
           {
             timeMs: Math.round(Number.parseFloat(options.dur ?? "3.8") * 1_000),
             opacity: options.maxOpacity ?? 1,
@@ -760,10 +806,12 @@ export function createEditableMotionFromPreset(
 
 export function compileFlatMotion(motion: FlatMotionSpec): FlatAnimation[] {
   if (motion.kind === "preset") {
-    return createFlatFigureAnimations({
-      preset: motion.preset,
-      options: motion.options,
-    }) ?? [];
+    return (
+      createFlatFigureAnimations({
+        preset: motion.preset,
+        options: motion.options,
+      }) ?? []
+    );
   }
 
   const normalized = normalizeEditableMotion(motion);
@@ -800,5 +848,7 @@ export function clearFlatNodeMotion(scene: FlatDesignScene, ref: FlatNodeRef): F
 }
 
 function cloneStructured<T>(value: T): T {
-  return globalThis.structuredClone ? globalThis.structuredClone(value) : JSON.parse(JSON.stringify(value));
+  return globalThis.structuredClone
+    ? globalThis.structuredClone(value)
+    : JSON.parse(JSON.stringify(value));
 }

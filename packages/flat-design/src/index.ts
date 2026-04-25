@@ -7,6 +7,7 @@ export {
   duplicateFlatNode,
   findFlatNodeById,
   getFlatNode,
+  insertFlatNode,
   listFlatNodes,
   moveFlatNode,
   normalizeEditableMotion,
@@ -14,11 +15,20 @@ export {
   removeMotionKeyframe,
   setFlatNodeMotion,
   sortMotionKeyframes,
+  updateFlatSceneMetadata,
   updateFlatNode,
   updateMotionKeyframe,
   type DuplicateFlatNodeOptions,
   type FlatNodeInsertPosition,
+  type FlatSceneMetadataPatch,
 } from "./core";
+export {
+  FlatSceneEditor,
+  type FlatSceneEditorFigureDefinition,
+  type FlatSceneEditorFigureFactoryOptions,
+  type FlatSceneEditorProps,
+  type FlatSceneEditorSelection,
+} from "./editor";
 export {
   createBobbingAnimation,
   createDriftAnimation,
@@ -40,11 +50,7 @@ export {
   type FlatMotionTimelineEditorProps,
   type UseFlatSceneSelectionResult,
 } from "./react";
-export {
-  FlatScene,
-  type FlatSceneProps,
-  type FlatSceneShapeRenderContext,
-} from "./flat-scene";
+export { FlatScene, type FlatSceneProps, type FlatSceneShapeRenderContext } from "./flat-scene";
 export {
   createFlatBadgeFigure,
   createFlatCardFigure,
