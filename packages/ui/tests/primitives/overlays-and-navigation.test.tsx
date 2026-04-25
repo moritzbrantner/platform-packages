@@ -536,7 +536,7 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
 
     expect(container).toBeTruthy();
     vi.spyOn(container as HTMLElement, "getBoundingClientRect").mockReturnValue(
-      createRect({ left: 0, top: 0, width: 800, height: 80 }),
+      createRect({ left: 0, top: 0, width: 800, height: 220 }),
     );
     vi.spyOn(nav, "getBoundingClientRect").mockReturnValue(
       createRect({ left: 176, top: 0, width: 448, height: 80 }),
@@ -553,6 +553,7 @@ describe("@moritzbrantner/ui overlays-and-navigation", () => {
         .closest('[data-slot="platform-navbar-submenu"]') as HTMLElement | null;
 
       expect(submenu?.style.left).toBe("184px");
+      expect(submenu?.style.top).toBe("88px");
       expect(submenu?.style.width).toBe("432px");
     });
   });

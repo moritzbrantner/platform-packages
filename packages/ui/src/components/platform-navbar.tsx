@@ -288,9 +288,10 @@ export function PlatformNavbar({
         : anchorRect.left + anchorWidth / 2;
     const rawLeft = variant === "mobile" ? anchorRect.left + margin : triggerCenter - width / 2;
     const left = clamp(rawLeft, margin, viewportWidth - width - margin);
-    const belowTop = containerRect.bottom + gap;
+    const verticalAnchorRect = navRect;
+    const belowTop = verticalAnchorRect.bottom + gap;
     const availableBelow = viewportHeight - belowTop - margin;
-    const aboveBottom = containerRect.top - gap;
+    const aboveBottom = verticalAnchorRect.top - gap;
     const availableAbove = aboveBottom - margin;
     const measuredHeight = submenuRect?.height ?? 0;
     const preferredHeight = Math.max(measuredHeight, 160);
