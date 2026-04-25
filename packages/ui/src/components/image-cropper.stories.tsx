@@ -34,6 +34,8 @@ export const AvatarCrop: Story = {
   play: async ({ canvas }) => {
     await expect(canvas.getByRole("application", { name: "Crop image" })).toBeVisible();
     await expect(canvas.getByRole("slider", { name: "Crop zoom" })).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Zoom in" })).toBeVisible();
+    await expect(canvas.getByText("100% zoom")).toBeVisible();
   },
 };
 

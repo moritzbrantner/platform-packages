@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { RotateCcwIcon, ZoomInIcon } from "lucide-react";
+import { MinusIcon, PlusIcon, RotateCcwIcon, ZoomInIcon } from "lucide-react";
 
+import { Badge } from "./badge";
 import { cn } from "../lib/cn";
 import { Button } from "./button";
 import { Label } from "./label";
@@ -42,6 +43,7 @@ type ImageCropperProps = Omit<React.ComponentProps<"div">, "onChange"> & {
   shape?: ImageCropperShape;
   showControls?: boolean;
   showGrid?: boolean;
+  showStatus?: boolean;
   zoomStep?: number;
 };
 
@@ -74,11 +76,14 @@ function ImageCropper({
   shape = "rectangle",
   showControls = true,
   showGrid = true,
+  showStatus = true,
   zoomStep = 0.1,
   className,
   ...props
 }: ImageCropperProps) {
   const cropperId = React.useId();
+  const cropperHintId = React.useId();
+  const cropperStatusId = React.useId();
   const surfaceRef = React.useRef<HTMLDivElement>(null);
   const dragRef = React.useRef<{
     pointerId: number;
@@ -107,6 +112,11 @@ function ImageCropper({
       minZoom,
       viewportSize,
     ],
+  );
+  const cropArea = React.useMemo(
+    () =>
+      imageSize && viewportSize ? getImageCropArea(displayCrop, imageSize, viewportSize) : null,
+    [displayCrop, imageSize, viewportSize],
   );
   const fit = imageSize && viewportSize ? getImageCropperFit(imageSize, viewportSize) : null;
   const imageStyle: React.CSSProperties = fit
@@ -149,15 +159,12 @@ function ImageCropper({
   }, [updateViewportSize]);
 
   React.useEffect(() => {
-    if (!imageSize || !viewportSize) {
+    if (!cropArea) {
       return;
     }
 
-    onCropComplete?.(
-      getImageCropArea(displayCrop, imageSize, viewportSize),
-      displayCrop,
-    );
-  }, [displayCrop, imageSize, onCropComplete, viewportSize]);
+    onCropComplete?.(cropArea, displayCrop);
+  }, [cropArea, displayCrop, onCropComplete]);
 
   const commitCrop = (nextCrop: ImageCropperCrop) => {
     const safeCrop =
@@ -189,6 +196,7 @@ function ImageCropper({
       return;
     }
 
+    event.currentTarget.focus();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = {
       pointerId: event.pointerId,
@@ -214,9 +222,30 @@ function ImageCropper({
 
   const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
     if (dragRef.current?.pointerId === event.pointerId) {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
       dragRef.current = null;
     }
   };
+
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    if (
+      disabled ||
+      document.activeElement !== event.currentTarget ||
+      Math.abs(event.deltaY) < 1
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const step = zoomStep * (event.shiftKey ? 2 : 1);
+    setZoom(displayCrop.zoom + direction * step);
+  };
+
+  const zoomPercentage = Math.round(displayCrop.zoom * 100);
+  const cropSummary = cropArea ? `${cropArea.width} × ${cropArea.height}px` : "Loading crop";
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (disabled) {
@@ -261,6 +290,9 @@ function ImageCropper({
         data-slot="image-cropper-surface"
         aria-label="Crop image"
         aria-disabled={disabled ? true : undefined}
+        aria-describedby={
+          showStatus ? `${cropperStatusId} ${cropperHintId}` : cropperHintId
+        }
         role="application"
         tabIndex={disabled ? undefined : 0}
         className={cn(
@@ -276,6 +308,7 @@ function ImageCropper({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
+        onWheel={handleWheel}
       >
         <img
           data-slot="image-cropper-image"
@@ -302,35 +335,78 @@ function ImageCropper({
           )}
         />
       </div>
-      {showControls ? (
-        <div
-          data-slot="image-cropper-controls"
-          className="grid items-center gap-2 sm:grid-cols-[auto_minmax(10rem,1fr)_auto]"
-        >
-          <Label htmlFor={cropperId} className="text-muted-foreground">
-            <ZoomInIcon aria-hidden="true" className="size-4" />
-            Zoom
-          </Label>
-          <Slider
-            id={cropperId}
-            disabled={disabled}
-            min={minZoom}
-            max={maxZoom}
-            step={zoomStep}
-            thumbAriaLabel="Crop zoom"
-            value={[displayCrop.zoom]}
-            onValueChange={(value) => setZoom(value[0] ?? minZoom)}
-          />
-          <Button
-            aria-label="Reset crop"
-            disabled={disabled}
-            size="icon-sm"
-            type="button"
-            variant="outline"
-            onClick={() => commitCrop(DEFAULT_CROP)}
-          >
-            <RotateCcwIcon aria-hidden="true" />
-          </Button>
+      {showControls || showStatus ? (
+        <div className="grid gap-3 rounded-lg border border-border/70 bg-card/70 p-3">
+          {showControls ? (
+            <div
+              data-slot="image-cropper-controls"
+              className="grid items-center gap-2 sm:grid-cols-[auto_auto_minmax(10rem,1fr)_auto_auto]"
+            >
+              <Label htmlFor={cropperId} className="text-muted-foreground">
+                <ZoomInIcon aria-hidden="true" className="size-4" />
+                Zoom
+              </Label>
+              <Button
+                aria-label="Zoom out"
+                disabled={disabled}
+                size="icon-xs"
+                type="button"
+                variant="outline"
+                onClick={() => setZoom(displayCrop.zoom - zoomStep)}
+              >
+                <MinusIcon aria-hidden="true" />
+              </Button>
+              <Slider
+                id={cropperId}
+                disabled={disabled}
+                min={minZoom}
+                max={maxZoom}
+                step={zoomStep}
+                thumbAriaLabel="Crop zoom"
+                value={[displayCrop.zoom]}
+                onValueChange={(value) => setZoom(value[0] ?? minZoom)}
+              />
+              <Button
+                aria-label="Zoom in"
+                disabled={disabled}
+                size="icon-xs"
+                type="button"
+                variant="outline"
+                onClick={() => setZoom(displayCrop.zoom + zoomStep)}
+              >
+                <PlusIcon aria-hidden="true" />
+              </Button>
+              <Button
+                aria-label="Reset crop"
+                disabled={disabled}
+                size="icon-sm"
+                type="button"
+                variant="outline"
+                onClick={() => commitCrop(DEFAULT_CROP)}
+              >
+                <RotateCcwIcon aria-hidden="true" />
+              </Button>
+            </div>
+          ) : null}
+          {showStatus ? (
+            <div
+              id={cropperStatusId}
+              data-slot="image-cropper-status"
+              className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+            >
+              <Badge variant="secondary">{zoomPercentage}% zoom</Badge>
+              <Badge variant="outline">{cropSummary}</Badge>
+              <span id={cropperHintId}>
+                Drag to reframe. Use arrow keys to nudge, <kbd>+</kbd>/<kbd>-</kbd> to zoom, or
+                wheel while focused.
+              </span>
+            </div>
+          ) : (
+            <p id={cropperHintId} className="text-xs text-muted-foreground">
+              Drag to reframe. Use arrow keys to nudge, <kbd>+</kbd>/<kbd>-</kbd> to zoom, or
+              wheel while focused.
+            </p>
+          )}
         </div>
       ) : null}
     </div>

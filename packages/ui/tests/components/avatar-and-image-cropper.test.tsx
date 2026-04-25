@@ -108,13 +108,18 @@ describe("image cropper", () => {
     const cropSurface = screen.getByRole("application", { name: "Crop image" });
     expect(screen.getByAltText("Avatar source")).toBeTruthy();
     expect(screen.getByRole("slider", { name: "Crop zoom" })).toBeTruthy();
+    expect(screen.getByText("100% zoom")).toBeTruthy();
 
     fireEvent.keyDown(cropSurface, { key: "=" });
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
+    cropSurface.focus();
+    fireEvent.wheel(cropSurface, { deltaY: -10 });
 
     expect(onCropChange).toHaveBeenCalledWith({
       x: 0,
       y: 0,
       zoom: 1.1,
     } satisfies ImageCropperCrop);
+    expect(onCropChange).toHaveBeenCalledTimes(3);
   });
 });

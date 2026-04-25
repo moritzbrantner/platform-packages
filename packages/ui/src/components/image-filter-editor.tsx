@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { ImageIcon, RotateCcwIcon } from "lucide-react";
+import { CheckIcon, EyeIcon, ImageIcon, RotateCcwIcon, SparklesIcon } from "lucide-react";
 
+import { Badge } from "./badge";
 import { cn } from "../lib/cn";
 import { Button } from "./button";
 import { Label } from "./label";
@@ -23,13 +24,16 @@ type ImageFilterPreset = {
   value: ImageFilterValue;
 };
 
-type ImageFilterEditorProps = Omit<React.ComponentProps<"div">, "onChange"> & {
+type ImageFilterPreviewMode = "edited" | "split" | "original";
+
+type ImageFilterEditorProps = Omit<React.ComponentProps<"div">, "defaultValue" | "onChange" | "value"> & {
   alt?: string;
   defaultValue?: Partial<ImageFilterValue>;
   disabled?: boolean;
   emptyState?: React.ReactNode;
   onValueChange?: (value: ImageFilterValue) => void;
   presets?: ImageFilterPreset[];
+  showCompare?: boolean;
   showPresets?: boolean;
   showReset?: boolean;
   src?: string | null;
@@ -113,6 +117,7 @@ function ImageFilterEditor({
   emptyState,
   onValueChange,
   presets = imageFilterPresets,
+  showCompare = true,
   showPresets = true,
   showReset = true,
   src,
@@ -123,8 +128,19 @@ function ImageFilterEditor({
   const [internalValue, setInternalValue] = React.useState<ImageFilterValue>(() =>
     normalizeImageFilterValue(defaultValue),
   );
+  const [previewMode, setPreviewMode] = React.useState<ImageFilterPreviewMode>("edited");
   const currentValue = value ?? internalValue;
   const filter = getImageFilterStyle(currentValue);
+  const activePreset =
+    presets.find((preset) => areImageFilterValuesEqual(currentValue, preset.value)) ?? null;
+  const adjustmentCount = imageFilterControls.reduce((count, control) => {
+    return currentValue[control.key] === DEFAULT_IMAGE_FILTER_VALUE[control.key] ? count : count + 1;
+  }, 0);
+  const statusLabel = activePreset?.label ?? (adjustmentCount > 0 ? "Custom mix" : "Original");
+  const adjustmentLabel =
+    adjustmentCount === 0
+      ? "No active adjustments"
+      : `${adjustmentCount} adjustment${adjustmentCount === 1 ? "" : "s"}`;
 
   const commitValue = (nextValue: ImageFilterValue) => {
     const normalizedValue = normalizeImageFilterValue(nextValue);
@@ -133,24 +149,118 @@ function ImageFilterEditor({
     onValueChange?.(normalizedValue);
   };
 
+  const previewModeLabel =
+    previewMode === "edited" ? "Edited" : previewMode === "split" ? "Compare" : "Original";
+
   return (
     <div
       data-slot="image-filter-editor"
       className={cn("grid gap-4 rounded-lg border border-border/70 bg-card p-4", className)}
       {...props}
     >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">{statusLabel}</Badge>
+          <Badge variant="outline">{adjustmentLabel}</Badge>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {showCompare && src ? (
+            <>
+              <Button
+                type="button"
+                size="xs"
+                variant={previewMode === "edited" ? "secondary" : "outline"}
+                aria-pressed={previewMode === "edited"}
+                aria-label="Show edited preview"
+                disabled={disabled}
+                onClick={() => setPreviewMode("edited")}
+              >
+                <SparklesIcon />
+                Edited
+              </Button>
+              <Button
+                type="button"
+                size="xs"
+                variant={previewMode === "split" ? "secondary" : "outline"}
+                aria-pressed={previewMode === "split"}
+                aria-label="Show compare preview"
+                disabled={disabled}
+                onClick={() => setPreviewMode("split")}
+              >
+                <EyeIcon />
+                Compare
+              </Button>
+              <Button
+                type="button"
+                size="xs"
+                variant={previewMode === "original" ? "secondary" : "outline"}
+                aria-pressed={previewMode === "original"}
+                aria-label="Show original preview"
+                disabled={disabled}
+                onClick={() => setPreviewMode("original")}
+              >
+                <ImageIcon />
+                Original
+              </Button>
+            </>
+          ) : null}
+          {showReset ? (
+            <Button
+              data-slot="image-filter-reset"
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={disabled}
+              onClick={() => commitValue(DEFAULT_IMAGE_FILTER_VALUE)}
+            >
+              <RotateCcwIcon />
+              Reset
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
       <div
         data-slot="image-filter-preview"
-        className="grid aspect-video min-h-48 place-items-center overflow-hidden rounded-md border border-border/60 bg-muted/35"
+        className="relative grid aspect-video min-h-48 place-items-center overflow-hidden rounded-md border border-border/60 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.2),_transparent_58%),linear-gradient(135deg,rgba(15,23,42,0.06),rgba(15,23,42,0.16))]"
       >
         {src ? (
-          <img
-            data-slot="image-filter-image"
-            src={src}
-            alt={alt}
-            className="size-full object-contain"
-            style={{ filter }}
-          />
+          <>
+            <img
+              data-slot="image-filter-image-base"
+              src={src}
+              alt={alt}
+              className="absolute inset-0 size-full object-contain p-2"
+            />
+            {previewMode !== "original" ? (
+              <img
+                data-slot="image-filter-image"
+                src={src}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 size-full object-contain p-2"
+                style={{
+                  clipPath: previewMode === "split" ? "inset(0 0 0 50%)" : undefined,
+                  filter,
+                }}
+              />
+            ) : null}
+            <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-3">
+              <Badge variant="outline">{previewModeLabel}</Badge>
+              {previewMode === "split" ? (
+                <Badge variant="secondary">Before / After</Badge>
+              ) : null}
+            </div>
+            {previewMode === "split" ? (
+              <>
+                <div className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white/85 shadow-[0_0_0_1px_rgba(15,23,42,0.18)]" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between p-3 text-xs font-medium text-white">
+                  <span className="rounded-full bg-black/55 px-2 py-1">Original</span>
+                  <span className="rounded-full bg-black/55 px-2 py-1">Edited</span>
+                </div>
+              </>
+            ) : null}
+          </>
         ) : (
           (emptyState ?? (
             <div className="grid place-items-center gap-2 px-4 text-center text-sm text-muted-foreground">
@@ -176,6 +286,7 @@ function ImageFilterEditor({
                 disabled={disabled}
                 onClick={() => commitValue(preset.value)}
               >
+                {selected ? <CheckIcon /> : null}
                 {preset.label}
               </Button>
             );
@@ -183,7 +294,7 @@ function ImageFilterEditor({
         </div>
       ) : null}
 
-      <div data-slot="image-filter-controls" className="grid gap-3">
+      <div data-slot="image-filter-controls" className="grid gap-3 md:grid-cols-2">
         {imageFilterControls.map((control) => {
           const controlId = `${controlIdPrefix}-${control.key}`;
           const displayValue = `${currentValue[control.key]}${control.suffix}`;
@@ -213,22 +324,6 @@ function ImageFilterEditor({
           );
         })}
       </div>
-
-      {showReset ? (
-        <div className="flex justify-end">
-          <Button
-            data-slot="image-filter-reset"
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={disabled}
-            onClick={() => commitValue(DEFAULT_IMAGE_FILTER_VALUE)}
-          >
-            <RotateCcwIcon />
-            Reset
-          </Button>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -125,8 +125,7 @@ describe("social components", () => {
         unobserve() {}
       },
     );
-
-    render(
+    const { container } = render(
       <ImageFilterEditor
         src="profile.png"
         alt="Profile upload"
@@ -135,14 +134,20 @@ describe("social components", () => {
       />,
     );
 
-    expect(screen.getByAltText("Profile upload").getAttribute("style")).toContain(
+    expect(screen.getByAltText("Profile upload")).toBeTruthy();
+    expect(container.querySelector("[data-slot='image-filter-image']")?.getAttribute("style")).toContain(
       "brightness(120%)",
     );
     expect(getImageFilterStyle({ brightness: 250, hueRotate: -220 })).toContain("brightness(200%)");
     expect(normalizeImageFilterValue({ grayscale: 250 }).grayscale).toBe(100);
+    expect(screen.getByText("Custom mix")).toBeTruthy();
+    expect(screen.getByText("6 adjustments")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Mono" }));
     expect(onValueChange).toHaveBeenCalledWith(imageFilterPresets[2].value);
+
+    fireEvent.click(screen.getByRole("button", { name: "Show compare preview" }));
+    expect(screen.getByText("Before / After")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(onValueChange).toHaveBeenCalledWith(imageFilterPresets[0].value);
