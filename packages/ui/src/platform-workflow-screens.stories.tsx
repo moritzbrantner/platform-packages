@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "storybook/test";
+import { expect, screen } from "storybook/test";
 
 import {
   PlatformWorkflowDemo,
@@ -31,6 +31,9 @@ const meta = {
       control: "select",
       options: workflowProfileIdOptions,
     },
+    visitorNavigationLabel: {
+      control: "text",
+    },
   },
 } satisfies Meta<typeof PlatformWorkflowDemo>;
 
@@ -44,11 +47,23 @@ export const PublicMain: Story = {
     initialSession: "visitor",
     initialProfileId: "mira",
   },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, userEvent }) => {
     await expect(canvas.getByRole("heading", { name: "Main page" })).toBeVisible();
     await expect(canvas.getByRole("button", { name: "About" })).toBeVisible();
-    await expect(canvas.getAllByRole("button", { name: "Login" })[0]).toBeVisible();
-    await expect(canvas.getAllByRole("button", { name: "Create account" })[0]).toBeVisible();
+    await expect(canvas.getAllByRole("button", { name: "Login" }).at(-1)!).toBeVisible();
+    await expect(canvas.getAllByRole("button", { name: "Create account" }).at(-1)!).toBeVisible();
+    await expect(screen.getByRole("link", { name: /About/ })).toHaveAttribute("href", "/en/about");
+
+    const themeSwitch = canvas.getByRole("switch", { name: "Color mode" });
+    await expect(themeSwitch).toHaveAttribute("aria-checked", "false");
+    await userEvent.click(themeSwitch);
+    await expect(themeSwitch).toHaveAttribute("aria-checked", "true");
+    await expect(canvas.getByText("dark mode")).toBeVisible();
+
+    await userEvent.click(canvas.getByRole("button", { name: "Language: English" }));
+    await userEvent.click(await screen.findByRole("menuitemradio", { name: "Deutsch" }));
+
+    await expect(canvas.getByText("/de/")).toBeVisible();
   },
 };
 

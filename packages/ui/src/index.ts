@@ -92,5 +92,6 @@ export * from "./components/toolbar";
 export * from "./components/tooltip";
 export * from "./components/typography";
 export * from "./components/workflow-builder";
+export * from "./components/workflow-node";
 export * from "./lib/cn";
 export * from "./themes";

@@ -109,6 +109,7 @@ export type PlatformWorkflowDemoProps = {
   initialRoute?: WorkflowRoute;
   initialSession?: WorkflowSessionState;
   initialProfileId?: string;
+  visitorNavigationLabel?: React.ReactNode;
 };
 
 const people: Person[] = [
@@ -216,6 +217,30 @@ export const workflowScenarios = {
   },
 } satisfies Record<string, WorkflowScenario>;
 
+const workflowRouteSlugs = {
+  main: "",
+  about: "about",
+  login: "login",
+  register: "register",
+  password: "password",
+  home: "home",
+  social: "social",
+  people: "people",
+  profile: "profile",
+  followers: "followers",
+  chats: "chats",
+  chat: "chat",
+  notifications: "notifications",
+  settings: "settings",
+} satisfies Record<WorkflowRoute, string>;
+
+function buildWorkflowHref(languageCode: string, route: WorkflowRoute) {
+  const normalizedLanguageCode = languageCode.trim().toLowerCase() || "en";
+  const slug = workflowRouteSlugs[route];
+
+  return slug ? `/${normalizedLanguageCode}/${slug}` : `/${normalizedLanguageCode}/`;
+}
+
 function isPublicRoute(route: WorkflowRoute) {
   return publicRoutes.has(route);
 }
@@ -231,11 +256,16 @@ function normalizeRouteForSession(
   return isPublicRoute(route) ? "home" : route;
 }
 
-function createVisitorNavigationGroups(activeRoute: WorkflowRoute): PlatformNavbarGroup[] {
+function createVisitorNavigationGroups(
+  activeRoute: WorkflowRoute,
+  languageCode: string,
+  visitorNavigationLabel: React.ReactNode,
+): PlatformNavbarGroup[] {
   return [
     {
       id: "discover",
-      label: "Discover",
+      // Placeholder copy so consuming apps can swap this label for their own information architecture.
+      label: visitorNavigationLabel,
       eyebrow: "Public",
       description: "Shared entry points for visitors.",
       icon: <HomeIcon className="size-4" />,
@@ -243,7 +273,7 @@ function createVisitorNavigationGroups(activeRoute: WorkflowRoute): PlatformNavb
         {
           id: "main",
           label: "Main",
-          href: "#main",
+          href: buildWorkflowHref(languageCode, "main"),
           description: "Start from the shared landing page.",
           icon: <HomeIcon className="size-4" />,
           active: activeRoute === "main",
@@ -251,42 +281,20 @@ function createVisitorNavigationGroups(activeRoute: WorkflowRoute): PlatformNavb
         {
           id: "about",
           label: "About",
-          href: "#about",
+          href: buildWorkflowHref(languageCode, "about"),
           description: "Review what the platform workflow demo covers.",
           icon: <BookOpenIcon className="size-4" />,
           active: activeRoute === "about",
         },
       ],
     },
-    {
-      id: "account",
-      label: "Account",
-      eyebrow: "Access",
-      description: "Login, registration, and recovery states.",
-      icon: <LogInIcon className="size-4" />,
-      items: [
-        {
-          id: "login",
-          label: "Login",
-          href: "#login",
-          description: "Sign in with an existing workspace account.",
-          icon: <LogInIcon className="size-4" />,
-          active: activeRoute === "login",
-        },
-        {
-          id: "register",
-          label: "Register",
-          href: "#register",
-          description: "Create a new collaboration account.",
-          icon: <UserPlusIcon className="size-4" />,
-          active: activeRoute === "register",
-        },
-      ],
-    },
   ];
 }
 
-function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): PlatformNavbarGroup[] {
+function createAuthenticatedNavigationGroups(
+  activeRoute: WorkflowRoute,
+  languageCode: string,
+): PlatformNavbarGroup[] {
   return [
     {
       id: "workspace",
@@ -298,7 +306,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "home",
           label: "Home",
-          href: "#home",
+          href: buildWorkflowHref(languageCode, "home"),
           description: "Review activity, social updates, and next actions.",
           icon: <HomeIcon className="size-4" />,
           active: activeRoute === "home",
@@ -306,7 +314,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "settings",
           label: "Settings",
-          href: "#settings",
+          href: buildWorkflowHref(languageCode, "settings"),
           description: "Adjust workspace notifications and profile defaults.",
           icon: <SettingsIcon className="size-4" />,
           active: activeRoute === "settings",
@@ -323,7 +331,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "social",
           label: "Overview",
-          href: "#social",
+          href: buildWorkflowHref(languageCode, "social"),
           description: "Open the combined social activity hub.",
           icon: <UsersIcon className="size-4" />,
           active: activeRoute === "social",
@@ -331,7 +339,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "people",
           label: "People",
-          href: "#people",
+          href: buildWorkflowHref(languageCode, "people"),
           description: "Find and follow platform users.",
           icon: <SearchIcon className="size-4" />,
           active: activeRoute === "people",
@@ -339,7 +347,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "followers",
           label: "Followers",
-          href: "#followers",
+          href: buildWorkflowHref(languageCode, "followers"),
           description: "Review the profiles you currently follow.",
           icon: <UserPlusIcon className="size-4" />,
           active: activeRoute === "followers",
@@ -347,7 +355,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "profile",
           label: "Profile",
-          href: "#profile",
+          href: buildWorkflowHref(languageCode, "profile"),
           description: "Review a public profile.",
           icon: <UserCircleIcon className="size-4" />,
           active: activeRoute === "profile",
@@ -364,7 +372,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "chats",
           label: "Chat overview",
-          href: "#chats",
+          href: buildWorkflowHref(languageCode, "chats"),
           description: "Review recent conversations and unread replies.",
           icon: <MessageCircleIcon className="size-4" />,
           active: activeRoute === "chats",
@@ -372,7 +380,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "chat",
           label: "Thread",
-          href: "#chat",
+          href: buildWorkflowHref(languageCode, "chat"),
           description: "Open a direct message thread.",
           icon: <MessageCircleIcon className="size-4" />,
           badge: "Live",
@@ -381,7 +389,7 @@ function createAuthenticatedNavigationGroups(activeRoute: WorkflowRoute): Platfo
         {
           id: "notifications",
           label: "Notifications",
-          href: "#notifications",
+          href: buildWorkflowHref(languageCode, "notifications"),
           description: "Check social updates and account events.",
           icon: <BellIcon className="size-4" />,
           active: activeRoute === "notifications",
@@ -396,7 +404,7 @@ function getDefaultOpenGroupId(
   activeRoute: WorkflowRoute,
 ): string | null {
   if (session === "visitor") {
-    return activeRoute === "main" || activeRoute === "about" ? "discover" : "account";
+    return "discover";
   }
 
   if (activeRoute === "home" || activeRoute === "settings") {
@@ -419,7 +427,10 @@ export function PlatformWorkflowDemo({
   initialRoute = "main",
   initialSession = "visitor",
   initialProfileId = "mira",
+  visitorNavigationLabel = "Discover",
 }: PlatformWorkflowDemoProps) {
+  const [languageCode, setLanguageCode] = React.useState("en");
+  const [themeMode, setThemeMode] = React.useState<"light" | "dark">("light");
   const [session, setSession] = React.useState<WorkflowSessionState>(initialSession);
   const [activeRoute, setActiveRoute] = React.useState<WorkflowRoute>(() =>
     normalizeRouteForSession(initialRoute, initialSession),
@@ -433,12 +444,15 @@ export function PlatformWorkflowDemo({
     setActiveRoute(normalizeRouteForSession(initialRoute, initialSession));
     setFollowingIds(defaultFollowingIds);
     setNotice(null);
+    setLanguageCode("en");
+    setThemeMode("light");
   }, [initialRoute, initialSession]);
 
   React.useEffect(() => {
     setSelectedProfileId(initialProfileId);
   }, [initialProfileId]);
 
+  const currentHref = buildWorkflowHref(languageCode, activeRoute);
   const selectedProfile =
     people.find((person) => person.id === selectedProfileId) ?? people[0] ?? null;
   const followingCount = followingIds.length;
@@ -506,12 +520,18 @@ export function PlatformWorkflowDemo({
   };
 
   const groups = isVisitor
-    ? createVisitorNavigationGroups(activeRoute)
-    : createAuthenticatedNavigationGroups(activeRoute);
+    ? createVisitorNavigationGroups(activeRoute, languageCode, visitorNavigationLabel)
+    : createAuthenticatedNavigationGroups(activeRoute, languageCode);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-5 sm:px-6 lg:px-8">
+    <div
+      lang={languageCode}
+      data-language-code={languageCode}
+      data-theme={themeMode}
+      className={themeMode === "dark" ? "dark" : undefined}
+    >
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-5 sm:px-6 lg:px-8">
         <PlatformNavbar
           brand={
             <span className="inline-flex items-center gap-2">
@@ -524,6 +544,16 @@ export function PlatformWorkflowDemo({
           groups={groups}
           activeItemId={activeRoute}
           defaultOpenGroupId={getDefaultOpenGroupId(session, activeRoute)}
+          languageSwitcher={{
+            value: languageCode,
+            onValueChange: (nextLanguageCode) => {
+              setLanguageCode(nextLanguageCode);
+            },
+          }}
+          themeModeSwitch={{
+            mode: themeMode,
+            onModeChange: setThemeMode,
+          }}
           actions={
             isVisitor ? (
               <div className="flex flex-wrap gap-2">
@@ -571,6 +601,11 @@ export function PlatformWorkflowDemo({
         />
 
         <main className="grid gap-6">
+          <WorkflowEnvironmentSummary
+            currentHref={currentHref}
+            languageCode={languageCode}
+            themeMode={themeMode}
+          />
           {isVisitor ? (
             <VisitorSummary />
           ) : (
@@ -588,8 +623,36 @@ export function PlatformWorkflowDemo({
             onNotice={setNotice}
           />
         </main>
+        </div>
       </div>
     </div>
+  );
+}
+
+function WorkflowEnvironmentSummary({
+  currentHref,
+  languageCode,
+  themeMode,
+}: {
+  currentHref: string;
+  languageCode: string;
+  themeMode: "light" | "dark";
+}) {
+  return (
+    <section className="grid gap-3 sm:grid-cols-3">
+      <div className="rounded-lg border bg-card p-4 text-card-foreground">
+        <p className="text-sm text-muted-foreground">Current URL</p>
+        <p className="mt-1 break-all font-mono text-sm font-semibold">{currentHref}</p>
+      </div>
+      <div className="rounded-lg border bg-card p-4 text-card-foreground">
+        <p className="text-sm text-muted-foreground">Language</p>
+        <p className="mt-1 text-2xl font-semibold uppercase">{languageCode}</p>
+      </div>
+      <div className="rounded-lg border bg-card p-4 text-card-foreground">
+        <p className="text-sm text-muted-foreground">Appearance</p>
+        <p className="mt-1 text-2xl font-semibold capitalize">{themeMode} mode</p>
+      </div>
+    </section>
   );
 }
 
@@ -740,7 +803,7 @@ function MainScreen({ onNavigate }: { onNavigate: (route: WorkflowRoute) => void
         <div className="grid content-start gap-3 rounded-lg border bg-muted/35 p-4">
           <h2 className="text-base font-medium">Story coverage</h2>
           <div className="grid gap-2 text-sm text-muted-foreground">
-            <p>Shared public entry points for about and account access.</p>
+            <p>Shared public entry points plus separate account actions in the navbar.</p>
             <p>Authenticated routes for home, social, messages, notifications, and settings.</p>
             <p>Persistent in-memory state for follows, selected profiles, and notices.</p>
           </div>

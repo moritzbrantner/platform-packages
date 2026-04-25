@@ -12,7 +12,9 @@ import {
   DocumentViewer,
   type TimelineEditorTrack,
   WorkflowBuilder,
+  WorkflowNode,
   getWorkflowBuilderConnectionValidity,
+  getWorkflowNodeSize,
   moveTimelineEditorClip,
   resizeTimelineEditorClip,
 } from "../../src";
@@ -207,10 +209,64 @@ describe("@moritzbrantner/ui component edge cases", () => {
       clientX: 20,
       clientY: 20,
     });
-    fireEvent.keyDown(container.querySelector("[data-slot='workflow-builder']")!, { key: "Delete" });
+    fireEvent.keyDown(container.querySelector("[data-slot='workflow-builder']")!, {
+      key: "Delete",
+    });
 
     expect(onAnnotationsChange).not.toHaveBeenCalled();
     expect(onNodesChange).not.toHaveBeenCalled();
     expect(container.querySelector("[data-slot='workflow-builder-surface']")).toBeTruthy();
+  });
+
+  test("workflow node supports compact summaries and expanded port metadata", () => {
+    render(
+      <>
+        <WorkflowNode
+          node={{
+            id: "expanded",
+            label: "Classify",
+            category: "AI",
+            packageLabel: "@platform/classification",
+            description: "Assign taxonomy labels from normalized text.",
+            tags: ["routing", "review"],
+            inputs: [
+              {
+                id: "text",
+                label: "Text",
+                kind: "text",
+                required: true,
+                description: "Normalized OCR output.",
+              },
+            ],
+            outputs: [
+              {
+                id: "labels",
+                label: "Labels",
+                kind: "labels",
+                description: "Predicted taxonomy labels.",
+              },
+            ],
+          }}
+        />
+        <WorkflowNode
+          node={{
+            id: "compact",
+            label: "Publish",
+            variant: "compact",
+            description: "Forward workflow state to delivery channels.",
+            inputs: [{ id: "labels", label: "Labels", kind: "labels" }],
+            outputs: [{ id: "event", label: "Webhook", kind: "event" }],
+          }}
+        />
+      </>,
+    );
+
+    expect(screen.getByText("Assign taxonomy labels from normalized text.")).toBeTruthy();
+    expect(screen.getByText("required")).toBeTruthy();
+    expect(screen.getByText("labels to event")).toBeTruthy();
+    expect(getWorkflowNodeSize({ id: "compact", label: "Publish", variant: "compact" })).toEqual({
+      width: 224,
+      height: 84,
+    });
   });
 });

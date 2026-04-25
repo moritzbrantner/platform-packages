@@ -22,6 +22,7 @@ const meta = {
     initialRoute: "main",
     initialSession: "visitor",
     initialProfileId: "mira",
+    visitorNavigationLabel: "Discover",
   },
   argTypes: {
     initialRoute: {
@@ -35,6 +36,9 @@ const meta = {
     initialProfileId: {
       control: "select",
       options: workflowProfileIdOptions,
+    },
+    visitorNavigationLabel: {
+      control: "text",
     },
   },
 } satisfies Meta<typeof PlatformWorkflowDemo>;

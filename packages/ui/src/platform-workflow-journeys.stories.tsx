@@ -17,6 +17,14 @@ const meta = {
       test: "todo",
     },
   },
+  args: {
+    visitorNavigationLabel: "Discover",
+  },
+  argTypes: {
+    visitorNavigationLabel: {
+      control: "text",
+    },
+  },
 } satisfies Meta<typeof PlatformWorkflowDemo>;
 
 export default meta;

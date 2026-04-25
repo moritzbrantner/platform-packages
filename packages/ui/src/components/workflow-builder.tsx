@@ -1,38 +1,24 @@
 "use client";
 
 import * as React from "react";
-import {
-  Maximize2Icon,
-  MinusIcon,
-  PlusIcon,
-  Trash2Icon,
-  WorkflowIcon,
-} from "lucide-react";
+import { Maximize2Icon, MinusIcon, PlusIcon, Trash2Icon, WorkflowIcon } from "lucide-react";
 
 import { cn } from "../lib/cn";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { Separator } from "./separator";
+import {
+  WorkflowNode,
+  getWorkflowNodeSize,
+  type WorkflowNodeData as WorkflowCanvasNodeData,
+  type WorkflowNodePort as WorkflowCanvasNodePort,
+} from "./workflow-node";
 
-type WorkflowBuilderPort = {
-  id: string;
-  label: string;
-  kind?: string;
-  required?: boolean;
-  metadata?: Record<string, unknown>;
-};
+type WorkflowBuilderPort = WorkflowCanvasNodePort;
 
-type WorkflowBuilderNodeData = {
-  id: string;
-  label: string;
-  description?: string;
-  kind?: string;
-  status?: "idle" | "running" | "success" | "error" | "warning" | string;
+type WorkflowBuilderNodeData = WorkflowCanvasNodeData & {
   x: number;
   y: number;
-  inputs?: WorkflowBuilderPort[];
-  outputs?: WorkflowBuilderPort[];
-  metadata?: Record<string, unknown>;
 };
 
 type WorkflowBuilderEdge = {
@@ -123,9 +109,6 @@ type DragState = {
   originalX: number;
   originalY: number;
 } | null;
-
-const workflowNodeWidth = 180;
-const workflowNodeHeight = 104;
 
 function WorkflowBuilder({
   nodes,
@@ -394,81 +377,32 @@ function WorkflowBuilderNode({
   className,
   ...props
 }: WorkflowBuilderNodeProps) {
+  const nodeSize = getWorkflowNodeSize(node);
+
   return (
     <div
       data-slot="workflow-builder-node"
       data-node-id={node.id}
       data-selected={selected ? "true" : undefined}
       data-status={node.status}
-      className={cn(
-        "absolute w-[180px] rounded-md border bg-card p-3 text-left text-card-foreground shadow-sm transition-colors hover:bg-muted/30 data-[selected=true]:border-primary data-[selected=true]:bg-primary/10",
-        className,
-      )}
-      style={{ left: node.x, top: node.y }}
+      className={cn("absolute", className)}
+      style={{ left: node.x, top: node.y, width: nodeSize.width }}
       onPointerDown={(event) => onNodePointerDown?.(event, node)}
       onMouseDown={(event) => onNodePointerDown?.(event, node)}
       {...props}
     >
-      <button
-        type="button"
-        data-slot="workflow-builder-node-select"
-        aria-label={node.label}
-        className="flex w-full items-start justify-between gap-2 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        onClick={(event) => {
-          event.stopPropagation();
-          onNodeSelect?.(node);
-        }}
-      >
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold">{node.label}</div>
-          {node.description ? (
-            <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">{node.description}</div>
-          ) : null}
-        </div>
-        {node.status ? <Badge variant={getWorkflowStatusVariant(node.status)}>{node.status}</Badge> : null}
-      </button>
-      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-        <div className="space-y-1">
-          {(node.inputs ?? []).map((port) => (
-            <button
-              key={port.id}
-              type="button"
-              data-slot="workflow-builder-port"
-              data-port-direction="input"
-              disabled={readOnly || !pendingConnection}
-              aria-label={`Connect to ${node.label} ${port.label}`}
-              className="block max-w-full rounded-md px-1.5 py-0.5 text-left text-muted-foreground outline-none hover:bg-muted focus-visible:ring-[2px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60"
-              onClick={(event) => {
-                event.stopPropagation();
-                onCompleteConnection?.(node.id, port.id);
-              }}
-            >
-              <span className="mr-1 text-primary">in</span>
-              {port.label}
-            </button>
-          ))}
-        </div>
-        <div className="space-y-1 text-right">
-          {(node.outputs ?? []).map((port) => (
-            <button
-              key={port.id}
-              type="button"
-              data-slot="workflow-builder-port"
-              data-port-direction="output"
-              disabled={readOnly}
-              aria-label={`Start ${node.label} ${port.label}`}
-              className="ml-auto block max-w-full rounded-md px-1.5 py-0.5 text-right text-muted-foreground outline-none hover:bg-muted focus-visible:ring-[2px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60"
-              onClick={(event) => {
-                event.stopPropagation();
-                onStartConnection?.(node.id, port.id);
-              }}
-            >
-              {port.label}
-              <span className="ml-1 text-primary">out</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <WorkflowNode
+        node={node}
+        selected={selected}
+        readOnly={readOnly}
+        inputDisabled={readOnly || !pendingConnection}
+        outputDisabled={readOnly}
+        onNodeSelect={() => onNodeSelect?.(node)}
+        onInputClick={(port) => onCompleteConnection?.(node.id, port.id)}
+        onOutputClick={(port) => onStartConnection?.(node.id, port.id)}
+        getInputAriaLabel={(port) => `Connect to ${node.label} ${port.label}`}
+        getOutputAriaLabel={(port) => `Start ${node.label} ${port.label}`}
+      />
     </div>
   );
 }
@@ -522,7 +456,13 @@ function WorkflowBuilderToolbar({
         >
           <PlusIcon />
         </Button>
-        <Button type="button" variant="outline" size="icon-sm" aria-label="Fit view" onClick={onFitView}>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          aria-label="Fit view"
+          onClick={onFitView}
+        >
           <Maximize2Icon />
         </Button>
         <Separator orientation="vertical" className="h-6" />
@@ -621,11 +561,16 @@ function getWorkflowBuilderConnectionValidity({
 function getWorkflowEdgeLine(nodes: WorkflowBuilderNodeData[], edge: WorkflowBuilderEdge) {
   const sourceNode = nodes.find((node) => node.id === edge.sourceNodeId);
   const targetNode = nodes.find((node) => node.id === edge.targetNodeId);
+  const sourceSize = sourceNode ? getWorkflowNodeSize(sourceNode) : null;
+  const targetSize = targetNode ? getWorkflowNodeSize(targetNode) : null;
   const source = sourceNode
-    ? { x: sourceNode.x + workflowNodeWidth, y: sourceNode.y + workflowNodeHeight / 2 }
+    ? {
+        x: sourceNode.x + (sourceSize?.width ?? 0),
+        y: sourceNode.y + (sourceSize?.height ?? 0) / 2,
+      }
     : { x: 0, y: 0 };
   const target = targetNode
-    ? { x: targetNode.x, y: targetNode.y + workflowNodeHeight / 2 }
+    ? { x: targetNode.x, y: targetNode.y + (targetSize?.height ?? 0) / 2 }
     : { x: 0, y: 0 };
   const handle = Math.max(48, Math.abs(target.x - source.x) / 2);
 
@@ -639,8 +584,15 @@ function getWorkflowBounds(nodes: WorkflowBuilderNodeData[]) {
   const ys = nodes.map((node) => node.y);
   const minX = Math.min(...xs, 0);
   const minY = Math.min(...ys, 0);
-  const maxX = Math.max(...xs.map((x) => x + workflowNodeWidth), workflowNodeWidth);
-  const maxY = Math.max(...ys.map((y) => y + workflowNodeHeight), workflowNodeHeight);
+  const sizes = nodes.map((node) => getWorkflowNodeSize(node));
+  const maxX = Math.max(
+    ...xs.map((x, index) => x + sizes[index]!.width),
+    workflowNodeSizeFallback().width,
+  );
+  const maxY = Math.max(
+    ...ys.map((y, index) => y + sizes[index]!.height),
+    workflowNodeSizeFallback().height,
+  );
 
   return {
     x: minX,
@@ -650,21 +602,16 @@ function getWorkflowBounds(nodes: WorkflowBuilderNodeData[]) {
   };
 }
 
-function getWorkflowStatusVariant(status: string): React.ComponentProps<typeof Badge>["variant"] {
-  if (status === "error") {
-    return "destructive";
-  }
-  if (status === "success" || status === "running") {
-    return "secondary";
-  }
-  return "outline";
-}
-
 function isWorkflowPortEvent(target: EventTarget) {
-  return target instanceof HTMLElement && Boolean(target.closest("[data-slot='workflow-builder-port']"));
+  return (
+    target instanceof HTMLElement &&
+    Boolean(target.closest("[data-slot='workflow-builder-port'], [data-slot='workflow-node-port']"))
+  );
 }
 
-function getWorkflowPointer(event: React.PointerEvent<HTMLElement> | React.MouseEvent<HTMLElement>) {
+function getWorkflowPointer(
+  event: React.PointerEvent<HTMLElement> | React.MouseEvent<HTMLElement>,
+) {
   const nativeEvent = event.nativeEvent as (PointerEvent | MouseEvent) & {
     pageX?: number;
     pageY?: number;
@@ -686,6 +633,13 @@ function getWorkflowPointer(event: React.PointerEvent<HTMLElement> | React.Mouse
 
 function clampWorkflowValue(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function workflowNodeSizeFallback() {
+  return {
+    width: 248,
+    height: 124,
+  };
 }
 
 export {
