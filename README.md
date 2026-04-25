@@ -186,6 +186,16 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - GitHub Packages publishing is configured through Changesets.
 - Includes a local playground app for manually testing package behavior.
 
+## Engineering standards
+
+- Repository code must follow Clean Code rules.
+- Use clear names, small focused modules, explicit boundaries, low duplication, and tests or docs where behavior is not obvious.
+- See [docs/engineering.md](./docs/engineering.md) for the working standard used across packages.
+
+## Package plans
+
+- See [docs/speed-reading-plan.md](./docs/speed-reading-plan.md) for the current improvement plan for `@moritzbrantner/speed-reading`.
+
 ## Styling rule
 
 - Package-authored styling must use Tailwind CSS.
