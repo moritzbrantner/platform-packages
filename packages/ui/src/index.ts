@@ -4,6 +4,7 @@ export * from "./components/accordion";
 export * from "./components/account-menu";
 export * from "./components/alert";
 export * from "./components/alert-dialog";
+export * from "./components/angle-input";
 export * from "./components/annotation-canvas";
 export * from "./components/app-layout";
 export * from "./components/aspect-ratio";
