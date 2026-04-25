@@ -1299,7 +1299,7 @@ function CatalogPreview({ designSystem = defaultUiThemeName }: CatalogPreviewPro
 }
 
 const meta = {
-  title: "Components/Shadcn catalog",
+  title: "Reference/Shadcn catalog",
   component: CatalogPreview,
   tags: ["autodocs", "test"],
   args: {

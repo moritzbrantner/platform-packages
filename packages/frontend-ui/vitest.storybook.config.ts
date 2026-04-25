@@ -16,7 +16,7 @@ export default defineConfig({
         plugins: [
           storybookTest({
             configDir: path.join(packageRoot, ".storybook"),
-            storybookScript: `${storybookBin} dev -p 6006 --no-open`,
+            storybookScript: `${storybookBin} dev -p 6007 --no-open`,
             tags: {
               include: ["test"],
             },

@@ -149,22 +149,22 @@ import {
   uiThemeLabels,
   uiThemeNames,
   type UiThemeName,
-} from "../../src";
-import { AtlasTheme, atlasTheme, uiTheme as atlasUiTheme } from "../../src/atlas";
+} from "@moritzbrantner/ui";
+import { AtlasTheme, atlasTheme, uiTheme as atlasUiTheme } from "@moritzbrantner/ui/atlas";
 import {
   BobbaTheme,
   Button as BobbaButton,
   bobbaTheme,
   uiTheme as bobbaUiTheme,
-} from "../../src/bobba";
-import { PaperTheme, paperTheme, uiTheme as paperUiTheme } from "../../src/paper";
-import { StudioTheme, studioTheme, uiTheme as studioUiTheme } from "../../src/studio";
+} from "@moritzbrantner/ui/bobba";
+import { PaperTheme, paperTheme, uiTheme as paperUiTheme } from "@moritzbrantner/ui/paper";
+import { StudioTheme, studioTheme, uiTheme as studioUiTheme } from "@moritzbrantner/ui/studio";
 import {
   Button as ZleekButton,
   ZleekTheme,
   uiTheme as zleekUiTheme,
   zleekTheme,
-} from "../../src/zleek";
+} from "@moritzbrantner/ui/zleek";
 
 const shadcnBasicComponentFiles = [
   "accordion",

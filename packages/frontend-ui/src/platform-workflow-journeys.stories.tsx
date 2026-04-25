@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
+import type { WorkflowScenario } from "./workflows/types";
 
 import {
   PlatformWorkflowDemo,
-  type WorkflowScenario,
   workflowScenarios,
 } from "./storybook/platform-workflow-demo";
 
 const meta = {
-  title: "Workflows/Journeys",
+  title: "Storybook/Workflows/Journeys",
   component: PlatformWorkflowDemo,
   tags: ["autodocs", "test"],
   parameters: {
@@ -130,7 +130,7 @@ export const MainToPasswordRecovery: Story = {
       await expect(canvas.getByRole("alert")).toHaveTextContent(
         "Reset link sent to reset@example.com",
       );
-      await expect(canvas.getByText("Visitor")).toBeVisible();
+      await expect(canvas.getAllByRole("button", { name: "Login" }).at(-1)!).toBeVisible();
     });
   },
 };
@@ -162,7 +162,7 @@ export const HomeToPeopleToProfileToChat: Story = {
     await runNamedStep(step, "Branch from the profile into chat", async () => {
       await userEvent.click(canvas.getByRole("button", { name: "Open chat" }));
 
-      await expect(canvas.getByRole("heading", { name: "Chat with Jordan Ellis" })).toBeVisible();
+      await expect(canvas.getAllByRole("heading", { name: "Chat with Jordan Ellis" })[0]).toBeVisible();
       await expect(canvas.getByRole("textbox", { name: "Message" })).toBeVisible();
     });
   },

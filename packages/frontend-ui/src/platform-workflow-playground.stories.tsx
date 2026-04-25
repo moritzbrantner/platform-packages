@@ -9,7 +9,7 @@ import {
 } from "./storybook/platform-workflow-demo";
 
 const meta = {
-  title: "Workflows/Playground",
+  title: "Storybook/Workflows/Playground",
   component: PlatformWorkflowDemo,
   tags: ["autodocs", "test"],
   parameters: {

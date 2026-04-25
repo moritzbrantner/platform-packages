@@ -138,9 +138,23 @@ export const Web: Story = {
     defaultOpenGroupId: "workspace",
     languageSwitcher: true,
   },
-  play: async ({ canvas }) => {
-    await expect(await canvas.findByRole("button", { name: "Open account menu" })).toBeInTheDocument();
-    await expect(canvas.getByText("MB")).toBeVisible();
+  play: async ({ canvas, userEvent }) => {
+    const trigger = (await canvas.findAllByRole("button", { name: "Open account menu" })).find(
+      (element) => {
+        const styles = window.getComputedStyle(element);
+
+        return styles.display !== "none" && styles.visibility !== "hidden";
+      },
+    );
+
+    if (!trigger) {
+      throw new Error("Expected a visible account menu trigger.");
+    }
+
+    await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
+    await userEvent.click(trigger);
+    await expect(await screen.findByRole("menuitem", { name: "Profile" })).toBeVisible();
+    await expect(screen.getByText("mira@example.com")).toBeVisible();
   },
 };
 

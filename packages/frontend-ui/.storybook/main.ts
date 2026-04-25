@@ -6,6 +6,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { mergeConfig } from "vite";
 
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
+const workspaceRoot = path.resolve(packageRoot, "../..");
+const uiPackageRoot = path.resolve(packageRoot, "../ui");
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(ts|tsx)"],
@@ -23,28 +25,30 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
-            find: /^@moritzbrantner\/ui$/,
+            find: /^@moritzbrantner\/frontend-ui$/,
             replacement: path.resolve(packageRoot, "src/index.ts"),
           },
           {
+            find: /^@moritzbrantner\/ui$/,
+            replacement: path.resolve(uiPackageRoot, "src/index.ts"),
+          },
+          {
             find: /^@moritzbrantner\/ui\/themes$/,
-            replacement: path.resolve(packageRoot, "src/themes.tsx"),
-          },
-          {
-            find: /^@moritzbrantner\/ui\/components\/(.+)$/,
-            replacement: path.resolve(packageRoot, "src/components/$1.tsx"),
-          },
-          {
-            find: /^@moritzbrantner\/ui\/lib\/cn$/,
-            replacement: path.resolve(packageRoot, "src/lib/cn.ts"),
+            replacement: path.resolve(uiPackageRoot, "src/themes.tsx"),
           },
         ],
         dedupe: ["react", "react-dom"],
+      },
+      server: {
+        fs: {
+          allow: [workspaceRoot],
+        },
       },
       optimizeDeps: {
         include: [
           "@storybook/addon-a11y/preview",
           "@storybook/react-vite",
+          "@moritzbrantner/ui",
           "@base-ui/react",
           "@tanstack/react-table",
           "class-variance-authority",

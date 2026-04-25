@@ -139,7 +139,7 @@ function InteractionPatternsPreview() {
 }
 
 const meta = {
-  title: "Components/Interaction patterns",
+  title: "Recipes/Interaction patterns",
   component: InteractionPatternsPreview,
   tags: ["autodocs", "test"],
   parameters: {
