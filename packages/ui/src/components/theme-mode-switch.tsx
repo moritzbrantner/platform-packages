@@ -102,7 +102,7 @@ function ThemeModeSwitch({
       />
       <span
         aria-hidden="true"
-        className="absolute right-3 top-2 size-1 rounded-full bg-white/95 opacity-0 shadow-[10px_4px_0_-1px_rgb(255_255_255_/_0.75),-7px_11px_0_-1px_rgb(255_255_255_/_0.72)] transition-opacity duration-300 group-data-[mode=dark]/theme-mode-switch:opacity-100"
+        className="absolute left-3 top-2 size-1 rounded-full bg-white/95 opacity-0 shadow-[10px_4px_0_-1px_rgb(255_255_255_/_0.75),-7px_11px_0_-1px_rgb(255_255_255_/_0.72)] transition-opacity duration-300 group-data-[mode=dark]/theme-mode-switch:opacity-100"
       />
       <span
         aria-hidden="true"
