@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { HeartIcon, Share2Icon, UserCheckIcon, UserPlusIcon } from "lucide-react";
+import {
+  HeartIcon,
+  MessageCircleIcon,
+  Share2Icon,
+  UserCheckIcon,
+  UserPlusIcon,
+} from "lucide-react";
 
 import { cn } from "../lib/cn";
 import { Button } from "./button";
@@ -22,6 +28,10 @@ type FollowButtonProps = SocialActionButtonProps & {
 
 type ShareButtonProps = SocialActionButtonProps & {
   shared?: boolean;
+};
+
+type CommentButtonProps = SocialActionButtonProps & {
+  commented?: boolean;
 };
 
 function SocialActionGroup({ className, ...props }: React.ComponentProps<"div">) {
@@ -96,6 +106,36 @@ function ShareButton({
   );
 }
 
+function CommentButton({
+  commented = false,
+  count,
+  label = "Comment",
+  showCount = true,
+  variant,
+  children,
+  className,
+  ...props
+}: CommentButtonProps) {
+  return (
+    <Button
+      data-slot="comment-button"
+      aria-pressed={commented}
+      data-commented={commented ? true : undefined}
+      variant={variant ?? (commented ? "secondary" : "outline")}
+      className={cn("min-w-0", className)}
+      {...props}
+    >
+      <MessageCircleIcon />
+      <span>{children ?? label}</span>
+      {showCount && count !== undefined ? (
+        <span data-slot="social-action-count" className="tabular-nums text-current/75">
+          {count}
+        </span>
+      ) : null}
+    </Button>
+  );
+}
+
 function FollowButton({
   following = false,
   count,
@@ -130,10 +170,12 @@ function FollowButton({
 }
 
 export {
+  CommentButton,
   FollowButton,
   LikeButton,
   ShareButton,
   SocialActionGroup,
+  type CommentButtonProps,
   type FollowButtonProps,
   type LikeButtonProps,
   type ShareButtonProps,

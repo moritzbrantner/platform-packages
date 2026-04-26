@@ -3,6 +3,7 @@ import * as React from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
+  Button,
   ChatBox,
   ChatBoxBody,
   ChatBoxBubble,
@@ -10,15 +11,39 @@ import {
   ChatBoxMessage,
   ChatBoxMeta,
   ChatBoxTitle,
+  CommentButton,
   FollowButton,
   ImageFilterEditor,
   LikeButton,
   ProfileSummary,
+  SocialComment,
+  SocialCommentActions,
+  SocialCommentAvatar,
+  SocialCommentContent,
+  SocialCommentList,
+  SocialCommentMeta,
+  SocialCommentText,
+  SocialComposer,
+  SocialComposerActions,
+  SocialComposerHeader,
+  SocialComposerTextarea,
+  SocialComposerToolbar,
   ProfileSummaryActions,
   ProfileSummaryAvatar,
   ProfileSummaryContent,
   ProfileSummaryDescription,
   ProfileSummaryHeader,
+  SocialPost,
+  SocialPostAuthor,
+  SocialPostAvatar,
+  SocialPostBody,
+  SocialPostFooter,
+  SocialPostHeader,
+  SocialPostMedia,
+  SocialPostMeta,
+  SocialPostMetrics,
+  SocialPostText,
+  SocialPostTitle,
   ProfileSummaryStat,
   ProfileSummaryStatLabel,
   ProfileSummaryStatValue,
@@ -46,6 +71,7 @@ describe("social components", () => {
     render(
       <SocialActionGroup>
         <LikeButton liked count={12} />
+        <CommentButton commented count={8} />
         <ShareButton count="4" />
         <FollowButton following />
       </SocialActionGroup>,
@@ -54,10 +80,91 @@ describe("social components", () => {
     expect(screen.getByRole("button", { name: "Unlike 12" }).getAttribute("aria-pressed")).toBe(
       "true",
     );
+    expect(screen.getByRole("button", { name: "Comment 8" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
     expect(screen.getByRole("button", { name: "Share 4" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Following" }).getAttribute("aria-pressed")).toBe(
       "true",
     );
+  });
+
+  test("renders a social post with comments and a composer workflow", () => {
+    const onSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
+
+    render(
+      <div className="grid gap-4">
+        <SocialComposer onSubmit={onSubmit}>
+          <SocialComposerHeader>
+            <span>Share an update</span>
+          </SocialComposerHeader>
+          <SocialComposerTextarea aria-label="Post draft" defaultValue="Studio update." />
+          <SocialComposerToolbar>
+            <span className="text-xs text-muted-foreground">Posting to launch review</span>
+            <SocialComposerActions>
+              <Button type="submit" size="sm">
+                Publish update
+              </Button>
+            </SocialComposerActions>
+          </SocialComposerToolbar>
+        </SocialComposer>
+
+        <SocialPost featured>
+          <SocialPostHeader>
+            <SocialPostAvatar name="Ada Lovelace" online />
+            <SocialPostAuthor>
+              <SocialPostTitle>Ada Lovelace</SocialPostTitle>
+              <SocialPostMeta>
+                <span>Systems author</span>
+                <span>Today</span>
+              </SocialPostMeta>
+            </SocialPostAuthor>
+          </SocialPostHeader>
+          <SocialPostBody>
+            <SocialPostText>Analytical engines, now with social replies.</SocialPostText>
+            <SocialPostMedia>
+              <img src="preview.png" alt="Post preview" />
+            </SocialPostMedia>
+          </SocialPostBody>
+          <SocialPostFooter>
+            <SocialPostMetrics>
+              <span>42 likes</span>
+              <span>3 comments</span>
+            </SocialPostMetrics>
+            <SocialActionGroup>
+              <LikeButton count={42} />
+              <CommentButton count={3} />
+              <ShareButton count={2} />
+            </SocialActionGroup>
+            <SocialCommentList aria-label="Thread replies">
+              <SocialComment>
+                <SocialCommentAvatar name="Grace Hopper" />
+                <SocialCommentContent>
+                  <SocialCommentMeta>
+                    <span>Grace Hopper</span>
+                    <span>now</span>
+                  </SocialCommentMeta>
+                  <SocialCommentText>Looks ready for the review deck.</SocialCommentText>
+                  <SocialCommentActions>
+                    <Button type="button" variant="link" size="xs" className="h-auto px-0 py-0">
+                      Reply
+                    </Button>
+                  </SocialCommentActions>
+                </SocialCommentContent>
+              </SocialComment>
+            </SocialCommentList>
+          </SocialPostFooter>
+        </SocialPost>
+      </div>,
+    );
+
+    expect(screen.getByRole("button", { name: "Publish update" })).toBeTruthy();
+    expect(screen.getByRole("img", { name: "Post preview" })).toBeTruthy();
+    expect(screen.getByRole("list", { name: "Thread replies" })).toBeTruthy();
+    expect(screen.getByText("42 likes")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Publish update" }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
   test("renders a summarized profile with stats and actions", () => {

@@ -75,6 +75,7 @@ export * from "./components/skeleton";
 export * from "./components/slider";
 export * from "./components/sonner";
 export * from "./components/social-actions";
+export * from "./components/social-feed";
 export * from "./components/spinner";
 export * from "./components/stat";
 export * from "./components/stepper";
