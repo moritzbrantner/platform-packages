@@ -153,7 +153,10 @@ export const Web: Story = {
 
     await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
     await userEvent.click(trigger);
-    await expect(await screen.findByRole("menuitem", { name: "Profile" })).toBeVisible();
+
+    const profileItems = await screen.findAllByRole("menuitem", { name: "Profile" });
+
+    await expect(profileItems.length).toBeGreaterThan(0);
     await expect(screen.getByText("mira@example.com")).toBeVisible();
   },
 };

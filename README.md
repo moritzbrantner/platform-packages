@@ -46,6 +46,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/feature-extraction`             | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/fill-mask`                      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/flat-design`                    | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/frontend-ui`                    | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/foundation-contract`            | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/graphs`                         | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/hexagon-grids`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
@@ -99,6 +100,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/text-to-image`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/text-to-speech`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/text-to-video`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
+| `@moritzbrantner/three-starters`                 | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/token-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/translation`                    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/tree-structures`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |

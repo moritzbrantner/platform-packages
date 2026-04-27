@@ -10,7 +10,7 @@ type SocialPostProps = React.ComponentProps<"article"> & {
   featured?: boolean;
 };
 
-type SocialCommentProps = React.ComponentProps<"article"> & {
+type SocialCommentProps = React.ComponentProps<"div"> & {
   align?: "start" | "end";
 };
 
@@ -152,7 +152,7 @@ function SocialCommentList({ className, ...props }: React.ComponentProps<"div">)
 
 function SocialComment({ className, align = "start", ...props }: SocialCommentProps) {
   return (
-    <article
+    <div
       data-slot="social-comment"
       data-align={align}
       role="listitem"

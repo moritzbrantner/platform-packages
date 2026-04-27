@@ -4,6 +4,7 @@ import {
   createHexGridLayout,
   createHoneycombCellGeometry,
   createHoneycombCellShape,
+  getHexGridCellTransform,
   getHexGridCellPosition,
 } from "@moritzbrantner/three-starters";
 
@@ -55,6 +56,13 @@ describe("@moritzbrantner/three-starters", () => {
     expect(positionYZ).toEqual([0, 2, 3]);
   });
 
+  test("computes a cell transform that lifts each tile by half its height", () => {
+    const transform = getHexGridCellTransform({ offset: [2, 3] }, 1.6);
+
+    expect(transform.position).toEqual([2, 3, 0.8]);
+    expect(transform.scale).toEqual([1, 1, 1.6]);
+  });
+
   test("rejects invalid honeycomb wall thickness", () => {
     expect(() =>
       createHoneycombCellShape({
@@ -62,5 +70,11 @@ describe("@moritzbrantner/three-starters", () => {
         wallThickness: 1,
       }),
     ).toThrow("wallThickness must be smaller than radius");
+  });
+
+  test("rejects invalid tile heights", () => {
+    expect(() => getHexGridCellTransform({ offset: [0, 0] }, -0.1)).toThrow(
+      "height must be zero or a positive number",
+    );
   });
 });

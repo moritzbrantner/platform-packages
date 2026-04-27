@@ -302,7 +302,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   play: async ({ canvas }) => {
-    await expect(canvas.getByText("Mira Patel")).toBeVisible();
+    await expect(canvas.getByRole("button", { name: "Follow Mira Patel" })).toBeVisible();
     await expect(canvas.getByLabelText("Post draft")).toBeVisible();
     await expect(canvas.getByRole("button", { name: "Comment 24" })).toBeVisible();
     await expect(canvas.getByRole("img", { name: "Launch rehearsal clip preview" })).toBeVisible();

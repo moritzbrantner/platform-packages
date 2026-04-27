@@ -5,6 +5,7 @@ import { Color, InstancedMesh, Object3D, type ColorRepresentation } from "three"
 import {
   createHexGridLayout,
   createHoneycombCellGeometry,
+  getHexGridCellTransform,
   type CreateHexGridLayoutOptions,
   type CreateHoneycombCellGeometryOptions,
   type HexGridCell,
@@ -16,6 +17,7 @@ export interface HexGridProps
     CreateHexGridLayoutOptions,
     CreateHoneycombCellGeometryOptions {
   plane?: HexGridPlane;
+  tileHeight?: number | ((cell: HexGridCell) => number);
   color?: ColorRepresentation;
   emissive?: ColorRepresentation;
   roughness?: number;
@@ -38,6 +40,7 @@ export function HexGrid({
   wallThickness = 0.24,
   depth = 0.35,
   plane = "xz",
+  tileHeight = depth,
   color = DEFAULT_COLOR,
   emissive = DEFAULT_EMISSIVE,
   roughness = DEFAULT_ROUGHNESS,
@@ -65,9 +68,9 @@ export function HexGrid({
       createHoneycombCellGeometry({
         radius,
         wallThickness,
-        depth,
+        depth: 1,
       }),
-    [depth, radius, wallThickness],
+    [radius, wallThickness],
   );
 
   useLayoutEffect(() => {
@@ -78,9 +81,12 @@ export function HexGrid({
     }
 
     for (const cell of layout.cells) {
-      tempObject.position.set(cell.offset[0], cell.offset[1], 0);
+      const resolvedHeight = typeof tileHeight === "function" ? tileHeight(cell) : tileHeight;
+      const transform = getHexGridCellTransform(cell, resolvedHeight);
+
+      tempObject.position.set(...transform.position);
       tempObject.rotation.set(0, 0, 0);
-      tempObject.scale.setScalar(1);
+      tempObject.scale.set(...transform.scale);
       tempObject.updateMatrix();
       mesh.setMatrixAt(cell.index, tempObject.matrix);
 
@@ -96,7 +102,7 @@ export function HexGrid({
     if (mesh.instanceColor) {
       mesh.instanceColor.needsUpdate = true;
     }
-  }, [cellColor, layout.cells, tempColor, tempObject]);
+  }, [cellColor, layout.cells, tempColor, tempObject, tileHeight]);
 
   useEffect(() => {
     return () => {

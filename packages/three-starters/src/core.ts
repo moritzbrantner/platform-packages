@@ -3,6 +3,7 @@ import { ExtrudeGeometry, Path, Shape, Vector2 } from "three";
 export type HexGridPlane = "xy" | "xz" | "yz";
 export type HexGridOffset = [x: number, y: number];
 export type HexGridPosition = [x: number, y: number, z: number];
+export type HexGridScale = [x: number, y: number, z: number];
 
 export interface HexGridCell {
   index: number;
@@ -19,6 +20,11 @@ export interface HexGridLayout {
   width: number;
   height: number;
   cells: HexGridCell[];
+}
+
+export interface HexGridCellTransform {
+  position: HexGridPosition;
+  scale: HexGridScale;
 }
 
 export interface CreateHexGridLayoutOptions {
@@ -140,6 +146,18 @@ export function getHexGridCellPosition(
   }
 
   return [x, y, 0];
+}
+
+export function getHexGridCellTransform(
+  cell: Pick<HexGridCell, "offset">,
+  height: number,
+): HexGridCellTransform {
+  assertNonNegativeNumber(height, "height");
+
+  return {
+    position: [cell.offset[0], cell.offset[1], height / 2],
+    scale: [1, 1, height],
+  };
 }
 
 function centerHexGridCells(

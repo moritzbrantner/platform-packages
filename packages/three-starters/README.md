@@ -9,6 +9,7 @@ The first component is `HexGrid`, a reusable honeycomb grid rendered from instan
 - `HexGrid`
 - `createHexGridLayout(options)`
 - `createHoneycombCellGeometry(options)`
+- `getHexGridCellTransform(cell, height)`
 
 ## Example
 
@@ -28,7 +29,7 @@ export function Scene() {
         radius={0.7}
         gap={0.08}
         wallThickness={0.22}
-        depth={0.4}
+        tileHeight={(cell) => 0.2 + ((cell.row + cell.column) % 4) * 0.18}
         plane="xz"
         color="#f4b453"
         emissive="#8a4c12"
@@ -38,3 +39,5 @@ export function Scene() {
   );
 }
 ```
+
+`depth` still works as the default uniform height. Use `tileHeight` when you want to vary height per honeycomb.

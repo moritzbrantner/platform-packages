@@ -9,7 +9,7 @@ const scaffoldCriticalPackages = [
   {
     dir: "ui",
     name: "@moritzbrantner/ui",
-    version: "0.5.0",
+    version: "0.5.1",
     files: ["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"],
     exports: [
       ".",
