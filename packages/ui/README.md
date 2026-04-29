@@ -86,6 +86,50 @@ Public components should accept `className`, forward standard DOM props, expose 
 </Button>
 ```
 
+## Component Editor
+
+`ComponentEditorProvider`, `EditableComponent`, `ComponentEditorPanel`, and `buildJsxSnippet` support interactive integration galleries. Wrap preview components with metadata, render the panel beside them, and users can click a preview, adjust supported props with inspector controls, then copy JSX.
+
+```tsx
+import {
+  Button,
+  ComponentEditorPanel,
+  ComponentEditorProvider,
+  EditableComponent,
+  buildJsxSnippet,
+  type EditableComponentDefinition,
+} from "@moritzbrantner/ui";
+
+const buttonDefinition: EditableComponentDefinition = {
+  id: "primary-button",
+  label: "Button",
+  importName: "Button",
+  importFrom: "@moritzbrantner/ui",
+  controls: [
+    { id: "variant", label: "Variant", type: "select", value: "default" },
+    { id: "label", label: "Label", type: "text", value: "Save" },
+  ],
+  buildSnippet: (values) =>
+    buildJsxSnippet({
+      importName: "Button",
+      importFrom: "@moritzbrantner/ui",
+      props: { variant: values.variant },
+      children: String(values.label),
+    }),
+};
+
+export function IntegrationGallery() {
+  return (
+    <ComponentEditorProvider defaultSelectedId="primary-button">
+      <EditableComponent definition={buttonDefinition}>
+        {(values) => <Button variant={values.variant as "default"}>{values.label}</Button>}
+      </EditableComponent>
+      <ComponentEditorPanel />
+    </ComponentEditorProvider>
+  );
+}
+```
+
 ## Theme Metadata
 
 `UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add theme metadata classes and `data-ui-theme` attributes around a subtree. They do not scope CSS tokens by themselves; the active visual theme still comes from the single stylesheet imported by the app.

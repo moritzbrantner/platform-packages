@@ -7,7 +7,8 @@ const navigationItems = [
     id: "brief",
     eyebrow: "Entry",
     label: "Project brief",
-    description: "Anchor the space with the current mission, primary audience, and outcome framing.",
+    description:
+      "Anchor the space with the current mission, primary audience, and outcome framing.",
     meta: "01",
     accentColor: "#fb7185",
   },
@@ -23,7 +24,8 @@ const navigationItems = [
     id: "flows",
     eyebrow: "IA",
     label: "Route map",
-    description: "Connect the major destinations and identify which hops need tighter narrative glue.",
+    description:
+      "Connect the major destinations and identify which hops need tighter narrative glue.",
     meta: "03",
     accentColor: "#22c55e",
   },
@@ -31,7 +33,8 @@ const navigationItems = [
     id: "states",
     eyebrow: "UX",
     label: "State matrix",
-    description: "Compare calm, active, warning, and blocked states without losing the overall path.",
+    description:
+      "Compare calm, active, warning, and blocked states without losing the overall path.",
     meta: "04",
     accentColor: "#14b8a6",
   },
@@ -39,7 +42,8 @@ const navigationItems = [
     id: "handoff",
     eyebrow: "Build",
     label: "Implementation handoff",
-    description: "Package the chosen route with copy, visual states, and keyboard behavior expectations.",
+    description:
+      "Package the chosen route with copy, visual states, and keyboard behavior expectations.",
     meta: "05",
     accentColor: "#38bdf8",
   },
@@ -55,7 +59,8 @@ const navigationItems = [
     id: "ship",
     eyebrow: "Release",
     label: "Launch review",
-    description: "Confirm the route still reads clearly when the system is under real content pressure.",
+    description:
+      "Confirm the route still reads clearly when the system is under real content pressure.",
     meta: "07",
     accentColor: "#e879f9",
   },
@@ -63,7 +68,8 @@ const navigationItems = [
     id: "iterate",
     eyebrow: "Loop",
     label: "Iteration queue",
-    description: "Capture the next improvements and keep the navigation surface evolving intentionally.",
+    description:
+      "Capture the next improvements and keep the navigation surface evolving intentionally.",
     meta: "08",
     accentColor: "#f97316",
   },
@@ -72,7 +78,7 @@ const navigationItems = [
 const meta = {
   title: "Recipes/Hex tile navigation",
   component: HexTileNavigation,
-  tags: ["autodocs"],
+  tags: ["autodocs", "test"],
   parameters: {
     layout: "fullscreen",
   },

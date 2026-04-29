@@ -11,6 +11,7 @@ import { Input } from "./input";
 import { NativeSelect, NativeSelectOption } from "./native-select";
 import { ScrollArea } from "./scroll-area";
 import { Separator } from "./separator";
+import { Slider } from "./slider";
 import { Textarea } from "./textarea";
 
 type InspectorFieldValue = string | number | boolean | string[] | null | undefined;
@@ -23,13 +24,29 @@ type InspectorFieldOption = {
 type InspectorFieldDefinition = {
   id: string;
   label: string;
-  type: "text" | "number" | "boolean" | "select" | "textarea" | "code" | "custom";
+  type:
+    | "text"
+    | "number"
+    | "slider"
+    | "boolean"
+    | "select"
+    | "textarea"
+    | "code"
+    | "color"
+    | "className"
+    | "custom";
   description?: string;
+  min?: number;
+  max?: number;
+  step?: number;
   placeholder?: string;
   readOnly?: boolean;
   options?: InspectorFieldOption[];
   value?: InspectorFieldValue;
-  render?: (value: InspectorFieldValue, onChange: (value: InspectorFieldValue) => void) => React.ReactNode;
+  render?: (
+    value: InspectorFieldValue,
+    onChange: (value: InspectorFieldValue) => void,
+  ) => React.ReactNode;
 };
 
 type InspectorPanelSectionData = {
@@ -116,11 +133,11 @@ function InspectorPanel({
     () => ({
       ...collectInspectorFieldValues(normalizedSections),
       ...defaultValues,
-      ...values,
     }),
-    [defaultValues, normalizedSections, values],
+    [defaultValues, normalizedSections],
   );
-  const [internalValues, setInternalValues] = React.useState<Record<string, InspectorFieldValue>>(initialValues);
+  const [internalValues, setInternalValues] =
+    React.useState<Record<string, InspectorFieldValue>>(initialValues);
   const currentValues = values ?? internalValues;
   const dirty = !areInspectorValuesEqual(currentValues, initialValues);
 
@@ -147,7 +164,10 @@ function InspectorPanel({
     <aside
       data-slot="inspector-panel"
       data-read-only={readOnly ? "true" : undefined}
-      className={cn("flex h-full min-h-[32rem] flex-col rounded-md border bg-card text-card-foreground", className)}
+      className={cn(
+        "flex h-full min-h-[32rem] flex-col rounded-md border bg-card text-card-foreground",
+        className,
+      )}
       {...props}
     >
       <InspectorPanelHeader title={title} description={description} dirty={dirty} />
@@ -233,7 +253,9 @@ function InspectorPanelSection({
       >
         <span>
           <span className="block text-sm font-medium">{title}</span>
-          {description ? <span className="block text-xs text-muted-foreground">{description}</span> : null}
+          {description ? (
+            <span className="block text-xs text-muted-foreground">{description}</span>
+          ) : null}
         </span>
         <ChevronDownIcon className={cn("size-4 transition-transform", open && "rotate-180")} />
       </button>
@@ -248,7 +270,9 @@ function InspectorPanelSection({
 }
 
 function InspectorFieldGroup({ className, ...props }: InspectorFieldGroupProps) {
-  return <div data-slot="inspector-field-group" className={cn("space-y-3", className)} {...props} />;
+  return (
+    <div data-slot="inspector-field-group" className={cn("space-y-3", className)} {...props} />
+  );
 }
 
 function InspectorField({
@@ -264,7 +288,10 @@ function InspectorField({
 
   return (
     <div data-slot="inspector-field" className={cn("space-y-1.5", className)} {...props}>
-      <label className="block text-xs font-medium text-muted-foreground" htmlFor={`inspector-${field.id}`}>
+      <label
+        className="block text-xs font-medium text-muted-foreground"
+        htmlFor={`inspector-${field.id}`}
+      >
         {field.label}
       </label>
       <InspectorFieldEditor
@@ -273,8 +300,12 @@ function InspectorField({
         disabled={disabled}
         onValueChange={onValueChange}
       />
-      {field.description ? <div className="text-xs text-muted-foreground">{field.description}</div> : null}
-      {validationMessage ? <div className="text-xs text-destructive">{validationMessage}</div> : null}
+      {field.description ? (
+        <div className="text-xs text-muted-foreground">{field.description}</div>
+      ) : null}
+      {validationMessage ? (
+        <div className="text-xs text-destructive">{validationMessage}</div>
+      ) : null}
     </div>
   );
 }
@@ -329,6 +360,60 @@ function InspectorFieldEditor({
     );
   }
 
+  if (field.type === "slider") {
+    const numericValue = typeof value === "number" ? value : Number(value ?? field.min ?? 0);
+
+    return (
+      <div className="flex items-center gap-3">
+        <Slider
+          id={id}
+          aria-label={field.label}
+          value={[Number.isFinite(numericValue) ? numericValue : (field.min ?? 0)]}
+          min={field.min ?? 0}
+          max={field.max ?? 100}
+          step={field.step ?? 1}
+          disabled={disabled}
+          onValueChange={(values) => onValueChange?.(values[0] ?? field.min ?? 0)}
+        />
+        <Input
+          aria-label={`${field.label} value`}
+          type="number"
+          value={String(Number.isFinite(numericValue) ? numericValue : (field.min ?? 0))}
+          min={field.min}
+          max={field.max}
+          step={field.step}
+          disabled={disabled}
+          className="h-8 w-20"
+          onChange={(event) => onValueChange?.(Number(event.currentTarget.value))}
+        />
+      </div>
+    );
+  }
+
+  if (field.type === "color") {
+    return (
+      <div className="flex items-center gap-2">
+        <Input
+          id={id}
+          aria-label={field.label}
+          type="color"
+          value={String(value || "#000000")}
+          disabled={disabled}
+          className="h-8 w-12 shrink-0 p-1"
+          onChange={(event) => onValueChange?.(event.currentTarget.value)}
+        />
+        <Input
+          aria-label={`${field.label} color value`}
+          value={String(value ?? "")}
+          disabled={disabled}
+          placeholder={field.placeholder ?? "#000000"}
+          className="font-mono text-xs"
+          onChange={(event) => onValueChange?.(event.currentTarget.value)}
+        />
+      </div>
+    );
+  }
+
   if (field.type === "textarea" || field.type === "code") {
     return (
       <Textarea
@@ -338,6 +423,20 @@ function InspectorFieldEditor({
         disabled={disabled}
         placeholder={field.placeholder}
         className={cn(field.type === "code" && "font-mono text-xs")}
+        onChange={(event) => onValueChange?.(event.currentTarget.value)}
+      />
+    );
+  }
+
+  if (field.type === "className") {
+    return (
+      <Textarea
+        id={id}
+        aria-label={field.label}
+        value={String(value ?? "")}
+        disabled={disabled}
+        placeholder={field.placeholder ?? "rounded-md border-border/60"}
+        className="min-h-20 font-mono text-xs"
         onChange={(event) => onValueChange?.(event.currentTarget.value)}
       />
     );
@@ -374,7 +473,13 @@ function InspectorActions({
       className={cn("flex items-center justify-end gap-2 border-t p-3", className)}
       {...props}
     >
-      <Button type="button" variant="outline" size="sm" disabled={readOnly || !dirty} onClick={onReset}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={readOnly || !dirty}
+        onClick={onReset}
+      >
         <RotateCcwIcon />
         Reset
       </Button>

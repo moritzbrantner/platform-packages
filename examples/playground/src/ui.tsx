@@ -35,6 +35,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   Checkbox,
+  ComponentEditorPanel,
+  ComponentEditorPreviewFrame,
+  ComponentEditorProvider,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -57,6 +60,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
+  EditableComponent,
   Field,
   FieldContent,
   FieldDescription,
@@ -107,7 +111,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
   UiTheme,
+  buildJsxSnippet,
   type CalendarCellComponentProps,
+  type ComponentEditableValue,
+  type EditableComponentDefinition,
   type ThemeMode,
   type CalendarIcsData,
   type UiThemeName,
@@ -442,6 +449,799 @@ function CalendarPreviewDay({
   );
 }
 
+type EditorValues = Record<string, ComponentEditableValue>;
+
+type EditableGalleryItem = {
+  definition: EditableComponentDefinition;
+  render: (values: EditorValues) => React.ReactNode;
+};
+
+function getEditorString(values: EditorValues, key: string) {
+  const value = values[key];
+  return typeof value === "string" ? value : "";
+}
+
+function getEditorNumber(values: EditorValues, key: string) {
+  const value = values[key];
+  return typeof value === "number" ? value : Number(value ?? 0);
+}
+
+function getEditorBoolean(values: EditorValues, key: string) {
+  return values[key] === true;
+}
+
+function mergeEditorClassName(baseClassName: string, values: EditorValues) {
+  return [baseClassName, getEditorString(values, "className")].filter(Boolean).join(" ");
+}
+
+function buildButtonSnippet(values: EditorValues) {
+  const styleColor = getEditorString(values, "backgroundColor");
+  const styleProp = styleColor ? ` style={{ backgroundColor: "${styleColor}" }}` : "";
+  const className = getEditorString(values, "className");
+  const props = [
+    `variant="${getEditorString(values, "variant")}"`,
+    `size="${getEditorString(values, "size")}"`,
+    getEditorBoolean(values, "disabled") ? "disabled" : "",
+    className ? `className="${className}"` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return `import { Button } from "@moritzbrantner/ui";\n\n<Button ${props}${styleProp}>\n  ${getEditorString(
+    values,
+    "label",
+  )}\n</Button>`;
+}
+
+function buildCardSnippet(values: EditorValues) {
+  const imports = ["Card", "CardContent", "CardDescription", "CardHeader", "CardTitle"];
+  const className = getEditorString(values, "className");
+  const padding = getEditorNumber(values, "padding");
+
+  return `import { ${imports.join(", ")} } from "@moritzbrantner/ui";\n\n<Card${
+    className ? ` className="${className}"` : ""
+  }>\n  <CardHeader>\n    <CardTitle>${getEditorString(
+    values,
+    "title",
+  )}</CardTitle>\n    <CardDescription>${getEditorString(
+    values,
+    "description",
+  )}</CardDescription>\n  </CardHeader>\n  <CardContent className="p-${padding}">\n    ${getEditorString(
+    values,
+    "content",
+  )}\n  </CardContent>\n</Card>`;
+}
+
+function buildEditableGalleryItems(): EditableGalleryItem[] {
+  return [
+    {
+      definition: {
+        id: "editable-button",
+        label: "Button",
+        importName: "Button",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          {
+            id: "variant",
+            label: "Variant",
+            type: "select",
+            value: "default",
+            options: ["default", "secondary", "outline", "ghost", "destructive"].map((value) => ({
+              label: value,
+              value,
+            })),
+          },
+          {
+            id: "size",
+            label: "Size",
+            type: "select",
+            value: "default",
+            options: ["default", "sm", "lg", "icon"].map((value) => ({ label: value, value })),
+          },
+          { id: "label", label: "Label", type: "text", value: "Save draft" },
+          { id: "disabled", label: "Disabled", type: "boolean", value: false },
+          { id: "backgroundColor", label: "Background color", type: "color", value: "" },
+          { id: "className", label: "className", type: "className", value: "" },
+        ],
+        buildSnippet: buildButtonSnippet,
+      },
+      render: (values) => (
+        <Button
+          variant={
+            getEditorString(values, "variant") as React.ComponentProps<typeof Button>["variant"]
+          }
+          size={getEditorString(values, "size") as React.ComponentProps<typeof Button>["size"]}
+          disabled={getEditorBoolean(values, "disabled")}
+          className={getEditorString(values, "className")}
+          style={
+            getEditorString(values, "backgroundColor")
+              ? { backgroundColor: getEditorString(values, "backgroundColor") }
+              : undefined
+          }
+        >
+          {getEditorString(values, "label")}
+        </Button>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-badge",
+        label: "Badge",
+        importName: "Badge",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          {
+            id: "variant",
+            label: "Variant",
+            type: "select",
+            value: "outline",
+            options: ["default", "secondary", "destructive", "outline"].map((value) => ({
+              label: value,
+              value,
+            })),
+          },
+          { id: "label", label: "Label", type: "text", value: "Preview" },
+          { id: "className", label: "className", type: "className", value: "" },
+        ],
+        buildSnippet: (values) =>
+          buildJsxSnippet({
+            importName: "Badge",
+            importFrom: "@moritzbrantner/ui",
+            props: {
+              variant: values.variant,
+              className: values.className,
+            },
+            children: getEditorString(values, "label"),
+          }),
+      },
+      render: (values) => (
+        <Badge
+          variant={
+            getEditorString(values, "variant") as React.ComponentProps<typeof Badge>["variant"]
+          }
+          className={getEditorString(values, "className")}
+        >
+          {getEditorString(values, "label")}
+        </Badge>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-card",
+        label: "Card",
+        importName: "Card",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "title", label: "Title", type: "text", value: "Release status" },
+          {
+            id: "description",
+            label: "Description",
+            type: "text",
+            value: "Ready to integrate into a project.",
+          },
+          {
+            id: "content",
+            label: "Content",
+            type: "textarea",
+            value: "Copy the JSX and adapt it.",
+          },
+          {
+            id: "padding",
+            label: "Content padding",
+            type: "slider",
+            value: 4,
+            min: 2,
+            max: 8,
+            step: 1,
+          },
+          { id: "className", label: "className", type: "className", value: "max-w-sm" },
+        ],
+        buildSnippet: buildCardSnippet,
+      },
+      render: (values) => (
+        <Card className={mergeEditorClassName("max-w-sm", values)}>
+          <CardHeader>
+            <CardTitle>{getEditorString(values, "title")}</CardTitle>
+            <CardDescription>{getEditorString(values, "description")}</CardDescription>
+          </CardHeader>
+          <CardContent style={{ padding: `${getEditorNumber(values, "padding") * 0.25}rem` }}>
+            <p className="text-sm text-muted-foreground">{getEditorString(values, "content")}</p>
+          </CardContent>
+        </Card>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-progress",
+        label: "Progress and LoadingBar",
+        importName: "Progress",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "value", label: "Value", type: "slider", value: 64, min: 0, max: 100, step: 1 },
+          { id: "showValue", label: "Show loading value", type: "boolean", value: true },
+          {
+            id: "size",
+            label: "Loading bar size",
+            type: "select",
+            value: "sm",
+            options: ["sm", "default", "lg"].map((value) => ({ label: value, value })),
+          },
+        ],
+        buildSnippet: (values) =>
+          `import { LoadingBar, Progress } from "@moritzbrantner/ui";\n\n<Progress value={${getEditorNumber(
+            values,
+            "value",
+          )}} />\n<LoadingBar value={${getEditorNumber(values, "value")}} size="${getEditorString(
+            values,
+            "size",
+          )}"${getEditorBoolean(values, "showValue") ? " showValue" : ""} />`,
+      },
+      render: (values) => (
+        <div className="w-full max-w-md space-y-3">
+          <Progress value={getEditorNumber(values, "value")} />
+          <LoadingBar
+            value={getEditorNumber(values, "value")}
+            size={
+              getEditorString(values, "size") as React.ComponentProps<typeof LoadingBar>["size"]
+            }
+            showValue={getEditorBoolean(values, "showValue")}
+          />
+        </div>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-slider",
+        label: "Slider",
+        importName: "Slider",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "value", label: "Value", type: "slider", value: 42, min: 0, max: 100, step: 1 },
+          { id: "max", label: "Max", type: "number", value: 100 },
+          { id: "step", label: "Step", type: "number", value: 1 },
+        ],
+        buildSnippet: (values) =>
+          buildJsxSnippet({
+            importName: "Slider",
+            importFrom: "@moritzbrantner/ui",
+            props: {
+              value: [`${getEditorNumber(values, "value")}`],
+              max: values.max,
+              step: values.step,
+            },
+            selfClosing: true,
+          }),
+      },
+      render: (values) => (
+        <Slider
+          className="max-w-md"
+          value={[getEditorNumber(values, "value")]}
+          max={getEditorNumber(values, "max")}
+          step={getEditorNumber(values, "step")}
+        />
+      ),
+    },
+    {
+      definition: {
+        id: "editable-form-controls",
+        label: "Input and Textarea",
+        importName: "Input",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "placeholder", label: "Input placeholder", type: "text", value: "Project name" },
+          {
+            id: "notes",
+            label: "Textarea content",
+            type: "textarea",
+            value: "Describe the component behavior you need.",
+          },
+          { id: "disabled", label: "Disabled", type: "boolean", value: false },
+          { id: "className", label: "className", type: "className", value: "" },
+        ],
+        buildSnippet: (values) =>
+          `import { Input, Textarea } from "@moritzbrantner/ui";\n\n<Input placeholder="${getEditorString(
+            values,
+            "placeholder",
+          )}"${getEditorBoolean(values, "disabled") ? " disabled" : ""}${
+            values.className ? ` className="${values.className}"` : ""
+          } />\n<Textarea defaultValue="${getEditorString(values, "notes")}" />`,
+      },
+      render: (values) => (
+        <div className="grid w-full max-w-md gap-3">
+          <Input
+            placeholder={getEditorString(values, "placeholder")}
+            disabled={getEditorBoolean(values, "disabled")}
+            className={getEditorString(values, "className")}
+          />
+          <Textarea
+            defaultValue={getEditorString(values, "notes")}
+            disabled={getEditorBoolean(values, "disabled")}
+          />
+        </div>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-switch-checkbox-radio",
+        label: "Switch, Checkbox, and RadioGroup",
+        importName: "Switch",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "enabled", label: "Switch enabled", type: "boolean", value: true },
+          { id: "checked", label: "Checkbox checked", type: "boolean", value: true },
+          {
+            id: "density",
+            label: "Radio value",
+            type: "select",
+            value: "comfortable",
+            options: ["compact", "comfortable", "spacious"].map((value) => ({
+              label: value,
+              value,
+            })),
+          },
+        ],
+        buildSnippet: (values) =>
+          `import { Checkbox, RadioGroup, RadioGroupItem, Switch } from "@moritzbrantner/ui";\n\n<Switch checked={${getEditorBoolean(
+            values,
+            "enabled",
+          )}} />\n<Checkbox checked={${getEditorBoolean(values, "checked")}} />\n<RadioGroup value="${getEditorString(
+            values,
+            "density",
+          )}">\n  <RadioGroupItem value="compact" />\n  <RadioGroupItem value="comfortable" />\n  <RadioGroupItem value="spacious" />\n</RadioGroup>`,
+      },
+      render: (values) => (
+        <div className="grid gap-3 text-sm">
+          <label className="flex items-center gap-2">
+            <Switch checked={getEditorBoolean(values, "enabled")} />
+            Notifications
+          </label>
+          <label className="flex items-center gap-2">
+            <Checkbox checked={getEditorBoolean(values, "checked")} />
+            Include QA
+          </label>
+          <RadioGroup value={getEditorString(values, "density")} className="grid-cols-3">
+            {["compact", "comfortable", "spacious"].map((value) => (
+              <label key={value} className="flex items-center gap-2">
+                <RadioGroupItem value={value} />
+                {value}
+              </label>
+            ))}
+          </RadioGroup>
+        </div>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-alert",
+        label: "Alert",
+        importName: "Alert",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "title", label: "Title", type: "text", value: "Release freeze window" },
+          {
+            id: "description",
+            label: "Description",
+            type: "textarea",
+            value: "Component changes need review before shipping.",
+          },
+          { id: "className", label: "className", type: "className", value: "" },
+        ],
+        buildSnippet: (values) =>
+          `import { Alert, AlertDescription, AlertTitle } from "@moritzbrantner/ui";\n\n<Alert${
+            values.className ? ` className="${values.className}"` : ""
+          }>\n  <AlertTitle>${getEditorString(values, "title")}</AlertTitle>\n  <AlertDescription>${getEditorString(
+            values,
+            "description",
+          )}</AlertDescription>\n</Alert>`,
+      },
+      render: (values) => (
+        <Alert className={getEditorString(values, "className")}>
+          <AlertTriangleIcon />
+          <AlertTitle>{getEditorString(values, "title")}</AlertTitle>
+          <AlertDescription>{getEditorString(values, "description")}</AlertDescription>
+        </Alert>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-tabs",
+        label: "Tabs and Accordion",
+        importName: "Tabs",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          {
+            id: "tab",
+            label: "Active tab",
+            type: "select",
+            value: "notes",
+            options: [
+              { label: "Notes", value: "notes" },
+              { label: "Inventory", value: "inventory" },
+            ],
+          },
+          { id: "firstLabel", label: "First tab label", type: "text", value: "Release notes" },
+          { id: "secondLabel", label: "Second tab label", type: "text", value: "Inventory" },
+        ],
+        buildSnippet: (values) =>
+          `import { Tabs, TabsContent, TabsList, TabsTrigger } from "@moritzbrantner/ui";\n\n<Tabs defaultValue="${getEditorString(
+            values,
+            "tab",
+          )}">\n  <TabsList>\n    <TabsTrigger value="notes">${getEditorString(
+            values,
+            "firstLabel",
+          )}</TabsTrigger>\n    <TabsTrigger value="inventory">${getEditorString(
+            values,
+            "secondLabel",
+          )}</TabsTrigger>\n  </TabsList>\n  <TabsContent value="notes">Release note content</TabsContent>\n  <TabsContent value="inventory">Inventory content</TabsContent>\n</Tabs>`,
+      },
+      render: (values) => (
+        <Tabs value={getEditorString(values, "tab")} className="w-full max-w-md">
+          <TabsList>
+            <TabsTrigger value="notes">{getEditorString(values, "firstLabel")}</TabsTrigger>
+            <TabsTrigger value="inventory">{getEditorString(values, "secondLabel")}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="notes" className="pt-3">
+            <Accordion type="single" collapsible>
+              <AccordionItem value="focus">
+                <AccordionTrigger>Focus and keyboard states</AccordionTrigger>
+                <AccordionContent>Reusable tab content.</AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </TabsContent>
+          <TabsContent value="inventory" className="pt-3">
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>@moritzbrantner/ui</TableCell>
+                  <TableCell>Current</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TabsContent>
+        </Tabs>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-calendar",
+        label: "Calendar",
+        importName: "Calendar",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          {
+            id: "maxEventsPerDay",
+            label: "Max events per day",
+            type: "slider",
+            value: 2,
+            min: 1,
+            max: 4,
+            step: 1,
+          },
+          { id: "showOutsideDays", label: "Show outside days", type: "boolean", value: false },
+          {
+            id: "cellSize",
+            label: "Cell size rem",
+            type: "slider",
+            value: 8,
+            min: 5,
+            max: 12,
+            step: 1,
+          },
+        ],
+        buildSnippet: (values) =>
+          `import { Calendar } from "@moritzbrantner/ui";\n\n<Calendar\n  mode="single"\n  maxEventsPerDay={${getEditorNumber(
+            values,
+            "maxEventsPerDay",
+          )}}\n  showOutsideDays={${getEditorBoolean(
+            values,
+            "showOutsideDays",
+          )}}\n  className="[--cell-size:${getEditorNumber(values, "cellSize")}rem]"\n/>`,
+      },
+      render: (values) => (
+        <Calendar
+          cellComponent={CalendarPreviewDay}
+          icsData={releaseCalendarData}
+          defaultMonth={new Date(2026, 3, 1)}
+          maxEventsPerDay={getEditorNumber(values, "maxEventsPerDay")}
+          mode="single"
+          selected={new Date(2026, 3, 14)}
+          showOutsideDays={getEditorBoolean(values, "showOutsideDays")}
+          className="w-full max-w-3xl rounded-none border border-border/60 bg-background/55 p-3"
+          style={
+            { "--cell-size": `${getEditorNumber(values, "cellSize")}rem` } as React.CSSProperties
+          }
+        />
+      ),
+    },
+    {
+      definition: {
+        id: "editable-chart",
+        label: "ChartContainer",
+        importName: "ChartContainer",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "adoptionColor", label: "Adoption color", type: "color", value: "#2563eb" },
+          { id: "qualityColor", label: "Quality color", type: "color", value: "#16a34a" },
+          {
+            id: "opacity",
+            label: "Fill opacity",
+            type: "slider",
+            value: 18,
+            min: 4,
+            max: 40,
+            step: 1,
+          },
+        ],
+        buildSnippet: (values) =>
+          `import { ChartContainer } from "@moritzbrantner/ui";\n\n<ChartContainer\n  config={{\n    adoption: { label: "Adoption", color: "${getEditorString(
+            values,
+            "adoptionColor",
+          )}" },\n    quality: { label: "Quality", color: "${getEditorString(
+            values,
+            "qualityColor",
+          )}" },\n  }}\n>\n  {/* Recharts chart */}\n</ChartContainer>`,
+      },
+      render: (values) => {
+        const config = {
+          adoption: { label: "Adoption", color: getEditorString(values, "adoptionColor") },
+          quality: { label: "Quality", color: getEditorString(values, "qualityColor") },
+        };
+
+        return (
+          <ChartContainer className="min-h-64 w-full max-w-md" config={config}>
+            <AreaChart data={deliveryMetrics} margin={{ left: 12, right: 12 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis dataKey="sprint" tickLine={false} axisLine={false} tickMargin={10} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend content={<ChartLegendContent />} />
+              <Area
+                type="monotone"
+                dataKey="adoption"
+                stroke="var(--color-adoption)"
+                fill="var(--color-adoption)"
+                fillOpacity={getEditorNumber(values, "opacity") / 100}
+              />
+              <Area
+                type="monotone"
+                dataKey="quality"
+                stroke="var(--color-quality)"
+                fill="var(--color-quality)"
+                fillOpacity={getEditorNumber(values, "opacity") / 100}
+              />
+            </AreaChart>
+          </ChartContainer>
+        );
+      },
+    },
+    {
+      definition: {
+        id: "editable-identity-state",
+        label: "AvatarCollection and Empty",
+        importName: "AvatarCollection",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          {
+            id: "maxVisible",
+            label: "Max visible avatars",
+            type: "slider",
+            value: 3,
+            min: 1,
+            max: 5,
+            step: 1,
+          },
+          { id: "emptyTitle", label: "Empty title", type: "text", value: "No package notes yet" },
+          { id: "emptyAction", label: "Action label", type: "text", value: "Create release note" },
+        ],
+        buildSnippet: (values) =>
+          `import { AvatarCollection, Button, Empty, EmptyContent, EmptyHeader, EmptyTitle } from "@moritzbrantner/ui";\n\n<AvatarCollection users={users} maxVisible={${getEditorNumber(
+            values,
+            "maxVisible",
+          )}} />\n<Empty>\n  <EmptyHeader>\n    <EmptyTitle>${getEditorString(
+            values,
+            "emptyTitle",
+          )}</EmptyTitle>\n  </EmptyHeader>\n  <EmptyContent>\n    <Button variant="outline">${getEditorString(
+            values,
+            "emptyAction",
+          )}</Button>\n  </EmptyContent>\n</Empty>`,
+      },
+      render: (values) => (
+        <div className="grid gap-4 md:grid-cols-2">
+          <AvatarCollection
+            users={[
+              { initials: "MB", name: "Moritz Brantner", online: true },
+              { initials: "AR", name: "Ari Reed" },
+              { initials: "LK", name: "Lena Koch" },
+              { initials: "VT", name: "Vera Tran" },
+              { initials: "PN", name: "Priya Nair" },
+            ]}
+            maxVisible={getEditorNumber(values, "maxVisible")}
+          />
+          <Empty className="min-h-48 border border-dashed">
+            <EmptyHeader>
+              <EmptyTitle>{getEditorString(values, "emptyTitle")}</EmptyTitle>
+              <EmptyDescription>
+                State copy and actions can be adjusted before integration.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="outline">{getEditorString(values, "emptyAction")}</Button>
+            </EmptyContent>
+          </Empty>
+        </div>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-overlays",
+        label: "Dropdown, Tooltip, and HoverCard",
+        importName: "DropdownMenu",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "menuLabel", label: "Menu button", type: "text", value: "Open menu" },
+          {
+            id: "tooltip",
+            label: "Tooltip text",
+            type: "text",
+            value: "Keep the selection pinned.",
+          },
+          {
+            id: "hoverTitle",
+            label: "Hover card title",
+            type: "text",
+            value: "Package maintainer",
+          },
+        ],
+        buildSnippet: (values) =>
+          `import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Tooltip, TooltipContent, TooltipTrigger } from "@moritzbrantner/ui";\n\n<DropdownMenu>\n  <DropdownMenuTrigger asChild>\n    <Button variant="outline">${getEditorString(
+            values,
+            "menuLabel",
+          )}</Button>\n  </DropdownMenuTrigger>\n  <DropdownMenuContent>\n    <DropdownMenuItem>Copy release note</DropdownMenuItem>\n  </DropdownMenuContent>\n</DropdownMenu>\n<Tooltip>\n  <TooltipTrigger asChild>\n    <Button variant="secondary">Tooltip target</Button>\n  </TooltipTrigger>\n  <TooltipContent>${getEditorString(values, "tooltip")}</TooltipContent>\n</Tooltip>`,
+      },
+      render: (values) => (
+        <TooltipProvider>
+          <div className="flex flex-wrap gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">{getEditorString(values, "menuLabel")}</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Release sharing</DropdownMenuLabel>
+                <DropdownMenuItem>Copy release note</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="secondary">Tooltip target</Button>
+              </TooltipTrigger>
+              <TooltipContent>{getEditorString(values, "tooltip")}</TooltipContent>
+            </Tooltip>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="ghost">Hover card</Button>
+              </HoverCardTrigger>
+              <HoverCardContent>
+                <p className="text-sm font-medium">{getEditorString(values, "hoverTitle")}</p>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+        </TooltipProvider>
+      ),
+    },
+    {
+      definition: {
+        id: "editable-navigation-utilities",
+        label: "Breadcrumb, Select, ToggleGroup, and Loading",
+        importName: "Breadcrumb",
+        importFrom: "@moritzbrantner/ui",
+        controls: [
+          { id: "page", label: "Breadcrumb page", type: "text", value: "UI package" },
+          {
+            id: "environment",
+            label: "Selected environment",
+            type: "select",
+            value: "preview",
+            options: ["local", "preview", "production"].map((value) => ({ label: value, value })),
+          },
+          {
+            id: "layout",
+            label: "Layout mode",
+            type: "select",
+            value: "grid",
+            options: ["grid", "list"].map((value) => ({ label: value, value })),
+          },
+        ],
+        buildSnippet: (values) =>
+          `import { Breadcrumb, NativeSelect, ToggleGroup, ToggleGroupItem } from "@moritzbrantner/ui";\n\n<Breadcrumb>{/* ${getEditorString(
+            values,
+            "page",
+          )} */}</Breadcrumb>\n<NativeSelect defaultValue="${getEditorString(
+            values,
+            "environment",
+          )}" />\n<ToggleGroup type="single" value="${getEditorString(
+            values,
+            "layout",
+          )}">\n  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>\n  <ToggleGroupItem value="list">List</ToggleGroupItem>\n</ToggleGroup>`,
+      },
+      render: (values) => (
+        <div className="grid gap-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/index.html">Playground</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator>
+                <ChevronRightIcon />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{getEditorString(values, "page")}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex flex-wrap gap-3">
+            <NativeSelect className="w-44" value={getEditorString(values, "environment")}>
+              <NativeSelectOption value="local">Local</NativeSelectOption>
+              <NativeSelectOption value="preview">Preview</NativeSelectOption>
+              <NativeSelectOption value="production">Production</NativeSelectOption>
+            </NativeSelect>
+            <ToggleGroup type="single" value={getEditorString(values, "layout")}>
+              <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+            </ToggleGroup>
+            <Spinner />
+            <DotsSpinner label="Loading previews" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+        </div>
+      ),
+    },
+  ];
+}
+
+function EditableIntegrationGallery() {
+  const editableItems = useMemo(buildEditableGalleryItems, []);
+
+  return (
+    <ComponentEditorProvider defaultSelectedId="editable-button">
+      <section className="mb-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <Card className={glassCardClass}>
+          <CardHeader>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>Component editor</CardTitle>
+                <CardDescription>
+                  Select a component, adjust its props and styling, then copy JSX for your project.
+                </CardDescription>
+              </div>
+              <Badge variant="outline">Click to edit</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 lg:grid-cols-2">
+              {editableItems.map((item) => (
+                <EditableComponent
+                  key={item.definition.id}
+                  definition={item.definition}
+                  className="min-h-full"
+                >
+                  {(values) => (
+                    <ComponentEditorPreviewFrame
+                      label={item.definition.label}
+                      className="flex min-h-40 flex-col justify-center"
+                    >
+                      {item.render(values)}
+                    </ComponentEditorPreviewFrame>
+                  )}
+                </EditableComponent>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <ComponentEditorPanel className="sticky top-4 max-h-[calc(100vh-2rem)] xl:self-start" />
+      </section>
+    </ComponentEditorProvider>
+  );
+}
+
 function UiPage() {
   const [uiStyle, setUiStyle] = useState<UiThemeName>(getInitialUiStyle);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -491,6 +1291,8 @@ function UiPage() {
         title="UI package examples"
         description="A wider component gallery for the shared UI package, now styled with sharper glass surfaces so buttons, overlays, forms, and empty states can be checked in one place."
       >
+        <EditableIntegrationGallery />
+
         <section className="mb-4">
           <Card className={glassCardClass}>
             <CardHeader>
