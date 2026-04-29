@@ -38,13 +38,22 @@ const config: StorybookConfig = {
             find: /^@moritzbrantner\/ui\/lib\/cn$/,
             replacement: path.resolve(packageRoot, "src/lib/cn.ts"),
           },
+          {
+            find: /^@moritzbrantner\/three-starters$/,
+            replacement: path.resolve(packageRoot, "../three-starters/src/index.ts"),
+          },
+          {
+            find: /^@moritzbrantner\/three-starters\/core$/,
+            replacement: path.resolve(packageRoot, "../three-starters/src/core.ts"),
+          },
         ],
-        dedupe: ["react", "react-dom"],
+        dedupe: ["react", "react-dom", "three"],
       },
       optimizeDeps: {
         include: [
           "@storybook/addon-a11y/preview",
           "@storybook/react-vite",
+          "@react-three/fiber",
           "@base-ui/react",
           "@tanstack/react-table",
           "class-variance-authority",
@@ -63,6 +72,7 @@ const config: StorybookConfig = {
           "recharts",
           "sonner",
           "tailwind-merge",
+          "three",
           "vaul",
         ],
       },

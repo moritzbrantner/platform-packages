@@ -4,6 +4,7 @@ import {
   createHexGridLayout,
   createHoneycombCellGeometry,
   createHoneycombCellShape,
+  getHexTileNavigationNeighborIndex,
   getHexGridCellTransform,
   getHexGridCellPosition,
 } from "@moritzbrantner/three-starters";
@@ -76,5 +77,25 @@ describe("@moritzbrantner/three-starters", () => {
     expect(() => getHexGridCellTransform({ offset: [0, 0] }, -0.1)).toThrow(
       "height must be zero or a positive number",
     );
+  });
+
+  test("skips incomplete slots when moving through the navigation grid", () => {
+    expect(getHexTileNavigationNeighborIndex(2, "right", 5, 3)).toBe(2);
+    expect(getHexTileNavigationNeighborIndex(1, "down", 5, 3)).toBe(4);
+    expect(getHexTileNavigationNeighborIndex(4, "left", 5, 3)).toBe(3);
+  });
+
+  test("supports six-direction hex traversal for staggered columns", () => {
+    expect(getHexTileNavigationNeighborIndex(1, "up-left", 5, 3)).toBe(0);
+    expect(getHexTileNavigationNeighborIndex(1, "up-right", 5, 3)).toBe(2);
+    expect(getHexTileNavigationNeighborIndex(1, "down-left", 5, 3)).toBe(3);
+    expect(getHexTileNavigationNeighborIndex(3, "up-right", 5, 3)).toBe(1);
+    expect(getHexTileNavigationNeighborIndex(0, "down-right", 5, 3)).toBe(1);
+  });
+
+  test("keeps the current tile when a hex-direction neighbor is out of bounds", () => {
+    expect(getHexTileNavigationNeighborIndex(0, "up-left", 5, 3)).toBe(0);
+    expect(getHexTileNavigationNeighborIndex(2, "up-right", 5, 3)).toBe(2);
+    expect(getHexTileNavigationNeighborIndex(4, "down-right", 5, 3)).toBe(4);
   });
 });

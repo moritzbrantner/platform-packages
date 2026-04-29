@@ -2,11 +2,12 @@
 
 Starter components for `three.js` scenes built with React Three Fiber.
 
-The first component is `HexGrid`, a reusable honeycomb grid rendered from instanced hex cells.
+The package currently includes `HexGrid` for low-level honeycomb scenes and `HexTileNavigation` for a higher-level interactive navigation surface.
 
 ## Main APIs
 
 - `HexGrid`
+- `HexTileNavigation`
 - `createHexGridLayout(options)`
 - `createHoneycombCellGeometry(options)`
 - `getHexGridCellTransform(cell, height)`
@@ -41,3 +42,28 @@ export function Scene() {
 ```
 
 `depth` still works as the default uniform height. Use `tileHeight` when you want to vary height per honeycomb.
+
+## Navigation Example
+
+```tsx
+import { HexTileNavigation } from "@moritzbrantner/three-starters";
+
+const items = [
+  {
+    id: "brief",
+    label: "Project brief",
+    description: "Frame the current objective before branching into deeper routes.",
+  },
+  {
+    id: "flows",
+    label: "Route map",
+    description: "Review the navigation geometry and choose the next destination.",
+  },
+];
+
+export function NavigationDemo() {
+  return <HexTileNavigation items={items} columns={2} />;
+}
+```
+
+`HexTileNavigation` wraps the shared `HexGrid` scene with click handling, arrow-key traversal, and a destination detail panel.

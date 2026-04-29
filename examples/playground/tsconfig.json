@@ -26,6 +26,8 @@
       "@moritzbrantner/storytelling": ["../../packages/storytelling/src/index.ts"],
       "@moritzbrantner/storytelling/remotion": ["../../packages/storytelling/src/remotion.tsx"],
       "@moritzbrantner/storytelling/three": ["../../packages/storytelling/src/three.tsx"],
+      "@moritzbrantner/three-starters": ["../../packages/three-starters/src/index.ts"],
+      "@moritzbrantner/three-starters/core": ["../../packages/three-starters/src/core.ts"],
       "@moritzbrantner/subtitles": ["../../packages/subtitles/src/index.ts"],
       "@moritzbrantner/ui": ["../../packages/ui/src/index.ts"],
       "@moritzbrantner/ui/bobba": ["../../packages/ui/src/bobba.ts"],

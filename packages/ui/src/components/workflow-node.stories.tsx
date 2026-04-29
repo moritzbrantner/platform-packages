@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn } from "storybook/test";
 
-import { WorkflowNode, getWorkflowNodeSize } from "./workflow-node";
+import { WorkflowNode, getWorkflowNodeSize, type WorkflowNodeData } from "./workflow-node";
 
-const classifierNode = {
+const classifierNode: WorkflowNodeData = {
   id: "classify",
   label: "Classify",
   category: "AI",
@@ -30,9 +30,9 @@ const classifierNode = {
       description: "Predicted taxonomy labels.",
     },
   ],
-} as const;
+};
 
-const compactPublishNode = {
+const compactPublishNode: WorkflowNodeData = {
   id: "publish",
   label: "Publish",
   description: "Forward workflow state to delivery channels.",
@@ -40,7 +40,7 @@ const compactPublishNode = {
   status: "success",
   outputs: [{ id: "event", label: "Webhook", kind: "event" }],
   inputs: [{ id: "labels", label: "Labels", kind: "labels" }],
-} as const;
+};
 
 const meta = {
   title: "Components/WorkflowNode",

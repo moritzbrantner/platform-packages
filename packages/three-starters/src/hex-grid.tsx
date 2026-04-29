@@ -24,6 +24,8 @@ export interface HexGridProps
   metalness?: number;
   cellColor?: ColorRepresentation | ((cell: HexGridCell) => ColorRepresentation);
   onCellClick?: (cell: HexGridCell, event: ThreeEvent<MouseEvent>) => void;
+  onCellPointerMove?: (cell: HexGridCell, event: ThreeEvent<PointerEvent>) => void;
+  onCellPointerOut?: (event: ThreeEvent<PointerEvent>) => void;
 }
 
 const DEFAULT_COLOR = "#f4b453";
@@ -47,6 +49,8 @@ export function HexGrid({
   metalness = DEFAULT_METALNESS,
   cellColor,
   onCellClick,
+  onCellPointerMove,
+  onCellPointerOut,
   ...groupProps
 }: HexGridProps) {
   const meshRef = useRef<InstancedMesh>(null);
@@ -134,6 +138,26 @@ export function HexGrid({
               }
             : undefined
         }
+        onPointerMove={
+          onCellPointerMove
+            ? (event) => {
+                const instanceId = event.instanceId;
+
+                if (instanceId == null) {
+                  return;
+                }
+
+                const cell = layout.cells[instanceId];
+
+                if (!cell) {
+                  return;
+                }
+
+                onCellPointerMove(cell, event);
+              }
+            : undefined
+        }
+        onPointerOut={onCellPointerOut}
       >
         <primitive attach="geometry" object={geometry} />
         <meshStandardMaterial

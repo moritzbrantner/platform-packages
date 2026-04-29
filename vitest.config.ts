@@ -182,6 +182,14 @@ export default defineConfig({
         "packages/speed-reading/src/core.ts",
       ),
       "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
+      "@moritzbrantner/three-starters": path.resolve(
+        rootDir,
+        "packages/three-starters/src/index.ts",
+      ),
+      "@moritzbrantner/three-starters/core": path.resolve(
+        rootDir,
+        "packages/three-starters/src/core.ts",
+      ),
       "@moritzbrantner/subtitles": path.resolve(rootDir, "packages/subtitles/src/index.ts"),
       "@moritzbrantner/summarization": path.resolve(rootDir, "packages/summarization/src/index.ts"),
       "@moritzbrantner/syntax-analysis": path.resolve(

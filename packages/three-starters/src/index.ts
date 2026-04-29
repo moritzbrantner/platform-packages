@@ -15,3 +15,10 @@ export {
   type HexGridScale,
 } from "./core";
 export { HexGrid, type HexGridProps } from "./hex-grid";
+export {
+  HexTileNavigation,
+  getHexTileNavigationNeighborIndex,
+  type HexTileNavigationDirection,
+  type HexTileNavigationItem,
+  type HexTileNavigationProps,
+} from "./hex-tile-navigation";

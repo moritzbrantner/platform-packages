@@ -41,6 +41,7 @@
         "@moritzbrantner/speed-reading": "workspace:*",
         "@moritzbrantner/storytelling": "workspace:*",
         "@moritzbrantner/subtitles": "workspace:*",
+        "@moritzbrantner/three-starters": "workspace:*",
         "@moritzbrantner/ui": "workspace:*",
         "@moritzbrantner/word-prediction": "workspace:*",
         "@moritzbrantner/word-vectors": "workspace:*",
@@ -65,35 +66,35 @@
     },
     "packages/any-to-any": {
       "name": "@moritzbrantner/any-to-any",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/audio-classification": {
       "name": "@moritzbrantner/audio-classification",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/audio-text-to-text": {
       "name": "@moritzbrantner/audio-text-to-text",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/audio-to-audio": {
       "name": "@moritzbrantner/audio-to-audio",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
     "packages/auth-contract": {
       "name": "@moritzbrantner/auth-contract",
-      "version": "0.1.0",
+      "version": "0.1.1",
     },
     "packages/automatic-speech-recognition": {
       "name": "@moritzbrantner/automatic-speech-recognition",
@@ -208,6 +209,9 @@
     "packages/flat-design": {
       "name": "@moritzbrantner/flat-design",
       "version": "0.1.1",
+      "dependencies": {
+        "@moritzbrantner/ui": "^0.5.0",
+      },
       "devDependencies": {
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
@@ -222,6 +226,34 @@
     "packages/foundation-contract": {
       "name": "@moritzbrantner/foundation-contract",
       "version": "0.1.0",
+    },
+    "packages/frontend-ui": {
+      "name": "@moritzbrantner/frontend-ui",
+      "version": "0.1.1",
+      "dependencies": {
+        "@moritzbrantner/ui": "^0.5.0",
+      },
+      "devDependencies": {
+        "@storybook/addon-a11y": "^10.3.5",
+        "@storybook/addon-docs": "^10.3.5",
+        "@storybook/addon-vitest": "^10.3.5",
+        "@storybook/react-vite": "^10.3.5",
+        "@tailwindcss/vite": "^4.1.14",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
+        "@vitest/browser-playwright": "^4.1.4",
+        "lucide-react": "^1.7.0",
+        "playwright": "^1.59.1",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "storybook": "^10.3.5",
+        "vite": "^8.0.8",
+        "vitest": "^4.1.4",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
     },
     "packages/graphs": {
       "name": "@moritzbrantner/graphs",
@@ -239,7 +271,7 @@
     },
     "packages/huggingface-universal": {
       "name": "@moritzbrantner/huggingface-universal",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@moritzbrantner/pipeline-core": "workspace:*",
       },
@@ -353,8 +385,8 @@
       "name": "@moritzbrantner/linguistics-learning",
       "version": "0.1.1",
       "dependencies": {
-        "@moritzbrantner/linguistics-core": "workspace:*",
-        "@moritzbrantner/linguistics-corpus": "workspace:*",
+        "@moritzbrantner/linguistics-core": "^0.1.1",
+        "@moritzbrantner/linguistics-corpus": "^0.1.1",
       },
     },
     "packages/maps": {
@@ -415,7 +447,7 @@
       "name": "@moritzbrantner/ocr",
       "version": "0.1.1",
       "dependencies": {
-        "@moritzbrantner/linguistics-core": "workspace:*",
+        "@moritzbrantner/linguistics-core": "^0.1.1",
       },
     },
     "packages/oxfmt-config": {
@@ -442,7 +474,7 @@
     },
     "packages/pipeline-core": {
       "name": "@moritzbrantner/pipeline-core",
-      "version": "0.1.1",
+      "version": "0.1.2",
     },
     "packages/question-answering": {
       "name": "@moritzbrantner/question-answering",
@@ -464,6 +496,7 @@
       "name": "@moritzbrantner/remotion",
       "version": "0.1.0",
       "dependencies": {
+        "@moritzbrantner/flat-design": "^0.1.1",
         "@moritzbrantner/maps": "^0.1.2",
       },
       "devDependencies": {
@@ -675,6 +708,24 @@
         "@moritzbrantner/huggingface-universal": "workspace:*",
       },
     },
+    "packages/three-starters": {
+      "name": "@moritzbrantner/three-starters",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@react-three/fiber": "^9.4.0",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "three": "^0.180.0",
+      },
+      "peerDependencies": {
+        "@react-three/fiber": "^9.4.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "three": "^0.180.0",
+      },
+    },
     "packages/token-classification": {
       "name": "@moritzbrantner/token-classification",
       "version": "0.1.1",
@@ -699,7 +750,7 @@
     },
     "packages/ui": {
       "name": "@moritzbrantner/ui",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@base-ui/react": "^1.3.0",
         "@tanstack/react-table": "^8.21.3",
@@ -724,7 +775,9 @@
         "vaul": "^1.1.2",
       },
       "devDependencies": {
+        "@moritzbrantner/three-starters": "workspace:*",
         "@playwright/test": "^1.59.1",
+        "@react-three/fiber": "^9.4.0",
         "@storybook/addon-a11y": "^10.3.5",
         "@storybook/addon-docs": "^10.3.5",
         "@storybook/addon-vitest": "^10.3.5",
@@ -738,6 +791,7 @@
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "storybook": "^10.3.5",
+        "three": "^0.180.0",
         "vite": "^8.0.8",
         "vitest": "^4.1.4",
       },
@@ -1105,6 +1159,8 @@
 
     "@moritzbrantner/foundation-contract": ["@moritzbrantner/foundation-contract@workspace:packages/foundation-contract"],
 
+    "@moritzbrantner/frontend-ui": ["@moritzbrantner/frontend-ui@workspace:packages/frontend-ui"],
+
     "@moritzbrantner/graphs": ["@moritzbrantner/graphs@workspace:packages/graphs"],
 
     "@moritzbrantner/hexagon-grids": ["@moritzbrantner/hexagon-grids@workspace:packages/hexagon-grids"],
@@ -1212,6 +1268,8 @@
     "@moritzbrantner/text-to-speech": ["@moritzbrantner/text-to-speech@workspace:packages/text-to-speech"],
 
     "@moritzbrantner/text-to-video": ["@moritzbrantner/text-to-video@workspace:packages/text-to-video"],
+
+    "@moritzbrantner/three-starters": ["@moritzbrantner/three-starters@workspace:packages/three-starters"],
 
     "@moritzbrantner/token-classification": ["@moritzbrantner/token-classification@workspace:packages/token-classification"],
 
@@ -2087,7 +2145,7 @@
 
     "fs-extra": ["fs-extra@7.0.1", "", { "dependencies": { "graceful-fs": "4.2.11", "jsonfile": "4.0.0", "universalify": "0.1.2" } }, "sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw=="],
 
-    "fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
+    "fsevents": ["fsevents@2.3.2", "", { "os": "darwin" }, "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA=="],
 
     "function-bind": ["function-bind@1.1.2", "", {}, "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA=="],
 
@@ -2533,7 +2591,7 @@
 
     "regenerator-runtime": ["regenerator-runtime@0.13.11", "", {}, "sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg=="],
 
-    "remotion": ["remotion@4.0.448", "", { "peerDependencies": { "react": "19.2.4", "react-dom": "19.2.4" } }, "sha512-4NBSmQRIzntZiLEtOU/bGMQXfnGgUsBoyrewdTRyYzPl+qnvlBjqwxcntsu6SDY/W7ucEwKZUTc7GDOcFhIuAA=="],
+    "remotion": ["remotion@4.0.451", "", { "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-uTku1RmytCk50ZtPEoTdmB/4Erb+nH85vT3jkCLWQCaG9qWXxp2XAJ+eL7EfsCUyast2umZm4vdrdKXVxbeDMQ=="],
 
     "require-directory": ["require-directory@2.1.1", "", {}, "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q=="],
 
@@ -2847,8 +2905,6 @@
 
     "@reduxjs/toolkit/immer": ["immer@11.1.4", "", {}, "sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw=="],
 
-    "@remotion/player/remotion": ["remotion@4.0.451", "", { "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-uTku1RmytCk50ZtPEoTdmB/4Erb+nH85vT3jkCLWQCaG9qWXxp2XAJ+eL7EfsCUyast2umZm4vdrdKXVxbeDMQ=="],
-
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
     "@tailwindcss/vite/vite": ["vite@7.3.1", "", { "dependencies": { "esbuild": "0.27.4", "fdir": "6.5.0", "picomatch": "4.0.4", "postcss": "8.5.8", "rollup": "4.60.1", "tinyglobby": "0.2.15" }, "optionalDependencies": { "@types/node": "24.12.0", "fsevents": "2.3.3", "jiti": "2.6.1", "lightningcss": "1.32.0" }, "bin": { "vite": "bin/vite.js" } }, "sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA=="],
@@ -2879,8 +2935,6 @@
 
     "path-scurry/lru-cache": ["lru-cache@11.3.5", "", {}, "sha512-NxVFwLAnrd9i7KUBxC4DrUhmgjzOs+1Qm50D3oF1/oL+r1NpZ4gA7xvG0/zJ8evR7zIKn4vLf7qTNduWFtCrRw=="],
 
-    "playwright/fsevents": ["fsevents@2.3.2", "", { "os": "darwin" }, "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA=="],
-
     "prompts/kleur": ["kleur@3.0.3", "", {}, "sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w=="],
 
     "read-yaml-file/js-yaml": ["js-yaml@3.14.2", "", { "dependencies": { "argparse": "1.0.10", "esprima": "4.0.1" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg=="],
@@ -2892,6 +2946,8 @@
     "restore-cursor/onetime": ["onetime@7.0.0", "", { "dependencies": { "mimic-function": "5.0.1" } }, "sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ=="],
 
     "rolldown/@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-rc.15", "", {}, "sha512-UromN0peaE53IaBRe9W7CjrZgXl90fqGpK+mIZbA3qSTeYqg3pqpROBdIPvOG3F5ereDHNwoHBI2e50n1BDr1g=="],
+
+    "rollup/fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
 
     "router/path-to-regexp": ["path-to-regexp@8.4.1", "", {}, "sha512-fvU78fIjZ+SBM9YwCknCvKOUKkLVqtWDVctl0s7xIqfmfb38t2TT4ZU2gHm+Z8xGwgW+QWEU3oQSAzIbo89Ggw=="],
 
@@ -2908,6 +2964,8 @@
     "string-width/strip-ansi": ["strip-ansi@7.2.0", "", { "dependencies": { "ansi-regex": "6.2.2" } }, "sha512-yDPMNjp4WyfYBkHnjIRLfca1i6KMyGCtsVgoKe/z1+6vukgaENdgGBZt+ZmKPc4gavvEZ5OgHfHdrazhgNyG7w=="],
 
     "sucrase/commander": ["commander@4.1.1", "", {}, "sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA=="],
+
+    "vite/fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
 
     "vitest/tinyexec": ["tinyexec@1.0.4", "", {}, "sha512-u9r3uZC0bdpGOXtlxUIdwf9pkmvhqJdrVCH9fapQtgy/OeTTMZ1nqH7agtvEfmGui6e1XxjcdrlxvxJvc3sMqw=="],
 
@@ -2942,6 +3000,8 @@
     "@inquirer/type/@types/node/undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
 
     "@tailwindcss/vite/vite/@types/node": ["@types/node@24.12.0", "", { "dependencies": { "undici-types": "7.16.0" } }, "sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ=="],
+
+    "@tailwindcss/vite/vite/fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
 
     "cliui/string-width/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 

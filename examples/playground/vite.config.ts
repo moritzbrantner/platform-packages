@@ -113,6 +113,14 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/storytelling/src/remotion.tsx"),
       },
       {
+        find: /^@moritzbrantner\/three-starters$/,
+        replacement: path.resolve(workspaceRoot, "packages/three-starters/src/index.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/three-starters\/core$/,
+        replacement: path.resolve(workspaceRoot, "packages/three-starters/src/core.ts"),
+      },
+      {
         find: /^@moritzbrantner\/word-prediction$/,
         replacement: path.resolve(workspaceRoot, "packages/word-prediction/src/index.ts"),
       },
@@ -145,6 +153,7 @@ export default defineConfig({
       "@moritzbrantner/subtitles",
       "@moritzbrantner/ui",
       "@moritzbrantner/storytelling",
+      "@moritzbrantner/three-starters",
       "@moritzbrantner/word-prediction",
       "@moritzbrantner/word-vectors",
     ],
@@ -178,6 +187,7 @@ export default defineConfig({
         subtitles: path.resolve(rootDir, "subtitles.html"),
         ui: path.resolve(rootDir, "ui.html"),
         storytelling: path.resolve(rootDir, "storytelling.html"),
+        hexTileNavigation: path.resolve(rootDir, "hex-tile-navigation.html"),
         wordPrediction: path.resolve(rootDir, "word-prediction.html"),
         wordVectors: path.resolve(rootDir, "word-vectors.html"),
       },

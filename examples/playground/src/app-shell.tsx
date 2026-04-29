@@ -17,6 +17,7 @@ import {
 } from "@moritzbrantner/ui";
 
 export type PageKey =
+  | "hex-tile-navigation"
   | "home"
   | "card-games"
   | "data-density"
@@ -156,6 +157,18 @@ export const playgroundExampleGroups: readonly PlaygroundExampleGroup[] = [
     eyebrow: "Surfaces",
     description: "Density, storytelling, card, and illustration packages.",
     items: [
+      {
+        key: "hex-tile-navigation",
+        href: "/hex-tile-navigation.html",
+        label: "Hex navigation",
+        eyebrow: "@moritzbrantner/three-starters",
+        title: "Hex tile navigation demo",
+        description:
+          "Explore a 3D honeycomb navigation surface with clickable tiles, keyboard movement, and destination details for route planning.",
+        cta: "Open hex navigation demo",
+        navDescription: "Interactive honeycomb destination grid.",
+        badge: "New",
+      },
       {
         key: "data-density",
         href: "/data-density.html",
