@@ -13,7 +13,7 @@ import {
   validateStory,
   type StoryDocument,
   type StoryRenderProps,
-} from "../src";
+} from ".";
 
 type FixtureData = {
   tone: string;
@@ -331,12 +331,12 @@ describe("@moritzbrantner/storytelling", () => {
   });
 
   test("imports remotion and three entrypoints without browser-only setup", async () => {
-    await expect(import("../src/remotion")).resolves.toHaveProperty("StoryRemotionComposition");
-    await expect(import("../src/three")).resolves.toHaveProperty("StoryCanvasStage");
+    await expect(import("./remotion")).resolves.toHaveProperty("StoryRemotionComposition");
+    await expect(import("./three")).resolves.toHaveProperty("StoryCanvasStage");
   });
 
   test("computes Remotion composition props", async () => {
-    const { getStoryCompositionProps } = await import("../src/remotion");
+    const { getStoryCompositionProps } = await import("./remotion");
     const composition = getStoryCompositionProps(story, {
       id: "signal-answer",
       choiceIds: ["answer"],
@@ -363,7 +363,7 @@ describe("@moritzbrantner/storytelling", () => {
       useCurrentFrame: () => 130,
     }));
 
-    const { StoryRemotionComposition } = await import("../src/remotion");
+    const { StoryRemotionComposition } = await import("./remotion");
     const capture = vi.fn();
     const remotionStory: StoryDocument<FixtureData> = {
       ...story,
