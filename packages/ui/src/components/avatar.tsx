@@ -4,9 +4,10 @@ import * as React from "react";
 import { Avatar as AvatarPrimitive } from "radix-ui";
 
 import { cn } from "../lib/cn";
+import { avatarShapeStyles } from "./avatar-shapes";
 
 type AvatarSize = "xs" | "sm" | "default" | "lg" | "xl";
-type AvatarShape = "round" | "square" | "hexagonal" | "octagonal";
+type AvatarShape = keyof typeof avatarShapeStyles;
 
 type AvatarRootProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
   size?: AvatarSize;
@@ -27,6 +28,7 @@ function AvatarRoot({
   className,
   size = "default",
   shape = "round",
+  style,
   ...props
 }: AvatarRootProps) {
   return (
@@ -35,9 +37,10 @@ function AvatarRoot({
       data-size={size}
       data-shape={shape}
       className={cn(
-        "group/avatar relative flex size-8 shrink-0 select-none after:absolute after:inset-0 after:border after:border-border after:content-[''] after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 data-[size=xl]:size-12 data-[size=xs]:size-5 data-[shape=round]:after:rounded-full data-[shape=square]:after:rounded-md data-[shape=hexagonal]:after:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] data-[shape=octagonal]:after:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)] dark:after:mix-blend-lighten",
+        "group/avatar relative flex size-8 shrink-0 select-none overflow-hidden border border-border bg-transparent data-[size=lg]:size-10 data-[size=sm]:size-6 data-[size=xl]:size-12 data-[size=xs]:size-5",
         className,
       )}
+      style={{ ...avatarShapeStyles[shape], ...style }}
       {...props}
     />
   );
@@ -71,10 +74,7 @@ function AvatarImage({ className, ...props }: React.ComponentProps<typeof Avatar
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn(
-        "aspect-square size-full object-cover group-data-[shape=round]/avatar:rounded-full group-data-[shape=square]/avatar:rounded-md group-data-[shape=hexagonal]/avatar:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] group-data-[shape=octagonal]/avatar:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)]",
-        className,
-      )}
+      className={cn("aspect-square size-full object-cover", className)}
       {...props}
     />
   );
@@ -100,7 +100,7 @@ function AvatarFallback({
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        "flex size-full items-center justify-center bg-muted text-sm font-medium text-muted-foreground group-data-[size=lg]/avatar:text-base group-data-[size=sm]/avatar:text-xs group-data-[size=xl]/avatar:text-base group-data-[size=xs]/avatar:text-[10px] group-data-[shape=round]/avatar:rounded-full group-data-[shape=square]/avatar:rounded-md group-data-[shape=hexagonal]/avatar:[clip-path:polygon(25%_6.7%,75%_6.7%,100%_50%,75%_93.3%,25%_93.3%,0_50%)] group-data-[shape=octagonal]/avatar:[clip-path:polygon(30%_0,70%_0,100%_30%,100%_70%,70%_100%,30%_100%,0_70%,0_30%)]",
+        "flex size-full items-center justify-center bg-muted text-sm font-medium text-muted-foreground group-data-[size=lg]/avatar:text-base group-data-[size=sm]/avatar:text-xs group-data-[size=xl]/avatar:text-base group-data-[size=xs]/avatar:text-[10px]",
         className,
       )}
       {...props}

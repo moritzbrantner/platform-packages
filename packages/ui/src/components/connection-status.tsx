@@ -53,13 +53,13 @@ const actionToneVariants = cva(
     variants: {
       status: {
         connected:
-          "bg-emerald-500/10 text-emerald-700 group-hover/connection-status:bg-emerald-500/18 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(5_150_105_/_0.72)] group-active/connection-status:bg-emerald-500/25 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(5_150_105_/_0.78)] dark:text-emerald-300",
+          "bg-emerald-500/10 text-emerald-800 group-hover/connection-status:bg-emerald-500/18 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(5_150_105_/_0.72)] group-active/connection-status:bg-emerald-500/25 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(5_150_105_/_0.78)] dark:text-emerald-300",
         synced:
-          "bg-emerald-500/12 text-emerald-700 group-hover/connection-status:bg-emerald-500/22 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(5_150_105_/_0.72)] group-active/connection-status:bg-emerald-500/30 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(5_150_105_/_0.78)] dark:text-emerald-300",
+          "bg-emerald-500/12 text-emerald-800 group-hover/connection-status:bg-emerald-500/22 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(5_150_105_/_0.72)] group-active/connection-status:bg-emerald-500/30 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(5_150_105_/_0.78)] dark:text-emerald-300",
         disconnected:
           "bg-destructive/10 text-red-700 group-hover/connection-status:bg-destructive/18 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(185_28_28_/_0.68)] group-active/connection-status:bg-destructive/25 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(185_28_28_/_0.74)] dark:text-red-300",
         "out-of-sync":
-          "bg-amber-500/12 text-amber-700 group-hover/connection-status:bg-amber-500/22 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(217_119_6_/_0.7)] group-active/connection-status:bg-amber-500/30 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(217_119_6_/_0.78)] dark:text-amber-300",
+          "bg-amber-500/12 text-amber-800 group-hover/connection-status:bg-amber-500/22 group-hover/connection-status:shadow-[0_10px_22px_-14px_rgb(217_119_6_/_0.7)] group-active/connection-status:bg-amber-500/30 group-active/connection-status:shadow-[0_6px_16px_-12px_rgb(217_119_6_/_0.78)] dark:text-amber-300",
       },
     },
   },

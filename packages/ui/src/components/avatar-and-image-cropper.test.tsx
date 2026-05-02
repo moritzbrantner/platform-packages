@@ -13,7 +13,7 @@ import {
 
 describe("avatar", () => {
   test("renders single-user avatars and avatar collections with shape variants", () => {
-    render(
+    const { container } = render(
       <>
         <Avatar size="xl" shape="round" name="Mira Brandt" online />
         <AvatarCollection
@@ -25,7 +25,7 @@ describe("avatar", () => {
             { name: "People Ops", size: "xl", shape: "round" },
           ]}
           maxVisible={1}
-          overflowShape="square"
+          overflowShape="hexagonal"
         />
       </>,
     );
@@ -39,12 +39,26 @@ describe("avatar", () => {
     expect(screen.getByText("PD").closest('[data-slot="avatar"]')?.getAttribute("data-shape")).toBe(
       "hexagonal",
     );
+    const roundAvatar = screen.getByText("MB").closest('[data-slot="avatar"]') as HTMLElement;
+    const hexagonalAvatar = screen.getByText("PD").closest('[data-slot="avatar"]') as HTMLElement;
+    const overflowCount = screen
+      .getByText("+4")
+      .closest('[data-slot="avatar-collection-count"]') as HTMLElement;
+
+    expect(roundAvatar.className).toContain("border");
+    expect(roundAvatar.className).toContain("overflow-hidden");
+    expect(roundAvatar.style.borderRadius).toBe("9999px");
+    expect(hexagonalAvatar.style.clipPath).toContain("polygon(50% 0");
+    expect(overflowCount.style.clipPath).toContain("polygon(50% 0");
+    expect(container.querySelector('[data-slot="avatar-collection"]')?.className).toContain(
+      "*:data-[shape=hexagonal]:ring-0",
+    );
     expect(
       screen
         .getByText("+4")
         .closest('[data-slot="avatar-collection-count"]')
         ?.getAttribute("data-shape"),
-    ).toBe("square");
+    ).toBe("hexagonal");
   });
 
   test("creates initials from names", () => {

@@ -20,15 +20,17 @@ export const Default: Story = {
       { name: "Platform Design", initials: "PD", size: "xl", shape: "square" },
       { name: "Design Systems", initials: "DS", size: "xl", shape: "hexagonal" },
       { name: "Release Crew", initials: "RC", size: "xl", shape: "octagonal" },
+      { name: "Support", initials: "SP", size: "xl", shape: "round" },
     ],
-    maxVisible: 3,
-    overflowShape: "square",
+    maxVisible: 4,
+    overflowShape: "hexagonal",
   },
   render: (args) => <AvatarCollection {...args} />,
   play: async ({ canvas }) => {
     await expect(canvas.getByText("MB")).toBeVisible();
     await expect(canvas.getByText("PD")).toBeVisible();
     await expect(canvas.getByText("DS")).toBeVisible();
+    await expect(canvas.getByText("RC")).toBeVisible();
     await expect(canvas.getByText("+1")).toBeVisible();
   },
 };

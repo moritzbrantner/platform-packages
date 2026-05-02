@@ -8,7 +8,7 @@ const viewports = [
 const storyIds = [
   "components-button--variants",
   "components-form-controls--basic",
-  "components-shadcn-catalog--full-catalog",
+  "reference-shadcn-catalog--full-catalog",
   "components-datagrid--default",
   "components-platformnavbar--web",
   "components-calendar--card-days",
@@ -20,7 +20,7 @@ const storyIds = [
 const uiThemes = ["bobba", "zleek", "atlas", "studio", "paper"] as const;
 const colorSchemes = ["light", "dark"] as const;
 const horizontallyScrollableStories = new Set([
-  "components-shadcn-catalog--full-catalog",
+  "reference-shadcn-catalog--full-catalog",
   "components-datagrid--default",
   "components-platformnavbar--web",
   "components-calendar--card-days",
@@ -29,7 +29,7 @@ const horizontallyScrollableStories = new Set([
 ]);
 const denseControlStories = new Set([
   "components-calendar--card-days",
-  "components-shadcn-catalog--full-catalog",
+  "reference-shadcn-catalog--full-catalog",
   "components-workflowbuilder--ai-workflow-graph",
 ]);
 
@@ -48,11 +48,11 @@ for (const viewport of viewports) {
 
     for (const designSystem of uiThemes) {
       test(`catalog renders ${designSystem}`, async ({ page }) => {
-        await gotoStory(page, "components-shadcn-catalog--full-catalog", {
+        await gotoStory(page, "reference-shadcn-catalog--full-catalog", {
           designSystem,
           theme: "light",
         });
-        await verifyPageLayout(page, "components-shadcn-catalog--full-catalog");
+        await verifyPageLayout(page, "reference-shadcn-catalog--full-catalog");
       });
     }
   });
@@ -95,6 +95,34 @@ async function verifyPageLayout(page: Page, storyId: string) {
         );
       })
       .map((element) => element.getAttribute("data-slot") ?? element.tagName.toLowerCase());
+    function hasVisibleButtonLabel(button: HTMLButtonElement) {
+      const walker = document.createTreeWalker(button, NodeFilter.SHOW_TEXT);
+
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const text = node.textContent?.trim();
+        const parent = node.parentElement;
+
+        if (!text || !parent || parent.closest("[aria-hidden='true'], .sr-only")) {
+          continue;
+        }
+
+        const style = window.getComputedStyle(parent);
+        const box = parent.getBoundingClientRect();
+
+        if (
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          box.width > 1 &&
+          box.height > 1
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     const clippedButtons = [...document.querySelectorAll<HTMLButtonElement>("button")]
       .filter((button) => {
         const style = window.getComputedStyle(button);
@@ -104,7 +132,7 @@ async function verifyPageLayout(page: Page, storyId: string) {
       .filter((button) => {
         const accessibleName = button.textContent?.trim() ?? button.getAttribute("aria-label") ?? "";
 
-        if (accessibleName.length === 0) {
+        if (accessibleName.length === 0 || !hasVisibleButtonLabel(button)) {
           return false;
         }
 

@@ -1,5 +1,11 @@
 # @moritzbrantner/ui
 
+## 0.5.2
+
+### Patch Changes
+
+- Refresh the UI package release with the current package test layout and release verification guardrails.
+
 ## 0.5.0
 
 ### Minor Changes

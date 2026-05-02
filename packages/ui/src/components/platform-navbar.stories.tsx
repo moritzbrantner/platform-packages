@@ -155,9 +155,13 @@ export const Web: Story = {
     await userEvent.click(trigger);
 
     const profileItems = await screen.findAllByRole("menuitem", { name: "Profile" });
+    const visibleEmail = screen
+      .getAllByText("mira@example.com")
+      .find((element) => element.getClientRects().length > 0);
 
     await expect(profileItems.length).toBeGreaterThan(0);
-    await expect(screen.getByText("mira@example.com")).toBeVisible();
+    await expect(visibleEmail).toBeDefined();
+    await expect(visibleEmail!).toBeVisible();
   },
 };
 
