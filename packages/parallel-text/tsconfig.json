@@ -13,5 +13,5 @@
       "@moritzbrantner/parallel-text/model": ["./src/model.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

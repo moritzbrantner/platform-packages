@@ -28,6 +28,12 @@ const initialNodes: WorkflowBuilderNodeData[] = [
         description: "Structured file manifests with stable source paths.",
         badge: "batch",
       },
+      {
+        id: "assets",
+        label: "Assets",
+        kind: "asset",
+        description: "Binary file references for layout and preview tasks.",
+      },
     ],
   },
   {
@@ -49,6 +55,12 @@ const initialNodes: WorkflowBuilderNodeData[] = [
         required: true,
         description: "Incoming source batches for OCR extraction.",
       },
+      {
+        id: "assets",
+        label: "Assets",
+        kind: "asset",
+        description: "Original image and PDF assets for visual extraction.",
+      },
     ],
     outputs: [
       {
@@ -56,6 +68,12 @@ const initialNodes: WorkflowBuilderNodeData[] = [
         label: "Text",
         kind: "text",
         description: "Layout-aware OCR output with confidence spans.",
+      },
+      {
+        id: "pages",
+        label: "Pages",
+        kind: "page",
+        description: "Page images and positional layout blocks.",
       },
     ],
   },
@@ -76,6 +94,12 @@ const initialNodes: WorkflowBuilderNodeData[] = [
         required: true,
         description: "Normalized content ready for taxonomy assignment.",
       },
+      {
+        id: "pages",
+        label: "Pages",
+        kind: "page",
+        description: "Page context used for evidence links.",
+      },
     ],
     outputs: [
       {
@@ -83,6 +107,12 @@ const initialNodes: WorkflowBuilderNodeData[] = [
         label: "Labels",
         kind: "labels",
         description: "Resolved taxonomy labels and confidence scores.",
+      },
+      {
+        id: "review",
+        label: "Review",
+        kind: "task",
+        description: "Human review tasks for low-confidence categories.",
       },
     ],
   },
@@ -123,12 +153,27 @@ const initialEdges: WorkflowBuilderEdge[] = [
     status: "success",
   },
   {
+    id: "ingest-assets-ocr",
+    sourceNodeId: "ingest",
+    sourcePortId: "assets",
+    targetNodeId: "ocr",
+    targetPortId: "assets",
+    status: "success",
+  },
+  {
     id: "ocr-classify",
     sourceNodeId: "ocr",
     sourcePortId: "text",
     targetNodeId: "classify",
     targetPortId: "text",
     status: "running",
+  },
+  {
+    id: "ocr-pages-classify",
+    sourceNodeId: "ocr",
+    sourcePortId: "pages",
+    targetNodeId: "classify",
+    targetPortId: "pages",
   },
   {
     id: "classify-publish",

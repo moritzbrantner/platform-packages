@@ -38,6 +38,7 @@ import {
   ComponentEditorPanel,
   ComponentEditorPreviewFrame,
   ComponentEditorProvider,
+  ConnectionStatus,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -1016,7 +1017,7 @@ function buildEditableGalleryItems(): EditableGalleryItem[] {
     {
       definition: {
         id: "editable-identity-state",
-        label: "AvatarCollection and Empty",
+        label: "AvatarCollection, ConnectionStatus, and Empty",
         importName: "AvatarCollection",
         importFrom: "@moritzbrantner/ui",
         controls: [
@@ -1033,10 +1034,10 @@ function buildEditableGalleryItems(): EditableGalleryItem[] {
           { id: "emptyAction", label: "Action label", type: "text", value: "Create release note" },
         ],
         buildSnippet: (values) =>
-          `import { AvatarCollection, Button, Empty, EmptyContent, EmptyHeader, EmptyTitle } from "@moritzbrantner/ui";\n\n<AvatarCollection users={users} maxVisible={${getEditorNumber(
+          `import { AvatarCollection, Button, ConnectionStatus, Empty, EmptyContent, EmptyHeader, EmptyTitle } from "@moritzbrantner/ui";\n\n<AvatarCollection users={users} maxVisible={${getEditorNumber(
             values,
             "maxVisible",
-          )}} />\n<Empty>\n  <EmptyHeader>\n    <EmptyTitle>${getEditorString(
+          )}} />\n<ConnectionStatus status="synced" onSync={checkSync} />\n<Empty>\n  <EmptyHeader>\n    <EmptyTitle>${getEditorString(
             values,
             "emptyTitle",
           )}</EmptyTitle>\n  </EmptyHeader>\n  <EmptyContent>\n    <Button variant="outline">${getEditorString(
@@ -1046,16 +1047,22 @@ function buildEditableGalleryItems(): EditableGalleryItem[] {
       },
       render: (values) => (
         <div className="grid gap-4 md:grid-cols-2">
-          <AvatarCollection
-            users={[
-              { initials: "MB", name: "Moritz Brantner", online: true },
-              { initials: "AR", name: "Ari Reed" },
-              { initials: "LK", name: "Lena Koch" },
-              { initials: "VT", name: "Vera Tran" },
-              { initials: "PN", name: "Priya Nair" },
-            ]}
-            maxVisible={getEditorNumber(values, "maxVisible")}
-          />
+          <div className="grid content-start gap-3">
+            <AvatarCollection
+              users={[
+                { initials: "MB", name: "Moritz Brantner", online: true },
+                { initials: "AR", name: "Ari Reed" },
+                { initials: "LK", name: "Lena Koch" },
+                { initials: "VT", name: "Vera Tran" },
+                { initials: "PN", name: "Priya Nair" },
+              ]}
+              maxVisible={getEditorNumber(values, "maxVisible")}
+            />
+            <ConnectionStatus
+              status="synced"
+              onSync={() => toast.success("Connection is synced")}
+            />
+          </div>
           <Empty className="min-h-48 border border-dashed">
             <EmptyHeader>
               <EmptyTitle>{getEditorString(values, "emptyTitle")}</EmptyTitle>

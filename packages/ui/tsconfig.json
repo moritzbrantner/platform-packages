@@ -7,19 +7,13 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
-      "@moritzbrantner/three-starters": [
-        "../three-starters/src/index.ts"
-      ],
-      "@moritzbrantner/three-starters/core": [
-        "../three-starters/src/core.ts"
-      ]
+      "@moritzbrantner/three-starters": ["../three-starters/src/index.ts"],
+      "@moritzbrantner/three-starters/core": ["../three-starters/src/core.ts"]
     }
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
     "vitest.storybook.config.ts"

@@ -33,7 +33,12 @@ const clientComponentPatterns = [
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 const indexSource = readFileSync(indexPath, "utf8");
 const componentNames = readdirSync(componentsDir)
-  .filter((fileName) => fileName.endsWith(".tsx") && !fileName.endsWith(".stories.tsx"))
+  .filter(
+    (fileName) =>
+      fileName.endsWith(".tsx") &&
+      !fileName.endsWith(".stories.tsx") &&
+      !fileName.endsWith(".test.tsx"),
+  )
   .map((fileName) => fileName.replace(/\.tsx$/, ""))
   .sort((left, right) => left.localeCompare(right));
 
@@ -209,7 +214,9 @@ function verifyClientDirectives() {
       !componentSource.startsWith('"use client";') &&
       clientComponentPatterns.some((pattern) => pattern.test(componentSource))
     ) {
-      errors.push(`${componentName}: browser or hook-based components must start with "use client";`);
+      errors.push(
+        `${componentName}: browser or hook-based components must start with "use client";`,
+      );
     }
   }
 }

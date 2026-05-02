@@ -5,7 +5,7 @@ import baseConfig from "../../vitest.config";
 export default mergeConfig(baseConfig, {
   test: {
     environment: "jsdom",
-    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary", "html"],

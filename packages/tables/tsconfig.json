@@ -10,5 +10,5 @@
       "@moritzbrantner/tables": ["./src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

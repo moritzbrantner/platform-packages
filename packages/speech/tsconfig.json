@@ -10,5 +10,5 @@
       "@moritzbrantner/speech": ["./src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

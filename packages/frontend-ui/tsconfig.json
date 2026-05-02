@@ -7,34 +7,18 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
-      "@moritzbrantner/ui": [
-        "../ui/src/index.ts"
-      ],
-      "@moritzbrantner/ui/themes": [
-        "../ui/src/themes.tsx"
-      ],
-      "@moritzbrantner/ui/atlas": [
-        "../ui/src/atlas.ts"
-      ],
-      "@moritzbrantner/ui/bobba": [
-        "../ui/src/bobba.ts"
-      ],
-      "@moritzbrantner/ui/paper": [
-        "../ui/src/paper.ts"
-      ],
-      "@moritzbrantner/ui/studio": [
-        "../ui/src/studio.ts"
-      ],
-      "@moritzbrantner/ui/zleek": [
-        "../ui/src/zleek.ts"
-      ]
+      "@moritzbrantner/ui": ["../ui/src/index.ts"],
+      "@moritzbrantner/ui/themes": ["../ui/src/themes.tsx"],
+      "@moritzbrantner/ui/atlas": ["../ui/src/atlas.ts"],
+      "@moritzbrantner/ui/bobba": ["../ui/src/bobba.ts"],
+      "@moritzbrantner/ui/paper": ["../ui/src/paper.ts"],
+      "@moritzbrantner/ui/studio": ["../ui/src/studio.ts"],
+      "@moritzbrantner/ui/zleek": ["../ui/src/zleek.ts"]
     }
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
     ".storybook/**/*.d.ts",

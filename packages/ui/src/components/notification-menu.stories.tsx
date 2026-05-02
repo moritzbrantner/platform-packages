@@ -43,8 +43,10 @@ const meta = {
   },
   args: {
     unreadCount: 2,
+    titleHref: "/notifications",
     items: notifications,
     onMarkAllRead: () => {},
+    onMarkRead: () => {},
   },
 } satisfies Meta<typeof NotificationMenu>;
 

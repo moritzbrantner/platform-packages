@@ -304,6 +304,7 @@ function WorkflowNodePortAnchor({
       type="button"
       data-slot="workflow-node-port"
       data-port-direction={direction}
+      data-port-id={port.id}
       disabled={disabled || !onClick}
       aria-label={getAriaLabel?.(port, node) ?? `${node.label} ${port.label}`}
       className={cn(
@@ -325,7 +326,11 @@ function WorkflowNodePortAnchor({
           !isInput && !compact && "flex-row-reverse text-right",
         )}
       >
-        <CircleIcon className="mt-0.5 size-3 shrink-0 fill-current" aria-hidden="true" />
+        <CircleIcon
+          data-slot="workflow-node-port-dot"
+          className="mt-0.5 size-3 shrink-0 fill-current"
+          aria-hidden="true"
+        />
         <div
           className={cn(
             "min-w-0 flex-1",
@@ -396,6 +401,17 @@ function getWorkflowNodeSize(node: WorkflowNodeData): WorkflowNodeSize {
   };
 }
 
+function getWorkflowNodePortCenterOffset(node: WorkflowNodeData, portIndex: number) {
+  const descriptionHeight = node.description ? workflowNodeDescriptionHeight : 0;
+
+  return (
+    workflowNodeHeaderHeight +
+    descriptionHeight +
+    portIndex * workflowNodePortRowHeight +
+    workflowNodePortRowHeight / 2
+  );
+}
+
 function getWorkflowNodeToneFromStatus(status?: string): WorkflowNodeData["tone"] {
   if (status === "success") {
     return "success";
@@ -456,5 +472,5 @@ function getWorkflowNodeStatusVariant(
   return "outline";
 }
 
-export { WorkflowNode, getWorkflowNodeSize };
+export { WorkflowNode, getWorkflowNodePortCenterOffset, getWorkflowNodeSize };
 export type { WorkflowNodeData, WorkflowNodePort, WorkflowNodeProps, WorkflowNodeSize };

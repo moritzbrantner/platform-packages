@@ -27,5 +27,5 @@ This repository now treats editor work as package-owned domain surfaces instead 
 - DOM-based package tests must run with Vitest so they execute in a jsdom environment.
 - Do not rely on raw `bun test <file>` for React DOM suites because it does not provide the browser-like environment those tests need.
 - Keep package interaction coverage close to the owning package:
-  `packages/flat-design/tests` for SVG editor interactions, `packages/media-editor/tests` for media editor interactions, and so on.
+  `packages/flat-design/src` for SVG editor interactions, `packages/media-editor/src` for media editor interactions, and so on.
 - Use the playground as an app-like smoke-test target through Vitest or Playwright when a package-backed editor needs integrated coverage.

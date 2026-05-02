@@ -94,6 +94,7 @@ export * from "./components/toggle-group";
 export * from "./components/toggle-setting";
 export * from "./components/toolbar";
 export * from "./components/tooltip";
+export * from "./components/tree-view";
 export * from "./components/typography";
 export * from "./components/workflow-builder";
 export * from "./components/workflow-node";

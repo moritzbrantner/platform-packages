@@ -55,10 +55,7 @@ export default defineConfig({
       ),
       "@moritzbrantner/fill-mask": path.resolve(rootDir, "packages/fill-mask/src/index.ts"),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
-      "@moritzbrantner/flat-design/core": path.resolve(
-        rootDir,
-        "packages/flat-design/src/core.ts",
-      ),
+      "@moritzbrantner/flat-design/core": path.resolve(rootDir, "packages/flat-design/src/core.ts"),
       "@moritzbrantner/flat-design/react": path.resolve(
         rootDir,
         "packages/flat-design/src/react.tsx",
@@ -306,6 +303,6 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    include: ["packages/*/tests/**/*.test.ts", "packages/*/tests/**/*.test.tsx"],
+    include: ["packages/*/src/**/*.test.ts", "packages/*/src/**/*.test.tsx"],
   },
 });

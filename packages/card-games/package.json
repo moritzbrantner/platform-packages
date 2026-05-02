@@ -38,6 +38,6 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/card-games/tests/card-games.test.tsx"
+    "test": "cd ../.. && vitest run packages/card-games/src"
   }
 }

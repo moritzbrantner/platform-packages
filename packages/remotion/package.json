@@ -49,6 +49,6 @@
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
     "storybook": "storybook dev -p 6008 --no-open",
-    "test": "cd ../.. && vitest run packages/remotion/tests/remotion.test.tsx"
+    "test": "cd ../.. && vitest run packages/remotion/src"
   }
 }

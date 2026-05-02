@@ -54,7 +54,7 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "storybook": "storybook dev -p 6007 --no-open",
-    "test": "cd ../.. && vitest run packages/frontend-ui/tests",
+    "test": "cd ../.. && vitest run packages/frontend-ui/src",
     "test:storybook": "../../node_modules/.bin/vitest --config vitest.storybook.config.ts --project=storybook --run"
   }
 }

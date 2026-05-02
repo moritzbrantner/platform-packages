@@ -9,5 +9,5 @@
       "@__SCOPE__/__PACKAGE_NAME__": ["./src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

@@ -30,7 +30,7 @@
     "release:typecheck": "bun run typecheck",
     "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
-    "test": "bun test ./tests/*.test.ts && turbo run test"
+    "test": "bun test ./scripts/*.test.ts && turbo run test"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",

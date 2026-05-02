@@ -13,5 +13,5 @@
       "@moritzbrantner/text-inference": ["../text-inference/src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

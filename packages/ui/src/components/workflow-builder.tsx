@@ -9,6 +9,7 @@ import { Button } from "./button";
 import { Separator } from "./separator";
 import {
   WorkflowNode,
+  getWorkflowNodePortCenterOffset,
   getWorkflowNodeSize,
   type WorkflowNodeData as WorkflowCanvasNodeData,
   type WorkflowNodePort as WorkflowCanvasNodePort,
@@ -102,6 +103,15 @@ type PendingConnection = {
   sourcePortId: string;
 };
 
+type WorkflowBuilderPortDirection = "input" | "output";
+
+type WorkflowBuilderPoint = {
+  x: number;
+  y: number;
+};
+
+type WorkflowBuilderPortPointMap = Record<string, WorkflowBuilderPoint>;
+
 type DragState = {
   nodeId: string;
   startX: number;
@@ -132,6 +142,8 @@ function WorkflowBuilder({
   const [internalSelectedEdgeId, setInternalSelectedEdgeId] = React.useState<string | null>(null);
   const [pendingConnection, setPendingConnection] = React.useState<PendingConnection | null>(null);
   const [dragState, setDragState] = React.useState<DragState>(null);
+  const [portPoints, setPortPoints] = React.useState<WorkflowBuilderPortPointMap>({});
+  const viewportRef = React.useRef<HTMLDivElement>(null);
   const currentZoom = zoom ?? internalZoom;
   const currentSelectedNodeId = selectedNodeId ?? internalSelectedNodeId;
   const currentSelectedEdgeId = selectedEdgeId ?? internalSelectedEdgeId;
@@ -266,6 +278,26 @@ function WorkflowBuilder({
     }
   };
 
+  React.useEffect(() => {
+    const viewport = viewportRef.current;
+
+    if (!viewport) {
+      return;
+    }
+
+    const measuredPortPoints = measureWorkflowBuilderPortPoints(viewport, currentZoom);
+
+    if (Object.keys(measuredPortPoints).length === 0) {
+      return;
+    }
+
+    setPortPoints((currentPortPoints) =>
+      workflowBuilderPortPointMapsAreEqual(currentPortPoints, measuredPortPoints)
+        ? currentPortPoints
+        : measuredPortPoints,
+    );
+  }, [currentZoom, edges, nodes, pendingConnection]);
+
   return (
     <div
       data-slot="workflow-builder"
@@ -296,6 +328,7 @@ function WorkflowBuilder({
         onMouseLeave={() => setDragState(null)}
       >
         <div
+          ref={viewportRef}
           data-slot="workflow-builder-viewport"
           className="relative min-h-[52rem] min-w-[72rem] origin-top-left"
           style={{ transform: `scale(${currentZoom})`, width: `${100 / currentZoom}%` }}
@@ -306,7 +339,7 @@ function WorkflowBuilder({
             className="pointer-events-none absolute inset-0 size-full overflow-visible"
           >
             {edges.map((edge) => {
-              const line = getWorkflowEdgeLine(nodes, edge);
+              const line = getWorkflowEdgeLine(nodes, edge, portPoints);
               const selected = edge.id === currentSelectedEdgeId;
               return (
                 <g key={edge.id}>
@@ -558,24 +591,62 @@ function getWorkflowBuilderConnectionValidity({
   return { valid: true };
 }
 
-function getWorkflowEdgeLine(nodes: WorkflowBuilderNodeData[], edge: WorkflowBuilderEdge) {
+function getWorkflowEdgeLine(
+  nodes: WorkflowBuilderNodeData[],
+  edge: WorkflowBuilderEdge,
+  portPoints: WorkflowBuilderPortPointMap = {},
+) {
   const sourceNode = nodes.find((node) => node.id === edge.sourceNodeId);
   const targetNode = nodes.find((node) => node.id === edge.targetNodeId);
-  const sourceSize = sourceNode ? getWorkflowNodeSize(sourceNode) : null;
-  const targetSize = targetNode ? getWorkflowNodeSize(targetNode) : null;
   const source = sourceNode
-    ? {
-        x: sourceNode.x + (sourceSize?.width ?? 0),
-        y: sourceNode.y + (sourceSize?.height ?? 0) / 2,
-      }
+    ? getWorkflowNodePortPoint(sourceNode, "output", edge.sourcePortId, portPoints)
     : { x: 0, y: 0 };
   const target = targetNode
-    ? { x: targetNode.x, y: targetNode.y + (targetSize?.height ?? 0) / 2 }
+    ? getWorkflowNodePortPoint(targetNode, "input", edge.targetPortId, portPoints)
     : { x: 0, y: 0 };
   const handle = Math.max(48, Math.abs(target.x - source.x) / 2);
 
   return {
     path: `M ${source.x} ${source.y} C ${source.x + handle} ${source.y}, ${target.x - handle} ${target.y}, ${target.x} ${target.y}`,
+  };
+}
+
+function getWorkflowNodePortPoint(
+  node: WorkflowBuilderNodeData,
+  direction: WorkflowBuilderPortDirection,
+  portId: string,
+  portPoints: WorkflowBuilderPortPointMap = {},
+): WorkflowBuilderPoint {
+  const size = getWorkflowNodeSize(node);
+  const compact = node.variant === "compact";
+  const measuredPoint = portPoints[getWorkflowBuilderPortPointKey(node.id, direction, portId)];
+
+  if (measuredPoint) {
+    return measuredPoint;
+  }
+
+  const x = node.x + getWorkflowNodePortDotXOffset(node, direction);
+
+  if (compact) {
+    return {
+      x,
+      y: node.y + size.height / 2,
+    };
+  }
+
+  const ports = direction === "input" ? (node.inputs ?? []) : (node.outputs ?? []);
+  const portIndex = ports.findIndex((port) => port.id === portId);
+
+  if (portIndex === -1) {
+    return {
+      x,
+      y: node.y + size.height / 2,
+    };
+  }
+
+  return {
+    x,
+    y: node.y + getWorkflowNodePortCenterOffset(node, portIndex),
   };
 }
 
@@ -600,6 +671,109 @@ function getWorkflowBounds(nodes: WorkflowBuilderNodeData[]) {
     width: Math.max(maxX - minX, 1),
     height: Math.max(maxY - minY, 1),
   };
+}
+
+function getWorkflowNodePortDotXOffset(
+  node: WorkflowBuilderNodeData,
+  direction: WorkflowBuilderPortDirection,
+) {
+  const size = getWorkflowNodeSize(node);
+
+  if (node.variant !== "compact") {
+    return direction === "input"
+      ? workflowNodePortDotInset()
+      : size.width - workflowNodePortDotInset();
+  }
+
+  if (direction === "input") {
+    return workflowNodePortDotInset();
+  }
+
+  const compactPortColumnWidth =
+    (size.width -
+      workflowNodeCompactPortPadding() * 2 -
+      workflowNodeCompactPortGap() * 2 -
+      workflowNodeCompactPortArrowWidth()) /
+    2;
+
+  return (
+    workflowNodeCompactPortPadding() +
+    compactPortColumnWidth +
+    workflowNodeCompactPortGap() +
+    workflowNodeCompactPortArrowWidth() +
+    workflowNodeCompactPortGap() +
+    workflowNodePortDotInset()
+  );
+}
+
+function measureWorkflowBuilderPortPoints(
+  viewport: HTMLElement,
+  zoom: number,
+): WorkflowBuilderPortPointMap {
+  const viewportRect = viewport.getBoundingClientRect();
+
+  if (viewportRect.width === 0 || viewportRect.height === 0 || zoom <= 0) {
+    return {};
+  }
+
+  const portPoints: WorkflowBuilderPortPointMap = {};
+  const portElements = viewport.querySelectorAll<HTMLElement>(
+    "[data-slot='workflow-node-port'][data-port-id]",
+  );
+
+  portElements.forEach((portElement) => {
+    const nodeElement = portElement.closest<HTMLElement>("[data-slot='workflow-builder-node']");
+    const dotElement = portElement.querySelector<HTMLElement>(
+      "[data-slot='workflow-node-port-dot']",
+    );
+    const nodeId = nodeElement?.dataset.nodeId;
+    const portId = portElement.dataset.portId;
+    const direction = portElement.dataset.portDirection as WorkflowBuilderPortDirection | undefined;
+
+    if (!nodeId || !portId || !dotElement || !isWorkflowBuilderPortDirection(direction)) {
+      return;
+    }
+
+    const dotRect = dotElement.getBoundingClientRect();
+
+    if (dotRect.width === 0 || dotRect.height === 0) {
+      return;
+    }
+
+    portPoints[getWorkflowBuilderPortPointKey(nodeId, direction, portId)] = {
+      x: (dotRect.left + dotRect.width / 2 - viewportRect.left) / zoom,
+      y: (dotRect.top + dotRect.height / 2 - viewportRect.top) / zoom,
+    };
+  });
+
+  return portPoints;
+}
+
+function workflowBuilderPortPointMapsAreEqual(
+  first: WorkflowBuilderPortPointMap,
+  second: WorkflowBuilderPortPointMap,
+) {
+  const firstKeys = Object.keys(first);
+  const secondKeys = Object.keys(second);
+
+  return (
+    firstKeys.length === secondKeys.length &&
+    firstKeys.every((key) => first[key]?.x === second[key]?.x && first[key]?.y === second[key]?.y)
+  );
+}
+
+function getWorkflowBuilderPortPointKey(
+  nodeId: string,
+  direction: WorkflowBuilderPortDirection,
+  portId: string,
+) {
+  return `${nodeId}:${direction}:${portId}`;
+}
+
+function isWorkflowBuilderPortDirection(
+  direction: string | undefined,
+): direction is WorkflowBuilderPortDirection {
+  return direction === "input" || direction === "output";
 }
 
 function isWorkflowPortEvent(target: EventTarget) {
@@ -640,6 +814,22 @@ function workflowNodeSizeFallback() {
     width: 248,
     height: 124,
   };
+}
+
+function workflowNodePortDotInset() {
+  return 28;
+}
+
+function workflowNodeCompactPortPadding() {
+  return 12;
+}
+
+function workflowNodeCompactPortGap() {
+  return 8;
+}
+
+function workflowNodeCompactPortArrowWidth() {
+  return 16;
 }
 
 export {

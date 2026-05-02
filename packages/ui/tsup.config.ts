@@ -8,7 +8,13 @@ const packageRoot = fileURLToPath(new URL("./", import.meta.url));
 const componentsDir = path.join(packageRoot, "src/components");
 const componentEntries = Object.fromEntries(
   readdirSync(componentsDir)
-    .filter((fileName) => /\.(ts|tsx)$/.test(fileName) && !fileName.endsWith(".stories.tsx"))
+    .filter(
+      (fileName) =>
+        /\.(ts|tsx)$/.test(fileName) &&
+        !fileName.endsWith(".stories.tsx") &&
+        !fileName.endsWith(".test.ts") &&
+        !fileName.endsWith(".test.tsx"),
+    )
     .sort((left, right) => left.localeCompare(right))
     .map((fileName) => {
       const entryName = fileName.replace(/\.(ts|tsx)$/, "");

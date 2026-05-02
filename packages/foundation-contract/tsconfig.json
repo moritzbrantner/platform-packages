@@ -9,5 +9,5 @@
       "@moritzbrantner/foundation-contract": ["./src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

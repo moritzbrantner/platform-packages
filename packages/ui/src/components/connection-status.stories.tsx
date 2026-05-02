@@ -14,7 +14,7 @@ const meta = {
   argTypes: {
     status: {
       control: "select",
-      options: ["connected", "disconnected", "out-of-sync"],
+      options: ["connected", "synced", "disconnected", "out-of-sync"],
     },
   },
 } satisfies Meta<typeof ConnectionStatus>;
@@ -27,8 +27,9 @@ export const Playground: Story = {};
 
 export const States: Story = {
   render: () => (
-    <div className="grid max-w-3xl gap-3 md:grid-cols-3">
+    <div className="grid max-w-4xl gap-3 md:grid-cols-4">
       <ConnectionStatus status="connected" onSync={fn()} />
+      <ConnectionStatus status="synced" onSync={fn()} />
       <ConnectionStatus status="disconnected" onReconnect={fn()} />
       <ConnectionStatus status="out-of-sync" onSync={fn()} />
     </div>

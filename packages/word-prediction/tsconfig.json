@@ -13,5 +13,5 @@
       "@moritzbrantner/word-vectors": ["../word-vectors/src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
