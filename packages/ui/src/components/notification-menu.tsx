@@ -49,7 +49,7 @@ function NotificationMenu({
   label = "Notifications",
   titleHref,
   titleLinkProps,
-  unreadCount = 0,
+  unreadCount,
   maxCount = 99,
   items = [],
   emptyLabel = "No notifications",
@@ -62,9 +62,51 @@ function NotificationMenu({
   maxItems,
   className,
 }: NotificationMenuProps): React.ReactElement {
-  const visibleItems = typeof maxItems === "number" ? items.slice(0, maxItems) : items;
-  const countLabel = formatNotificationMenuCount(unreadCount, maxCount);
-  const accessibleLabel = unreadCount > 0 ? `${label}, ${unreadCount} unread` : label;
+  const [readItemIds, setReadItemIds] = React.useState<ReadonlySet<string>>(() => new Set());
+  const [localUnreadAdjustment, setLocalUnreadAdjustment] = React.useState(0);
+  const previousUnreadCountRef = React.useRef(unreadCount);
+  const unreadItemIds = React.useMemo(
+    () => new Set(items.filter((item) => item.unread).map((item) => item.id)),
+    [items],
+  );
+  const visibleItems = React.useMemo(
+    () =>
+      (typeof maxItems === "number" ? items.slice(0, maxItems) : items).map((item) =>
+        readItemIds.has(item.id) ? { ...item, unread: false } : item,
+      ),
+    [items, maxItems, readItemIds],
+  );
+  const localReadCount = [...readItemIds].filter((itemId) => unreadItemIds.has(itemId)).length;
+  const effectiveUnreadCount = Math.max(
+    0,
+    unreadCount === undefined
+      ? unreadItemIds.size - localReadCount
+      : unreadCount - localUnreadAdjustment,
+  );
+  const countLabel = formatNotificationMenuCount(effectiveUnreadCount, maxCount);
+  const accessibleLabel =
+    effectiveUnreadCount > 0 ? `${label}, ${effectiveUnreadCount} unread` : label;
+
+  React.useEffect(() => {
+    setReadItemIds((currentReadItemIds) => {
+      const nextReadItemIds = new Set(
+        [...currentReadItemIds].filter((itemId) => unreadItemIds.has(itemId)),
+      );
+
+      return nextReadItemIds.size === currentReadItemIds.size
+        ? currentReadItemIds
+        : nextReadItemIds;
+    });
+  }, [unreadItemIds]);
+
+  React.useEffect(() => {
+    if (previousUnreadCountRef.current === unreadCount) {
+      return;
+    }
+
+    previousUnreadCountRef.current = unreadCount;
+    setLocalUnreadAdjustment(0);
+  }, [unreadCount]);
 
   return (
     <DropdownMenu>
@@ -78,7 +120,7 @@ function NotificationMenu({
           className={cn("relative", className)}
         >
           <BellIcon />
-          {unreadCount > 0 ? (
+          {effectiveUnreadCount > 0 ? (
             <Badge asChild className="absolute -right-2 -top-2 min-w-5 justify-center px-1">
               <span aria-hidden="true">{countLabel}</span>
             </Badge>
@@ -101,7 +143,9 @@ function NotificationMenu({
           ) : (
             <span className="truncate text-sm font-medium text-popover-foreground">{label}</span>
           )}
-          {unreadCount > 0 ? <span className="shrink-0 text-xs">{unreadCount} unread</span> : null}
+          {effectiveUnreadCount > 0 ? (
+            <span className="shrink-0 text-xs">{effectiveUnreadCount} unread</span>
+          ) : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {visibleItems.length === 0 ? (
@@ -109,11 +153,11 @@ function NotificationMenu({
         ) : (
           visibleItems.map((item) => {
             const itemMarkRead = item.onMarkRead ?? onMarkRead;
-            const canMarkRead = Boolean(item.unread && !item.disabled && itemMarkRead);
+            const canMarkRead = Boolean(item.unread && !item.disabled);
             const itemTitle = getNotificationMenuText(item.title);
             const markReadActionLabel = itemTitle
               ? `Mark ${itemTitle} as read`
-              : getNotificationMenuText(markReadLabel) ?? "Mark notification as read";
+              : (getNotificationMenuText(markReadLabel) ?? "Mark notification as read");
 
             return (
               <DropdownMenuItem
@@ -129,6 +173,7 @@ function NotificationMenu({
                     {item.unread ? (
                       <span
                         aria-hidden="true"
+                        data-slot="notification-menu-unread-indicator"
                         className="size-2 shrink-0 rounded-full bg-primary"
                       />
                     ) : null}
@@ -152,12 +197,22 @@ function NotificationMenu({
                           event.preventDefault();
                           event.stopPropagation();
 
+                          if (!readItemIds.has(item.id)) {
+                            setReadItemIds((currentReadItemIds) => {
+                              const nextReadItemIds = new Set(currentReadItemIds);
+                              nextReadItemIds.add(item.id);
+
+                              return nextReadItemIds;
+                            });
+                            setLocalUnreadAdjustment((currentAdjustment) => currentAdjustment + 1);
+                          }
+
                           if (item.onMarkRead) {
                             item.onMarkRead(item.id, item);
                             return;
                           }
 
-                          onMarkRead?.(item.id, item);
+                          itemMarkRead?.(item.id, item);
                         }}
                       >
                         <CheckIcon className="size-3.5" />
@@ -173,7 +228,7 @@ function NotificationMenu({
         {onMarkAllRead ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled={unreadCount === 0} onSelect={onMarkAllRead}>
+            <DropdownMenuItem disabled={effectiveUnreadCount === 0} onSelect={onMarkAllRead}>
               <CheckCheckIcon />
               {markAllReadLabel}
             </DropdownMenuItem>

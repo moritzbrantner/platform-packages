@@ -161,6 +161,39 @@ describe("notification menu", () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
+  test("updates item and badge state after marking a notification read", async () => {
+    render(
+      <NotificationMenu
+        unreadCount={2}
+        items={[
+          {
+            id: "follow",
+            title: "Jules followed you",
+            unread: true,
+          },
+        ]}
+      />,
+    );
+
+    openMenu(screen.getByRole("button", { name: "Notifications, 2 unread" }));
+    expect(
+      await screen.findByRole("button", { name: "Mark Jules followed you as read" }),
+    ).toBeTruthy();
+    expect(
+      document.body.querySelector('[data-slot="notification-menu-unread-indicator"]'),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mark Jules followed you as read" }));
+
+    await waitFor(() =>
+      expect(document.body.querySelector('[aria-label="Notifications, 1 unread"]')).toBeTruthy(),
+    );
+    expect(
+      document.body.querySelector('[data-slot="notification-menu-unread-indicator"]'),
+    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Mark Jules followed you as read" })).toBeNull();
+  });
+
   test("calls onMarkAllRead when the action is present", async () => {
     const onMarkAllRead = vi.fn();
 
