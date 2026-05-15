@@ -14,6 +14,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   type PaginationState,
+  type OnChangeFn,
   type RowData,
   type RowSelectionState,
   type SortingState,
@@ -91,6 +92,30 @@ type DataGridColumnFilterValue =
   | DataGridDateFilterValue
   | DataGridBooleanFilterValue;
 
+type DataGridControlledState = {
+  sorting?: SortingState;
+  columnFilters?: ColumnFiltersState;
+  columnVisibility?: VisibilityState;
+  rowSelection?: RowSelectionState;
+  globalFilter?: string;
+  pagination?: PaginationState;
+};
+
+type DataGridServerProps = {
+  state?: DataGridControlledState;
+  onSortingChange?: OnChangeFn<SortingState>;
+  onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
+  onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  onGlobalFilterChange?: OnChangeFn<string>;
+  onPaginationChange?: OnChangeFn<PaginationState>;
+  manualSorting?: boolean;
+  manualFiltering?: boolean;
+  manualPagination?: boolean;
+  pageCount?: number;
+  rowCount?: number;
+};
+
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> extends DataGridColumnFilterMeta {}
 }
@@ -110,7 +135,7 @@ type DataGridProps<TData, TValue = unknown> = Omit<React.ComponentProps<"div">, 
   onDensityChange?: (density: DataGridDensity) => void;
   onSelectedRowsChange?: (rows: TData[]) => void;
   toolbar?: React.ReactNode | ((table: ReactTable<TData>) => React.ReactNode);
-};
+} & DataGridServerProps;
 
 type DataGridToolbarProps<TData> = React.ComponentProps<"div"> & {
   table?: ReactTable<TData>;
@@ -217,6 +242,18 @@ function DataGrid<TData, TValue = unknown>({
   density = "comfortable",
   onSelectedRowsChange,
   toolbar,
+  state: controlledState,
+  onSortingChange,
+  onColumnFiltersChange,
+  onColumnVisibilityChange,
+  onRowSelectionChange,
+  onGlobalFilterChange,
+  onPaginationChange,
+  manualSorting,
+  manualFiltering,
+  manualPagination,
+  pageCount,
+  rowCount,
   className,
   ...props
 }: DataGridProps<TData, TValue>) {
@@ -231,8 +268,59 @@ function DataGrid<TData, TValue = unknown>({
   });
 
   React.useEffect(() => {
-    setPagination((current) => ({ ...current, pageSize }));
-  }, [pageSize]);
+    if (controlledState?.pagination === undefined) {
+      setPagination((current) => ({ ...current, pageSize }));
+    }
+  }, [controlledState?.pagination, pageSize]);
+
+  const resolvedSorting = controlledState?.sorting ?? sorting;
+  const resolvedColumnFilters = controlledState?.columnFilters ?? columnFilters;
+  const resolvedColumnVisibility = controlledState?.columnVisibility ?? columnVisibility;
+  const resolvedRowSelection = controlledState?.rowSelection ?? rowSelection;
+  const resolvedGlobalFilter = controlledState?.globalFilter ?? globalFilter;
+  const resolvedPagination = controlledState?.pagination ?? pagination;
+
+  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+    if (controlledState?.sorting === undefined) {
+      setSorting(updater);
+    }
+    onSortingChange?.(updater);
+  };
+
+  const handleColumnFiltersChange: OnChangeFn<ColumnFiltersState> = (updater) => {
+    if (controlledState?.columnFilters === undefined) {
+      setColumnFilters(updater);
+    }
+    onColumnFiltersChange?.(updater);
+  };
+
+  const handleColumnVisibilityChange: OnChangeFn<VisibilityState> = (updater) => {
+    if (controlledState?.columnVisibility === undefined) {
+      setColumnVisibility(updater);
+    }
+    onColumnVisibilityChange?.(updater);
+  };
+
+  const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (updater) => {
+    if (controlledState?.rowSelection === undefined) {
+      setRowSelection(updater);
+    }
+    onRowSelectionChange?.(updater);
+  };
+
+  const handleGlobalFilterChange: OnChangeFn<string> = (updater) => {
+    if (controlledState?.globalFilter === undefined) {
+      setGlobalFilter(updater);
+    }
+    onGlobalFilterChange?.(updater);
+  };
+
+  const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
+    if (controlledState?.pagination === undefined) {
+      setPagination(updater);
+    }
+    onPaginationChange?.(updater);
+  };
 
   const tableColumns = React.useMemo<ColumnDef<TData, unknown>[]>(() => {
     if (!enableRowSelection) {
@@ -274,20 +362,25 @@ function DataGrid<TData, TValue = unknown>({
     columns: tableColumns,
     getRowId,
     state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      globalFilter,
-      pagination,
+      sorting: resolvedSorting,
+      columnFilters: resolvedColumnFilters,
+      columnVisibility: resolvedColumnVisibility,
+      rowSelection: resolvedRowSelection,
+      globalFilter: resolvedGlobalFilter,
+      pagination: resolvedPagination,
     },
     enableRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onGlobalFilterChange: setGlobalFilter,
-    onPaginationChange: setPagination,
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
+    onRowSelectionChange: handleRowSelectionChange,
+    onGlobalFilterChange: handleGlobalFilterChange,
+    onPaginationChange: handlePaginationChange,
+    manualSorting,
+    manualFiltering,
+    manualPagination,
+    pageCount,
+    rowCount,
     defaultColumn: {
       filterFn: dataGridFilterFn as FilterFn<TData>,
     },
@@ -302,7 +395,7 @@ function DataGrid<TData, TValue = unknown>({
 
   React.useEffect(() => {
     onSelectedRowsChange?.(table.getSelectedRowModel().rows.map((row) => row.original));
-  }, [onSelectedRowsChange, rowSelection, table]);
+  }, [onSelectedRowsChange, resolvedRowSelection, table]);
 
   const visibleColumnCount = Math.max(table.getVisibleLeafColumns().length, 1);
   const status: DataGridStatus = loading
@@ -324,8 +417,8 @@ function DataGrid<TData, TValue = unknown>({
       {toolbar === undefined ? (
         <DataGridToolbar
           table={table}
-          searchValue={globalFilter}
-          onSearchChange={setGlobalFilter}
+          searchValue={resolvedGlobalFilter}
+          onSearchChange={(value) => handleGlobalFilterChange(value)}
           searchPlaceholder={searchPlaceholder}
         />
       ) : typeof toolbar === "function" ? (
@@ -1018,7 +1111,9 @@ export {
 export type {
   DataGridColumnFilterKind,
   DataGridColumnFilterMeta,
+  DataGridControlledState,
   DataGridDensity,
   DataGridProps,
+  DataGridServerProps,
   DataGridStatus,
 };

@@ -495,4 +495,101 @@ describe("@moritzbrantner/ui data-grid", () => {
     rerender(<DataGrid columns={columns} data={[]} error="Load failed" />);
     expect(screen.getByText("Load failed")).toBeTruthy();
   });
+
+  test("uses controlled global filter state", () => {
+    const onGlobalFilterChange = vi.fn();
+    const columns: ColumnDef<{ name: string }>[] = [{ accessorKey: "name", header: "Name" }];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[{ name: "Alpha" }, { name: "Beta" }]}
+        state={{ globalFilter: "Alpha" }}
+        onGlobalFilterChange={onGlobalFilterChange}
+      />,
+    );
+
+    expect(screen.getByText("Alpha")).toBeTruthy();
+    expect(screen.queryByText("Beta")).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Search rows"), { target: { value: "Beta" } });
+
+    expect(onGlobalFilterChange).toHaveBeenCalledWith("Beta");
+    expect(screen.getByText("Alpha")).toBeTruthy();
+  });
+
+  test("supports manual pagination callbacks", () => {
+    const onPaginationChange = vi.fn();
+    const columns: ColumnDef<{ name: string }>[] = [{ accessorKey: "name", header: "Name" }];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[{ name: "Alpha" }]}
+        manualPagination
+        pageCount={3}
+        state={{ pagination: { pageIndex: 0, pageSize: 1 } }}
+        onPaginationChange={onPaginationChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(onPaginationChange).toHaveBeenCalled();
+  });
+
+  test("passes manual sorting and filtering callbacks without local-only assumptions", () => {
+    const onSortingChange = vi.fn();
+    const onColumnFiltersChange = vi.fn();
+    const columns: ColumnDef<{ name: string; status: string }>[] = [
+      {
+        accessorKey: "name",
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Name" />,
+      },
+      { accessorKey: "status", header: "Status" },
+    ];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[{ name: "Alpha", status: "paid" }]}
+        manualSorting
+        manualFiltering
+        onSortingChange={onSortingChange}
+        onColumnFiltersChange={onColumnFiltersChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Name/i }));
+
+    expect(onSortingChange).toHaveBeenCalled();
+
+    fireEvent.contextMenu(screen.getByText("Status"));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Filter Status by paid" }));
+
+    expect(onColumnFiltersChange).toHaveBeenCalled();
+  });
+
+  test("selection callback still returns selected rows", async () => {
+    const onSelectedRowsChange = vi.fn();
+    const columns: ColumnDef<{ id: string; name: string }>[] = [
+      { accessorKey: "name", header: "Name" },
+    ];
+
+    render(
+      <DataGrid
+        columns={columns}
+        data={[{ id: "a", name: "Alpha" }]}
+        getRowId={(row) => row.id}
+        enableRowSelection
+        onSelectedRowsChange={onSelectedRowsChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select row" }));
+
+    await waitFor(() => {
+      expect(onSelectedRowsChange).toHaveBeenLastCalledWith([{ id: "a", name: "Alpha" }]);
+    });
+  });
 });

@@ -130,6 +130,16 @@ export function IntegrationGallery() {
 }
 ```
 
+## Composed Patterns
+
+The package also includes reusable state-light patterns for common application surfaces:
+
+- `StateView`, `EmptyState`, `LoadingState`, `ErrorState`, and `OfflineState` for consistent non-happy-path panels.
+- `SearchField`, `SelectionToolbar`, `FormSection`, `FieldGrid`, `FormActions`, and `ValidationSummary` for repeated search, selection, and form structure.
+- `CommandPalette`, `UploadQueue`, `ShortcutList`, `ShortcutHelpDialog`, and `WorkbenchLayout` for generic tool surfaces.
+
+These components render UI state and slots only. Keep fetching, routing, upload execution, auth/session state, and product-specific workflows in consuming packages.
+
 ## Theme Metadata
 
 `UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add theme metadata classes and `data-ui-theme` attributes around a subtree. They do not scope CSS tokens by themselves; the active visual theme still comes from the single stylesheet imported by the app.
