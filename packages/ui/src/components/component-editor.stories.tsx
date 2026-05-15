@@ -83,7 +83,8 @@ type Story = StoryObj<typeof meta>;
 
 export const IntegrationEditor: Story = {
   play: async ({ canvas, userEvent }) => {
-    await userEvent.selectOptions(canvas.getByLabelText("Variant"), "outline");
+    await userEvent.click(canvas.getByLabelText("Variant"));
+    await userEvent.click(canvas.getByRole("option", { name: "Outline" }));
     await expect(canvas.getByText(/variant="outline"/)).toBeInTheDocument();
   },
 };

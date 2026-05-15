@@ -8,7 +8,7 @@ import { Badge } from "./badge";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { Input } from "./input";
-import { NativeSelect, NativeSelectOption } from "./native-select";
+import { SelectDropdown } from "./select";
 import { Separator } from "./separator";
 
 type QueryBuilderFieldType = "text" | "number" | "date" | "boolean" | "select" | "multi-select";
@@ -185,17 +185,18 @@ function QueryBuilderGroup({
       {...props}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <NativeSelect
+        <SelectDropdown
           aria-label={root ? "Root combinator" : "Group combinator"}
           value={group.combinator}
           disabled={readOnly}
-          onChange={(event) =>
-            onGroupChange?.({ ...group, combinator: event.currentTarget.value as "and" | "or" })
+          onValueChange={(value) =>
+            onGroupChange?.({ ...group, combinator: value as "and" | "or" })
           }
-        >
-          <NativeSelectOption value="and">All rules</NativeSelectOption>
-          <NativeSelectOption value="or">Any rule</NativeSelectOption>
-        </NativeSelect>
+          options={[
+            { label: "All rules", value: "and" },
+            { label: "Any rule", value: "or" },
+          ]}
+        />
         <span className="text-xs text-muted-foreground">match in this group</span>
         <div className="ml-auto flex items-center gap-2">
           <Button
@@ -304,30 +305,23 @@ function QueryBuilderRule({
       {...props}
     >
       <div className="grid gap-2 md:grid-cols-[minmax(9rem,1fr)_minmax(8rem,0.8fr)_minmax(10rem,1fr)_auto] md:items-center">
-        <NativeSelect
+        <SelectDropdown
           aria-label="Rule field"
           value={field?.id ?? ""}
           disabled={readOnly}
-          onChange={(event) => changeField(event.currentTarget.value)}
-        >
-          {fields.map((item) => (
-            <NativeSelectOption key={item.id} value={item.id}>
-              {item.label}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-        <NativeSelect
+          onValueChange={changeField}
+          options={fields.map((item) => ({ label: item.label, value: item.id }))}
+        />
+        <SelectDropdown
           aria-label="Rule operator"
           value={operator}
           disabled={readOnly}
-          onChange={(event) => onRuleChange?.({ ...rule, operator: event.currentTarget.value })}
-        >
-          {operators.map((operatorName) => (
-            <NativeSelectOption key={operatorName} value={operatorName}>
-              {queryBuilderOperatorLabels[operatorName] ?? operatorName}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+          onValueChange={(value) => onRuleChange?.({ ...rule, operator: value })}
+          options={operators.map((operatorName) => ({
+            label: queryBuilderOperatorLabels[operatorName] ?? operatorName,
+            value: operatorName,
+          }))}
+        />
         <QueryBuilderValueEditor
           field={field}
           rule={{ ...rule, operator }}
@@ -386,22 +380,18 @@ function QueryBuilderValueEditor({
 
   if (field.type === "select" || field.type === "multi-select") {
     return (
-      <NativeSelect
+      <SelectDropdown
         aria-label="Rule value"
         value={String(Array.isArray(rule.value) ? rule.value[0] ?? "" : rule.value ?? "")}
         disabled={readOnly}
-        onChange={(event) =>
-          onValueChange?.(
-            field.type === "multi-select" ? [event.currentTarget.value] : event.currentTarget.value,
-          )
+        onValueChange={(value) =>
+          onValueChange?.(field.type === "multi-select" ? [value] : value)
         }
-      >
-        {(field.options ?? []).map((option) => (
-          <NativeSelectOption key={String(option.value)} value={String(option.value)}>
-            {option.label}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+        options={(field.options ?? []).map((option) => ({
+          label: option.label,
+          value: String(option.value),
+        }))}
+      />
     );
   }
 

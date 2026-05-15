@@ -8,8 +8,8 @@ import { Badge } from "./badge";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { Input } from "./input";
-import { NativeSelect, NativeSelectOption } from "./native-select";
 import { ScrollArea } from "./scroll-area";
+import { SelectDropdown } from "./select";
 import { Separator } from "./separator";
 import { Slider } from "./slider";
 import { Textarea } from "./textarea";
@@ -343,20 +343,17 @@ function InspectorFieldEditor({
 
   if (field.type === "select") {
     return (
-      <NativeSelect
+      <SelectDropdown
         id={id}
         aria-label={field.label}
         value={String(value ?? "")}
         disabled={disabled}
-        className="w-full"
-        onChange={(event) => onValueChange?.(event.currentTarget.value)}
-      >
-        {(field.options ?? []).map((option) => (
-          <NativeSelectOption key={String(option.value)} value={String(option.value)}>
-            {option.label}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+        onValueChange={(nextValue) => onValueChange?.(nextValue)}
+        options={(field.options ?? []).map((option) => ({
+          label: option.label,
+          value: String(option.value),
+        }))}
+      />
     );
   }
 

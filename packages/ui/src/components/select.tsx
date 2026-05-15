@@ -6,8 +6,109 @@ import { Select as SelectPrimitive } from "radix-ui";
 import { cn } from "../lib/cn";
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
 
+type SelectDropdownOption = {
+  label: React.ReactNode;
+  value: string;
+  disabled?: boolean;
+  textValue?: string;
+};
+
+type SelectDropdownProps = Omit<
+  React.ComponentProps<typeof SelectPrimitive.Root>,
+  "children" | "defaultValue" | "onValueChange" | "value"
+> & {
+  "aria-describedby"?: string;
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"];
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  className?: string;
+  contentClassName?: string;
+  defaultValue?: string;
+  id?: string;
+  onValueChange?: (value: string) => void;
+  options: SelectDropdownOption[];
+  placeholder?: React.ReactNode;
+  size?: "sm" | "default";
+  value?: string;
+};
+
+const emptySelectDropdownValuePrefix = "__moritzbrantner_ui_empty_select_value__";
+
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
+}
+
+function SelectDropdown({
+  "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  className,
+  contentClassName,
+  defaultValue,
+  id,
+  onValueChange,
+  options,
+  placeholder,
+  size = "default",
+  value,
+  ...props
+}: SelectDropdownProps) {
+  const emptyOptionValues = new Set(
+    options
+      .map((option, index) => (option.value === "" ? encodeEmptySelectDropdownValue(index) : null))
+      .filter((optionValue): optionValue is string => optionValue !== null),
+  );
+  const selectedValue = encodeSelectDropdownValue(value, options);
+  const selectedDefaultValue = encodeSelectDropdownValue(defaultValue, options);
+
+  return (
+    <Select
+      value={selectedValue}
+      defaultValue={selectedDefaultValue}
+      onValueChange={(nextValue) =>
+        onValueChange?.(emptyOptionValues.has(nextValue) ? "" : nextValue)
+      }
+      {...props}
+    >
+      <SelectTrigger
+        id={id}
+        aria-describedby={ariaDescribedBy}
+        aria-invalid={ariaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        className={cn("w-full", className)}
+        size={size}
+      >
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className={contentClassName}>
+        {options.map((option, index) => (
+          <SelectItem
+            key={`${option.value}-${index}`}
+            value={option.value === "" ? encodeEmptySelectDropdownValue(index) : option.value}
+            disabled={option.disabled}
+            textValue={option.textValue}
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function encodeSelectDropdownValue(value: string | undefined, options: SelectDropdownOption[]) {
+  if (value !== "") {
+    return value;
+  }
+
+  const emptyOptionIndex = options.findIndex((option) => option.value === "");
+  return emptyOptionIndex >= 0 ? encodeEmptySelectDropdownValue(emptyOptionIndex) : value;
+}
+
+function encodeEmptySelectDropdownValue(index: number) {
+  return `${emptySelectDropdownValuePrefix}${index}`;
 }
 
 function SelectGroup({ className, ...props }: React.ComponentProps<typeof SelectPrimitive.Group>) {
@@ -173,6 +274,7 @@ function SelectScrollDownButton({
 
 export {
   Select,
+  SelectDropdown,
   SelectContent,
   SelectGroup,
   SelectItem,
@@ -183,3 +285,4 @@ export {
   SelectTrigger,
   SelectValue,
 };
+export type { SelectDropdownOption, SelectDropdownProps };

@@ -10,6 +10,10 @@ import {
 } from "..";
 
 beforeAll(() => {
+  Element.prototype.scrollIntoView = vi.fn();
+  Element.prototype.hasPointerCapture = vi.fn(() => false);
+  Element.prototype.setPointerCapture = vi.fn();
+  Element.prototype.releasePointerCapture = vi.fn();
   globalThis.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}
@@ -52,6 +56,13 @@ const buttonDefinition: EditableComponentDefinition = {
 };
 
 describe("@moritzbrantner/ui component editor", () => {
+  async function chooseSelectOption(label: string, optionName: string) {
+    const trigger = screen.getByLabelText(label);
+    trigger.focus();
+    fireEvent.keyDown(trigger, { key: "Enter" });
+    fireEvent.click(await screen.findByRole("option", { name: optionName }));
+  }
+
   test("generates deterministic JSX snippets", () => {
     expect(
       buildJsxSnippet({
@@ -85,7 +96,7 @@ describe("@moritzbrantner/ui component editor", () => {
 
     await screen.findByRole("heading", { name: "Button" });
 
-    fireEvent.change(screen.getByLabelText("Variant"), { target: { value: "outline" } });
+    await chooseSelectOption("Variant", "Outline");
     expect(await screen.findByText("Variant: outline")).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("Spacing value"), { target: { value: "6" } });
@@ -119,7 +130,7 @@ describe("@moritzbrantner/ui component editor", () => {
     );
 
     await screen.findByRole("heading", { name: "Button" });
-    fireEvent.change(screen.getByLabelText("Variant"), { target: { value: "outline" } });
+    await chooseSelectOption("Variant", "Outline");
     expect(await screen.findByText("Variant: outline")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Copy" }));

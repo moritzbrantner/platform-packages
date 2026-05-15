@@ -51,7 +51,7 @@ import {
 } from "./dropdown-menu";
 import { Input } from "./input";
 import { Label } from "./label";
-import { NativeSelect, NativeSelectOption } from "./native-select";
+import { SelectDropdown } from "./select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
 
 type DataGridDensity = "compact" | "comfortable" | "spacious";
@@ -835,25 +835,24 @@ function DataGridBooleanFilter<TData, TValue>({
   return (
     <Label className="grid gap-1 text-xs text-muted-foreground">
       Value
-      <NativeSelect
+      <SelectDropdown
         aria-label={`Filter ${label}`}
-        className="w-full"
         size="sm"
         value={booleanFilter.value ?? "all"}
-        onChange={(event) =>
-          column.setFilterValue(cleanColumnFilterValue({
-            kind: "boolean",
-            value:
-              event.target.value === "true" || event.target.value === "false"
-                ? event.target.value
-                : undefined,
-          }))
+        onValueChange={(value) =>
+          column.setFilterValue(
+            cleanColumnFilterValue({
+              kind: "boolean",
+              value: value === "true" || value === "false" ? value : undefined,
+            }),
+          )
         }
-      >
-        <NativeSelectOption value="all">All</NativeSelectOption>
-        <NativeSelectOption value="true">True</NativeSelectOption>
-        <NativeSelectOption value="false">False</NativeSelectOption>
-      </NativeSelect>
+        options={[
+          { label: "All", value: "all" },
+          { label: "True", value: "true" },
+          { label: "False", value: "false" },
+        ]}
+      />
     </Label>
   );
 }
