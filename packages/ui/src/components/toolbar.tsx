@@ -5,7 +5,7 @@ import { cn } from "../lib/cn";
 import { Separator } from "./separator";
 
 const toolbarVariants = cva(
-  "flex min-h-11 w-full flex-wrap items-center gap-2 border border-border/60 bg-card/70 px-3 py-2 text-sm shadow-[var(--glass-shadow)] supports-backdrop-filter:backdrop-blur-xl",
+  "flex min-h-[var(--ui-toolbar-min-height)] w-full flex-wrap items-center gap-[var(--ui-toolbar-gap,var(--ui-control-gap))] border border-border/60 bg-card/70 px-[var(--ui-toolbar-padding-x)] py-[var(--ui-toolbar-padding-y)] text-sm shadow-[var(--ui-shadow-surface)] supports-backdrop-filter:backdrop-blur-xl",
   {
     variants: {
       justify: {
@@ -14,8 +14,9 @@ const toolbarVariants = cva(
         end: "justify-end",
       },
       density: {
-        default: "min-h-11",
-        compact: "min-h-9 px-2 py-1.5",
+        default: "min-h-[var(--ui-toolbar-min-height)]",
+        compact:
+          "min-h-[var(--ui-control-height-md)] px-[var(--ui-control-padding-x-sm)] py-[var(--ui-menu-item-padding-y)]",
       },
     },
     defaultVariants: {
@@ -48,7 +49,10 @@ function ToolbarGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       role="group"
       data-slot="toolbar-group"
-      className={cn("flex min-w-0 flex-wrap items-center gap-2", className)}
+      className={cn(
+        "flex min-w-0 flex-wrap items-center gap-[var(--ui-toolbar-gap,var(--ui-control-gap))]",
+        className,
+      )}
       {...props}
     />
   );

@@ -23,6 +23,12 @@ Apps import exactly one global UI stylesheet:
 import "@moritzbrantner/ui/styles.css";
 ```
 
+Apps that need multiple UI themes on one page can instead import the scoped theme stylesheet:
+
+```tsx
+import "@moritzbrantner/ui/theme-scopes.css";
+```
+
 The package also exposes theme-specific stylesheets:
 
 ```tsx
@@ -77,7 +83,24 @@ Avoid:
 
 Tokens are semantic CSS custom properties in `packages/ui/styles.css`. Public component styling should use tokens such as `--primary`, `--muted`, `--border`, and `--ring`, not raw color names.
 
-Theme wrappers such as `UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add metadata classes and `data-ui-theme` attributes. They do not scope CSS variables by themselves, so multiple visual themes are not intended to coexist in one document unless the stylesheets are changed to support scoped tokens.
+Theme wrappers such as `UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add metadata classes and `data-ui-theme` attributes. With `@moritzbrantner/ui/theme-scopes.css`, those wrappers also scope the built-in theme variables so multiple visual themes can coexist in one document. With the global theme stylesheets, use one UI theme per app.
+
+Consumers can tune supported theme values with the typed `createUiTheme` helper:
+
+```tsx
+import { UiTheme, createUiTheme } from "@moritzbrantner/ui";
+
+<UiTheme
+  theme="custom"
+  style={createUiTheme({
+    "--primary": "oklch(0.58 0.17 250)",
+    "--ui-radius-control": "0.75rem",
+    "--ui-control-height-md": "2.5rem",
+  })}
+>
+  <App />
+</UiTheme>;
+```
 
 The current visual systems are:
 

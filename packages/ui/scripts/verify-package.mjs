@@ -59,6 +59,7 @@ const requiredPackageFiles = [
   "dist/lib/cn.js",
   "dist/themes.js",
   "styles.css",
+  "theme-scopes.css",
   "bobba/styles.css",
   "zleek/styles.css",
   "atlas/styles.css",

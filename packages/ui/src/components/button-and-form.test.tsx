@@ -78,6 +78,7 @@ import {
   EmptyTitle,
   InspectorPanel,
   type InspectorPanelSectionData,
+  Input,
   Kbd,
   LoadingBar,
   MenubarShortcut,
@@ -445,6 +446,28 @@ describe("@moritzbrantner/ui button-and-form", () => {
     expect(button.className).toContain("active:brightness-110");
   });
 
+  test("uses public UI tokens for primitive shape and spacing", () => {
+    const { container } = render(
+      <Card>
+        <CardContent>
+          <Input aria-label="Name" />
+          <Button>Save</Button>
+        </CardContent>
+      </Card>,
+    );
+
+    const card = container.querySelector("[data-slot='card']");
+    const input = screen.getByLabelText("Name");
+    const button = screen.getByRole("button", { name: "Save" });
+
+    expect(card?.className).toContain("rounded-[var(--ui-card-radius");
+    expect(card?.className).toContain("gap-[var(--ui-card-gap");
+    expect(input.className).toContain("h-[var(--ui-input-height");
+    expect(input.className).toContain("rounded-[var(--ui-input-radius");
+    expect(button.className).toContain("h-[var(--ui-button-height-md");
+    expect(button.className).toContain("rounded-[var(--ui-button-radius");
+  });
+
   test("mirrors hover styles for selected buttons and tap styles for Enter", () => {
     const onKeyDown = vi.fn();
     const onKeyUp = vi.fn();
@@ -461,10 +484,18 @@ describe("@moritzbrantner/ui button-and-form", () => {
     const selectedButton = screen.getByRole("button", { name: "Selected" });
     const keyboardButton = screen.getByRole("button", { name: "Keyboard" });
 
-    expect(selectedButton.className).toContain("aria-[pressed=true]:-translate-y-[1px]");
-    expect(selectedButton.className).toContain("aria-[pressed=true]:scale-[1.055]");
-    expect(selectedButton.className).toContain("data-[state=on]:scale-[1.055]");
-    expect(selectedButton.className).toContain("aria-[pressed=true]:shadow-[0_22px");
+    expect(selectedButton.className).toContain(
+      "aria-[pressed=true]:translate-y-[var(--ui-motion-hover-y)]",
+    );
+    expect(selectedButton.className).toContain(
+      "aria-[pressed=true]:scale-[var(--ui-motion-hover-scale)]",
+    );
+    expect(selectedButton.className).toContain(
+      "data-[state=on]:scale-[var(--ui-motion-hover-scale)]",
+    );
+    expect(selectedButton.className).toContain(
+      "aria-[pressed=true]:shadow-[var(--ui-shadow-interactive)]",
+    );
     expect(keyboardButton.className).toContain("data-[keyboard-active=true]:scale-[0.98]");
     expect(keyboardButton.className).toContain("data-[keyboard-active=true]:brightness-110");
 

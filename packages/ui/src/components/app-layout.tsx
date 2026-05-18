@@ -70,7 +70,7 @@ function PageShell({
 }
 
 const pageHeaderVariants = cva(
-  "group/page-header @container/page-header grid gap-4 rounded-md border border-border/60 bg-card/60 p-4 text-card-foreground shadow-[var(--glass-shadow)] supports-backdrop-filter:backdrop-blur-xl md:p-5",
+  "group/page-header @container/page-header grid gap-[var(--ui-surface-gap)] rounded-[var(--ui-radius-surface)] border border-border/60 bg-card/60 p-[var(--ui-surface-padding-md)] text-card-foreground shadow-[var(--ui-shadow-surface)] supports-backdrop-filter:backdrop-blur-xl md:p-[calc(var(--ui-surface-padding-md)+0.25rem)]",
   {
     variants: {
       align: {
@@ -141,7 +141,7 @@ function PageContent({ className, ...props }: React.ComponentProps<"main">) {
 }
 
 const surfaceVariants = cva(
-  "group/surface relative isolate overflow-hidden rounded-md border text-sm shadow-[var(--glass-shadow)]",
+  "group/surface relative isolate overflow-hidden rounded-[var(--ui-radius-surface)] border text-sm shadow-[var(--ui-shadow-surface)]",
   {
     variants: {
       variant: {
@@ -152,8 +152,8 @@ const surfaceVariants = cva(
         transparent: "border-border/40 bg-transparent text-foreground shadow-none",
       },
       padding: {
-        default: "py-4",
-        compact: "py-3",
+        default: "py-[var(--ui-surface-padding-md)]",
+        compact: "py-[var(--ui-surface-padding-sm)]",
         none: "py-0",
       },
     },
@@ -186,7 +186,7 @@ function SurfaceHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="surface-header"
       className={cn(
-        "grid auto-rows-min items-start gap-1 px-4 group-data-[padding=compact]/surface:px-3 group-data-[padding=none]/surface:px-0 has-data-[slot=surface-action]:grid-cols-[1fr_auto] has-data-[slot=surface-description]:grid-rows-[auto_auto]",
+        "grid auto-rows-min items-start gap-1 px-[var(--ui-surface-padding-md)] group-data-[padding=compact]/surface:px-[var(--ui-surface-padding-sm)] group-data-[padding=none]/surface:px-0 has-data-[slot=surface-action]:grid-cols-[1fr_auto] has-data-[slot=surface-description]:grid-rows-[auto_auto]",
         className,
       )}
       {...props}
@@ -229,7 +229,7 @@ function SurfaceContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="surface-content"
       className={cn(
-        "px-4 group-data-[padding=compact]/surface:px-3 group-data-[padding=none]/surface:px-0",
+        "px-[var(--ui-surface-padding-md)] group-data-[padding=compact]/surface:px-[var(--ui-surface-padding-sm)] group-data-[padding=none]/surface:px-0",
         className,
       )}
       {...props}
@@ -242,7 +242,7 @@ function SurfaceFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="surface-footer"
       className={cn(
-        "mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 bg-muted/35 px-4 pt-4 group-data-[padding=compact]/surface:mt-3 group-data-[padding=compact]/surface:px-3 group-data-[padding=compact]/surface:pt-3 group-data-[padding=none]/surface:mt-0 group-data-[padding=none]/surface:px-0",
+        "mt-[var(--ui-surface-gap)] flex flex-wrap items-center gap-[var(--ui-control-gap)] border-t border-border/60 bg-muted/35 px-[var(--ui-surface-padding-md)] pt-[var(--ui-surface-padding-md)] group-data-[padding=compact]/surface:mt-[var(--ui-surface-padding-sm)] group-data-[padding=compact]/surface:px-[var(--ui-surface-padding-sm)] group-data-[padding=compact]/surface:pt-[var(--ui-surface-padding-sm)] group-data-[padding=none]/surface:mt-0 group-data-[padding=none]/surface:px-0",
         className,
       )}
       {...props}

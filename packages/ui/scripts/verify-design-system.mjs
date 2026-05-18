@@ -70,6 +70,11 @@ function verifyPackageMetadata() {
   expectEqual(packageJson.private, false, "package must stay publishable");
   expectArrayIncludes(packageJson.files, "dist", "package files must include dist");
   expectArrayIncludes(packageJson.files, "styles.css", "package files must include styles.css");
+  expectArrayIncludes(
+    packageJson.files,
+    "theme-scopes.css",
+    "package files must include theme-scopes.css",
+  );
   expectArrayIncludes(packageJson.files, "zleek", "package files must include zleek styles");
   expectArrayIncludes(packageJson.files, "bobba", "package files must include bobba styles");
   expectArrayIncludes(packageJson.files, "atlas", "package files must include atlas styles");
@@ -101,6 +106,11 @@ function verifyPackageMetadata() {
     packageJson.exports["./styles.css"],
     "./styles.css",
     "default stylesheet must be exported",
+  );
+  expectEqual(
+    packageJson.exports["./theme-scopes.css"],
+    "./theme-scopes.css",
+    "scoped theme stylesheet must be exported",
   );
   expectEqual(
     packageJson.exports["./zleek/styles.css"],

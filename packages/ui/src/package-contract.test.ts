@@ -361,10 +361,20 @@ describe("@moritzbrantner/ui package-contract", () => {
     expect(packageJson.peerDependencies.react).toBeTruthy();
     expect(packageJson.peerDependencies["react-dom"]).toBeTruthy();
     expect(packageJson.files).toEqual(
-      expect.arrayContaining(["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"]),
+      expect.arrayContaining([
+        "dist",
+        "styles.css",
+        "theme-scopes.css",
+        "zleek",
+        "bobba",
+        "atlas",
+        "studio",
+        "paper",
+      ]),
     );
     expect(packageJson.sideEffects).toEqual(expect.arrayContaining(["*.css"]));
     expect(packageJson.exports["./styles.css"]).toBe("./styles.css");
+    expect(packageJson.exports["./theme-scopes.css"]).toBe("./theme-scopes.css");
     expect(packageJson.exports["./zleek/styles.css"]).toBe("./zleek/styles.css");
     expect(packageJson.exports["./bobba/styles.css"]).toBe("./bobba/styles.css");
     expect(packageJson.exports["./atlas"].import).toBe("./dist/atlas.js");

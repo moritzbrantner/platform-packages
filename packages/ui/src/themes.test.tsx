@@ -144,10 +144,13 @@ import {
   ToolbarGroup,
   ToolbarSpacer,
   ToolbarTitle,
+  UiTheme,
+  createUiTheme,
   defaultUiThemeName,
   themeConfig,
   uiThemeLabels,
   uiThemeNames,
+  uiTokenNames,
   type UiThemeName,
 } from ".";
 import { AtlasTheme, atlasTheme, uiTheme as atlasUiTheme } from "./atlas";
@@ -343,6 +346,7 @@ describe("@moritzbrantner/ui theme-contract", () => {
       "atlas",
       "studio",
       "paper",
+      "custom",
     ] as const satisfies readonly UiThemeName[];
 
     render(
@@ -371,9 +375,10 @@ describe("@moritzbrantner/ui theme-contract", () => {
     expect(screen.getByRole("button", { name: "Studio action" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Paper action" })).toBeTruthy();
     expect(Object.keys(themeConfig).sort()).toEqual([...allThemeNames].sort());
-    expect(uiThemeNames).toEqual(["bobba", "zleek", "atlas", "studio", "paper"]);
+    expect(uiThemeNames).toEqual(["bobba", "zleek", "atlas", "studio", "paper", "custom"]);
     expect(defaultUiThemeName).toBe("bobba");
     expect(uiThemeLabels.paper).toBe("Paper");
+    expect(uiThemeLabels.custom).toBe("Custom");
     expect(zleekTheme.name).toBe("zleek");
     expect(bobbaTheme.name).toBe("bobba");
     expect(atlasTheme.name).toBe("atlas");
@@ -384,5 +389,29 @@ describe("@moritzbrantner/ui theme-contract", () => {
     expect(atlasUiTheme).toBe(atlasTheme);
     expect(studioUiTheme).toBe(studioTheme);
     expect(paperUiTheme).toBe(paperTheme);
+  });
+
+  test("creates sanitized custom theme token styles", () => {
+    const style = createUiTheme({
+      "--primary": "oklch(0.58 0.17 250)",
+      "--ui-radius-control": "0.75rem",
+      "--ui-control-height-md": "2.5rem",
+      "--unknown-token": "red",
+    } as Parameters<typeof createUiTheme>[0]);
+
+    render(
+      <UiTheme theme="custom" style={style} data-testid="custom-theme">
+        <Button>Custom action</Button>
+      </UiTheme>,
+    );
+
+    const root = screen.getByTestId("custom-theme");
+
+    expect(uiTokenNames).toContain("--ui-radius-control");
+    expect(root.getAttribute("data-ui-theme")).toBe("custom");
+    expect(root.className).toContain("custom");
+    expect(root.getAttribute("style")).toContain("--primary: oklch(0.58 0.17 250)");
+    expect(root.getAttribute("style")).toContain("--ui-radius-control: 0.75rem");
+    expect(root.getAttribute("style")).not.toContain("--unknown-token");
   });
 });

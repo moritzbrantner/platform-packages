@@ -12,6 +12,7 @@
   "files": [
     "dist",
     "styles.css",
+    "theme-scopes.css",
     "zleek",
     "bobba",
     "atlas",
@@ -58,6 +59,7 @@
       "import": "./dist/components/*.js"
     },
     "./styles.css": "./styles.css",
+    "./theme-scopes.css": "./theme-scopes.css",
     "./zleek/styles.css": "./zleek/styles.css",
     "./bobba/styles.css": "./bobba/styles.css",
     "./atlas/styles.css": "./atlas/styles.css",
