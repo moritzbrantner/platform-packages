@@ -73,16 +73,20 @@ const relationLabels: Record<LogicalArgumentRelation, string> = {
 };
 
 const statusClassNames: Record<LogicalArgumentStatus, string> = {
-  invalid: "border-destructive/35 bg-destructive/10 text-destructive",
+  invalid:
+    "border-destructive/35 bg-destructive/10 text-red-700 dark:bg-destructive/20 dark:text-red-300",
   open: "border-border bg-muted text-muted-foreground",
   sound: "border-primary/35 bg-primary/10 text-primary",
-  unsound: "border-destructive/35 bg-destructive/10 text-destructive",
+  unsound:
+    "border-destructive/35 bg-destructive/10 text-red-700 dark:bg-destructive/20 dark:text-red-300",
   valid: "border-primary/35 bg-primary/10 text-primary",
 };
 
 const relationClassNames: Record<LogicalArgumentRelation, string> = {
-  objects: "border-destructive/30 bg-destructive/5 text-destructive",
-  rebuts: "border-destructive/30 bg-destructive/5 text-destructive",
+  objects:
+    "border-destructive/30 bg-destructive/5 text-red-700 dark:bg-destructive/15 dark:text-red-300",
+  rebuts:
+    "border-destructive/30 bg-destructive/5 text-red-700 dark:bg-destructive/15 dark:text-red-300",
   supports: "border-primary/30 bg-primary/5 text-primary",
   undercuts: "border-border bg-muted text-muted-foreground",
 };

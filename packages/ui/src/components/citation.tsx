@@ -58,7 +58,8 @@ const statusLabels: Record<CitationStatus, string> = {
 
 const statusClassNames: Record<CitationStatus, string> = {
   cited: "border-primary/30 bg-primary/10 text-primary",
-  disputed: "border-destructive/35 bg-destructive/10 text-destructive",
+  disputed:
+    "border-destructive/35 bg-destructive/10 text-red-700 dark:bg-destructive/20 dark:text-red-300",
   missing: "border-border bg-muted text-muted-foreground",
   supporting: "border-primary/30 bg-primary/10 text-primary",
 };

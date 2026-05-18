@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "storybook/test";
+import { expect, screen } from "storybook/test";
 
 import { Button } from "./button";
 import {
@@ -84,7 +84,7 @@ type Story = StoryObj<typeof meta>;
 export const IntegrationEditor: Story = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByLabelText("Variant"));
-    await userEvent.click(canvas.getByRole("option", { name: "Outline" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Outline" }));
     await expect(canvas.getByText(/variant="outline"/)).toBeInTheDocument();
   },
 };

@@ -9,7 +9,7 @@ import {
 } from "../test/a11y-fixtures";
 import { Button } from "./button";
 import { CommandPalette, type CommandPaletteGroup } from "./command-palette";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
 import { SearchField } from "./search-field";
 import { SelectionToolbar } from "./selection-toolbar";
 import { EmptyState, StateViewDescription, StateViewTitle } from "./state-view";
@@ -44,7 +44,9 @@ function AccessibilityPatternsDemo() {
       </ReducedMotionFixture>
       <EmptyState>
         <StateViewTitle>Keyboard-ready state</StateViewTitle>
-        <StateViewDescription>State surfaces keep useful text and action slots visible.</StateViewDescription>
+        <StateViewDescription>
+          State surfaces keep useful text and action slots visible.
+        </StateViewDescription>
       </EmptyState>
       <WorkbenchLayout
         toolbar={<FocusableFixture />}
@@ -57,6 +59,9 @@ function AccessibilityPatternsDemo() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Accessible dialog fixture</DialogTitle>
+            <DialogDescription>
+              A fixture for checking focusable content inside an open dialog.
+            </DialogDescription>
           </DialogHeader>
           <FocusableFixture />
         </DialogContent>
