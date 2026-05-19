@@ -34,7 +34,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remotion": "^4.0.379",
-    "three": "^0.180.0"
+    "three": "^0.184.0"
   },
   "peerDependenciesMeta": {
     "@react-three/fiber": {
@@ -58,7 +58,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "remotion": "^4.0.379",
-    "three": "^0.180.0"
+    "three": "^0.184.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

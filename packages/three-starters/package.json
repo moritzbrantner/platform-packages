@@ -28,7 +28,7 @@
     "@moritzbrantner/ui": "^0.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "three": "^0.180.0"
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@react-three/fiber": "^9.4.0",
@@ -37,7 +37,7 @@
     "@types/react-dom": "^19.2.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "three": "^0.180.0"
+    "three": "^0.184.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
