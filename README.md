@@ -6,12 +6,12 @@ Shared packages for the maintained scaffold family. This repo stays broad on pur
 
 The maintained template family should converge on these packages first:
 
-- `@moritzbrantner/ui`
+- `@moritzbrantner/ui` from the standalone `moritzbrantner/ui` repository
 - `@moritzbrantner/storytelling`
 - `@moritzbrantner/oxfmt-config`
 - `@moritzbrantner/typescript-config`
 
-These four packages are the current scaffold-facing contract for `monorepo`, `next-template`, `expo-template`, and `electron-template`.
+These four packages are the current scaffold-facing contract for `monorepo`, `next-template`, `expo-template`, and `electron-template`. This repository still incubates the non-UI package set, while `@moritzbrantner/ui` is consumed as a published package.
 
 Everything else in this repository remains valid, but is not required for `scaffold-v2` alignment.
 Complete frontend composition for pages, roles, auth/session state, and account/settings/profile workflows belongs in the sibling `@moritzbrantner/frontend-ui` repository. This repository keeps `@moritzbrantner/ui` focused on reusable components and design-system primitives.
@@ -75,7 +75,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/parallel-text`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/pipeline-core`                  | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/question-answering`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/remotion`                       | experimental           | Remotion adapters that compose runtime packages into frame-based renderers.  |
+| `@moritzbrantner/remotion`                       | experimental           | Remotion adapters that compose runtime packages into frame-based renderers. |
 | `@moritzbrantner/reinforcement-learning`         | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/sentence-similarity`            | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/sentiment-analysis`             | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
@@ -105,7 +105,6 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/translation`                    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/tree-structures`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/typescript-config`              | scaffold-critical      | Shared scaffold contract surface.                                           |
-| `@moritzbrantner/ui`                             | scaffold-critical      | Shared scaffold contract surface.                                           |
 | `@moritzbrantner/unconditional-image-generation` | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/upload-playbook`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/video-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
@@ -148,7 +147,6 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - `@moritzbrantner/text-inference`: text task contracts, re-exported core chunking helpers, and Hugging Face HTTP wrappers used by the text-focused AI packages.
 - `@moritzbrantner/text-summarization`: chunked summarization pipeline with optional multi-pass reduction for longer documents.
 - `@moritzbrantner/tree-structures`: parent-link tree indexing, traversal helpers, subtree queries, and aggregate tree statistics for hierarchy-heavy data.
-- `@moritzbrantner/ui`: Tailwind 4 compatible UI primitives plus the shared theme/style contract.
 - `@moritzbrantner/storytelling`: unified serializable story documents with branching playback, scroll previews, renderer registries, and Remotion/Three.js adapters.
 - `@moritzbrantner/word-prediction`: next-word suggestion engine for chat-style and keyboard-style text prediction, with optional semantic backoff from word vectors.
 - `@moritzbrantner/word-vectors`: distributional word vectors with similarity lookup, context inspection, persistence, and corpus-aware training adapters.
@@ -183,7 +181,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 ## Repository scope
 
 - The repository remains broad and can host shared runtime, tooling, and domain packages.
-- The scaffold-critical set is limited to `ui`, `storytelling`, `oxfmt-config`, and `typescript-config`.
+- The scaffold-critical set is limited to external `@moritzbrantner/ui`, plus local `storytelling`, `oxfmt-config`, and `typescript-config`.
 - Unrelated packages stay in place and are not blocked on the template-family release cadence.
 - GitHub Packages publishing is configured through Changesets.
 - Includes a local playground app for manually testing package behavior.
@@ -222,7 +220,7 @@ The custom verifier scripts still run through `bun run lint` and enforce package
 
 - The package names use the neutral `@moritzbrantner/*` scope in source.
 - Before first GitHub Packages publish, either publish from a matching GitHub org/user scope or rename the packages to your actual GitHub Packages scope.
-- Publish or prepare releasable versions of the scaffold-critical package set before widening the release scope to the rest of the repository.
+- Publish or prepare releasable versions of the local scaffold-critical package set before widening the release scope to the rest of the repository.
 - Do not move `@repo/auth-contract` or `@repo/upload-playbook` into this repository until real multi-repo reuse exists.
 - See [`docs/publishing.md`](./docs/publishing.md) for the release workflow and scope caveat.
 - See [SCAFFOLD_ALIGNMENT.md](./SCAFFOLD_ALIGNMENT.md) for the scaffold-family alignment contract for this repository.

@@ -9,8 +9,7 @@
     "types": ["node"],
     "paths": {
       "@moritzbrantner/data-density": ["../data-density/src/index.ts"],
-      "@moritzbrantner/maps": ["./src/index.ts"],
-      "@moritzbrantner/ui": ["../ui/src/index.ts"]
+      "@moritzbrantner/maps": ["./src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]

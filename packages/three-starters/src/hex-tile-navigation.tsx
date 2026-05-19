@@ -1,5 +1,12 @@
 import { Canvas } from "@react-three/fiber";
-import { useMemo, useState, type ComponentProps, type CSSProperties, type KeyboardEvent } from "react";
+import { Button } from "@moritzbrantner/ui";
+import {
+  useMemo,
+  useState,
+  type ComponentProps,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import { Color, type ColorRepresentation } from "three";
 
 import { createHexGridLayout, getHexGridCellPosition } from "./core";
@@ -24,8 +31,10 @@ export type HexTileNavigationDirection =
   | "down-left"
   | "down-right";
 
-export interface HexTileNavigationProps
-  extends Omit<ComponentProps<"section">, "children" | "onChange"> {
+export interface HexTileNavigationProps extends Omit<
+  ComponentProps<"section">,
+  "children" | "onChange"
+> {
   items: readonly HexTileNavigationItem[];
   columns: number;
   rows?: number;
@@ -98,19 +107,25 @@ export function HexTileNavigation({
       }),
     [columns, gap, radius, rows],
   );
-  const resolvedCanvasHeight = typeof canvasHeight === "number" ? `${canvasHeight}px` : canvasHeight;
+  const resolvedCanvasHeight =
+    typeof canvasHeight === "number" ? `${canvasHeight}px` : canvasHeight;
   const [uncontrolledActiveItemId, setUncontrolledActiveItemId] = useState(
     initialActiveItemId ?? items[0]?.id ?? "",
   );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const controlledIndex = activeItemId == null ? -1 : items.findIndex((item) => item.id === activeItemId);
+  const controlledIndex =
+    activeItemId == null ? -1 : items.findIndex((item) => item.id === activeItemId);
   const uncontrolledIndex = items.findIndex((item) => item.id === uncontrolledActiveItemId);
-  const activeIndex = controlledIndex >= 0 ? controlledIndex : uncontrolledIndex >= 0 ? uncontrolledIndex : 0;
+  const activeIndex =
+    controlledIndex >= 0 ? controlledIndex : uncontrolledIndex >= 0 ? uncontrolledIndex : 0;
   const activeItem = items[activeIndex];
   const colorPalette = useMemo(
     () =>
-      items.map((item, index) =>
-        new Color(item.accentColor ?? FALLBACK_ACCENT_COLORS[index % FALLBACK_ACCENT_COLORS.length]),
+      items.map(
+        (item, index) =>
+          new Color(
+            item.accentColor ?? FALLBACK_ACCENT_COLORS[index % FALLBACK_ACCENT_COLORS.length],
+          ),
       ),
     [items],
   );
@@ -153,7 +168,13 @@ export function HexTileNavigation({
       return;
     }
 
-    const nextIndex = getHexTileNavigationNeighborIndex(activeIndex, direction, items.length, columns, rows);
+    const nextIndex = getHexTileNavigationNeighborIndex(
+      activeIndex,
+      direction,
+      items.length,
+      columns,
+      rows,
+    );
 
     if (nextIndex !== activeIndex) {
       event.preventDefault();
@@ -200,7 +221,10 @@ export function HexTileNavigation({
           </mesh>
 
           {activeCellPosition ? (
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[activeCellPosition[0], 0.02, activeCellPosition[2]]}>
+            <mesh
+              rotation={[-Math.PI / 2, 0, 0]}
+              position={[activeCellPosition[0], 0.02, activeCellPosition[2]]}
+            >
               <ringGeometry args={[radius * 0.82, radius * 1.12, 6]} />
               <meshBasicMaterial
                 color={colorPalette[activeIndex]?.getStyle() ?? "#f59e0b"}
@@ -266,8 +290,9 @@ export function HexTileNavigation({
       </div>
 
       <div style={toolbarStyle}>
-        <button
+        <Button
           type="button"
+          variant="outline"
           style={buttonStyle}
           onClick={() =>
             selectIndex(
@@ -276,9 +301,10 @@ export function HexTileNavigation({
           }
         >
           Previous
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           style={buttonStyle}
           onClick={() =>
             selectIndex(
@@ -287,7 +313,7 @@ export function HexTileNavigation({
           }
         >
           Next
-        </button>
+        </Button>
         <div style={hintStyle}>Use arrow keys or Q/W/E/A/S/D to move across the grid.</div>
       </div>
 
@@ -312,9 +338,10 @@ export function HexTileNavigation({
           const accentColor = colorPalette[cell.index]?.getStyle() ?? FALLBACK_ACCENT_COLORS[0];
 
           return (
-            <button
+            <Button
               key={`${cell.row}-${cell.column}`}
               type="button"
+              variant="ghost"
               disabled={isPlaceholder}
               onClick={() => selectIndex(cell.index)}
               style={{
@@ -335,7 +362,7 @@ export function HexTileNavigation({
             >
               <span style={tileButtonMetaStyle}>{item?.eyebrow ?? "Empty"}</span>
               <span style={tileButtonTitleStyle}>{item?.label ?? "Reserved"}</span>
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -99,10 +99,7 @@ function createRing(count, radius, offsetX, offsetY) {
     const angle = (index / count) * Math.PI * 2;
     const radialOffset = radius * (1 + 0.14 * Math.sin(angle * 5));
 
-    return [
-      offsetX + Math.cos(angle) * radialOffset,
-      offsetY + Math.sin(angle) * radialOffset,
-    ];
+    return [offsetX + Math.cos(angle) * radialOffset, offsetY + Math.sin(angle) * radialOffset];
   });
 
   coordinates.push([...coordinates[0]]);

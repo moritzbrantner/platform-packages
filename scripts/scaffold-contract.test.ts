@@ -7,30 +7,6 @@ const packagesRoot = path.join(repoRoot, "packages");
 
 const scaffoldCriticalPackages = [
   {
-    dir: "ui",
-    name: "@moritzbrantner/ui",
-    version: "0.5.1",
-    files: ["dist", "styles.css", "zleek", "bobba", "atlas", "studio", "paper"],
-    exports: [
-      ".",
-      "./zleek",
-      "./bobba",
-      "./atlas",
-      "./studio",
-      "./paper",
-      "./themes",
-      "./lib/cn",
-      "./components/*",
-      "./styles.css",
-      "./zleek/styles.css",
-      "./bobba/styles.css",
-      "./atlas/styles.css",
-      "./studio/styles.css",
-      "./paper/styles.css",
-    ],
-    scripts: ["build", "lint", "check-types", "test", "test:package", "build-storybook"],
-  },
-  {
     dir: "storytelling",
     name: "@moritzbrantner/storytelling",
     version: "0.3.1",
@@ -68,11 +44,13 @@ test("readme marks the scaffold-critical package set explicitly", () => {
 
   expect(readme).toContain("## Scaffold-critical package set");
   expect(readme).toContain("`@moritzbrantner/ui`");
+  expect(readme).toContain("standalone `moritzbrantner/ui` repository");
   expect(readme).toContain("`@moritzbrantner/storytelling`");
   expect(readme).toContain("`@moritzbrantner/oxfmt-config`");
   expect(readme).toContain("`@moritzbrantner/typescript-config`");
   expect(readme).toContain("Everything else in this repository remains valid");
   expect(readme).toContain("Do not move `@repo/auth-contract` or `@repo/upload-playbook`");
+  expect(existsSync(path.join(packagesRoot, "ui", "package.json"))).toBe(false);
 });
 
 test("readme package inventory lists every workspace package", () => {
@@ -215,7 +193,6 @@ test("release-ready package inventory entries have publishable metadata", () => 
     (match) => match[1]!,
   );
 
-  expect(releaseReadyPackageNames).toContain("ui");
   expect(releaseReadyPackageNames).toContain("maps");
 
   for (const packageDir of releaseReadyPackageNames) {

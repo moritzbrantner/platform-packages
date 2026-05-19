@@ -1,6 +1,6 @@
 # Design system
 
-`@moritzbrantner/ui` is the low-level design-system package for this workspace. It owns shared tokens, React primitives, composed UI components, theme metadata, Storybook coverage, and package-consumption guarantees.
+`@moritzbrantner/ui` is the low-level design-system package consumed by this workspace. It now lives in the standalone `moritzbrantner/ui` repository and owns shared tokens, React primitives, composed UI components, theme metadata, Storybook coverage, and package-consumption guarantees.
 
 `@moritzbrantner/frontend-ui` is intentionally higher level. It may compose `@moritzbrantner/ui` with pages, auth/session state, roles, profiles, settings, admin surfaces, navigation models, and other product workflows, but those workflows should not move into `@moritzbrantner/ui`.
 
@@ -81,7 +81,7 @@ Avoid:
 
 ## Token strategy
 
-Tokens are semantic CSS custom properties in `packages/ui/styles.css`. Public component styling should use tokens such as `--primary`, `--muted`, `--border`, and `--ring`, not raw color names.
+Tokens are semantic CSS custom properties exported from `@moritzbrantner/ui/styles.css`. Public component styling should use tokens such as `--primary`, `--muted`, `--border`, and `--ring`, not raw color names.
 
 Theme wrappers such as `UiTheme`, `BobbaTheme`, `ZleekTheme`, `AtlasTheme`, `StudioTheme`, and `PaperTheme` add metadata classes and `data-ui-theme` attributes. With `@moritzbrantner/ui/theme-scopes.css`, those wrappers also scope the built-in theme variables so multiple visual themes can coexist in one document. With the global theme stylesheets, use one UI theme per app.
 
@@ -134,7 +134,7 @@ bun run --filter @moritzbrantner/ui test
 bun run --filter @moritzbrantner/ui build
 bun run --filter @moritzbrantner/ui test:storybook
 bun run --filter @moritzbrantner/ui test:package
-cd packages/ui && npm pack --dry-run --ignore-scripts --json
+cd ../ui && npm pack --dry-run --ignore-scripts --json
 ```
 
 `bun run --filter @moritzbrantner/ui lint` includes a design-system verifier that checks package exports, stylesheet exports, component root exports, Storybook coverage, and the consumer example.

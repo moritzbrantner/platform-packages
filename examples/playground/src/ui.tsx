@@ -1060,7 +1060,9 @@ function buildEditableGalleryItems(): EditableGalleryItem[] {
             />
             <ConnectionStatus
               status="synced"
-              onSync={() => toast.success("Connection is synced")}
+              onSync={() => {
+                toast.success("Connection is synced");
+              }}
             />
           </div>
           <Empty className="min-h-48 border border-dashed">

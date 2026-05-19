@@ -32,7 +32,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@moritzbrantner/ui": "^0.5.0"
+    "@moritzbrantner/ui": "^0.5.2"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",

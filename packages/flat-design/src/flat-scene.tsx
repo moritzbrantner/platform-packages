@@ -282,7 +282,9 @@ export function FlatScene({
         </defs>
       ) : null}
       {scene.background ? <rect width="100%" height="100%" fill={scene.background} /> : null}
-      {scene.layers.map((layer, index) => renderLayer(layer, `layer-${index}`, index, getShapeProps))}
+      {scene.layers.map((layer, index) =>
+        renderLayer(layer, `layer-${index}`, index, getShapeProps),
+      )}
     </svg>
   );
 }

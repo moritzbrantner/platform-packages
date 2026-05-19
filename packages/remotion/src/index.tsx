@@ -147,7 +147,10 @@ export function RemotionClusteredMap<TProperties = Record<string, unknown>>({
     timeStep,
     tracks,
   });
-  const points = useMemo(() => getTemporalMapPointsAtTime(tracks, activeTime), [activeTime, tracks]);
+  const points = useMemo(
+    () => getTemporalMapPointsAtTime(tracks, activeTime),
+    [activeTime, tracks],
+  );
 
   return <ClusteredMap {...mapProps} points={points} />;
 }
@@ -178,7 +181,10 @@ export function RemotionHeatMap<TProperties = Record<string, unknown>>({
     timeStep,
     tracks,
   });
-  const points = useMemo(() => getTemporalMapPointsAtTime(tracks, activeTime), [activeTime, tracks]);
+  const points = useMemo(
+    () => getTemporalMapPointsAtTime(tracks, activeTime),
+    [activeTime, tracks],
+  );
   const temporalMaxWeight = useMemo(() => {
     if (!preserveTemporalScale || maxWeight !== undefined) {
       return undefined;

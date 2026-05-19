@@ -1,6 +1,7 @@
 {
   "name": "@moritzbrantner/data-density",
   "version": "0.1.1",
+  "description": "Renderer-agnostic density indexes for windows, binned series, and clustered geo data.",
   "private": false,
   "type": "module",
   "repository": {
@@ -8,6 +9,7 @@
     "url": "git+https://github.com/moritzbrantner/platform-packages.git",
     "directory": "packages/data-density"
   },
+  "license": "UNLICENSED",
   "files": [
     "dist"
   ],
@@ -30,10 +32,13 @@
     "access": "restricted"
   },
   "scripts": {
+    "bench:large-data": "node ./scripts/benchmark-large-data.mjs",
     "build": "tsup src/index.ts --format esm --dts --clean --out-dir dist",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ && node ../../scripts/verify-package-styles.mjs .",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/data-density/src"
+    "test": "cd ../.. && vitest run packages/data-density/src",
+    "pack:dry": "npm pack --dry-run --ignore-scripts --json",
+    "verify:release": "bun run check-types && bun run lint && bun run test && bun run build && bun run bench:large-data && bun run pack:dry"
   }
 }

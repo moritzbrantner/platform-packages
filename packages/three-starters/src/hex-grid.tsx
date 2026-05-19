@@ -13,7 +13,8 @@ import {
 } from "./core";
 
 export interface HexGridProps
-  extends Omit<ThreeElements["group"], "children" | "rotation" | "scale">,
+  extends
+    Omit<ThreeElements["group"], "children" | "rotation" | "scale">,
     CreateHexGridLayoutOptions,
     CreateHoneycombCellGeometryOptions {
   plane?: HexGridPlane;

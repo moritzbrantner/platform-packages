@@ -1,10 +1,6 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-} from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent } from "react";
+
+import { Button } from "@moritzbrantner/ui";
 
 import {
   addMotionKeyframe,
@@ -113,7 +109,9 @@ function clamp(value: number, min: number, max: number) {
 
 export function useFlatSceneSelection(scene: FlatDesignScene): UseFlatSceneSelectionResult {
   const nodes = useMemo(() => listFlatNodes(scene), [scene]);
-  const [selectedNodeRef, setSelectedNodeRef] = useState<FlatNodeRef | undefined>(() => nodes[0]?.ref);
+  const [selectedNodeRef, setSelectedNodeRef] = useState<FlatNodeRef | undefined>(
+    () => nodes[0]?.ref,
+  );
   const selectedNode = useMemo(
     () => (selectedNodeRef ? getFlatNode(scene, selectedNodeRef) : undefined),
     [scene, selectedNodeRef],
@@ -246,8 +244,13 @@ export function FlatMotionTimelineEditor({
 
     const rect = event.currentTarget.getBoundingClientRect();
     const ratio = rect.width === 0 ? 0 : (event.clientX - rect.left) / rect.width;
-    const timeMs = clamp(Math.round(ratio * normalizedMotion.durationMs), 0, normalizedMotion.durationMs);
-    const source = normalizedMotion.keyframes[activeIndex] ?? normalizedMotion.keyframes[0] ?? { timeMs };
+    const timeMs = clamp(
+      Math.round(ratio * normalizedMotion.durationMs),
+      0,
+      normalizedMotion.durationMs,
+    );
+    const source = normalizedMotion.keyframes[activeIndex] ??
+      normalizedMotion.keyframes[0] ?? { timeMs };
     const nextMotion = addMotionKeyframe(normalizedMotion, {
       ...source,
       timeMs,
@@ -313,14 +316,15 @@ export function FlatMotionTimelineEditor({
               {normalizedMotion.direction ?? "normal"}
             </div>
           </div>
-          <button
+          <Button
             type="button"
+            variant="outline"
             className="h-9 rounded-md border border-border bg-background px-3 text-sm font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             onClick={handleRemoveKeyframe}
             disabled={readOnly || normalizedMotion.keyframes.length <= 2}
           >
             Delete keyframe
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-3">
@@ -331,8 +335,9 @@ export function FlatMotionTimelineEditor({
             </span>
             <span>{normalizedMotion.durationMs}ms</span>
           </div>
-          <button
+          <Button
             type="button"
+            variant="outline"
             className="relative h-12 w-full rounded-md border border-border bg-background"
             aria-label="Motion timeline rail"
             onClick={handleAddKeyframe}
@@ -359,7 +364,7 @@ export function FlatMotionTimelineEditor({
                 {index + 1}
               </span>
             ))}
-          </button>
+          </Button>
         </div>
 
         <div className="overflow-x-auto">
@@ -391,7 +396,13 @@ export function FlatMotionTimelineEditor({
                         className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm outline-none transition focus:border-primary"
                         aria-label={`Keyframe ${index + 1} ${field}`}
                         type="number"
-                        min={field === "timeMs" || field === "opacity" ? 0 : field === "scale" ? 0.2 : undefined}
+                        min={
+                          field === "timeMs" || field === "opacity"
+                            ? 0
+                            : field === "scale"
+                              ? 0.2
+                              : undefined
+                        }
                         max={
                           field === "timeMs"
                             ? normalizedMotion.durationMs
@@ -401,7 +412,13 @@ export function FlatMotionTimelineEditor({
                                 ? 3
                                 : undefined
                         }
-                        step={field === "timeMs" ? 100 : field === "opacity" || field === "scale" ? 0.01 : 1}
+                        step={
+                          field === "timeMs"
+                            ? 100
+                            : field === "opacity" || field === "scale"
+                              ? 0.01
+                              : 1
+                        }
                         value={readNumericKeyframeValue(keyframe, field)}
                         onChange={(event) =>
                           handleKeyframeFieldChange(index, field, Number(event.target.value))

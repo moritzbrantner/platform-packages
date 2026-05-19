@@ -320,7 +320,9 @@ export function createTemporalGeoJsonPlaybackIndex<TProperties = Record<string, 
       return {
         features: preparedTracks
           .map((track) => resolvePreparedTrackAtTime(track, time))
-          .filter((feature): feature is TemporalGeoJsonOutputFeature<TProperties> => feature !== null),
+          .filter(
+            (feature): feature is TemporalGeoJsonOutputFeature<TProperties> => feature !== null,
+          ),
         type: "FeatureCollection",
       };
     },
@@ -420,9 +422,11 @@ function prepareTemporalGeoJsonTrack<TProperties>(
   return {
     frames,
     index,
-    segments: frames.slice(0, -1).map((previousFrame, segmentIndex) =>
-      prepareTemporalGeoJsonSegment(previousFrame, frames[segmentIndex + 1]!, options),
-    ),
+    segments: frames
+      .slice(0, -1)
+      .map((previousFrame, segmentIndex) =>
+        prepareTemporalGeoJsonSegment(previousFrame, frames[segmentIndex + 1]!, options),
+      ),
     sourceTrack: track,
     times: frames.map((frame) => frame.time),
   };
@@ -482,7 +486,9 @@ function resolvePreparedTrackAtTime<TProperties>(
   if (firstFrameAfterTime === track.frames.length) {
     const lastFrame = track.frames[track.frames.length - 1]!;
 
-    return lastFrame.visible === false ? null : toFeature(track.sourceTrack, track.index, lastFrame);
+    return lastFrame.visible === false
+      ? null
+      : toFeature(track.sourceTrack, track.index, lastFrame);
   }
 
   const previousFrame = track.frames[firstFrameAfterTime - 1]!;
@@ -498,7 +504,9 @@ function resolvePreparedTrackAtTime<TProperties>(
   }
 
   const nextFrame = track.frames[firstFrameAfterTime]!;
-  const progress = clampProgress((time - previousFrame.time) / (nextFrame.time - previousFrame.time));
+  const progress = clampProgress(
+    (time - previousFrame.time) / (nextFrame.time - previousFrame.time),
+  );
   const segment = track.segments[firstFrameAfterTime - 1]!;
   const geometry = resolvePreparedSegmentGeometry(segment, progress);
 
@@ -607,7 +615,8 @@ function prepareLineInterpolator(
 ): PreparedFlatCoordinates | null {
   const shouldForceResample =
     options.denseGeometryBehavior === "resample" &&
-    Math.max(previousCoordinates.length, nextCoordinates.length) > Math.max(2, options.denseLineThreshold);
+    Math.max(previousCoordinates.length, nextCoordinates.length) >
+      Math.max(2, options.denseLineThreshold);
 
   if (options.strategy === "compatible" && !shouldForceResample) {
     if (previousCoordinates.length !== nextCoordinates.length || previousCoordinates.length < 2) {
@@ -667,7 +676,8 @@ function preparePolygonRingInterpolator(
 
   const shouldForceResample =
     options.denseGeometryBehavior === "resample" &&
-    Math.max(previousOpenRing.length, nextOpenRing.length) > Math.max(3, options.denseRingThreshold);
+    Math.max(previousOpenRing.length, nextOpenRing.length) >
+      Math.max(3, options.denseRingThreshold);
 
   if (options.strategy === "compatible" && !shouldForceResample) {
     if (previousOpenRing.length !== nextOpenRing.length) {
@@ -1472,8 +1482,7 @@ function resolvePlaybackIndexOptions(
 
   return {
     ...interpolationOptions,
-    denseGeometryBehavior:
-      options.denseGeometryBehavior === "preserve" ? "preserve" : "resample",
+    denseGeometryBehavior: options.denseGeometryBehavior === "preserve" ? "preserve" : "resample",
     denseLineThreshold: sanitizePositiveInteger(
       options.denseLineThreshold,
       interpolationOptions.maxCoordinatesPerLine,

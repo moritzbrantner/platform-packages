@@ -59,9 +59,7 @@ function resolveInitialHistory<TData extends StoryNodeData>(
   }).history;
 }
 
-function buildSelectedEdgeLookup<TData extends StoryNodeData>(
-  history: StoryHistoryEntry<TData>[],
-) {
+function buildSelectedEdgeLookup<TData extends StoryNodeData>(history: StoryHistoryEntry<TData>[]) {
   const selectedEdges = new Set<string>();
 
   for (let index = 0; index < history.length - 1; index += 1) {
@@ -132,7 +130,11 @@ function buildRevealedStoryGraph<TData extends StoryNodeData>(
         title: node.title,
         eyebrow: node.eyebrow,
         state:
-          node.id === activeNodeId ? "active" : visitedNodeIds.has(node.id) ? "visited" : "available",
+          node.id === activeNodeId
+            ? "active"
+            : visitedNodeIds.has(node.id)
+              ? "visited"
+              : "available",
         historyIndex,
       };
     }),

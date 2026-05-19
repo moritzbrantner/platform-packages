@@ -240,7 +240,6 @@ export default defineConfig({
         rootDir,
         "packages/tree-structures/src/index.ts",
       ),
-      "@moritzbrantner/ui": path.resolve(rootDir, "packages/ui/src/index.ts"),
       "@moritzbrantner/unconditional-image-generation": path.resolve(
         rootDir,
         "packages/unconditional-image-generation/src/index.ts",

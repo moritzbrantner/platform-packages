@@ -7,7 +7,6 @@ import { mergeConfig } from "vite";
 
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
 const workspaceRoot = path.resolve(packageRoot, "../..");
-const uiPackageRoot = path.resolve(packageRoot, "../ui");
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(ts|tsx)"],
@@ -27,14 +26,6 @@ const config: StorybookConfig = {
           {
             find: /^@moritzbrantner\/frontend-ui$/,
             replacement: path.resolve(packageRoot, "src/index.ts"),
-          },
-          {
-            find: /^@moritzbrantner\/ui$/,
-            replacement: path.resolve(uiPackageRoot, "src/index.ts"),
-          },
-          {
-            find: /^@moritzbrantner\/ui\/themes$/,
-            replacement: path.resolve(uiPackageRoot, "src/themes.tsx"),
           },
         ],
         dedupe: ["react", "react-dom"],

@@ -77,30 +77,6 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/subtitles/src/index.ts"),
       },
       {
-        find: /^@moritzbrantner\/ui$/,
-        replacement: path.resolve(workspaceRoot, "packages/ui/src/index.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/ui\/bobba$/,
-        replacement: path.resolve(workspaceRoot, "packages/ui/src/bobba.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/ui\/atlas$/,
-        replacement: path.resolve(workspaceRoot, "packages/ui/src/atlas.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/ui\/studio$/,
-        replacement: path.resolve(workspaceRoot, "packages/ui/src/studio.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/ui\/paper$/,
-        replacement: path.resolve(workspaceRoot, "packages/ui/src/paper.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/ui\/zleek$/,
-        replacement: path.resolve(workspaceRoot, "packages/ui/src/zleek.ts"),
-      },
-      {
         find: /^@moritzbrantner\/storytelling$/,
         replacement: path.resolve(workspaceRoot, "packages/storytelling/src/index.ts"),
       },

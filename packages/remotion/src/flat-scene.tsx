@@ -250,35 +250,50 @@ function sampleFlatTransformAnimation(
 ): FlatAnimatedTransformValue | undefined {
   switch (animation.transformType) {
     case "translate":
-      return sampleAnimationValues(animation.values, animation, timeInMs, (left, right, progress) => ({
-        x: lerp(left.x, right.x, progress),
-        y: lerp(left.y, right.y, progress),
-      }));
+      return sampleAnimationValues(
+        animation.values,
+        animation,
+        timeInMs,
+        (left, right, progress) => ({
+          x: lerp(left.x, right.x, progress),
+          y: lerp(left.y, right.y, progress),
+        }),
+      );
     case "scale":
-      return sampleAnimationValues(animation.values, animation, timeInMs, (left, right, progress) => {
-        if (typeof left === "number" && typeof right === "number") {
-          return lerp(left, right, progress);
-        }
+      return sampleAnimationValues(
+        animation.values,
+        animation,
+        timeInMs,
+        (left, right, progress) => {
+          if (typeof left === "number" && typeof right === "number") {
+            return lerp(left, right, progress);
+          }
 
-        const leftScale = toScaleValue(left);
-        const rightScale = toScaleValue(right);
+          const leftScale = toScaleValue(left);
+          const rightScale = toScaleValue(right);
 
-        return {
-          x: lerp(leftScale.x, rightScale.x, progress),
-          y: lerp(leftScale.y, rightScale.y, progress),
-        };
-      });
+          return {
+            x: lerp(leftScale.x, rightScale.x, progress),
+            y: lerp(leftScale.y, rightScale.y, progress),
+          };
+        },
+      );
     case "rotate":
-      return sampleAnimationValues(animation.values, animation, timeInMs, (left, right, progress) => {
-        const leftRotate = toRotateValue(left);
-        const rightRotate = toRotateValue(right);
+      return sampleAnimationValues(
+        animation.values,
+        animation,
+        timeInMs,
+        (left, right, progress) => {
+          const leftRotate = toRotateValue(left);
+          const rightRotate = toRotateValue(right);
 
-        return {
-          angle: lerp(leftRotate.angle, rightRotate.angle, progress),
-          cx: lerp(leftRotate.cx, rightRotate.cx, progress),
-          cy: lerp(leftRotate.cy, rightRotate.cy, progress),
-        };
-      });
+          return {
+            angle: lerp(leftRotate.angle, rightRotate.angle, progress),
+            cx: lerp(leftRotate.cx, rightRotate.cx, progress),
+            cy: lerp(leftRotate.cy, rightRotate.cy, progress),
+          };
+        },
+      );
   }
 }
 
@@ -375,7 +390,9 @@ function getAnimationKeyTimes(animation: FlatAnimation, valueCount: number) {
 
   const lastIndex = valueCount - 1;
 
-  return Array.from({ length: valueCount }, (_, index) => (lastIndex === 0 ? 0 : index / lastIndex));
+  return Array.from({ length: valueCount }, (_, index) =>
+    lastIndex === 0 ? 0 : index / lastIndex,
+  );
 }
 
 function parseClockValue(value: string | undefined, fallbackInMs: number) {

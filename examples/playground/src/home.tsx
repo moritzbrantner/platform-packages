@@ -50,8 +50,8 @@ function HomePage() {
               <p>
                 Run <code>bun run dev:playground</code> from the workspace root. Vite aliases
                 packages to local source files, so edits in
-                <code>packages/maps</code>, <code>packages/ui</code>, and sibling package sources
-                show up immediately.
+                <code>packages/maps</code>, <code>@moritzbrantner/ui</code>, and sibling package
+                sources show up immediately.
               </p>
               <p>
                 Use the theme toggle in the navigation bar to check light and dark rendering. The

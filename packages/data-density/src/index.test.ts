@@ -122,6 +122,48 @@ describe("@moritzbrantner/data-density", () => {
     expect(series.summary.metrics.weight).toBe(12);
   });
 
+  test("drops invalid metrics and finite-coordinate records before aggregation", () => {
+    const summary = createDensityMetricSummary([
+      { count: 2, revenue: Number.NaN },
+      { count: Number.POSITIVE_INFINITY, revenue: 8 },
+    ]);
+
+    expect(summary.metricKeys).toEqual(["count", "revenue"]);
+    expect(summary.metrics).toEqual({ count: 2, revenue: 8 });
+
+    const series = createBinnedSeriesIndex([
+      { id: "valid", x: 1, y: 2, metrics: { count: 1 } },
+      { id: "invalid-x", x: Number.NaN, y: 3, metrics: { count: 100 } },
+      { id: "invalid-y", x: 2, y: Number.POSITIVE_INFINITY, metrics: { count: 100 } },
+    ]).getBinnedSeries({ includeEmptyBins: true, targetBinCount: 2, xDomain: [0, 2] });
+
+    expect(series.summary.pointCount).toBe(1);
+    expect(series.summary.metrics.count).toBe(1);
+
+    const geoIndex = createGeoPointAggregationIndex([
+      { id: "valid", latitude: 50, longitude: 10, metrics: { count: 1 } },
+      { id: "invalid-lat", latitude: Number.NaN, longitude: 10, metrics: { count: 100 } },
+      { id: "invalid-lng", latitude: 50, longitude: Number.NaN, metrics: { count: 100 } },
+    ]);
+    const aggregation = geoIndex.getViewportAggregation({ bounds: [-180, -85, 180, 85], zoom: 10 });
+
+    expect(aggregation.summary.visiblePointCount).toBe(1);
+    expect(aggregation.summary.metrics.count).toBe(1);
+    expect(getBoundsFromGeoPoints([{ latitude: Number.NaN, longitude: 0 }])).toBeNull();
+  });
+
+  test("supports antimeridian viewport bounds without double-counting metrics", () => {
+    const index = createGeoPointAggregationIndex([
+      { id: "west", latitude: 10, longitude: 179, metrics: { count: 1 } },
+      { id: "east", latitude: 10, longitude: -179, metrics: { count: 1 } },
+      { id: "outside", latitude: 10, longitude: 0, metrics: { count: 100 } },
+    ]);
+    const aggregation = index.getViewportAggregation({ bounds: [170, -20, -170, 20], zoom: 8 });
+
+    expect(aggregation.summary.visiblePointCount).toBe(2);
+    expect(aggregation.summary.metrics.count).toBe(2);
+  });
+
   test("aggregates high-volume series deterministically without mutating input points", () => {
     const points = Array.from({ length: 1_000 }, (_, index) => ({
       id: `point-${index}`,

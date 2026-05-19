@@ -9,7 +9,7 @@
 5. Open a pull request and merge it into `main`.
 6. Wait for the `Publish Private Packages` workflow to finish on `main`.
 
-The current workflow validates and publishes every public package under `packages/*`.
+The current workflow validates and publishes every public package under `packages/*`. `@moritzbrantner/ui` is published from the standalone `moritzbrantner/ui` repository and is consumed here as an external package.
 
 ## Later releases
 
@@ -19,7 +19,7 @@ The current workflow validates and publishes every public package under `package
 4. Commit the generated changeset file with your code changes.
 5. Merge to `main` and let the publish workflow publish packages whose current version is not already present in GitHub Packages.
 
-The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`.
+The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`. `@moritzbrantner/ui` is part of that contract, but its release workflow lives in the standalone UI repository.
 
 ## Release-readiness categories
 
@@ -61,7 +61,7 @@ Consumers need an `.npmrc` entry for the package scope you publish under and a t
 
 For the maintained scaffold family, consumer repos should adopt these first:
 
-- `@moritzbrantner/ui`
+- `@moritzbrantner/ui` from the standalone `moritzbrantner/ui` repository
 - `@moritzbrantner/storytelling`
 - `@moritzbrantner/oxfmt-config`
 - `@moritzbrantner/typescript-config`

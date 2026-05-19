@@ -262,10 +262,7 @@ export function normalizeText(text: string, options: NormalizeTextOptions): stri
 
 export { initLinguisticsKernel, isLinguisticsKernelReady };
 
-export function extractWordTexts(
-  text: string,
-  options: ExtractWordTextsOptions = {},
-): string[] {
+export function extractWordTexts(text: string, options: ExtractWordTextsOptions = {}): string[] {
   const surfaces = extractWordTextsWithKernel(text) ?? fallbackExtractWordTexts(text);
 
   return surfaces.map((surface) => {
@@ -284,8 +281,9 @@ export function extractWordTexts(
 }
 
 export function splitTextSentences(text: string): string[] {
-  return splitTextSentencesWithKernel(text) ?? segmentSentences(text, undefined, false).map(
-    (segment) => segment.segment,
+  return (
+    splitTextSentencesWithKernel(text) ??
+    segmentSentences(text, undefined, false).map((segment) => segment.segment)
   );
 }
 
@@ -542,7 +540,10 @@ function fallbackExtractWordTexts(text: string): string[] {
 
 function segmentTextDocumentFromKernel<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
->(document: TextDocument<Metadata>, options: SegmentTextDocumentOptions): TextDocument<Metadata> | null {
+>(
+  document: TextDocument<Metadata>,
+  options: SegmentTextDocumentOptions,
+): TextDocument<Metadata> | null {
   try {
     const raw = segmentTextDocumentWithKernel(document.text, {
       includePunctuation: options.granularity === "word",
@@ -657,10 +658,7 @@ function materializeSentenceTokens<
   let wordIndex = 0;
   let lastBoundary = 0;
 
-  while (
-    context.cursor < rawTokens.length &&
-    rawTokens[context.cursor]!.end <= sentence.end
-  ) {
+  while (context.cursor < rawTokens.length && rawTokens[context.cursor]!.end <= sentence.end) {
     const rawToken = rawTokens[context.cursor]!;
     context.cursor += 1;
 

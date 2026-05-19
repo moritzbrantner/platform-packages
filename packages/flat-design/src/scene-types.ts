@@ -1,7 +1,4 @@
-import type {
-  FlatBuiltInFigureAnimationPreset,
-  FlatFigureAnimationOptions,
-} from "./figures";
+import type { FlatBuiltInFigureAnimationPreset, FlatFigureAnimationOptions } from "./figures";
 
 export type FlatLength = number | string;
 

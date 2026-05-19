@@ -412,7 +412,10 @@ export function MediaTimeline({
     return undefined;
   };
 
-  const updateTrack = (trackId: string, updater: (track: MediaTimelineTrack) => MediaTimelineTrack) => {
+  const updateTrack = (
+    trackId: string,
+    updater: (track: MediaTimelineTrack) => MediaTimelineTrack,
+  ) => {
     if (!onTracksChange || readOnly) {
       return;
     }

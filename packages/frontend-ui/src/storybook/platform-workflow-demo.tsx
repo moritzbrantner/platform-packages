@@ -913,7 +913,9 @@ function RegisterScreen({
           ),
           footer: (
             <>
-              <span className="text-sm text-muted-foreground">Already have a workspace profile?</span>
+              <span className="text-sm text-muted-foreground">
+                Already have a workspace profile?
+              </span>
               <Button type="button" variant="ghost" onClick={() => onNavigate("login")}>
                 <LogInIcon />
                 Sign in instead
@@ -1071,7 +1073,9 @@ function HomeScreen({
               <Card>
                 <CardHeader>
                   <CardTitle>Workspace controls</CardTitle>
-                  <CardDescription>Preferences, delivery settings, and profile defaults.</CardDescription>
+                  <CardDescription>
+                    Preferences, delivery settings, and profile defaults.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-3">
                   <p className="text-sm text-muted-foreground">
@@ -1435,7 +1439,11 @@ function ChatScreen({ person }: { person: Person }) {
 
   return (
     <WorkbenchScreen
-      eyebrow={<Badge variant={person.online ? "secondary" : "outline"}>{person.online ? "Active" : "Away"}</Badge>}
+      eyebrow={
+        <Badge variant={person.online ? "secondary" : "outline"}>
+          {person.online ? "Active" : "Away"}
+        </Badge>
+      }
       title={`Chat with ${person.name}`}
       description={person.online ? "Online now" : "Last active yesterday"}
       sections={[
@@ -1537,8 +1545,8 @@ function ChatOverviewScreen({
                         <div className="min-w-0">
                           <CardTitle className="truncate">{person.name}</CardTitle>
                           <CardDescription className="truncate">
-                            {person.online ? "Available now" : "Away"} - Last note on social workflow
-                            handoff
+                            {person.online ? "Available now" : "Away"} - Last note on social
+                            workflow handoff
                           </CardDescription>
                         </div>
                       </div>
@@ -1579,12 +1587,19 @@ function ChatOverviewScreen({
           <CardHeader>
             <CardTitle>Current focus</CardTitle>
             <CardDescription>
-              {selectedProfile ? `Ready to continue with ${selectedProfile.name}.` : "Select a thread."}
+              {selectedProfile
+                ? `Ready to continue with ${selectedProfile.name}.`
+                : "Select a thread."}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm text-muted-foreground">
-            <p>Unread replies, followed profiles, and direct threads stay connected in this workflow.</p>
-            <p>Jumping into a thread keeps the selected profile aligned with the rest of the social flow.</p>
+            <p>
+              Unread replies, followed profiles, and direct threads stay connected in this workflow.
+            </p>
+            <p>
+              Jumping into a thread keeps the selected profile aligned with the rest of the social
+              flow.
+            </p>
           </CardContent>
         </Card>
       }
@@ -1607,7 +1622,10 @@ function NotificationsScreen({ followingCount }: { followingCount: number }) {
                 "Jordan Ellis sent a chat reply in Platform Workflows.",
                 `${followingCount} followed profiles have updates ready.`,
               ].map((message) => (
-                <div key={message} className="rounded-lg border bg-card p-4 text-sm text-card-foreground">
+                <div
+                  key={message}
+                  className="rounded-lg border bg-card p-4 text-sm text-card-foreground"
+                >
                   {message}
                 </div>
               ))}
@@ -1681,12 +1699,20 @@ function SettingsScreen({ onNotice }: { onNotice: (message: string) => void }) {
         <Card>
           <CardHeader>
             <CardTitle>Included</CardTitle>
-            <CardDescription>Primary settings areas covered by this workflow screen.</CardDescription>
+            <CardDescription>
+              Primary settings areas covered by this workflow screen.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm text-muted-foreground">
-            <div className="rounded-lg border bg-muted/35 px-4 py-3">Profile identity and public status</div>
-            <div className="rounded-lg border bg-muted/35 px-4 py-3">Notification and direct-message delivery</div>
-            <div className="rounded-lg border bg-muted/35 px-4 py-3">Recovery email and account access controls</div>
+            <div className="rounded-lg border bg-muted/35 px-4 py-3">
+              Profile identity and public status
+            </div>
+            <div className="rounded-lg border bg-muted/35 px-4 py-3">
+              Notification and direct-message delivery
+            </div>
+            <div className="rounded-lg border bg-muted/35 px-4 py-3">
+              Recovery email and account access controls
+            </div>
           </CardContent>
         </Card>
       }
@@ -1720,15 +1746,7 @@ function OverviewCard({
   );
 }
 
-function Field({
-  children,
-  id,
-  label,
-}: {
-  children: React.ReactNode;
-  id: string;
-  label: string;
-}) {
+function Field({ children, id, label }: { children: React.ReactNode; id: string; label: string }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>

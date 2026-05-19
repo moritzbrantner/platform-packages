@@ -122,9 +122,7 @@ function detectStoryGraphCycle<TData extends StoryNodeData>(story: StoryDocument
   const visit = (nodeId: string, trail: string[]) => {
     if (visited.has(nodeId)) return;
     if (visiting.has(nodeId)) {
-      throw new Error(
-        `Story "${story.id}" contains a cycle: ${[...trail, nodeId].join(" -> ")}.`,
-      );
+      throw new Error(`Story "${story.id}" contains a cycle: ${[...trail, nodeId].join(" -> ")}.`);
     }
 
     const node = nodeLookup.get(nodeId);

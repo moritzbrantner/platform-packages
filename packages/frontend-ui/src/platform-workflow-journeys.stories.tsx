@@ -2,10 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
 import type { WorkflowScenario } from "./workflows/types";
 
-import {
-  PlatformWorkflowDemo,
-  workflowScenarios,
-} from "./storybook/platform-workflow-demo";
+import { PlatformWorkflowDemo, workflowScenarios } from "./storybook/platform-workflow-demo";
 
 const meta = {
   title: "Storybook/Workflows/Journeys",
@@ -40,9 +37,7 @@ function getScenarioArgs(scenario: WorkflowScenario) {
 }
 
 async function runNamedStep(
-  step:
-    | ((label: string, play: () => Promise<void>) => void | Promise<void>)
-    | undefined,
+  step: ((label: string, play: () => Promise<void>) => void | Promise<void>) | undefined,
   label: string,
   play: () => Promise<void>,
 ) {
@@ -119,19 +114,23 @@ export const MainToPasswordRecovery: Story = {
       await expect(canvas.getByRole("heading", { name: "Login" })).toBeVisible();
     });
 
-    await runNamedStep(step, "Continue into password recovery and stay in visitor mode", async () => {
-      await userEvent.click(canvas.getByRole("button", { name: "Forgot password?" }));
-      await expect(canvas.getByRole("heading", { name: "Password forgotten" })).toBeVisible();
+    await runNamedStep(
+      step,
+      "Continue into password recovery and stay in visitor mode",
+      async () => {
+        await userEvent.click(canvas.getByRole("button", { name: "Forgot password?" }));
+        await expect(canvas.getByRole("heading", { name: "Password forgotten" })).toBeVisible();
 
-      await userEvent.clear(canvas.getByLabelText("Recovery email"));
-      await userEvent.type(canvas.getByLabelText("Recovery email"), "reset@example.com");
-      await userEvent.click(canvas.getByRole("button", { name: "Send reset link" }));
+        await userEvent.clear(canvas.getByLabelText("Recovery email"));
+        await userEvent.type(canvas.getByLabelText("Recovery email"), "reset@example.com");
+        await userEvent.click(canvas.getByRole("button", { name: "Send reset link" }));
 
-      await expect(canvas.getByRole("alert")).toHaveTextContent(
-        "Reset link sent to reset@example.com",
-      );
-      await expect(canvas.getAllByRole("button", { name: "Login" }).at(-1)!).toBeVisible();
-    });
+        await expect(canvas.getByRole("alert")).toHaveTextContent(
+          "Reset link sent to reset@example.com",
+        );
+        await expect(canvas.getAllByRole("button", { name: "Login" }).at(-1)!).toBeVisible();
+      },
+    );
   },
 };
 
@@ -154,15 +153,17 @@ export const HomeToPeopleToProfileToChat: Story = {
       await userEvent.click(canvas.getByRole("button", { name: "Open Jordan Ellis profile" }));
 
       await expect(canvas.getByRole("heading", { name: "Jordan Ellis" })).toBeVisible();
-      await expect(
-        canvas.getByRole("button", { name: "Unfollow Jordan Ellis" }),
-      ).toHaveTextContent("Following");
+      await expect(canvas.getByRole("button", { name: "Unfollow Jordan Ellis" })).toHaveTextContent(
+        "Following",
+      );
     });
 
     await runNamedStep(step, "Branch from the profile into chat", async () => {
       await userEvent.click(canvas.getByRole("button", { name: "Open chat" }));
 
-      await expect(canvas.getAllByRole("heading", { name: "Chat with Jordan Ellis" })[0]).toBeVisible();
+      await expect(
+        canvas.getAllByRole("heading", { name: "Chat with Jordan Ellis" })[0],
+      ).toBeVisible();
       await expect(canvas.getByRole("textbox", { name: "Message" })).toBeVisible();
     });
   },

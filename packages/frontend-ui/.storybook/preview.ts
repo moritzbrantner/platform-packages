@@ -1,12 +1,17 @@
 import React from "react";
 import type { Preview } from "@storybook/react-vite";
 
-import { defaultUiThemeName, uiThemeLabels, uiThemeNames, type UiThemeName } from "../../ui/src/themes";
-import atlasStyles from "../../ui/atlas/styles.css?inline";
-import bobbaStyles from "../../ui/bobba/styles.css?inline";
-import paperStyles from "../../ui/paper/styles.css?inline";
-import studioStyles from "../../ui/studio/styles.css?inline";
-import zleekStyles from "../../ui/zleek/styles.css?inline";
+import {
+  defaultUiThemeName,
+  uiThemeLabels,
+  uiThemeNames,
+  type UiThemeName,
+} from "@moritzbrantner/ui/themes";
+import atlasStyles from "@moritzbrantner/ui/atlas/styles.css?inline";
+import bobbaStyles from "@moritzbrantner/ui/bobba/styles.css?inline";
+import paperStyles from "@moritzbrantner/ui/paper/styles.css?inline";
+import studioStyles from "@moritzbrantner/ui/studio/styles.css?inline";
+import zleekStyles from "@moritzbrantner/ui/zleek/styles.css?inline";
 
 const designSystemStyles = {
   bobba: bobbaStyles,

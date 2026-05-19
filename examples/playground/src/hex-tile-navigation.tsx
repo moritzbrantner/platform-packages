@@ -18,7 +18,8 @@ const navigationItems = [
     id: "landing",
     eyebrow: "Public",
     label: "Landing beacon",
-    description: "Frame the product promise and guide first-time visitors toward the next relevant branch.",
+    description:
+      "Frame the product promise and guide first-time visitors toward the next relevant branch.",
     meta: "A1",
     accentColor: "#fb7185",
   },
@@ -26,7 +27,8 @@ const navigationItems = [
     id: "signals",
     eyebrow: "Research",
     label: "Signal intake",
-    description: "Pull in behavioral notes, metrics, and qualitative findings before shifting the route.",
+    description:
+      "Pull in behavioral notes, metrics, and qualitative findings before shifting the route.",
     meta: "B2",
     accentColor: "#f59e0b",
   },
@@ -34,7 +36,8 @@ const navigationItems = [
     id: "structure",
     eyebrow: "IA",
     label: "Structure map",
-    description: "Lay out the major destinations so the surrounding route has a stable shared geometry.",
+    description:
+      "Lay out the major destinations so the surrounding route has a stable shared geometry.",
     meta: "C3",
     accentColor: "#84cc16",
   },
@@ -42,7 +45,8 @@ const navigationItems = [
     id: "states",
     eyebrow: "UX",
     label: "State gallery",
-    description: "Compare calm, hovered, active, and blocked transitions on one coherent navigation surface.",
+    description:
+      "Compare calm, hovered, active, and blocked transitions on one coherent navigation surface.",
     meta: "D4",
     accentColor: "#14b8a6",
   },
@@ -58,7 +62,8 @@ const navigationItems = [
     id: "qa",
     eyebrow: "Verify",
     label: "Navigation QA",
-    description: "Walk the grid with keyboard and pointer input to catch broken hops before release.",
+    description:
+      "Walk the grid with keyboard and pointer input to catch broken hops before release.",
     meta: "F6",
     accentColor: "#818cf8",
   },
@@ -66,7 +71,8 @@ const navigationItems = [
     id: "release",
     eyebrow: "Release",
     label: "Launch review",
-    description: "Validate that the navigation still reads clearly once real content and edge cases land.",
+    description:
+      "Validate that the navigation still reads clearly once real content and edge cases land.",
     meta: "G7",
     accentColor: "#c084fc",
   },
@@ -74,7 +80,8 @@ const navigationItems = [
     id: "iterate",
     eyebrow: "Loop",
     label: "Iteration queue",
-    description: "Capture follow-up opportunities and keep the route evolving with real usage data.",
+    description:
+      "Capture follow-up opportunities and keep the route evolving with real usage data.",
     meta: "H8",
     accentColor: "#f97316",
   },
@@ -123,7 +130,10 @@ function HexTileNavigationPage() {
                 Focus the navigation surface, then use the arrow keys or Q/W/E/A/S/D to walk to
                 neighboring tiles.
               </p>
-              <p>The 3D tile lift, ring marker, and detail card stay in sync with the current destination.</p>
+              <p>
+                The 3D tile lift, ring marker, and detail card stay in sync with the current
+                destination.
+              </p>
             </CardContent>
           </Card>
 
@@ -135,13 +145,20 @@ function HexTileNavigationPage() {
               <div className="space-y-2">
                 <CardTitle>Where it fits</CardTitle>
                 <CardDescription>
-                  This pattern works well for roadmap overviews, branching flows, destination launchers, and spatial wayfinding.
+                  This pattern works well for roadmap overviews, branching flows, destination
+                  launchers, and spatial wayfinding.
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
-              <p>Reserve empty cells for future states or use a full grid when every destination is active today.</p>
-              <p>Because the scene is React Three Fiber based, product teams can layer in richer lights, animation, or scene props later.</p>
+              <p>
+                Reserve empty cells for future states or use a full grid when every destination is
+                active today.
+              </p>
+              <p>
+                Because the scene is React Three Fiber based, product teams can layer in richer
+                lights, animation, or scene props later.
+              </p>
             </CardContent>
           </Card>
         </div>

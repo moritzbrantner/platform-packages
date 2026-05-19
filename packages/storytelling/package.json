@@ -1,6 +1,7 @@
 {
   "name": "@moritzbrantner/storytelling",
   "version": "0.3.1",
+  "description": "Serializable story documents, branching React playback, and Remotion or Three adapters.",
   "private": false,
   "type": "module",
   "repository": {
@@ -8,6 +9,7 @@
     "url": "git+https://github.com/moritzbrantner/platform-packages.git",
     "directory": "packages/storytelling"
   },
+  "license": "UNLICENSED",
   "files": [
     "dist"
   ],
@@ -46,7 +48,7 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/ui": "^0.5.0",
+    "@moritzbrantner/ui": "^0.5.2",
     "motion": "^12.35.0"
   },
   "devDependencies": {
@@ -67,6 +69,9 @@
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/ next-intl",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
-    "test": "cd ../.. && vitest run packages/storytelling/src"
+    "test": "cd ../.. && vitest run packages/storytelling/src",
+    "test:package": "node ./scripts/verify-package.mjs",
+    "pack:dry": "npm pack --dry-run --ignore-scripts --json",
+    "verify:release": "bun run check-types && bun run lint && bun run test && bun run build && bun run test:package && bun run pack:dry"
   }
 }

@@ -5,16 +5,7 @@
     "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "paths": {
-      "@moritzbrantner/ui": ["../ui/src/index.ts"],
-      "@moritzbrantner/ui/themes": ["../ui/src/themes.tsx"],
-      "@moritzbrantner/ui/atlas": ["../ui/src/atlas.ts"],
-      "@moritzbrantner/ui/bobba": ["../ui/src/bobba.ts"],
-      "@moritzbrantner/ui/paper": ["../ui/src/paper.ts"],
-      "@moritzbrantner/ui/studio": ["../ui/src/studio.ts"],
-      "@moritzbrantner/ui/zleek": ["../ui/src/zleek.ts"]
-    }
+    "moduleResolution": "Bundler"
   },
   "include": [
     "src/**/*.ts",
