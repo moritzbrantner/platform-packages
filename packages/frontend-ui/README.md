@@ -15,6 +15,14 @@ tokens, or low-level interaction patterns; those stay in `@moritzbrantner/ui`.
 - `DashboardScreen`
 - `DetailScreen`
 - `WorkbenchScreen`
+- `MobileDashboardScreen`
+- `MobileDetailScreen`
+- `MobileFormScreen`
+- `MobileWorkbenchScreen`
+- `MobileScreenShell`
+- `MobileScreenHeader`
+- `MobileScreenSections`
+- `MobileActionDock`
 - `FrontendScreenSection`
 - `WorkflowRoute`
 - `WorkflowSessionState`
@@ -45,6 +53,31 @@ export function HomeScreen() {
           content: <p>12 items need review.</p>,
         },
       ]}
+    />
+  );
+}
+```
+
+Mobile screens reuse the same `FrontendScreenSection` data shape, but expose
+mobile-only composition points for compact navigation, stacked companion
+content, safe-area shell padding, and sticky bottom actions:
+
+```tsx
+import { Button } from "@moritzbrantner/ui";
+import { MobileWorkbenchScreen } from "@moritzbrantner/frontend-ui";
+
+export function ThreadScreen() {
+  return (
+    <MobileWorkbenchScreen
+      title="Thread"
+      description="Direct conversation"
+      sections={[
+        {
+          id: "messages",
+          content: <p>Message history</p>,
+        },
+      ]}
+      composer={<Button>Send</Button>}
     />
   );
 }

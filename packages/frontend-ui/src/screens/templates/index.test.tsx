@@ -4,7 +4,19 @@ import { describe, expect, test } from "vitest";
 
 import { Button, Toolbar, ToolbarGroup, ToolbarTitle } from "@moritzbrantner/ui";
 
-import { DashboardScreen, DetailScreen, FormScreen, PublicScreen, WorkbenchScreen } from "../..";
+import {
+  DashboardScreen,
+  DetailScreen,
+  FormScreen,
+  MobileActionDock,
+  MobileDashboardScreen,
+  MobileDetailScreen,
+  MobileFormScreen,
+  MobileScreenShell,
+  MobileWorkbenchScreen,
+  PublicScreen,
+  WorkbenchScreen,
+} from "../..";
 
 describe("@moritzbrantner/frontend-ui screen templates", () => {
   test("renders public and form screens with shared header structure", () => {
@@ -73,5 +85,68 @@ describe("@moritzbrantner/frontend-ui screen templates", () => {
     expect(screen.getByRole("heading", { name: "Profile" })).toBeTruthy();
     expect(screen.getByText("Sidebar notes")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Chat" })).toBeTruthy();
+  });
+
+  test("renders mobile-specific screen templates with shared section data", () => {
+    render(
+      <>
+        <MobileDashboardScreen
+          eyebrow="Mobile"
+          title="Today"
+          description="Compact dashboard"
+          navigation={<nav aria-label="Mobile tabs">Tabs</nav>}
+          summary={<p>3 alerts</p>}
+          sections={[{ id: "feed", title: "Feed", content: <p>Latest activity</p> }]}
+          bottomActions={<Button>Review</Button>}
+        />
+        <MobileDetailScreen
+          title="Ticket"
+          sections={[{ id: "timeline", content: <p>Timeline entry</p> }]}
+          companion={<aside>Related records</aside>}
+        />
+        <MobileFormScreen
+          title="Account"
+          sections={[
+            {
+              id: "account-form",
+              content: (
+                <label htmlFor="mobile-name">
+                  Name
+                  <input id="mobile-name" />
+                </label>
+              ),
+            },
+          ]}
+        />
+        <MobileWorkbenchScreen
+          title="Thread"
+          sections={[{ id: "messages", content: <p>Message history</p> }]}
+          composer={<Button>Send</Button>}
+        />
+      </>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Today" })).toBeTruthy();
+    expect(screen.getByRole("navigation", { name: "Mobile tabs" })).toBeTruthy();
+    expect(screen.getByText("Latest activity")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Ticket" })).toBeTruthy();
+    expect(screen.getByText("Related records")).toBeTruthy();
+    expect(screen.getByLabelText("Name")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Thread" })).toBeTruthy();
+    expect(screen.getByText("Message history")).toBeTruthy();
+  });
+
+  test("renders low-level mobile primitives for custom mobile flows", () => {
+    render(
+      <MobileScreenShell>
+        <p>Custom shell content</p>
+        <MobileActionDock>
+          <Button>Continue</Button>
+        </MobileActionDock>
+      </MobileScreenShell>,
+    );
+
+    expect(screen.getByText("Custom shell content")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeTruthy();
   });
 });
