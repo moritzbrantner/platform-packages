@@ -2,6 +2,11 @@ node_modules/
 .turbo/
 dist/
 packages/*/dist/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
 coverage/
 packages/*/coverage/
 playwright-report/
@@ -10,6 +15,6 @@ test-results/
 packages/*/test-results/
 storybook-static/
 packages/*/storybook-static/
-packages/*/*.tgz
+*.tgz
 
 /backups/

@@ -211,10 +211,13 @@ This inventory is the source-of-truth view for release readiness. Status values 
 4. Build packages and the playground with `bun run build`.
 5. Apply formatting with `bun run format`.
 6. Run checks with `bun run format:check`, `bun run lint`, `bun run typecheck`, and `bun run test`.
+7. Run full local verification with `bun run verify`.
 
 Oxlint and Oxfmt are the active local linting and formatting tools for this repository. The published `@moritzbrantner/oxfmt-config` package mirrors the shared formatter defaults for scaffold consumers.
 
 The custom verifier scripts still run through `bun run lint` and enforce package-specific style exports, forbidden package imports, and shared UI component usage.
+
+See [`docs/development.md`](./docs/development.md) for setup, daily development, verification, hygiene, and troubleshooting notes.
 
 ## Publishing
 

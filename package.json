@@ -21,6 +21,7 @@
     "lint:ox": "oxlint --format=github",
     "lint:packages": "turbo run lint",
     "lint:repo": "node scripts/verify-package-styles.mjs && node scripts/verify-ui-components.mjs",
+    "repo:hygiene": "bash scripts/check_repo_hygiene.sh",
     "preview:playground": "bun run --filter @moritzbrantner/playground preview",
     "build:playground": "bun run --filter @moritzbrantner/playground build",
     "release:build": "bun run build",
@@ -30,7 +31,8 @@
     "release:typecheck": "bun run typecheck",
     "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
-    "test": "bun test ./scripts/*.test.ts && turbo run test"
+    "test": "bun test ./scripts/*.test.ts && turbo run test",
+    "verify": "bun run repo:hygiene && bun run lint && bun run typecheck && bun run test && bun run build"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
