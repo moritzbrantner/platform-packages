@@ -49,9 +49,9 @@ function HomePage() {
               </p>
               <p>
                 Run <code>bun run dev:playground</code> from the workspace root. Vite aliases
-                packages to local source files, so edits in
-                <code>packages/maps</code>, <code>@moritzbrantner/ui</code>, and sibling package
-                sources show up immediately.
+                incubating packages to local source files, while standalone packages such as
+                <code>@moritzbrantner/maps</code> and <code>@moritzbrantner/ui</code> resolve from
+                their published package builds.
               </p>
               <p>
                 Use the theme toggle in the navigation bar to check light and dark rendering. The

@@ -33,10 +33,6 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/flat-design/src/react.tsx"),
       },
       {
-        find: /^@moritzbrantner\/maps$/,
-        replacement: path.resolve(workspaceRoot, "packages/maps/src/index.ts"),
-      },
-      {
         find: /^@moritzbrantner\/media-editor$/,
         replacement: path.resolve(workspaceRoot, "packages/media-editor/src/index.ts"),
       },
@@ -120,7 +116,6 @@ export default defineConfig({
       "@moritzbrantner/linguistics-core",
       "@moritzbrantner/linguistics-corpus",
       "@moritzbrantner/linguistics-learning",
-      "@moritzbrantner/maps",
       "@moritzbrantner/media-editor",
       "@moritzbrantner/ocr",
       "@moritzbrantner/parallel-text",

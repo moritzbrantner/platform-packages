@@ -125,7 +125,6 @@ export default defineConfig({
         rootDir,
         "packages/linguistics-learning/src/index.ts",
       ),
-      "@moritzbrantner/maps": path.resolve(rootDir, "packages/maps/src/index.ts"),
       "@moritzbrantner/mask-generation": path.resolve(
         rootDir,
         "packages/mask-generation/src/index.ts",

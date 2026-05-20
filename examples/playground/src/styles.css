@@ -3,5 +3,4 @@
 
 @source "./**/*.{ts,tsx}";
 @source "../../../packages/card-games/src/**/*.{ts,tsx}";
-@source "../../../packages/maps/src/**/*.{ts,tsx}";
 @source "../../../packages/storytelling/src/**/*.{ts,tsx}";
