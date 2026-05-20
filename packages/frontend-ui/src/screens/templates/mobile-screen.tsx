@@ -24,26 +24,36 @@ export type MobileScreenBaseProps = Omit<FrontendScreenBaseProps, "sidebar" | "t
   footer?: React.ReactNode;
   className?: string;
   contentClassName?: string;
+  maxWidth?: MobileScreenShellMaxWidth;
 };
 
 export type MobileDashboardScreenProps = MobileScreenBaseProps;
 export type MobileDetailScreenProps = MobileScreenBaseProps;
-export type MobileFormScreenProps = Omit<MobileScreenBaseProps, "companion">;
+export type MobileFormScreenProps = MobileScreenBaseProps;
 export type MobileWorkbenchScreenProps = MobileScreenBaseProps & {
   composer?: React.ReactNode;
+};
+
+export type MobileScreenShellMaxWidth = "phone" | "full";
+
+export type MobileScreenShellProps = {
+  children: React.ReactNode;
+  className?: string;
+  maxWidth?: MobileScreenShellMaxWidth;
 };
 
 export function MobileScreenShell({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  maxWidth = "phone",
+}: MobileScreenShellProps) {
   return (
     <div
+      data-slot="mobile-screen-shell"
+      data-max-width={maxWidth}
       className={cn(
-        "mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background text-foreground",
+        "mx-auto flex min-h-dvh w-full flex-col bg-background text-foreground",
+        maxWidth === "phone" ? "max-w-md" : "max-w-none",
         "pt-[max(env(safe-area-inset-top),0.75rem)]",
         "pb-[max(env(safe-area-inset-bottom),0.75rem)]",
         className,
@@ -81,7 +91,7 @@ export function MobileScreenHeader({
   );
 
   return (
-    <header className="grid gap-3 px-4 pb-3">
+    <header data-slot="mobile-screen-header" className="grid gap-3 px-4 pb-3">
       {hasTopBar ? (
         <div className="flex min-h-9 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -118,11 +128,15 @@ export function MobileScreenSections({
   className?: string;
 }) {
   if (sections.length === 0) {
-    return emptyState ? <div className={className}>{emptyState}</div> : null;
+    return emptyState ? (
+      <div data-slot="mobile-screen-sections" className={className}>
+        {emptyState}
+      </div>
+    ) : null;
   }
 
   return (
-    <div className={cn("grid gap-3", className)}>
+    <div data-slot="mobile-screen-sections" className={cn("grid gap-3", className)}>
       {sections.map((section) => (
         <Surface
           key={section.id}
@@ -150,19 +164,31 @@ export function MobileScreenSections({
 export function MobileActionDock({
   children,
   className,
+  layout = "inline",
 }: {
   children: React.ReactNode;
   className?: string;
+  layout?: "inline" | "stacked";
 }) {
   return (
     <div
+      data-slot="mobile-action-dock"
+      data-layout={layout}
       className={cn(
         "sticky bottom-0 z-10 mt-auto border-t bg-background/95 px-4 py-3 backdrop-blur",
         "pb-[max(env(safe-area-inset-bottom),0.75rem)]",
         className,
       )}
     >
-      <div className="flex flex-wrap items-center gap-2">{children}</div>
+      <div
+        className={cn(
+          layout === "stacked"
+            ? "grid gap-2 [&_[data-slot=button]]:w-full"
+            : "flex flex-wrap items-center gap-2",
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -216,9 +242,10 @@ function MobileScreenTemplate({
   footer,
   className,
   contentClassName,
+  maxWidth,
 }: MobileScreenBaseProps) {
   return (
-    <MobileScreenShell className={className}>
+    <MobileScreenShell className={className} maxWidth={maxWidth}>
       <MobileScreenHeader
         eyebrow={eyebrow}
         title={title}

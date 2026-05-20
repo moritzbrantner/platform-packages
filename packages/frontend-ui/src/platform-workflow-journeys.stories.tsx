@@ -169,6 +169,54 @@ export const HomeToPeopleToProfileToChat: Story = {
   },
 };
 
+export const MobileHomeToPeopleToProfileToChat: Story = {
+  args: getScenarioArgs(workflowScenarios.homeToPeopleToProfileToChat),
+  parameters: {
+    viewport: {
+      viewports: {
+        mobile390: {
+          name: "Mobile 390",
+          styles: {
+            width: "390px",
+            height: "844px",
+          },
+        },
+        mobile430: {
+          name: "Mobile 430",
+          styles: {
+            width: "430px",
+            height: "932px",
+          },
+        },
+        tablet768: {
+          name: "Tablet 768",
+          styles: {
+            width: "768px",
+            height: "1024px",
+          },
+        },
+      },
+      defaultViewport: "mobile390",
+    },
+  },
+  play: async ({ canvas, step, userEvent }) => {
+    await runNamedStep(step, "Move through the social journey in a mobile viewport", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Open social overview" }));
+      await userEvent.click(canvas.getByRole("button", { name: "Open people" }));
+
+      await expect(canvas.getByRole("heading", { name: "People" })).toBeVisible();
+
+      await userEvent.click(canvas.getByRole("button", { name: "Open Jordan Ellis profile" }));
+      await expect(canvas.getByRole("heading", { name: "Jordan Ellis" })).toBeVisible();
+
+      await userEvent.click(canvas.getByRole("button", { name: "Open chat" }));
+      await expect(
+        canvas.getAllByRole("heading", { name: "Chat with Jordan Ellis" })[0],
+      ).toBeVisible();
+    });
+  },
+};
+
 export const HomeToSocialToFollowers: Story = {
   args: getScenarioArgs(workflowScenarios.homeToSocialToFollowers),
   play: async ({ canvas, step, userEvent }) => {

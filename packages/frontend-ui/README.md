@@ -23,6 +23,14 @@ tokens, or low-level interaction patterns; those stay in `@moritzbrantner/ui`.
 - `MobileScreenHeader`
 - `MobileScreenSections`
 - `MobileActionDock`
+- `AdaptiveDashboardScreen`
+- `AdaptiveDetailScreen`
+- `AdaptiveFormScreen`
+- `AdaptiveWorkbenchScreen`
+- `MobileToolbar`
+- `MobileOverflowPanel`
+- `MobileCompanionPanel`
+- `MobileStickyFooter`
 - `FrontendScreenSection`
 - `WorkflowRoute`
 - `WorkflowSessionState`
@@ -81,6 +89,57 @@ export function ThreadScreen() {
     />
   );
 }
+```
+
+Adaptive screens render the desktop template at `md` and above, and the mobile
+template below `md`, using CSS visibility classes instead of viewport detection:
+
+```tsx
+import { Button } from "@moritzbrantner/ui";
+import { AdaptiveDashboardScreen, MobileToolbar } from "@moritzbrantner/frontend-ui";
+
+export function QueueScreen() {
+  return (
+    <AdaptiveDashboardScreen
+      title="Review queue"
+      description="Operational overview"
+      primaryAction={<Button>New review</Button>}
+      mobileNavigation={
+        <MobileToolbar label="Queue filters">
+          <Button variant="outline" size="sm">
+            Open
+          </Button>
+          <Button variant="outline" size="sm">
+            Assigned
+          </Button>
+        </MobileToolbar>
+      }
+      mobileBottomActions={<Button>Review next</Button>}
+      sections={[
+        {
+          id: "activity",
+          title: "Activity",
+          content: <p>Five updates need attention.</p>,
+        },
+      ]}
+      sidebar={<aside>Queue health</aside>}
+    />
+  );
+}
+```
+
+Use `MobileCompanionPanel` or `MobileOverflowPanel` when desktop sidebar or
+secondary controls need a compact mobile home:
+
+```tsx
+import { Button } from "@moritzbrantner/ui";
+import { MobileCompanionPanel } from "@moritzbrantner/frontend-ui";
+
+<MobileCompanionPanel
+  title="Related records"
+  trigger={<Button variant="outline">Open related records</Button>}
+  companion={<aside>Customer, priority, and owner details.</aside>}
+/>;
 ```
 
 ## Workflow scenarios
