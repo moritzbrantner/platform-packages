@@ -152,6 +152,121 @@ const leafletMock = vi.hoisted(() => {
 
 vi.mock("leaflet", () => leafletMock);
 
+vi.mock("@moritzbrantner/maps", () => ({
+  ClusteredMap: ({ mapLabel, points }: { mapLabel?: string; points: MockTemporalMapPoint[] }) => {
+    const group = leafletMock.layerGroup();
+
+    for (const point of points) {
+      leafletMock
+        .circleMarker([point.latitude, point.longitude], {
+          className: "mb-maps__point-marker",
+        })
+        .addTo(group);
+    }
+
+    return <div aria-label={mapLabel} data-map-ready="true" />;
+  },
+  HeatMap: ({ mapLabel, points }: { mapLabel?: string; points: MockTemporalMapPoint[] }) => {
+    const group = leafletMock.layerGroup();
+
+    for (const point of points) {
+      leafletMock
+        .circleMarker([point.latitude, point.longitude], {
+          className: "mb-maps__heat-marker",
+        })
+        .addTo(group);
+    }
+
+    return <div aria-label={mapLabel} data-map-ready="true" />;
+  },
+  getTemporalHeatMapMaxWeight: (
+    tracks: MockTemporalMapTrack[],
+    options: { weightMetric?: string } = {},
+  ) =>
+    Math.max(
+      ...tracks.flatMap((track) =>
+        track.frames.map((frame) =>
+          options.weightMetric && frame.metrics
+            ? Number(frame.metrics[options.weightMetric] ?? 0)
+            : 1,
+        ),
+      ),
+    ),
+  getTemporalMapPointsAtTime: (tracks: MockTemporalMapTrack[], time: number) =>
+    tracks.map((track) => interpolateTrackPoint(track, time)),
+  getTemporalMapTimeRange: (tracks: MockTemporalMapTrack[]) => {
+    const times = tracks.flatMap((track) => track.frames.map((frame) => frame.time));
+
+    if (!times.length) {
+      return null;
+    }
+
+    return {
+      end: Math.max(...times),
+      start: Math.min(...times),
+    };
+  },
+  snapTemporalMapTime: (
+    time: number,
+    timeRange: { end: number; start: number },
+    timeStep: number | "any",
+  ) => {
+    if (timeStep === "any" || timeStep <= 0) {
+      return time;
+    }
+
+    return Math.min(
+      timeRange.end,
+      Math.max(timeRange.start, Math.round(time / timeStep) * timeStep),
+    );
+  },
+}));
+
+type MockTemporalMapPoint = {
+  latitude: number;
+  longitude: number;
+  metrics?: Record<string, number>;
+  time: number;
+};
+
+type MockTemporalMapTrack = {
+  frames: MockTemporalMapPoint[];
+};
+
+function interpolateTrackPoint(track: MockTemporalMapTrack, time: number): MockTemporalMapPoint {
+  const frames = [...track.frames].sort((left, right) => left.time - right.time);
+  const firstFrame = frames[0];
+  const lastFrame = frames[frames.length - 1];
+
+  if (!firstFrame || !lastFrame) {
+    return { latitude: 0, longitude: 0, time };
+  }
+
+  if (time <= firstFrame.time) {
+    return firstFrame;
+  }
+
+  if (time >= lastFrame.time) {
+    return lastFrame;
+  }
+
+  const nextFrame = frames.find((frame) => frame.time >= time) ?? lastFrame;
+  const previousFrame =
+    frames
+      .slice()
+      .reverse()
+      .find((frame) => frame.time <= time) ?? firstFrame;
+  const span = nextFrame.time - previousFrame.time;
+  const progress = span > 0 ? (time - previousFrame.time) / span : 0;
+
+  return {
+    latitude: previousFrame.latitude + (nextFrame.latitude - previousFrame.latitude) * progress,
+    longitude: previousFrame.longitude + (nextFrame.longitude - previousFrame.longitude) * progress,
+    metrics: nextFrame.metrics ?? previousFrame.metrics,
+    time,
+  };
+}
+
 beforeEach(() => {
   vi.resetModules();
 });

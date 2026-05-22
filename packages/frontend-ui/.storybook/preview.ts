@@ -2,10 +2,10 @@ import React from "react";
 import type { Preview } from "@storybook/react-vite";
 
 import {
+  builtInUiThemeNames,
   defaultUiThemeName,
   uiThemeLabels,
-  uiThemeNames,
-  type UiThemeName,
+  type BuiltInUiThemeName,
 } from "@moritzbrantner/ui/themes";
 import atlasStyles from "@moritzbrantner/ui/atlas/styles.css?inline";
 import bobbaStyles from "@moritzbrantner/ui/bobba/styles.css?inline";
@@ -19,18 +19,18 @@ const designSystemStyles = {
   atlas: atlasStyles,
   studio: studioStyles,
   paper: paperStyles,
-} as const satisfies Record<UiThemeName, string>;
+} as const satisfies Record<BuiltInUiThemeName, string>;
 
-const designSystemOptions = uiThemeNames.map((value) => ({
+const designSystemOptions = builtInUiThemeNames.map((value) => ({
   value,
   title: uiThemeLabels[value],
 }));
 
-function isDesignSystemName(value: unknown): value is UiThemeName {
+function isDesignSystemName(value: unknown): value is BuiltInUiThemeName {
   return typeof value === "string" && value in designSystemStyles;
 }
 
-function applyDesignSystemStyle(theme: UiThemeName) {
+function applyDesignSystemStyle(theme: BuiltInUiThemeName) {
   if (typeof document === "undefined") {
     return;
   }

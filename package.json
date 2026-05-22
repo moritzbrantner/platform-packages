@@ -9,6 +9,9 @@
     "packages/foundation-contract",
     "packages/upload-playbook"
   ],
+  "overrides": {
+    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz"
+  },
   "scripts": {
     "build": "turbo run build",
     "changeset": "changeset",

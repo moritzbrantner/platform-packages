@@ -35,9 +35,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   Checkbox,
-  ComponentEditorPanel,
-  ComponentEditorPreviewFrame,
-  ComponentEditorProvider,
   ConnectionStatus,
   Dialog,
   DialogContent,
@@ -61,7 +58,6 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-  EditableComponent,
   Field,
   FieldContent,
   FieldDescription,
@@ -112,14 +108,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
   UiTheme,
-  buildJsxSnippet,
+  type BuiltInUiThemeName,
   type CalendarCellComponentProps,
+  type CalendarIcsData,
+  type ThemeMode,
+} from "@moritzbrantner/ui/bobba";
+import {
+  ComponentEditorPanel,
+  ComponentEditorPreviewFrame,
+  ComponentEditorProvider,
+  EditableComponent,
+  buildJsxSnippet,
   type ComponentEditableValue,
   type EditableComponentDefinition,
-  type ThemeMode,
-  type CalendarIcsData,
-  type UiThemeName,
-} from "@moritzbrantner/ui/bobba";
+} from "@moritzbrantner/ui/labs";
 
 import { PlaygroundPage } from "./app-shell";
 import { mountPage } from "./mount";
@@ -160,7 +162,7 @@ const uiStyleOptions = [
     description: "Document and research style",
   },
 ] as const satisfies ReadonlyArray<{
-  value: UiThemeName;
+  value: BuiltInUiThemeName;
   label: string;
   description: string;
 }>;
@@ -170,9 +172,12 @@ const uiStyleLoaders = {
   atlas: () => import("@moritzbrantner/ui/atlas/styles.css?inline"),
   studio: () => import("@moritzbrantner/ui/studio/styles.css?inline"),
   paper: () => import("@moritzbrantner/ui/paper/styles.css?inline"),
-} as const satisfies Record<Exclude<UiThemeName, "bobba">, () => Promise<{ default: string }>>;
+} as const satisfies Record<
+  Exclude<BuiltInUiThemeName, "bobba">,
+  () => Promise<{ default: string }>
+>;
 
-function isUiThemeName(value: string | null): value is UiThemeName {
+function isUiThemeName(value: string | null): value is BuiltInUiThemeName {
   return (
     value === "bobba" ||
     value === "zleek" ||
@@ -182,7 +187,7 @@ function isUiThemeName(value: string | null): value is UiThemeName {
   );
 }
 
-function getInitialUiStyle(): UiThemeName {
+function getInitialUiStyle(): BuiltInUiThemeName {
   if (typeof window === "undefined") {
     return "bobba";
   }
@@ -199,7 +204,7 @@ function getInitialThemeMode(): ThemeMode {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-function usePlaygroundUiStyle(style: UiThemeName) {
+function usePlaygroundUiStyle(style: BuiltInUiThemeName) {
   useEffect(() => {
     let cancelled = false;
 
@@ -319,7 +324,7 @@ const deliveryMetrics = [
 ] as const;
 
 const releaseRows = [
-  { packageName: "@moritzbrantner/ui", version: "0.2.0", status: "Current" },
+  { packageName: "@moritzbrantner/ui", version: "0.8.0", status: "Current" },
   {
     packageName: "@moritzbrantner/storytelling",
     version: "0.1.0",
@@ -1252,7 +1257,7 @@ function EditableIntegrationGallery() {
 }
 
 function UiPage() {
-  const [uiStyle, setUiStyle] = useState<UiThemeName>(getInitialUiStyle);
+  const [uiStyle, setUiStyle] = useState<BuiltInUiThemeName>(getInitialUiStyle);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(64);
   const [alertsEnabled, setAlertsEnabled] = useState(true);

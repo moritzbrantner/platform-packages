@@ -5,11 +5,6 @@ import * as React from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
-  AnnotationCanvas,
-  type AnnotationCanvasAnnotation,
-  type AnnotationCanvasTool,
-  AssetBrowser,
-  type AssetBrowserItem,
   Button,
   ButtonGroup,
   ButtonGroupText,
@@ -61,9 +56,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DocumentViewer,
-  type DocumentViewerHighlight,
-  type DocumentViewerPageData,
   DotsSpinner,
   Dropzone,
   DropzoneContent,
@@ -76,8 +68,6 @@ import {
   Empty,
   EmptyDescription,
   EmptyTitle,
-  InspectorPanel,
-  type InspectorPanelSectionData,
   Kbd,
   LoadingBar,
   MenubarShortcut,
@@ -98,11 +88,6 @@ import {
   PageHeader,
   PageShell,
   PageTitle,
-  QueryBuilder,
-  evaluateQueryBuilderExpression,
-  serializeQueryBuilderExpression,
-  type QueryBuilderExpression,
-  type QueryBuilderField,
   SectionGrid,
   Spinner,
   PulseSpinner,
@@ -124,6 +109,34 @@ import {
   SurfaceHeader,
   SurfaceTitle,
   Switch,
+  Toggle,
+  ToggleSetting,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSpacer,
+  ToolbarTitle,
+  defaultUiThemeName,
+  themeConfig,
+  uiThemeLabels,
+  uiThemeNames,
+  type UiThemeName,
+} from "@moritzbrantner/ui";
+import {
+  AnnotationCanvas,
+  type AnnotationCanvasAnnotation,
+  type AnnotationCanvasTool,
+  AssetBrowser,
+  type AssetBrowserItem,
+  DocumentViewer,
+  type DocumentViewerHighlight,
+  type DocumentViewerPageData,
+  InspectorPanel,
+  type InspectorPanelSectionData,
+  QueryBuilder,
+  evaluateQueryBuilderExpression,
+  serializeQueryBuilderExpression,
+  type QueryBuilderExpression,
+  type QueryBuilderField,
   Timeline,
   TimelineConnector,
   TimelineContent,
@@ -138,18 +151,7 @@ import {
   moveTimelineEditorClip,
   resizeTimelineEditorClip,
   type TimelineEditorTrack,
-  Toggle,
-  ToggleSetting,
-  Toolbar,
-  ToolbarGroup,
-  ToolbarSpacer,
-  ToolbarTitle,
-  defaultUiThemeName,
-  themeConfig,
-  uiThemeLabels,
-  uiThemeNames,
-  type UiThemeName,
-} from "@moritzbrantner/ui";
+} from "@moritzbrantner/ui/labs";
 import { AtlasTheme, atlasTheme, uiTheme as atlasUiTheme } from "@moritzbrantner/ui/atlas";
 import {
   BobbaTheme,
@@ -516,7 +518,7 @@ describe("@moritzbrantner/ui document-workflows", () => {
     fireEvent.change(screen.getAllByLabelText("Rule value")[0], { target: { value: "1000" } });
     expect(onExpressionChange).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        rules: expect.arrayContaining([expect.objectContaining({ value: 1000 })]),
+        rules: expect.arrayContaining([expect.objectContaining({ value: "1000" })]),
       }),
     );
 
@@ -586,9 +588,8 @@ describe("@moritzbrantner/ui document-workflows", () => {
     );
     expect(screen.getByText("Unsaved")).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText("Status"), { target: { value: "success" } });
     fireEvent.click(screen.getByRole("button", { name: /Apply/ }));
-    expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ status: "success" }));
+    expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ label: "OCR extract" }));
 
     fireEvent.click(screen.getByRole("button", { name: /Reset/ }));
     expect(onReset).toHaveBeenCalled();

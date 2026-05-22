@@ -25,14 +25,14 @@
   },
   "peerDependencies": {
     "@react-three/fiber": "^9.4.0",
-    "@moritzbrantner/ui": "^0.5.2",
+    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.180.0"
   },
   "devDependencies": {
     "@react-three/fiber": "^9.4.0",
-    "@moritzbrantner/ui": "^0.5.2",
+    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "react": "^19.2.0",

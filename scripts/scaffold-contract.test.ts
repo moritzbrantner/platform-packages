@@ -193,7 +193,7 @@ test("release-ready package inventory entries have publishable metadata", () => 
     (match) => match[1]!,
   );
 
-  expect(releaseReadyPackageNames).toContain("maps");
+  expect(releaseReadyPackageNames).toContain("storytelling");
 
   for (const packageDir of releaseReadyPackageNames) {
     const packageJson = readPackageJson(packageDir);

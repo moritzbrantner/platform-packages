@@ -26,7 +26,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@moritzbrantner/ui": "^0.5.2"
+    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.3.5",

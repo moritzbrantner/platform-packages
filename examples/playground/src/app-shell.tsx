@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 
 import {
+  AccountMenu,
   Badge,
   Button,
   Card,
@@ -11,7 +12,9 @@ import {
   CardHeader,
   CardTitle,
   cn,
+  NotificationMenu,
   PlatformNavbar,
+  ThemeModeSwitch,
   type PlatformNavbarGroup,
   Toaster,
 } from "@moritzbrantner/ui";
@@ -399,44 +402,45 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
             <PlatformNavbar
               activeGroupId={activeGroup?.id}
               activeItemId={activePage}
-              accountMenu={{
-                user: {
-                  name: "Mira Brandt",
-                  email: "mira@example.com",
-                  initials: "MB",
-                },
-                items: [
-                  { id: "profile", label: "Profile" },
-                  { id: "settings", label: "Settings" },
-                  { id: "logout", label: "Sign out", destructive: true },
-                ],
-              }}
+              actions={
+                <>
+                  <NotificationMenu
+                    unreadCount={2}
+                    items={[
+                      {
+                        id: "workspace",
+                        title: "Workspace updated",
+                        description: "The playground package list was refreshed.",
+                        unread: true,
+                        meta: "2m",
+                      },
+                      {
+                        id: "release",
+                        title: "Release checks passed",
+                        description: "UI package verification finished successfully.",
+                        unread: true,
+                        meta: "1h",
+                      },
+                    ]}
+                  />
+                  <ThemeModeSwitch mode={themeMode} onModeChange={setTheme} />
+                  <AccountMenu
+                    user={{
+                      name: "Mira Brandt",
+                      email: "mira@example.com",
+                      initials: "MB",
+                    }}
+                    items={[
+                      { id: "profile", label: "Profile" },
+                      { id: "settings", label: "Settings" },
+                      { id: "logout", label: "Sign out", destructive: true },
+                    ]}
+                  />
+                </>
+              }
               brand="Platform packages"
               className="max-w-none"
               groups={navbarGroups}
-              notificationMenu={{
-                unreadCount: 2,
-                items: [
-                  {
-                    id: "workspace",
-                    title: "Workspace updated",
-                    description: "The playground package list was refreshed.",
-                    unread: true,
-                    meta: "2m",
-                  },
-                  {
-                    id: "release",
-                    title: "Release checks passed",
-                    description: "UI package verification finished successfully.",
-                    unread: true,
-                    meta: "1h",
-                  },
-                ],
-              }}
-              themeModeSwitch={{
-                mode: themeMode,
-                onModeChange: setTheme,
-              }}
               variant="desktop"
             />
             <div className="space-y-3">

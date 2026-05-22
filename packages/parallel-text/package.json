@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@moritzbrantner/linguistics-core": "^0.1.1",
-    "@moritzbrantner/ui": "^0.5.2"
+    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz"
   },
   "peerDependencies": {
     "react": "^19.0.0",

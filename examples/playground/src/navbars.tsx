@@ -3,7 +3,9 @@ import { useMemo, useState, type SVGProps } from "react";
 import {
   Badge,
   Button,
+  LanguageSwitcher,
   PlatformNavbar,
+  ThemeModeSwitch,
   type PlatformNavbarGroup,
   type PlatformNavbarItem,
   type PlatformNavbarRenderLinkProps,
@@ -267,18 +269,24 @@ function NavbarVariantPreview({ variant }: { variant: PlatformNavbarVariant }) {
           variant={variant}
           activeItemId={activeItemId}
           defaultOpenGroupId={config.open}
-          languageSwitcher={variant === "web" ? true : undefined}
           renderLink={DemoLink}
-          themeModeSwitch={variant === "web" ? true : undefined}
           actions={
-            <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="icon-sm" aria-label="Search">
-                <SearchIcon className="size-4" />
-              </Button>
-              <Button type="button" variant="secondary" size="sm">
-                Sync
-              </Button>
-            </div>
+            <>
+              {variant === "web" ? (
+                <>
+                  <LanguageSwitcher />
+                  <ThemeModeSwitch />
+                </>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="icon-sm" aria-label="Search">
+                  <SearchIcon className="size-4" />
+                </Button>
+                <Button type="button" variant="secondary" size="sm">
+                  Sync
+                </Button>
+              </div>
+            </>
           }
           onNavigate={(item: PlatformNavbarItem) => {
             setActiveItemId(item.id);

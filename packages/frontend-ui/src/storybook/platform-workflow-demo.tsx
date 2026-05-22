@@ -44,11 +44,13 @@ import {
   ChatTitle,
   Input,
   Label,
+  LanguageSwitcher,
   PageShell,
   PlatformNavbar,
   type PlatformNavbarGroup,
   Separator,
   Textarea,
+  ThemeModeSwitch,
 } from "@moritzbrantner/ui";
 
 import { DashboardScreen } from "../screens/templates/dashboard-screen";
@@ -518,45 +520,49 @@ export function PlatformWorkflowDemo({
           groups={groups}
           activeItemId={activeRoute}
           defaultOpenGroupId={getDefaultOpenGroupId(session, activeRoute)}
-          languageSwitcher={{
-            value: languageCode,
-            onValueChange: (nextLanguageCode) => {
-              setLanguageCode(nextLanguageCode);
-            },
-          }}
-          themeModeSwitch={{
-            mode: themeMode,
-            onModeChange: setThemeMode,
-          }}
           actions={
-            isVisitor ? (
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" variant="outline" onClick={() => navigate("login")}>
-                  <LogInIcon />
-                  Login
-                </Button>
-                <Button type="button" size="sm" onClick={() => navigate("register")}>
-                  <UserPlusIcon />
-                  Create account
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={activeRoute === "chat" ? "secondary" : "outline"}
-                  onClick={() => openChat(selectedProfile?.id ?? "mira")}
-                >
-                  <MessageCircleIcon />
-                  Chat
-                </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={signOut}>
-                  <LogInIcon />
-                  Sign out
-                </Button>
-              </div>
-            )
+            <>
+              <LanguageSwitcher
+                value={languageCode}
+                onValueChange={(nextLanguageCode) => {
+                  setLanguageCode(nextLanguageCode);
+                }}
+              />
+              <ThemeModeSwitch mode={themeMode} onModeChange={setThemeMode} />
+              {isVisitor ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate("login")}
+                  >
+                    <LogInIcon />
+                    Login
+                  </Button>
+                  <Button type="button" size="sm" onClick={() => navigate("register")}>
+                    <UserPlusIcon />
+                    Create account
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={activeRoute === "chat" ? "secondary" : "outline"}
+                    onClick={() => openChat(selectedProfile?.id ?? "mira")}
+                  >
+                    <MessageCircleIcon />
+                    Chat
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={signOut}>
+                    <LogInIcon />
+                    Sign out
+                  </Button>
+                </div>
+              )}
+            </>
           }
           onNavigate={(item) => navigate(item.id as WorkflowRoute)}
           renderLink={({ className, children, href, onClick, "aria-current": ariaCurrent }) => (
