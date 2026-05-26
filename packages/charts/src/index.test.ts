@@ -4,6 +4,7 @@ import {
   createChartDensityIndex,
   createChartDensitySample,
   createChartDensityViewportSummary,
+  type ChartDensityValueMode,
 } from "@moritzbrantner/charts";
 
 describe("@moritzbrantner/charts", () => {
@@ -53,5 +54,32 @@ describe("@moritzbrantner/charts", () => {
     expect(sample.y).toBe(4);
     expect(sample.minY).toBe(2);
     expect(sample.maxY).toBe(6);
+  });
+
+  test("keeps chart samples in parity across density backends", () => {
+    const points = [
+      { id: "b", x: 5, y: 10, metrics: { orders: 1 } },
+      { id: "a", x: 0, y: 2, metrics: { orders: 1 } },
+      { id: "c", x: 5, y: -2, metrics: { orders: 1 } },
+      { id: "d", x: 20, y: 8, metrics: { orders: 1 } },
+      { id: "invalid", x: Number.NaN, y: 100, metrics: { orders: 100 } },
+    ];
+    const hybrid = createChartDensityIndex(points, { backend: "hybrid-js" });
+    const wasm = createChartDensityIndex(points, { backend: "wasm-index" });
+    const valueModes: ChartDensityValueMode[] = ["average", "count", "max", "min", "sum"];
+
+    for (const valueMode of valueModes) {
+      const query = {
+        includeEmptyBins: true,
+        targetBinCount: 4,
+        valueMode,
+        xDomain: [20, 0] as [number, number],
+      };
+
+      expect(wasm.getChartSeries(query)).toEqual(hybrid.getChartSeries(query));
+      expect(createChartDensityViewportSummary(wasm.getChartSeries(query))).toEqual(
+        createChartDensityViewportSummary(hybrid.getChartSeries(query)),
+      );
+    }
   });
 });

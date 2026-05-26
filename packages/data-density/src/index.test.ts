@@ -13,8 +13,11 @@ import {
   clusterDensePoints,
   getBoundsFromGeoPoints,
   sumDensityMetrics,
+  type BinnedSeriesBackend,
   type GeoDensityPoint,
 } from "@moritzbrantner/data-density";
+
+const binnedSeriesBackends: BinnedSeriesBackend[] = ["hybrid-js", "wasm-index"];
 
 describe("@moritzbrantner/data-density", () => {
   test("normalizes and sums metric records", () => {
@@ -95,6 +98,67 @@ describe("@moritzbrantner/data-density", () => {
       minX: 0,
       minY: 0,
     });
+  });
+
+  test("keeps binned series backends in parity for edge cases", () => {
+    const points: Array<{
+      id: string;
+      metrics: Record<string, number>;
+      x: number;
+      y: number;
+    }> = [
+      { id: "sorted-a", x: 0, y: 2, metrics: { count: 1, invalid: Number.NaN } },
+      { id: "duplicate-a", x: 5, y: 10, metrics: { count: 1, revenue: 10 } },
+      { id: "duplicate-b", x: 5, y: -2, metrics: { count: 1, revenue: 20 } },
+      { id: "reverse", x: 20, y: 8, metrics: { count: 1, revenue: 30 } },
+      { id: "invalid-x", x: Number.NaN, y: 100, metrics: { count: 100 } },
+      { id: "invalid-y", x: 6, y: Number.POSITIVE_INFINITY, metrics: { count: 100 } },
+      { id: "outside", x: 100, y: 3, metrics: { count: 1, revenue: 40 } },
+    ];
+    const snapshot = structuredClone(points);
+    const indexes = Object.fromEntries(
+      binnedSeriesBackends.map((backend) => [
+        backend,
+        createBinnedSeriesIndex(points, {
+          backend,
+          filterPoint(point) {
+            return point.id !== "outside";
+          },
+        }),
+      ]),
+    ) as Record<BinnedSeriesBackend, ReturnType<typeof createBinnedSeriesIndex>>;
+    const queries = [
+      { includeEmptyBins: true, targetBinCount: 4, xDomain: [20, 0] as [number, number] },
+      { includeEmptyBins: false, targetBinCount: 4, xDomain: [20, 0] as [number, number] },
+      { includeEmptyBins: true, targetBinCount: 3, xDomain: [5, 5] as [number, number] },
+      { includeEmptyBins: false, targetBinCount: 2, xDomain: [200, 300] as [number, number] },
+    ];
+
+    for (const query of queries) {
+      expect(indexes["wasm-index"].getBinnedSeries(query)).toEqual(
+        indexes["hybrid-js"].getBinnedSeries(query),
+      );
+    }
+
+    expect(indexes["wasm-index"].getSeriesBounds()).toEqual(indexes["hybrid-js"].getSeriesBounds());
+    expect(indexes["wasm-index"].getPointById("duplicate-b")).toEqual(
+      indexes["hybrid-js"].getPointById("duplicate-b"),
+    );
+    expect(indexes["wasm-index"].getPointById("invalid-x")).toBeNull();
+    expect(
+      createBinnedSeriesIndex([], { backend: "wasm-index" }).getBinnedSeries({
+        includeEmptyBins: true,
+        targetBinCount: 2,
+        xDomain: [0, 1],
+      }),
+    ).toEqual(
+      createBinnedSeriesIndex([], { backend: "hybrid-js" }).getBinnedSeries({
+        includeEmptyBins: true,
+        targetBinCount: 2,
+        xDomain: [0, 1],
+      }),
+    );
+    expect(points).toEqual(snapshot);
   });
 
   test("summarizes, buckets, and clusters dense points through Rust WASM", () => {

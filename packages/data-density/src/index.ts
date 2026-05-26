@@ -1,4 +1,8 @@
-import { runOperation } from "@mb-rust/dense-data-wasm";
+import {
+  NumericSeriesIndex as DenseDataWasmNumericSeriesIndex,
+  runOperation,
+  type NumericSeriesKernelResult,
+} from "@mb-rust/dense-data-wasm";
 import Supercluster from "supercluster";
 
 export type DataDensityMetricRecord = Record<string, number>;
@@ -199,7 +203,10 @@ export type BinnedSeries<TProperties = Record<string, unknown>> = {
   summary: BinnedSeriesSummary;
 };
 
+export type BinnedSeriesBackend = "hybrid-js" | "wasm-index";
+
 export type BinnedSeriesIndexOptions<TProperties = Record<string, unknown>> = {
+  backend?: BinnedSeriesBackend;
   filterPoint?: (point: IndexedNumericSeriesPoint<TProperties>) => boolean;
 };
 
@@ -505,6 +512,17 @@ export function createBinnedSeriesIndex<TProperties = Record<string, unknown>>(
   points: readonly NumericSeriesPoint<TProperties>[],
   options: BinnedSeriesIndexOptions<TProperties> = {},
 ): BinnedSeriesIndex<TProperties> {
+  if (options.backend === "wasm-index") {
+    return createWasmIndexedBinnedSeriesIndex(points, options);
+  }
+
+  return createHybridBinnedSeriesIndex(points, options);
+}
+
+function createHybridBinnedSeriesIndex<TProperties = Record<string, unknown>>(
+  points: readonly NumericSeriesPoint<TProperties>[],
+  options: BinnedSeriesIndexOptions<TProperties> = {},
+): BinnedSeriesIndex<TProperties> {
   const normalizedPoints = points
     .map((point, index) => normalizeSeriesPoint(point, index))
     .filter(isFiniteSeriesPoint)
@@ -604,6 +622,81 @@ export function createBinnedSeriesIndex<TProperties = Record<string, unknown>>(
         minX: normalizedPoints[0]!.x,
         minY,
       };
+    },
+  };
+}
+
+function createWasmIndexedBinnedSeriesIndex<TProperties = Record<string, unknown>>(
+  points: readonly NumericSeriesPoint<TProperties>[],
+  options: BinnedSeriesIndexOptions<TProperties> = {},
+): BinnedSeriesIndex<TProperties> {
+  const normalizedPoints = points
+    .map((point, index) => normalizeSeriesPoint(point, index))
+    .filter(isFiniteSeriesPoint)
+    .filter((point) => options.filterPoint?.(point) ?? true);
+  const acceptedFinitePoints = normalizedPoints;
+  const pointLookup = new Map(acceptedFinitePoints.map((point) => [point.id, point]));
+  const metricKeys = collectDensityMetricKeys(acceptedFinitePoints.map((point) => point.metrics));
+  const wasmIndex = new DenseDataWasmNumericSeriesIndex(
+    acceptedFinitePoints.map((point, sourceIndex) => ({
+      metrics: point.metrics,
+      sourceIndex,
+      x: point.x,
+      y: point.y,
+    })),
+  );
+
+  return {
+    getBinnedSeries(query) {
+      const xDomain = normalizeDomain(query.xDomain);
+      const targetBinCount = clampInteger(query.targetBinCount, 1, 100_000);
+      const kernelResult = wasmIndex.getBinnedSeries({
+        includeEmptyBins: query.includeEmptyBins ?? false,
+        targetBinCount,
+        xDomain,
+      }) as NumericSeriesKernelResult;
+      const visibleBins = kernelResult.bins.map(
+        (bin): BinnedSeriesBin<TProperties> => ({
+          averageY: bin.averageY,
+          firstPoint:
+            bin.firstPointIndex === null || bin.firstPointIndex === undefined
+              ? null
+              : (acceptedFinitePoints[bin.firstPointIndex] ?? null),
+          index: bin.index,
+          lastPoint:
+            bin.lastPointIndex === null || bin.lastPointIndex === undefined
+              ? null
+              : (acceptedFinitePoints[bin.lastPointIndex] ?? null),
+          maxY: bin.maxY,
+          metrics: normalizeDensityMetrics(bin.metrics),
+          minY: bin.minY,
+          pointCount: bin.pointCount,
+          sumY: bin.sumY,
+          x0: bin.x0,
+          x1: bin.x1,
+        }),
+      );
+
+      return {
+        bins: visibleBins,
+        summary: {
+          binCount: visibleBins.length,
+          metrics: sumDensityMetrics(
+            visibleBins.map((bin) => bin.metrics),
+            metricKeys,
+          ),
+          pointCount: visibleBins.reduce((total, bin) => total + bin.pointCount, 0),
+          xDomain,
+        },
+      };
+    },
+
+    getPointById(pointId) {
+      return pointLookup.get(pointId) ?? null;
+    },
+
+    getSeriesBounds() {
+      return wasmIndex.getSeriesBounds();
     },
   };
 }
