@@ -28,6 +28,7 @@
       "name": "@moritzbrantner/playground",
       "dependencies": {
         "@moritzbrantner/card-games": "workspace:*",
+        "@moritzbrantner/charts": "workspace:*",
         "@moritzbrantner/data-density": "workspace:*",
         "@moritzbrantner/flat-design": "workspace:*",
         "@moritzbrantner/linguistics-core": "workspace:*",

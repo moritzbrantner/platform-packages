@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-three/fiber": "^9.4.0",
     "@moritzbrantner/card-games": "workspace:*",
+    "@moritzbrantner/charts": "workspace:*",
     "@moritzbrantner/data-density": "workspace:*",
     "@moritzbrantner/flat-design": "workspace:*",
     "@moritzbrantner/linguistics-core": "workspace:*",

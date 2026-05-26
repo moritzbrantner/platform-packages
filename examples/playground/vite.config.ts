@@ -7,6 +7,7 @@ import { defineConfig } from "vite";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const workspaceRoot = path.resolve(rootDir, "../..");
+const rustPackagesRoot = path.resolve(workspaceRoot, "../rust-packages");
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -15,6 +16,10 @@ export default defineConfig({
       {
         find: /^@moritzbrantner\/card-games$/,
         replacement: path.resolve(workspaceRoot, "packages/card-games/src/index.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/charts$/,
+        replacement: path.resolve(workspaceRoot, "packages/charts/src/index.ts"),
       },
       {
         find: /^@moritzbrantner\/data-density$/,
@@ -107,8 +112,16 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
+    include: [
+      "@base-ui/react",
+      "@base-ui/utils/store",
+      "recharts",
+      "use-sync-external-store/shim",
+      "use-sync-external-store/shim/with-selector",
+    ],
     exclude: [
       "@moritzbrantner/card-games",
+      "@moritzbrantner/charts",
       "@moritzbrantner/data-density",
       "@moritzbrantner/flat-design",
       "@moritzbrantner/flat-design/core",
@@ -133,7 +146,7 @@ export default defineConfig({
     port: 8703,
     strictPort: true,
     fs: {
-      allow: [workspaceRoot],
+      allow: [workspaceRoot, rustPackagesRoot],
     },
   },
   build: {
@@ -141,6 +154,7 @@ export default defineConfig({
       input: {
         home: path.resolve(rootDir, "index.html"),
         cardGames: path.resolve(rootDir, "card-games.html"),
+        charts: path.resolve(rootDir, "charts.html"),
         dataDensity: path.resolve(rootDir, "data-density.html"),
         flatDesign: path.resolve(rootDir, "flat-design.html"),
         linguisticsCore: path.resolve(rootDir, "linguistics-core.html"),
