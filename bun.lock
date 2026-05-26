@@ -90,6 +90,15 @@
       "version": "0.1.1",
       "dependencies": {
         "@moritzbrantner/data-density": "^0.1.1",
+        "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
+      },
+      "devDependencies": {
+        "react": "^19.2.0",
+        "recharts": "^3.8.1",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+        "recharts": "^3.0.0",
       },
     },
     "packages/collaboration": {

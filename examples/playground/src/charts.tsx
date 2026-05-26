@@ -1,29 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useMemo, useState } from "react";
+import { Area, AreaChart, CartesianGrid, Legend, Line, XAxis, YAxis } from "recharts";
 
 import {
+  ChartBackendStatus,
+  ChartHotBinRow,
+  ChartMetricCard,
+  ChartMetricStrip,
+  ChartRangeSelector,
+  ChartSampleSparkline,
+  ChartValueModePreview,
+  ChartValueModeSelector,
   createChartDensityViewportSummary,
-  createProgressiveChartDensityIndex,
+  getChartSampleYBounds,
+  measureChartSeries,
+  useProgressiveChartDensity,
   type ChartDensitySample,
-  type ChartDensitySeries,
   type ChartDensityValueMode,
+  type ChartRange,
   type ChartSeriesPoint,
-  type ProgressiveChartDensityIndex,
 } from "@moritzbrantner/charts";
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -34,10 +31,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   Item,
-  ItemContent,
   ItemDescription,
-  ItemTitle,
-  Progress,
   Slider,
 } from "@moritzbrantner/ui";
 
@@ -48,18 +42,6 @@ type TelemetryPointProperties = {
   cohort: "consumer" | "enterprise" | "platform";
   minute: number;
   phase: "baseline" | "ramp" | "incident" | "recovery";
-};
-
-type ChartRange = {
-  description: string;
-  domain: [number, number];
-  id: string;
-  label: string;
-};
-
-type MeasuredSeries = {
-  queryMs: number;
-  series: ChartDensitySeries<TelemetryPointProperties>;
 };
 
 const SOURCE_POINT_COUNT = 180_000;
@@ -110,59 +92,17 @@ const primaryChartConfig = {
   },
 };
 
-const countChartConfig = {
-  count: {
-    color: "var(--chart-4)",
-    label: "Point count",
-  },
-};
-
-const revenueChartConfig = {
-  revenue: {
-    color: "var(--chart-5)",
-    label: "Revenue",
-  },
-};
-
 function ChartsPage() {
   const [targetBinCount, setTargetBinCount] = useState(DEFAULT_TARGET_BINS);
   const [valueMode, setValueMode] = useState<ChartDensityValueMode>("average");
   const [rangeId, setRangeId] = useState("day");
-  const [statusTick, setStatusTick] = useState(0);
-
-  const chartIndex = useMemo(
-    () =>
-      createProgressiveChartDensityIndex(telemetryPoints, {
-        progressive: {
-          onError() {
-            setStatusTick((tick) => tick + 1);
-          },
-          onReady() {
-            setStatusTick((tick) => tick + 1);
-          },
-        },
-      }),
-    [],
-  );
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setStatusTick((tick) => tick + 1);
-
-      if (chartIndex.getProgressiveStatus().wasmReady) {
-        window.clearInterval(interval);
-      }
-    }, 250);
-
-    return () => window.clearInterval(interval);
-  }, [chartIndex]);
+  const { index: chartIndex, status, warmWasmNow } = useProgressiveChartDensity(telemetryPoints);
 
   const activeRange = chartRanges.find((range) => range.id === rangeId) ?? chartRanges[0]!;
-  const status = chartIndex.getProgressiveStatus();
-  const backendKey = `${status.activeBackend}-${status.wasmReady}-${statusTick}`;
+  const backendKey = `${status.activeBackend}-${status.wasmReady}-${status.isWarming}`;
   const measuredSeries = useMemo(
     () =>
-      measureChartQuery(chartIndex, {
+      measureChartSeries(chartIndex, {
         includeEmptyBins: true,
         targetBinCount,
         valueMode,
@@ -179,14 +119,14 @@ function ChartsPage() {
     [measuredSeries.series],
   );
   const visibleYBounds = useMemo(
-    () => getSampleYBounds(measuredSeries.series.samples),
+    () => getChartSampleYBounds(measuredSeries.series.samples),
     [measuredSeries.series],
   );
   const modeSeries = useMemo(
     () =>
       VALUE_MODES.map((mode) => ({
         mode,
-        measured: measureChartQuery(chartIndex, {
+        measured: measureChartSeries(chartIndex, {
           includeEmptyBins: true,
           targetBinCount: 64,
           valueMode: mode,
@@ -209,13 +149,6 @@ function ChartsPage() {
   const focusPoint = focusSample?.firstPoint
     ? chartIndex.getPointById(focusSample.firstPoint.id)
     : null;
-  const backendProgress = status.wasmReady ? 100 : status.isWarming ? 62 : 22;
-
-  async function warmWasmNow() {
-    setStatusTick((tick) => tick + 1);
-    await chartIndex.warmWasmIndex().catch(() => undefined);
-    setStatusTick((tick) => tick + 1);
-  }
 
   return (
     <PlaygroundPage
@@ -224,17 +157,17 @@ function ChartsPage() {
       description="Use the same UI chart wrapper as @moritzbrantner/ui, then push beyond it with dense samples, value modes, viewport summaries, point lookup, and progressive WASM-backed indexing."
     >
       <section className="grid gap-4 lg:grid-cols-4">
-        <MetricCard
+        <ChartMetricCard
           label="Source points"
           value={formatInteger(telemetryPoints.length)}
           hint="Generated telemetry retained in the density index."
         />
-        <MetricCard
+        <ChartMetricCard
           label="Rendered samples"
           value={formatInteger(measuredSeries.series.summary.sampleCount)}
           hint={`${formatInteger(viewportSummary.itemCount)} points represented in view.`}
         />
-        <MetricCard
+        <ChartMetricCard
           label="Active backend"
           value={status.activeBackend}
           hint={
@@ -243,7 +176,7 @@ function ChartsPage() {
               : "Hybrid JS is visible immediately."
           }
         />
-        <MetricCard
+        <ChartMetricCard
           label="Last query"
           value={`${measuredSeries.queryMs.toFixed(2)} ms`}
           hint="Measured while creating the render series."
@@ -320,17 +253,11 @@ function ChartsPage() {
                 />
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {VALUE_MODES.map((mode) => (
-                  <Button
-                    key={mode}
-                    type="button"
-                    size="sm"
-                    variant={mode === valueMode ? "default" : "outline"}
-                    onClick={() => setValueMode(mode)}
-                  >
-                    {mode}
-                  </Button>
-                ))}
+                <ChartValueModeSelector
+                  modes={VALUE_MODES}
+                  valueMode={valueMode}
+                  onValueModeChange={setValueMode}
+                />
               </div>
             </div>
           </CardContent>
@@ -348,31 +275,20 @@ function ChartsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-medium">{status.activeBackend}</span>
-                <span className="text-muted-foreground">
-                  {status.wasmReady ? "ready" : status.isWarming ? "warming" : "scheduled"}
-                </span>
-              </div>
-              <Progress value={backendProgress} />
-            </div>
+            <ChartBackendStatus status={status} onWarmNow={warmWasmNow} />
             <div className="grid gap-3">
-              <MetricStrip
+              <ChartMetricStrip
                 label="Bins"
                 value={formatInteger(measuredSeries.series.summary.binCount)}
               />
-              <MetricStrip
+              <ChartMetricStrip
                 label="Metrics"
                 value={
                   viewportSummary.metricKeys.length ? viewportSummary.metricKeys.join(", ") : "none"
                 }
               />
-              <MetricStrip label="Mode" value={measuredSeries.series.summary.valueMode} />
+              <ChartMetricStrip label="Mode" value={measuredSeries.series.summary.valueMode} />
             </div>
-            <Button type="button" variant="outline" className="w-full" onClick={warmWasmNow}>
-              Warm WASM now
-            </Button>
           </CardContent>
         </Card>
       </section>
@@ -390,28 +306,12 @@ function ChartsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {chartRanges.map((range) => (
-              <button
-                key={range.id}
-                type="button"
-                className={`w-full border p-4 text-left transition hover:border-primary/60 ${
-                  range.id === activeRange.id
-                    ? "border-primary bg-primary/10"
-                    : "border-border/60 bg-muted/20"
-                }`}
-                onClick={() => setRangeId(range.id)}
-              >
-                <span className="flex items-center justify-between gap-3">
-                  <span className="font-medium">{range.label}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatMinute(range.domain[0])}-{formatMinute(range.domain[1])}
-                  </span>
-                </span>
-                <span className="mt-2 block text-sm leading-6 text-muted-foreground">
-                  {range.description}
-                </span>
-              </button>
-            ))}
+            <ChartRangeSelector
+              activeRangeId={activeRange.id}
+              formatDomain={(domain) => `${formatMinute(domain[0])}-${formatMinute(domain[1])}`}
+              onRangeChange={setRangeId}
+              ranges={chartRanges}
+            />
           </CardContent>
         </Card>
 
@@ -433,7 +333,7 @@ function ChartsPage() {
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
             {modeSeries.map(({ mode, measured }) => (
-              <ModePreview
+              <ChartValueModePreview
                 key={mode}
                 mode={mode}
                 measured={measured}
@@ -458,19 +358,19 @@ function ChartsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
-            <MetricStrip
+            <ChartMetricStrip
               label="Orders"
               value={formatInteger(viewportSummary.metrics.orders ?? 0)}
             />
-            <MetricStrip
+            <ChartMetricStrip
               label="Revenue"
               value={formatCurrency(viewportSummary.metrics.revenue ?? 0)}
             />
-            <MetricStrip
+            <ChartMetricStrip
               label="Incidents"
               value={formatInteger(viewportSummary.metrics.incidents ?? 0)}
             />
-            <MetricStrip
+            <ChartMetricStrip
               label="Visible domain"
               value={`${formatMinute(viewportSummary.xDomain[0])}-${formatMinute(
                 viewportSummary.xDomain[1],
@@ -493,13 +393,13 @@ function ChartsPage() {
           <CardContent className="space-y-3">
             {focusSample && focusPoint ? (
               <>
-                <MetricStrip
+                <ChartMetricStrip
                   label="Focused bin"
                   value={`${formatMinute(focusSample.x0)}-${formatMinute(focusSample.x1)}`}
                 />
-                <MetricStrip label="Point id" value={focusPoint.id} />
-                <MetricStrip label="Cohort" value={focusPoint.properties.cohort} />
-                <MetricStrip label="Phase" value={focusPoint.properties.phase} />
+                <ChartMetricStrip label="Point id" value={focusPoint.id} />
+                <ChartMetricStrip label="Cohort" value={focusPoint.properties.cohort} />
+                <ChartMetricStrip label="Phase" value={focusPoint.properties.phase} />
               </>
             ) : (
               <Item variant="muted" className="bg-muted/20 p-4">
@@ -523,11 +423,15 @@ function ChartsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Sparkline samples={measuredSeries.series.samples} domain={activeRange.domain} />
+            <ChartSampleSparkline
+              samples={measuredSeries.series.samples}
+              domain={activeRange.domain}
+              formatDomainValue={formatMinute}
+            />
             <div className="grid gap-3 sm:grid-cols-3">
-              <MetricStrip label="Max y" value={formatDecimal(visibleYBounds.maxY)} />
-              <MetricStrip label="Min y" value={formatDecimal(visibleYBounds.minY)} />
-              <MetricStrip label="Mode" value={valueMode} />
+              <ChartMetricStrip label="Max y" value={formatDecimal(visibleYBounds.maxY)} />
+              <ChartMetricStrip label="Min y" value={formatDecimal(visibleYBounds.minY)} />
+              <ChartMetricStrip label="Mode" value={valueMode} />
             </div>
           </CardContent>
         </Card>
@@ -545,174 +449,20 @@ function ChartsPage() {
           </CardHeader>
           <CardContent className="grid gap-3">
             {topBins.map((sample) => (
-              <HotBinRow key={sample.index} sample={sample} />
+              <ChartHotBinRow
+                key={sample.index}
+                sample={sample}
+                formatX={formatMinute}
+                formatMetric={(metricKey, value) =>
+                  metricKey === "revenue" ? formatCurrency(value) : formatInteger(value)
+                }
+              />
             ))}
           </CardContent>
         </Card>
       </section>
     </PlaygroundPage>
   );
-}
-
-function MetricCard({ label, value, hint }: { label: string; value: string; hint: string }) {
-  return (
-    <Card className="rounded-none border-border/60 bg-background/80 shadow-lg shadow-black/5">
-      <CardContent className="space-y-2 p-5">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <p className="text-2xl font-semibold tracking-tight">{value}</p>
-        <p className="text-sm leading-6 text-muted-foreground">{hint}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetricStrip({ label, value }: { label: string; value: string }) {
-  return (
-    <Item variant="muted" className="items-start bg-muted/20 p-4">
-      <ItemContent>
-        <ItemDescription className="text-xs uppercase tracking-[0.18em]">{label}</ItemDescription>
-        <ItemTitle className="mt-1 text-lg font-semibold">{value}</ItemTitle>
-      </ItemContent>
-    </Item>
-  );
-}
-
-function ModePreview({
-  active,
-  measured,
-  mode,
-  onSelect,
-}: {
-  active: boolean;
-  measured: MeasuredSeries;
-  mode: ChartDensityValueMode;
-  onSelect: () => void;
-}) {
-  const data = createChartData(measured.series.samples);
-
-  return (
-    <button
-      type="button"
-      className={`border p-3 text-left transition hover:border-primary/60 ${
-        active ? "border-primary bg-primary/10" : "border-border/60 bg-muted/20"
-      }`}
-      onClick={onSelect}
-    >
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="font-medium capitalize">{mode}</span>
-        <span className="text-xs text-muted-foreground">{measured.queryMs.toFixed(2)} ms</span>
-      </div>
-      <ChartContainer
-        className="h-28 w-full"
-        config={mode === "count" ? countChartConfig : primaryChartConfig}
-      >
-        {mode === "count" ? (
-          <BarChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 4 }}>
-            <Bar dataKey="count" fill="var(--color-count)" radius={0} />
-          </BarChart>
-        ) : (
-          <LineChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 4 }}>
-            <Line
-              dataKey="value"
-              dot={false}
-              isAnimationActive={false}
-              stroke="var(--color-average)"
-              strokeWidth={1.5}
-              type="monotone"
-            />
-          </LineChart>
-        )}
-      </ChartContainer>
-    </button>
-  );
-}
-
-function Sparkline({
-  domain,
-  samples,
-}: {
-  domain: [number, number];
-  samples: Array<ChartDensitySample<TelemetryPointProperties>>;
-}) {
-  const values = samples.filter((sample) => sample.y !== null);
-  const minY = Math.min(...values.map((sample) => sample.y ?? 0));
-  const maxY = Math.max(...values.map((sample) => sample.y ?? 0));
-  const spread = Math.max(1, maxY - minY);
-  const points = values
-    .map((sample) => {
-      const x = ((sample.x - domain[0]) / (domain[1] - domain[0])) * 100;
-      const y = 92 - (((sample.y ?? minY) - minY) / spread) * 84;
-
-      return `${clamp(x, 0, 100)},${clamp(y, 8, 92)}`;
-    })
-    .join(" ");
-
-  return (
-    <div className="relative overflow-hidden border border-border/60 bg-muted/20 p-4">
-      <svg
-        viewBox="0 0 100 100"
-        role="img"
-        aria-label="Dense chart sparkline"
-        className="h-56 w-full"
-      >
-        <defs>
-          <linearGradient id="charts-sparkline-fill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-        <polyline
-          points={`0,96 ${points} 100,96`}
-          fill="url(#charts-sparkline-fill)"
-          stroke="none"
-        />
-        <polyline points={points} fill="none" stroke="var(--primary)" strokeWidth="1.4" />
-      </svg>
-      <div className="absolute bottom-3 left-3 text-xs text-muted-foreground">
-        {formatInteger(samples.length)} samples from {formatMinute(domain[0])} to{" "}
-        {formatMinute(domain[1])}
-      </div>
-    </div>
-  );
-}
-
-function HotBinRow({ sample }: { sample: ChartDensitySample<TelemetryPointProperties> }) {
-  const revenue = sample.metrics.revenue ?? 0;
-
-  return (
-    <Item
-      variant="muted"
-      className="grid gap-3 bg-muted/20 p-4 text-sm md:grid-cols-[1fr_auto] md:items-center"
-    >
-      <div>
-        <p className="font-medium">
-          {formatMinute(sample.x0)}-{formatMinute(sample.x1)}
-        </p>
-        <p className="text-muted-foreground">
-          {formatInteger(sample.pointCount)} source points, average {formatDecimal(sample.averageY)}
-        </p>
-      </div>
-      <div className="text-left md:text-right">
-        <p>{formatCurrency(revenue)}</p>
-        <p className="text-muted-foreground">
-          {formatInteger(sample.metrics.incidents ?? 0)} incidents
-        </p>
-      </div>
-    </Item>
-  );
-}
-
-function measureChartQuery(
-  index: ProgressiveChartDensityIndex<TelemetryPointProperties>,
-  query: Parameters<ProgressiveChartDensityIndex<TelemetryPointProperties>["getChartSeries"]>[0],
-): MeasuredSeries {
-  const startedAt = now();
-  const series = index.getChartSeries(query);
-
-  return {
-    queryMs: now() - startedAt,
-    series,
-  };
 }
 
 function createChartData(samples: Array<ChartDensitySample<TelemetryPointProperties>>) {
@@ -726,22 +476,6 @@ function createChartData(samples: Array<ChartDensitySample<TelemetryPointPropert
     value: sample.y,
     x: sample.x,
   }));
-}
-
-function getSampleYBounds(samples: Array<ChartDensitySample<TelemetryPointProperties>>) {
-  const values = samples.flatMap((sample) => [sample.minY, sample.maxY]).filter(isNumber);
-
-  if (values.length === 0) {
-    return {
-      maxY: null,
-      minY: null,
-    };
-  }
-
-  return {
-    maxY: Math.max(...values),
-    minY: Math.min(...values),
-  };
 }
 
 function createTelemetryPoints(count: number): Array<ChartSeriesPoint<TelemetryPointProperties>> {
@@ -834,14 +568,6 @@ function formatCurrency(value: number) {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
-}
-
-function isNumber(value: number | null): value is number {
-  return value !== null;
-}
-
-function now() {
-  return typeof performance === "undefined" ? Date.now() : performance.now();
 }
 
 mountPage(<ChartsPage />);

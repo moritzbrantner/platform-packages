@@ -20,7 +20,16 @@
     }
   },
   "dependencies": {
+    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
     "@moritzbrantner/data-density": "^0.1.1"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "recharts": "^3.0.0"
+  },
+  "devDependencies": {
+    "react": "^19.2.0",
+    "recharts": "^3.8.1"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

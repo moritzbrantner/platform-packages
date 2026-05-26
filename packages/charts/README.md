@@ -4,10 +4,15 @@ Density-aware chart indexing helpers for large numeric series.
 
 ## Main APIs
 
+The default export surface includes data helpers and chart-specific React UI:
+
 - `createChartDensityIndex(points, options)` / `createChartSeriesIndex(points, options)`
 - `createProgressiveChartDensityIndex(points, options)`
 - `index.getChartSeries(query)` / `index.getBinnedSeries(query)`
 - `createChartDensitySample(bin, valueMode)` / `createChartDensityViewportSummary(series)`
+- `useProgressiveChartDensity(points, options)`
+- `ChartMetricCard`, `ChartMetricStrip`, `ChartRangeSelector`, `ChartValueModeSelector`
+- `ChartBackendStatus`, `ChartSampleSparkline`, `ChartHotBinRow`, `ChartValueModePreview`
 
 ## Examples
 
@@ -53,6 +58,70 @@ export function DenseAreaChart() {
         />
       </AreaChart>
     </ChartContainer>
+  );
+}
+```
+
+### Chart-owned frontend components
+
+Use `@moritzbrantner/charts` when chart-specific controls, backend status, or
+sample previews should live with the chart package instead of the shared UI
+design system.
+
+```tsx
+import { useState } from "react";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import {
+  ChartBackendStatus,
+  ChartMetricCard,
+  ChartRangeSelector,
+  ChartValueModeSelector,
+  createChartDensityViewportSummary,
+  measureChartSeries,
+  useProgressiveChartDensity,
+  type ChartDensityValueMode,
+  type ChartRange,
+  type ChartSeriesPoint,
+} from "@moritzbrantner/charts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@moritzbrantner/ui";
+
+const ranges: ChartRange[] = [
+  { id: "day", label: "Day", domain: [0, 1_440] },
+  { id: "incident", label: "Incident", domain: [770, 900] },
+];
+
+export function DenseChartPanel({ points }: { points: ChartSeriesPoint[] }) {
+  const [rangeId, setRangeId] = useState("day");
+  const [valueMode, setValueMode] = useState<ChartDensityValueMode>("average");
+  const { index, status, warmWasmNow } = useProgressiveChartDensity(points);
+  const activeRange = ranges.find((range) => range.id === rangeId) ?? ranges[0]!;
+  const measured = measureChartSeries(index, {
+    includeEmptyBins: true,
+    targetBinCount: 160,
+    valueMode,
+    xDomain: activeRange.domain,
+  });
+  const summary = createChartDensityViewportSummary(measured.series);
+  const chartData = measured.series.samples.map((sample) => ({
+    label: Math.round(sample.x),
+    value: sample.y,
+  }));
+
+  return (
+    <div className="grid gap-4">
+      <ChartMetricCard label="Rendered samples" value={summary.sampleCount} />
+      <ChartBackendStatus status={status} onWarmNow={warmWasmNow} />
+      <ChartRangeSelector activeRangeId={rangeId} ranges={ranges} onRangeChange={setRangeId} />
+      <ChartValueModeSelector valueMode={valueMode} onValueModeChange={setValueMode} />
+      <ChartContainer config={{ value: { label: "Value", color: "var(--chart-1)" } }}>
+        <AreaChart data={chartData}>
+          <CartesianGrid vertical={false} />
+          <XAxis dataKey="label" />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Area dataKey="value" stroke="var(--color-value)" fill="var(--color-value)" />
+        </AreaChart>
+      </ChartContainer>
+    </div>
   );
 }
 ```
