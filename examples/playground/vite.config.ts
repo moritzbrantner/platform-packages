@@ -37,30 +37,6 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/media-editor/src/index.ts"),
       },
       {
-        find: /^@moritzbrantner\/timeline-editor$/,
-        replacement: path.resolve(workspaceRoot, "packages/timeline-editor/src/index.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/timeline-editor\/core$/,
-        replacement: path.resolve(workspaceRoot, "packages/timeline-editor/src/core.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/timeline-editor\/react$/,
-        replacement: path.resolve(workspaceRoot, "packages/timeline-editor/src/react.tsx"),
-      },
-      {
-        find: /^@moritzbrantner\/workflow-editor$/,
-        replacement: path.resolve(workspaceRoot, "packages/workflow-editor/src/index.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/workflow-editor\/core$/,
-        replacement: path.resolve(workspaceRoot, "packages/workflow-editor/src/core.ts"),
-      },
-      {
-        find: /^@moritzbrantner\/workflow-editor\/react$/,
-        replacement: path.resolve(workspaceRoot, "packages/workflow-editor/src/react.tsx"),
-      },
-      {
         find: /^@moritzbrantner\/linguistics-core$/,
         replacement: path.resolve(workspaceRoot, "packages/linguistics-core/src/index.ts"),
       },
@@ -146,13 +122,7 @@ export default defineConfig({
       "@moritzbrantner/speed-reading",
       "@moritzbrantner/speech",
       "@moritzbrantner/subtitles",
-      "@moritzbrantner/timeline-editor",
-      "@moritzbrantner/timeline-editor/core",
-      "@moritzbrantner/timeline-editor/react",
       "@moritzbrantner/ui",
-      "@moritzbrantner/workflow-editor",
-      "@moritzbrantner/workflow-editor/core",
-      "@moritzbrantner/workflow-editor/react",
       "@moritzbrantner/storytelling",
       "@moritzbrantner/three-starters",
       "@moritzbrantner/word-prediction",

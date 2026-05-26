@@ -42,11 +42,11 @@
         "@moritzbrantner/storytelling": "workspace:*",
         "@moritzbrantner/subtitles": "workspace:*",
         "@moritzbrantner/three-starters": "workspace:*",
-        "@moritzbrantner/timeline-editor": "workspace:*",
+        "@moritzbrantner/timeline-editor": "https://registry.npmjs.org/@moritzbrantner/timeline-editor/-/timeline-editor-0.1.1.tgz",
         "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
         "@moritzbrantner/word-prediction": "workspace:*",
         "@moritzbrantner/word-vectors": "workspace:*",
-        "@moritzbrantner/workflow-editor": "workspace:*",
+        "@moritzbrantner/workflow-editor": "https://registry.npmjs.org/@moritzbrantner/workflow-editor/-/workflow-editor-0.1.1.tgz",
         "@react-three/fiber": "^9.4.0",
         "next-themes": "^0.4.6",
         "pdfjs-dist": "^5.4.296",
@@ -704,21 +704,6 @@
         "three": "^0.180.0",
       },
     },
-    "packages/timeline-editor": {
-      "name": "@moritzbrantner/timeline-editor",
-      "version": "0.1.0",
-      "dependencies": {
-        "@moritzbrantner/keyboard": "^0.1.1",
-        "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
-      },
-      "devDependencies": {
-        "@types/react": "^19.2.2",
-        "react": "^19.2.0",
-      },
-      "peerDependencies": {
-        "react": "^19.0.0",
-      },
-    },
     "packages/token-classification": {
       "name": "@moritzbrantner/token-classification",
       "version": "0.1.1",
@@ -809,22 +794,6 @@
       "dependencies": {
         "@moritzbrantner/linguistics-core": "^0.1.1",
         "@moritzbrantner/linguistics-corpus": "^0.1.1",
-      },
-    },
-    "packages/workflow-editor": {
-      "name": "@moritzbrantner/workflow-editor",
-      "version": "0.1.0",
-      "dependencies": {
-        "@moritzbrantner/graphs": "^0.1.1",
-        "@moritzbrantner/keyboard": "^0.1.1",
-        "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
-      },
-      "devDependencies": {
-        "@types/react": "^19.2.2",
-        "react": "^19.2.0",
-      },
-      "peerDependencies": {
-        "react": "^19.0.0",
       },
     },
     "packages/zero-shot-classification": {
@@ -1231,7 +1200,7 @@
 
     "@moritzbrantner/three-starters": ["@moritzbrantner/three-starters@workspace:packages/three-starters"],
 
-    "@moritzbrantner/timeline-editor": ["@moritzbrantner/timeline-editor@workspace:packages/timeline-editor"],
+    "@moritzbrantner/timeline-editor": ["@moritzbrantner/timeline-editor@https://registry.npmjs.org/@moritzbrantner/timeline-editor/-/timeline-editor-0.1.1.tgz", { "dependencies": { "@moritzbrantner/ui": "^0.8.0" }, "peerDependencies": { "react": "^19.0.0" } }, "sha512-W+pK/Scqw3zkiJMGyiVfaY+fJAloAtRNPshm3bDXfzbMmeYPG+0nBjlO2kFTZ4GrXumsKo0A0dgCa4DpTpAbPg=="],
 
     "@moritzbrantner/token-classification": ["@moritzbrantner/token-classification@workspace:packages/token-classification"],
 
@@ -1261,7 +1230,7 @@
 
     "@moritzbrantner/word-vectors": ["@moritzbrantner/word-vectors@workspace:packages/word-vectors"],
 
-    "@moritzbrantner/workflow-editor": ["@moritzbrantner/workflow-editor@workspace:packages/workflow-editor"],
+    "@moritzbrantner/workflow-editor": ["@moritzbrantner/workflow-editor@https://registry.npmjs.org/@moritzbrantner/workflow-editor/-/workflow-editor-0.1.1.tgz", { "dependencies": { "@moritzbrantner/ui": "^0.8.0" }, "peerDependencies": { "react": "^19.0.0" } }, "sha512-y61Az0xE0KgwKBIuRdjxPO4cxCXsdV9tCHhYvPCeq5An7OiPFXVCCCfQn5ny0kCMT16eb1fex0PnKk99AqZyvw=="],
 
     "@moritzbrantner/zero-shot-classification": ["@moritzbrantner/zero-shot-classification@workspace:packages/zero-shot-classification"],
 

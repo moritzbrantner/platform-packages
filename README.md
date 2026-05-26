@@ -24,6 +24,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 - release-ready: ready for the first non-scaffold standalone install wave.
 - generated task wrapper: typed Hugging Face task package generated around `@moritzbrantner/huggingface-universal`.
 - experimental: valid workspace package, but not part of the first publish expansion.
+- external: package is consumed from a standalone repository instead of owned by this monorepo.
 
 | Package                                          | Status                 | Notes                                                                       |
 | ------------------------------------------------ | ---------------------- | --------------------------------------------------------------------------- |
@@ -100,7 +101,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/text-to-speech`                 | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/text-to-video`                  | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/three-starters`                 | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/timeline-editor`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/timeline-editor`                | external               | Standalone public package in `moritzbrantner/timeline-editor`.              |
 | `@moritzbrantner/token-classification`           | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/translation`                    | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/tree-structures`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
@@ -114,7 +115,7 @@ This inventory is the source-of-truth view for release readiness. Status values 
 | `@moritzbrantner/visual-question-answering`      | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/word-prediction`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/word-vectors`                   | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/workflow-editor`                | experimental           | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/workflow-editor`                | external               | Standalone public package in `moritzbrantner/workflow-editor`.              |
 | `@moritzbrantner/zero-shot-classification`       | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/zero-shot-image-classification` | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |
 | `@moritzbrantner/zero-shot-object-detection`     | generated task wrapper | Thin typed Hugging Face universal task wrapper.                             |

@@ -11,9 +11,9 @@ This repository now treats editor work as package-owned domain surfaces instead 
 - `@moritzbrantner/media-editor`
   Own media-specific clip and timeline editing, media project state, transport controls, and future subtitle-aware editing flows. It may build on the generic timeline editor package later, but media terms and media mutations stay here.
 - `@moritzbrantner/timeline-editor`
-  Own generic time-aligned item models, timeline mutations, overlap validation, UI adapters, and React workbench wrappers for non-media timeline editing.
+  Lives in the standalone [`moritzbrantner/timeline-editor`](https://github.com/moritzbrantner/timeline-editor) repository and owns generic time-aligned item models, timeline mutations, overlap validation, UI adapters, and React workbench wrappers for non-media timeline editing.
 - `@moritzbrantner/workflow-editor`
-  Own node-based workflow document types, validation, serialization, graph indexing adapters, and inspector-driven editing.
+  Lives in the standalone [`moritzbrantner/workflow-editor`](https://github.com/moritzbrantner/workflow-editor) repository and owns node-based workflow document types, validation, serialization, graph indexing adapters, and inspector-driven editing.
 - `examples/playground`
   Remains the only integrated app surface in this repository for validating package-backed editors end to end.
 
@@ -29,5 +29,5 @@ This repository now treats editor work as package-owned domain surfaces instead 
 - DOM-based package tests must run with Vitest so they execute in a jsdom environment.
 - Do not rely on raw `bun test <file>` for React DOM suites because it does not provide the browser-like environment those tests need.
 - Keep package interaction coverage close to the owning package:
-  `packages/flat-design/src` for SVG editor interactions, `packages/media-editor/src` for media editor interactions, `packages/timeline-editor/src` for generic timeline interactions, `packages/workflow-editor/src` for node graph interactions, and so on.
+  `packages/flat-design/src` for SVG editor interactions, `packages/media-editor/src` for media editor interactions, and each standalone editor repository for its own interaction coverage.
 - Use the playground as an app-like smoke-test target through Vitest or Playwright when a package-backed editor needs integrated coverage.

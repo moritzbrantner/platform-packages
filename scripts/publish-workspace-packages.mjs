@@ -1,14 +1,15 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const packagesRoot = path.join(repoRoot, "packages");
-const npmUserConfig = path.join(repoRoot, ".npmrc");
 const registry = "https://npm.pkg.github.com";
 const authToken = process.env.GH_PACKAGES_TOKEN;
+const npmUserConfig = createGitHubPackagesUserConfig();
 
 function readPackageJson(relativeDir) {
   const packageJsonPath = path.join(repoRoot, relativeDir, "package.json");
@@ -119,4 +120,17 @@ for (const { relativeDir, packageDir, packageJson: pkg } of releasePackages) {
       npm_config_userconfig: npmUserConfig,
     },
   });
+}
+
+function createGitHubPackagesUserConfig() {
+  const tempDir = mkdtempSync(path.join(tmpdir(), "platform-packages-npmrc-"));
+  const userConfigPath = path.join(tempDir, ".npmrc");
+
+  writeFileSync(
+    userConfigPath,
+    `@moritzbrantner:registry=${registry}\n//npm.pkg.github.com/:_authToken=${authToken ?? ""}\n`,
+    "utf8",
+  );
+
+  return userConfigPath;
 }

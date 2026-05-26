@@ -38,32 +38,8 @@ export default defineConfig({
       "@moritzbrantner/text-to-3d": path.resolve(rootDir, "packages/text-to-3d/src/index.ts"),
       "@moritzbrantner/text-to-image": path.resolve(rootDir, "packages/text-to-image/src/index.ts"),
       "@moritzbrantner/text-to-video": path.resolve(rootDir, "packages/text-to-video/src/index.ts"),
-      "@moritzbrantner/timeline-editor": path.resolve(
-        rootDir,
-        "packages/timeline-editor/src/index.ts",
-      ),
-      "@moritzbrantner/timeline-editor/core": path.resolve(
-        rootDir,
-        "packages/timeline-editor/src/core.ts",
-      ),
-      "@moritzbrantner/timeline-editor/react": path.resolve(
-        rootDir,
-        "packages/timeline-editor/src/react.tsx",
-      ),
       "@moritzbrantner/translation": path.resolve(rootDir, "packages/translation/src/index.ts"),
       "@moritzbrantner/word-vectors": path.resolve(rootDir, "packages/word-vectors/src/index.ts"),
-      "@moritzbrantner/workflow-editor": path.resolve(
-        rootDir,
-        "packages/workflow-editor/src/index.ts",
-      ),
-      "@moritzbrantner/workflow-editor/core": path.resolve(
-        rootDir,
-        "packages/workflow-editor/src/core.ts",
-      ),
-      "@moritzbrantner/workflow-editor/react": path.resolve(
-        rootDir,
-        "packages/workflow-editor/src/react.tsx",
-      ),
     },
   },
   test: {
