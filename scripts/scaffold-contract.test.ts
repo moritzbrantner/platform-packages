@@ -4,6 +4,7 @@ import { test, expect } from "bun:test";
 
 const repoRoot = path.resolve(import.meta.dir, "..");
 const packagesRoot = path.join(repoRoot, "packages");
+const publishRegistries = ["https://npm.pkg.github.com", "https://registry.npmjs.org"] as const;
 
 const scaffoldCriticalPackages = [
   {
@@ -79,7 +80,8 @@ test("publishing guide describes the full workspace release path", () => {
   const publishingGuide = readFileSync(path.join(repoRoot, "docs/publishing.md"), "utf8");
 
   expect(publishingGuide).toContain("Prepare or publish the full workspace package set");
-  expect(publishingGuide).toContain("validates and publishes every public package");
+  expect(publishingGuide).toContain("validates every public package");
+  expect(publishingGuide).toContain("Public npm packages");
   expect(publishingGuide).toContain("consumer repos should adopt these first");
   expect(publishingGuide).toContain("Release-readiness categories");
 });
@@ -202,9 +204,13 @@ test("release-ready package inventory entries have publishable metadata", () => 
     expect(packageJson.repository?.directory, `${packageJson.name} repository directory`).toBe(
       `packages/${packageDir}`,
     );
-    expect(packageJson.publishConfig?.registry, `${packageJson.name} registry`).toBe(
-      "https://npm.pkg.github.com",
+    expect(publishRegistries, `${packageJson.name} registry`).toContain(
+      packageJson.publishConfig?.registry,
     );
+
+    if (packageJson.publishConfig?.registry === "https://registry.npmjs.org") {
+      expect(packageJson.publishConfig?.access, `${packageJson.name} access`).toBe("public");
+    }
   }
 });
 

@@ -9,7 +9,7 @@
 5. Open a pull request and merge it into `main`.
 6. Wait for the `Publish Private Packages` workflow to finish on `main`.
 
-The current workflow validates and publishes every public package under `packages/*`. `@moritzbrantner/ui` is published from the standalone `moritzbrantner/ui` repository and is consumed here as an external package.
+The current workflow validates every public package under `packages/*` and publishes packages whose `publishConfig.registry` is `https://npm.pkg.github.com`. `@moritzbrantner/ui` is published from the standalone `moritzbrantner/ui` repository and is consumed here as an external package.
 
 ## Later releases
 
@@ -20,6 +20,28 @@ The current workflow validates and publishes every public package under `package
 5. Merge to `main` and let the publish workflow publish packages whose current version is not already present in GitHub Packages.
 
 The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`. `@moritzbrantner/ui` is part of that contract, but its release workflow lives in the standalone UI repository.
+
+## Public npm packages
+
+GitHub Packages remains the default private package workflow for this repository. Public npm packages must opt into npmjs with package-local metadata:
+
+- `publishConfig.registry` set to `https://registry.npmjs.org`
+- `publishConfig.access` set to `public`
+- an npmjs `NPM_TOKEN`, not `GH_PACKAGES_TOKEN`
+- npm publish commands that override the repository `.npmrc`, because the repo-level scope config points `@moritzbrantner/*` at GitHub Packages
+
+`@moritzbrantner/data-density` is the first local package candidate for public npm. Publish it with:
+
+```sh
+bun run publish:npm:data-density
+```
+
+That script publishes from `packages/data-density` using a temporary npmjs-only user config and the public npm registry. Before publishing, confirm the target version is still absent from npm:
+
+```sh
+curl -s -o /dev/null -w "%{http_code}\n" \
+  https://registry.npmjs.org/@moritzbrantner%2fdata-density
+```
 
 ## Release-readiness categories
 
@@ -44,10 +66,11 @@ Before publishing new package families:
 
 Every publishable package under `packages/*` must have:
 
-- a scoped lowercase package name owned by the GitHub Packages publisher
+- a scoped lowercase package name owned by the target registry publisher
 - `"private": false`
 - a `repository` block pointing to `moritzbrantner/platform-packages`
-- `publishConfig.registry` set to `https://npm.pkg.github.com`
+- `publishConfig.registry` set to the package's target registry
+- `publishConfig.access` matching the package's target visibility
 - real publishable files referenced by `main`, `exports`, or package-specific config paths
 
 ## Installing from another repository

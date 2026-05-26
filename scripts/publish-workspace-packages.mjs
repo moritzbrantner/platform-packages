@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,6 +18,7 @@ function readPackageJson(relativeDir) {
 function getWorkspacePackages() {
   return readdirSync(packagesRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
+    .filter((entry) => existsSync(path.join(packagesRoot, entry.name, "package.json")))
     .map((entry) => {
       const relativeDir = path.join("packages", entry.name);
       return {
@@ -27,6 +28,7 @@ function getWorkspacePackages() {
       };
     })
     .filter(({ packageJson }) => packageJson.private === false)
+    .filter(({ packageJson }) => packageJson.publishConfig?.registry === registry)
     .sort((a, b) => a.packageJson.name.localeCompare(b.packageJson.name));
 }
 

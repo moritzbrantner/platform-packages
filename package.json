@@ -26,6 +26,7 @@
     "lint:repo": "node scripts/verify-package-styles.mjs && node scripts/verify-ui-components.mjs",
     "repo:hygiene": "bash scripts/check_repo_hygiene.sh",
     "preview:playground": "bun run --filter @moritzbrantner/playground preview",
+    "publish:npm:data-density": "node scripts/publish-npm-data-density.mjs",
     "build:playground": "bun run --filter @moritzbrantner/playground build",
     "release:build": "bun run build",
     "release:lint": "bun run lint",
