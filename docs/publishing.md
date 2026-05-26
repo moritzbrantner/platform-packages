@@ -49,8 +49,12 @@ The README package inventory is the local source of truth for package status:
 
 - `scaffold-critical`: must stay publishable and adoptable by the maintained scaffold family.
 - `release-ready`: validated for the first non-scaffold standalone install wave.
-- `generated task wrapper`: generated around `@moritzbrantner/huggingface-universal`; publish only after the universal task type map and generated package contract are validated.
 - `experimental`: valid workspace packages that are not included in the first publish expansion.
+
+Thin Hugging Face task wrappers are not published from this repository. Use
+official Hugging Face JavaScript packages directly for raw model invocation:
+`@huggingface/inference` for hosted/provider-backed inference and
+`@huggingface/transformers` for browser or local JavaScript inference.
 
 Before publishing new package families:
 

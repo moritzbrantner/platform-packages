@@ -1,39 +1,8 @@
 import { describe, expect, test } from "vitest";
 
-import {
-  createModelReference,
-  createQuestionAnsweringPipeline,
-  createQuestionAnsweringUniversalPipeline,
-  huggingFaceTaskDescriptor,
-} from "@moritzbrantner/question-answering";
-import type { UniversalHuggingFaceProvider } from "@moritzbrantner/huggingface-universal";
+import { createQuestionAnsweringPipeline } from "@moritzbrantner/question-answering";
 
 describe("@moritzbrantner/question-answering", () => {
-  test("exports the Hugging Face universal task descriptor", async () => {
-    expect(huggingFaceTaskDescriptor.task).toBe("question-answering");
-
-    const provider: UniversalHuggingFaceProvider = {
-      id: "fake",
-      async run(request) {
-        return {
-          task: request.task,
-          model: request.model.model,
-          output: request.input,
-          raw: null,
-        };
-      },
-    };
-    const pipeline = createQuestionAnsweringUniversalPipeline({
-      provider,
-      model: createModelReference("demo/question-answering"),
-    });
-
-    await expect(pipeline.run({ question: "Where?", context: "Berlin" })).resolves.toMatchObject({
-      task: "question-answering",
-      model: "demo/question-answering",
-    });
-  });
-
   test("answers across chunks and keeps the best results", async () => {
     const pipeline = createQuestionAnsweringPipeline({
       provider: {

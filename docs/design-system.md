@@ -2,8 +2,6 @@
 
 `@moritzbrantner/ui` is the low-level design-system package consumed by this workspace. It now lives in the standalone `moritzbrantner/ui` repository and owns shared tokens, React primitives, composed UI components, theme metadata, Storybook coverage, and package-consumption guarantees.
 
-`@moritzbrantner/frontend-ui` is intentionally higher level. It may compose `@moritzbrantner/ui` with pages, auth/session state, roles, profiles, settings, admin surfaces, navigation models, and other product workflows, but those workflows should not move into `@moritzbrantner/ui`.
-
 ## Layers
 
 The package is maintained in four layers:
@@ -11,9 +9,9 @@ The package is maintained in four layers:
 1. Tokens: CSS variables for color, typography, radius, spacing, shadows, motion, z-index, focus rings, and chart colors.
 2. Primitives: reusable controls such as `Button`, `Input`, `Checkbox`, `Select`, `Dialog`, `Popover`, `Tooltip`, and `Tabs`.
 3. Composed components: shared arrangements such as `Card`, `DataTable`, `PlatformNavbar`, `PageShell`, `Toolbar`, `Stepper`, and `Dropzone`.
-4. Product patterns: app shell, auth, settings, admin/account/profile pages, role-aware navigation, and complete frontend flows. These belong in product packages such as `frontend-ui`, not in `ui`.
+4. Product patterns: app shell, auth, settings, admin/account/profile pages, role-aware navigation, and complete frontend flows. These belong in consuming applications, not in `ui`.
 
-Generic visual affordances such as `AccountMenu` and `NotificationMenu` may live in `@moritzbrantner/ui` when they are state-free and contract-free. App-specific menu content, routing, auth/session state, and backend behavior belong in `@moritzbrantner/frontend-ui` or consuming applications.
+Generic visual affordances such as `AccountMenu` and `NotificationMenu` may live in `@moritzbrantner/ui` when they are state-free and contract-free. App-specific menu content, routing, auth/session state, and backend behavior belong in consuming applications.
 
 ## Consumer contract
 

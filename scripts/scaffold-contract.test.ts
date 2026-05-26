@@ -32,14 +32,6 @@ const scaffoldCriticalPackages = [
     scripts: [],
   },
 ] as const;
-const wrapperDependencyAllowlist: Record<string, Record<string, string>> = {
-  "question-answering": {
-    "@moritzbrantner/huggingface-universal": "^0.1.1",
-    "@moritzbrantner/linguistics-core": "^0.1.1",
-    "@moritzbrantner/text-inference": "^0.1.1",
-  },
-};
-
 test("readme marks the scaffold-critical package set explicitly", () => {
   const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
 
@@ -72,7 +64,7 @@ test("readme package inventory lists every workspace package", () => {
     inventoryPackages.map((entry) => entry.name).sort((left, right) => left.localeCompare(right)),
   ).toEqual(workspacePackages);
   expect(new Set(inventoryPackages.map((entry) => entry.status))).toEqual(
-    new Set(["experimental", "generated task wrapper", "release-ready", "scaffold-critical"]),
+    new Set(["experimental", "release-ready", "scaffold-critical"]),
   );
 });
 
@@ -214,46 +206,6 @@ test("release-ready package inventory entries have publishable metadata", () => 
   }
 });
 
-test("Hugging Face task wrappers follow the generated package contract", () => {
-  const universalSource = readFileSync(
-    path.join(packagesRoot, "huggingface-universal", "src", "index.ts"),
-    "utf8",
-  );
-  const tasks = Array.from(universalSource.matchAll(/task:\s*"([^"]+)"/g), (match) => match[1]!);
-
-  expect(tasks).toHaveLength(47);
-
-  for (const task of tasks) {
-    const packageDir = path.join(packagesRoot, task);
-    const packageJson = readPackageJson(task);
-    const source = readFileSync(path.join(packageDir, "src", "index.ts"), "utf8");
-    const pascalName = toPascalTaskName(task);
-
-    expect(existsSync(packageDir), `${task} package directory`).toBe(true);
-    expect(packageJson.name).toBe(`@moritzbrantner/${task}`);
-    expect(packageJson.dependencies).toEqual(
-      wrapperDependencyAllowlist[task] ?? {
-        "@moritzbrantner/huggingface-universal": "^0.1.1",
-      },
-    );
-    expect(source).toMatch(new RegExp(`getHuggingFaceTaskDescriptor\\(\\s*"${task}"\\s*,?\\s*\\)`));
-    expect(source).toMatch(new RegExp(`createHuggingFaceTaskPackage\\(\\s*"${task}"\\s*,?\\s*\\)`));
-    expect(source).toContain(
-      task === "question-answering"
-        ? `create${pascalName}UniversalPipeline`
-        : `create${pascalName}Pipeline`,
-    );
-    if (!wrapperDependencyAllowlist[task]) {
-      expect(source).toContain("export const createPipeline");
-    }
-    expect(source).toContain("export const createModelReference");
-    expect(source).toContain(`export type ${pascalName}Input`);
-    expect(source).toContain(`export type ${pascalName}Output`);
-    expect(source).toContain(`export type ${pascalName}Request`);
-    expect(source).toContain(`export type ${pascalName}Result`);
-  }
-});
-
 function readPackageJson(packageDir: string) {
   return JSON.parse(readFileSync(path.join(packagesRoot, packageDir, "package.json"), "utf8")) as {
     dependencies?: Record<string, string>;
@@ -285,11 +237,4 @@ function exportKeys(exportsField: unknown): string[] {
   }
 
   return [];
-}
-
-function toPascalTaskName(task: string): string {
-  return task
-    .split("-")
-    .map((part) => (part === "3d" ? "3D" : `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`))
-    .join("");
 }

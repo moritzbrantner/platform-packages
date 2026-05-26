@@ -1,3 +1,4 @@
+import { runOperation } from "@mb-rust/dense-data-wasm";
 import Supercluster from "supercluster";
 
 export type DataDensityMetricRecord = Record<string, number>;
@@ -7,6 +8,105 @@ export type DataDensityMetricSummary = {
   metricKeys: string[];
   metrics: DataDensityMetricRecord;
 };
+
+export type DenseDataNumberSummary = {
+  count: number;
+  finiteCount: number;
+  max: number | null;
+  mean: number | null;
+  min: number | null;
+  nonFiniteCount: number;
+  stdDev: number | null;
+  sum: number | null;
+  variance: number | null;
+  weightSum: number;
+};
+
+export type DenseDataBounds = {
+  max: number[];
+  min: number[];
+};
+
+export type DenseDataAverages = {
+  coordinates: number[];
+  count: number;
+  value: number | null;
+  valueCount: number;
+  valueWeightSum: number;
+  weightSum: number;
+};
+
+export type DenseDataPoint = {
+  coordinates: number[];
+  id?: string;
+  value?: number;
+  weight?: number;
+};
+
+export type DenseDataSummary = {
+  bounds: DenseDataBounds;
+  coordinateStats: DenseDataNumberSummary[];
+  count: number;
+  dimensions: number;
+  valueStats: DenseDataNumberSummary | null;
+  weightSum: number;
+};
+
+export type DenseDataBucket = {
+  averages: DenseDataAverages;
+  bounds: DenseDataBounds;
+  count: number;
+  key: {
+    indices: number[];
+  };
+  pointIndices: number[];
+  weightSum: number;
+};
+
+export type DenseDataBucketIndexOptions = {
+  cellSize: number;
+  dimensions: number;
+  origin?: number[];
+  widths?: number[];
+};
+
+export type DenseDataBucketIndex = {
+  getBuckets(): DenseDataBucket[];
+  getPointByIndex(index: number): DenseDataPoint | null;
+  getSummary(): DenseDataSummary;
+};
+
+export type DenseDataCluster = {
+  averages: DenseDataAverages | null;
+  bounds: DenseDataBounds | null;
+  centroid: number[];
+  clusterIndex: number;
+  count: number;
+  pointIndices: number[];
+  weightSum: number;
+};
+
+export type DenseDataClusterOptions = {
+  clusters: number;
+  maxIterations?: number;
+  tolerance?: number;
+};
+
+export type DenseDataClusterResult = {
+  clusters: DenseDataCluster[];
+  iterations: number;
+};
+
+export class DenseDataWasmError extends Error {
+  readonly operation: string;
+
+  constructor(operation: string, cause: unknown) {
+    const message = cause instanceof Error ? cause.message : String(cause);
+    super(`@mb-rust/dense-data-wasm failed while running ${operation}: ${message}`);
+    this.name = "DenseDataWasmError";
+    this.operation = operation;
+  }
+}
 
 export type DataDensityViewportSummary = DataDensityMetricSummary & {
   kind: "chart" | "graph" | "map" | "table";
@@ -310,6 +410,47 @@ export function createGeoDensityViewportSummary<TProperties = Record<string, unk
   };
 }
 
+export function createDensePointSummary(points: readonly DenseDataPoint[]): DenseDataSummary {
+  return runDenseDataOperation<DenseDataSummary>("summarizeDensePoints", { points });
+}
+
+export function createDensePointBucketIndex(
+  points: readonly DenseDataPoint[],
+  options: DenseDataBucketIndexOptions,
+): DenseDataBucketIndex {
+  const normalizedPoints = points.map(normalizeDenseDataPoint);
+  const summary = createDensePointSummary(normalizedPoints);
+  const bucketResponse = runDenseDataOperation<{ buckets: DenseDataBucket[] }>(
+    "bucketDensePoints",
+    {
+      grid: options,
+      points: normalizedPoints,
+    },
+  );
+
+  return {
+    getBuckets() {
+      return bucketResponse.buckets;
+    },
+    getPointByIndex(index) {
+      return normalizedPoints[index] ?? null;
+    },
+    getSummary() {
+      return summary;
+    },
+  };
+}
+
+export function clusterDensePoints(
+  points: readonly DenseDataPoint[],
+  options: DenseDataClusterOptions,
+): DenseDataClusterResult {
+  return runDenseDataOperation<DenseDataClusterResult>("clusterDensePoints", {
+    ...options,
+    points: points.map(normalizeDenseDataPoint),
+  });
+}
+
 export function createDataDensityWindowIndex<TItem>(
   items: readonly TItem[],
   options: DataDensityWindowIndexOptions<TItem> = {},
@@ -376,21 +517,55 @@ export function createBinnedSeriesIndex<TProperties = Record<string, unknown>>(
     getBinnedSeries(query) {
       const xDomain = normalizeDomain(query.xDomain);
       const targetBinCount = clampInteger(query.targetBinCount, 1, 100_000);
-      const binWidth = getBinWidth(xDomain, targetBinCount);
       const startIndex = lowerBoundByX(normalizedPoints, xDomain[0]);
       const endIndex = upperBoundByX(normalizedPoints, xDomain[1]);
-      const bins = createEmptyBins<TProperties>(xDomain, targetBinCount, binWidth, metricKeys);
-
-      for (let pointIndex = startIndex; pointIndex < endIndex; pointIndex += 1) {
-        const point = normalizedPoints[pointIndex]!;
-        const binIndex = Math.min(
-          targetBinCount - 1,
-          Math.max(0, Math.floor((point.x - xDomain[0]) / binWidth)),
-        );
-        updateSeriesBin(bins[binIndex]!, point, metricKeys);
-      }
-
-      const visibleBins = query.includeEmptyBins ? bins : bins.filter((bin) => bin.pointCount > 0);
+      const visiblePoints = normalizedPoints.slice(startIndex, endIndex);
+      const kernelResult = runDenseDataOperation<{
+        bins: Array<{
+          averageY: number | null;
+          firstPointIndex: number | null;
+          index: number;
+          lastPointIndex: number | null;
+          maxY: number | null;
+          metrics: DataDensityMetricRecord;
+          minY: number | null;
+          pointCount: number;
+          sumY: number;
+          x0: number;
+          x1: number;
+        }>;
+      }>("binNumericSeries", {
+        includeEmptyBins: query.includeEmptyBins ?? false,
+        points: visiblePoints.map((point, index) => ({
+          index,
+          metrics: point.metrics,
+          x: point.x,
+          y: point.y,
+        })),
+        targetBinCount,
+        xDomain,
+      });
+      const visibleBins = kernelResult.bins.map(
+        (bin): BinnedSeriesBin<TProperties> => ({
+          averageY: bin.averageY,
+          firstPoint:
+            bin.firstPointIndex === null || bin.firstPointIndex === undefined
+              ? null
+              : (visiblePoints[bin.firstPointIndex] ?? null),
+          index: bin.index,
+          lastPoint:
+            bin.lastPointIndex === null || bin.lastPointIndex === undefined
+              ? null
+              : (visiblePoints[bin.lastPointIndex] ?? null),
+          maxY: bin.maxY,
+          metrics: normalizeDensityMetrics(bin.metrics),
+          minY: bin.minY,
+          pointCount: bin.pointCount,
+          sumY: bin.sumY,
+          x0: bin.x0,
+          x1: bin.x1,
+        }),
+      );
 
       return {
         bins: visibleBins,
@@ -539,47 +714,39 @@ function normalizeSeriesPoint<TProperties>(
   };
 }
 
+function normalizeDenseDataPoint(point: DenseDataPoint): DenseDataPoint {
+  const normalized: DenseDataPoint = {
+    coordinates: [...point.coordinates],
+  };
+
+  if (point.id !== undefined) {
+    normalized.id = point.id;
+  }
+
+  if (point.weight !== undefined) {
+    normalized.weight = point.weight;
+  }
+
+  if (point.value !== undefined) {
+    normalized.value = point.value;
+  }
+
+  return normalized;
+}
+
+function runDenseDataOperation<TValue>(operation: string, input: Record<string, unknown>): TValue {
+  try {
+    return runOperation({
+      input,
+      operation,
+    }).value as TValue;
+  } catch (error) {
+    throw new DenseDataWasmError(operation, error);
+  }
+}
+
 function isFiniteSeriesPoint<TProperties>(point: IndexedNumericSeriesPoint<TProperties>) {
   return Number.isFinite(point.x) && Number.isFinite(point.y);
-}
-
-function createEmptyBins<TProperties>(
-  xDomain: NumericSeriesDomain,
-  binCount: number,
-  binWidth: number,
-  metricKeys: readonly string[],
-): Array<BinnedSeriesBin<TProperties>> {
-  return Array.from({ length: binCount }, (_, index) => ({
-    averageY: null,
-    firstPoint: null,
-    index,
-    lastPoint: null,
-    maxY: null,
-    metrics: Object.fromEntries(metricKeys.map((metricKey) => [metricKey, 0])),
-    minY: null,
-    pointCount: 0,
-    sumY: 0,
-    x0: xDomain[0] + index * binWidth,
-    x1: index === binCount - 1 ? xDomain[1] : xDomain[0] + (index + 1) * binWidth,
-  }));
-}
-
-function updateSeriesBin<TProperties>(
-  bin: BinnedSeriesBin<TProperties>,
-  point: IndexedNumericSeriesPoint<TProperties>,
-  metricKeys: readonly string[],
-) {
-  bin.firstPoint ??= point;
-  bin.lastPoint = point;
-  bin.pointCount += 1;
-  bin.sumY += point.y;
-  bin.averageY = bin.sumY / bin.pointCount;
-  bin.minY = bin.minY === null ? point.y : Math.min(bin.minY, point.y);
-  bin.maxY = bin.maxY === null ? point.y : Math.max(bin.maxY, point.y);
-
-  for (const metricKey of metricKeys) {
-    bin.metrics[metricKey] += point.metrics[metricKey] ?? 0;
-  }
 }
 
 function lowerBoundByX<TProperties>(
@@ -627,12 +794,6 @@ function normalizeDomain(domain: NumericSeriesDomain): NumericSeriesDomain {
   const right = Number.isFinite(domain[1]) ? domain[1] : left;
 
   return left <= right ? [left, right] : [right, left];
-}
-
-function getBinWidth(domain: NumericSeriesDomain, binCount: number) {
-  const span = domain[1] - domain[0];
-
-  return span > 0 ? span / binCount : 1;
 }
 
 function normalizeGeoPoint<TProperties>(

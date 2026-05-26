@@ -11,11 +11,9 @@
         "../document-structure-extraction/src/index.ts"
       ],
       "@moritzbrantner/extraction-schema": ["../extraction-schema/src/index.ts"],
-      "@moritzbrantner/huggingface-universal": ["../huggingface-universal/src/index.ts"],
       "@moritzbrantner/information-extraction": ["../information-extraction/src/index.ts"],
       "@moritzbrantner/linguistics-core": ["../linguistics-core/src/index.ts"],
       "@moritzbrantner/ocr": ["../ocr/src/index.ts"],
-      "@moritzbrantner/pipeline-core": ["../pipeline-core/src/index.ts"],
       "@moritzbrantner/question-answering": ["../question-answering/src/index.ts"],
       "@moritzbrantner/sentiment-analysis": ["../sentiment-analysis/src/index.ts"],
       "@moritzbrantner/syntax-analysis": ["../syntax-analysis/src/index.ts"],

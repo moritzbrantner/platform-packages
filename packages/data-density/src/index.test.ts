@@ -6,8 +6,11 @@ import {
   createDataDensityWindowIndex,
   createDensityMetricSummary,
   createDensityViewportSummary,
+  createDensePointBucketIndex,
+  createDensePointSummary,
   createGeoDensityViewportSummary,
   createGeoPointAggregationIndex,
+  clusterDensePoints,
   getBoundsFromGeoPoints,
   sumDensityMetrics,
   type GeoDensityPoint,
@@ -92,6 +95,31 @@ describe("@moritzbrantner/data-density", () => {
       minX: 0,
       minY: 0,
     });
+  });
+
+  test("summarizes, buckets, and clusters dense points through Rust WASM", () => {
+    const points = [
+      { id: "left", coordinates: [0, 0], weight: 1, value: 2 },
+      { id: "near-left", coordinates: [0.2, 0.1], weight: 1 },
+      { id: "right", coordinates: [9, 9], weight: 2, value: 6 },
+      { id: "far-right", coordinates: [10, 10], weight: 1 },
+    ];
+    const summary = createDensePointSummary(points);
+    const bucketIndex = createDensePointBucketIndex(points, {
+      cellSize: 1,
+      dimensions: 2,
+    });
+    const clusters = clusterDensePoints(points, { clusters: 2 });
+
+    expect(summary.count).toBe(4);
+    expect(summary.dimensions).toBe(2);
+    expect(summary.valueStats?.finiteCount).toBe(2);
+    expect(bucketIndex.getBuckets().length).toBeGreaterThan(1);
+    expect(bucketIndex.getPointByIndex(0)?.id).toBe("left");
+    expect(clusters.clusters).toHaveLength(2);
+    expect(clusters.clusters.flatMap((cluster) => cluster.pointIndices).sort()).toEqual([
+      0, 1, 2, 3,
+    ]);
   });
 
   test("keeps empty windows and empty bins deterministic at viewport edges", () => {

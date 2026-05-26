@@ -15,12 +15,18 @@ The map package uses three ideas that generalize well:
 
 This package contains the reusable parts:
 
+- `@mb-rust/dense-data-wasm` is a required runtime dependency for dense point
+  summaries, fixed-grid buckets, deterministic k-means clusters, and numeric
+  series binning.
 - `createGeoPointAggregationIndex()` clusters geographic points by viewport and
   zoom. This is what `@moritzbrantner/maps` uses for high-volume map markers.
 - `createBinnedSeriesIndex()` groups numeric series into chart-sized bins with
-  min, max, average, count, and metric totals.
+  min, max, average, count, and metric totals through the Rust dense-data WASM
+  kernel.
 - `createDataDensityWindowIndex()` returns overscanned windows for ordered data,
   useful for tables, lists, timelines, and other virtualized views.
+- `createDensePointSummary()`, `createDensePointBucketIndex()`, and
+  `clusterDensePoints()` expose Rust-backed dense point operations.
 - `collectDensityMetricKeys()` and `sumDensityMetrics()` provide shared metric
   normalization and aggregation.
 
