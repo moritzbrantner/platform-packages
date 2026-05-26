@@ -82,4 +82,106 @@ describe("@moritzbrantner/charts", () => {
       );
     }
   });
+
+  test("creates high-volume chart samples through the dense-data WASM backend", () => {
+    const points = Array.from({ length: 5_000 }, (_, pointIndex) => ({
+      id: `point-${pointIndex}`,
+      metrics: {
+        orders: 1,
+        revenue: pointIndex % 37,
+        unstable: pointIndex % 2 === 0 ? Number.NaN : pointIndex,
+      },
+      properties: {
+        segment: pointIndex % 5,
+      },
+      x: pointIndex % 2 === 0 ? pointIndex : 5_000 - pointIndex,
+      y: Math.sin(pointIndex / 10) * 25 + (pointIndex % 13),
+    }));
+    const snapshot = structuredClone(points);
+    const expectedPoints = points.filter((point) => point.id !== "point-17");
+    const index = createChartDensityIndex(
+      [
+        ...points,
+        {
+          id: "invalid",
+          metrics: { orders: 100, revenue: 100 },
+          properties: { segment: 0 },
+          x: Number.NaN,
+          y: 10,
+        },
+      ],
+      {
+        backend: "wasm-index",
+        filterPoint(point) {
+          return point.id !== "point-17";
+        },
+      },
+    );
+
+    const series = index.getChartSeries({
+      includeEmptyBins: true,
+      targetBinCount: 128,
+      valueMode: "average",
+      xDomain: [0, 5_000],
+    });
+
+    expect(series.samples).toHaveLength(128);
+    expect(series.summary.binCount).toBe(128);
+    expect(series.summary.pointCount).toBe(expectedPoints.length);
+    expect(series.summary.metrics.orders).toBe(expectedPoints.length);
+    expect(series.summary.metrics.revenue).toBe(
+      expectedPoints.reduce((total, point) => total + point.metrics.revenue, 0),
+    );
+    expect(series.summary.metrics.unstable).toBe(
+      expectedPoints
+        .filter((point) => Number.isFinite(point.metrics.unstable))
+        .reduce((total, point) => total + point.metrics.unstable, 0),
+    );
+    expect(series.samples.every((sample) => sample.x >= sample.x0 && sample.x <= sample.x1)).toBe(
+      true,
+    );
+    expect(createChartDensityViewportSummary(series)).toMatchObject({
+      binCount: 128,
+      itemCount: expectedPoints.length,
+      kind: "chart",
+      metricKeys: ["orders", "revenue", "unstable"],
+      sampleCount: 128,
+      valueMode: "average",
+    });
+    expect(index.getPointById("point-2500")?.properties.segment).toBe(0);
+    expect(index.getPointById("invalid")).toBeNull();
+    expect(points).toEqual(snapshot);
+  });
+
+  test("keeps dense-data-backed chart value modes correct with empty and duplicate bins", () => {
+    const index = createChartDensityIndex(
+      [
+        { id: "a", metrics: { count: 1 }, x: 0, y: 2 },
+        { id: "b", metrics: { count: 1 }, x: 0, y: 8 },
+        { id: "c", metrics: { count: 1 }, x: 20, y: -4 },
+      ],
+      { backend: "wasm-index" },
+    );
+    const query = {
+      includeEmptyBins: true,
+      targetBinCount: 4,
+      xDomain: [0, 40] as [number, number],
+    };
+
+    expect(
+      index.getChartSeries({ ...query, valueMode: "average" }).samples.map((sample) => sample.y),
+    ).toEqual([5, null, -4, null]);
+    expect(
+      index.getChartSeries({ ...query, valueMode: "count" }).samples.map((sample) => sample.y),
+    ).toEqual([2, null, 1, null]);
+    expect(
+      index.getChartSeries({ ...query, valueMode: "max" }).samples.map((sample) => sample.y),
+    ).toEqual([8, null, -4, null]);
+    expect(
+      index.getChartSeries({ ...query, valueMode: "min" }).samples.map((sample) => sample.y),
+    ).toEqual([2, null, -4, null]);
+    expect(
+      index.getChartSeries({ ...query, valueMode: "sum" }).samples.map((sample) => sample.y),
+    ).toEqual([10, null, -4, null]);
+  });
 });
