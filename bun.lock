@@ -42,9 +42,11 @@
         "@moritzbrantner/storytelling": "workspace:*",
         "@moritzbrantner/subtitles": "workspace:*",
         "@moritzbrantner/three-starters": "workspace:*",
+        "@moritzbrantner/timeline-editor": "workspace:*",
         "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
         "@moritzbrantner/word-prediction": "workspace:*",
         "@moritzbrantner/word-vectors": "workspace:*",
+        "@moritzbrantner/workflow-editor": "workspace:*",
         "@react-three/fiber": "^9.4.0",
         "next-themes": "^0.4.6",
         "pdfjs-dist": "^5.4.296",
@@ -702,6 +704,21 @@
         "three": "^0.180.0",
       },
     },
+    "packages/timeline-editor": {
+      "name": "@moritzbrantner/timeline-editor",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/keyboard": "^0.1.1",
+        "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
+      },
+      "devDependencies": {
+        "@types/react": "^19.2.2",
+        "react": "^19.2.0",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+      },
+    },
     "packages/token-classification": {
       "name": "@moritzbrantner/token-classification",
       "version": "0.1.1",
@@ -792,6 +809,22 @@
       "dependencies": {
         "@moritzbrantner/linguistics-core": "^0.1.1",
         "@moritzbrantner/linguistics-corpus": "^0.1.1",
+      },
+    },
+    "packages/workflow-editor": {
+      "name": "@moritzbrantner/workflow-editor",
+      "version": "0.1.0",
+      "dependencies": {
+        "@moritzbrantner/graphs": "^0.1.1",
+        "@moritzbrantner/keyboard": "^0.1.1",
+        "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
+      },
+      "devDependencies": {
+        "@types/react": "^19.2.2",
+        "react": "^19.2.0",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
       },
     },
     "packages/zero-shot-classification": {
@@ -1198,6 +1231,8 @@
 
     "@moritzbrantner/three-starters": ["@moritzbrantner/three-starters@workspace:packages/three-starters"],
 
+    "@moritzbrantner/timeline-editor": ["@moritzbrantner/timeline-editor@workspace:packages/timeline-editor"],
+
     "@moritzbrantner/token-classification": ["@moritzbrantner/token-classification@workspace:packages/token-classification"],
 
     "@moritzbrantner/translation": ["@moritzbrantner/translation@workspace:packages/translation"],
@@ -1225,6 +1260,8 @@
     "@moritzbrantner/word-prediction": ["@moritzbrantner/word-prediction@workspace:packages/word-prediction"],
 
     "@moritzbrantner/word-vectors": ["@moritzbrantner/word-vectors@workspace:packages/word-vectors"],
+
+    "@moritzbrantner/workflow-editor": ["@moritzbrantner/workflow-editor@workspace:packages/workflow-editor"],
 
     "@moritzbrantner/zero-shot-classification": ["@moritzbrantner/zero-shot-classification@workspace:packages/zero-shot-classification"],
 
@@ -2824,7 +2861,7 @@
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "4.2.11", "jsonfile": "4.0.0", "universalify": "0.1.2" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
 
-    "@moritzbrantner/linguistics-core/@mb-rust/text-core-wasm": ["@mb-rust/text-core-wasm@file:../rust-packages/packages/text-core-wasm", { "devDependencies": { "playwright": "^1.60.0" } }],
+    "@moritzbrantner/linguistics-core/@mb-rust/text-core-wasm": ["@mb-rust/text-core-wasm@file:../rust-packages/packages/text-core-wasm", {}],
 
     "@playwright/test/playwright": ["playwright@1.59.1", "", { "dependencies": { "playwright-core": "1.59.1" }, "optionalDependencies": { "fsevents": "2.3.2" }, "bin": { "playwright": "cli.js" } }, "sha512-C8oWjPR3F81yljW9o5OxcWzfh6avkVwDD2VYdwIGqTkl+OGFISgypqzfu7dOe4QNLL2aqcWBmI3PMtLIK233lw=="],
 

@@ -7,7 +7,9 @@
     "packages/*",
     "packages/auth-contract",
     "packages/foundation-contract",
-    "packages/upload-playbook"
+    "packages/timeline-editor",
+    "packages/upload-playbook",
+    "packages/workflow-editor"
   ],
   "overrides": {
     "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz"

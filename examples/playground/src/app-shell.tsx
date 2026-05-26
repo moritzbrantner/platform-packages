@@ -37,8 +37,10 @@ export type PageKey =
   | "speech"
   | "subtitles"
   | "temporal-maps"
+  | "timeline-editor"
   | "ui"
   | "storytelling"
+  | "workflow-editor"
   | "word-prediction"
   | "word-vectors";
 
@@ -308,6 +310,30 @@ export const playgroundExampleGroups: readonly PlaygroundExampleGroup[] = [
           "Arrange audio, video, and title clips on a zoomable timeline with draggable clips, trimming handles, scrubbing, selection, and drop targets.",
         cta: "Open media editor demo",
         navDescription: "Clip timeline, trimming, and scrubbing.",
+      },
+      {
+        key: "timeline-editor",
+        href: "/timeline-editor.html",
+        label: "Timeline editor package",
+        eyebrow: "@moritzbrantner/timeline-editor",
+        title: "Generic timeline editor demo",
+        description:
+          "Arrange generic planning, production, and review items with reusable timeline mutations, selection, inspection, scrubbing, and asset insertion.",
+        cta: "Open timeline editor demo",
+        navDescription: "Generic timeline items and workbench controls.",
+        badge: "New",
+      },
+      {
+        key: "workflow-editor",
+        href: "/workflow-editor.html",
+        label: "Workflow editor package",
+        eyebrow: "@moritzbrantner/workflow-editor",
+        title: "Workflow graph editor demo",
+        description:
+          "Build node graph workflows from templates, validate connections, inspect nodes and edges, and exercise graph indexing helpers.",
+        cta: "Open workflow editor demo",
+        navDescription: "Node graph editing and validation.",
+        badge: "New",
       },
       {
         key: "speed-reading",
