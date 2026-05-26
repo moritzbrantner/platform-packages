@@ -11,7 +11,11 @@ if (!existsSync(distEntry)) {
   process.exit(1);
 }
 
-const { createChartDensityIndex, createChartDensityViewportSummary } = await import(distEntry);
+const {
+  createChartDensityIndex,
+  createChartDensityViewportSummary,
+  createProgressiveChartDensityIndex,
+} = await import(distEntry);
 
 const results = [];
 const runFullMatrix = process.env.CHARTS_BENCH_FULL === "1";
@@ -79,12 +83,58 @@ for (const size of seriesSizes) {
   }
 }
 
+for (const size of seriesSizes) {
+  const points = createSeriesPoints(size, { metricCount: 3, pattern: "sorted" });
+  const baseName = `chart.${formatSize(size)}.sorted.3metrics.progressive`;
+  let index;
+
+  results.push(
+    benchmark(`${baseName}.construct.hybrid-first`, () => {
+      index = createProgressiveChartDensityIndex(points, {
+        progressive: {
+          warmup: "manual",
+        },
+      });
+    }),
+  );
+  results.push(
+    benchmark(`${baseName}.query.first-render`, () => {
+      assertChartSeries(
+        index.getChartSeries({
+          targetBinCount: 250,
+          valueMode: "average",
+          xDomain: [0, size - 1],
+        }),
+      );
+    }),
+  );
+  results.push(
+    await benchmarkAsync(`${baseName}.warmup.wasm-index`, async () => {
+      await index.warmWasmIndex();
+    }),
+  );
+  results.push(
+    benchmark(`${baseName}.query.after-warmup`, () => {
+      assertChartSeries(
+        index.getChartSeries({
+          targetBinCount: 250,
+          valueMode: "average",
+          xDomain: [0, size - 1],
+        }),
+      );
+    }),
+  );
+}
+
 const maxDurationMs = 3_000;
 const failNames = new Set([
   "chart.100k.sorted.3metrics.hybrid-js.construct",
   "chart.100k.sorted.3metrics.hybrid-js.query.full",
   "chart.100k.sorted.3metrics.wasm-index.construct",
   "chart.100k.sorted.3metrics.wasm-index.query.full",
+  "chart.100k.sorted.3metrics.progressive.query.first-render",
+  "chart.100k.sorted.3metrics.progressive.warmup.wasm-index",
+  "chart.100k.sorted.3metrics.progressive.query.after-warmup",
 ]);
 const slowBenchmarks = results.filter(
   (result) =>
@@ -115,6 +165,17 @@ function benchmark(name, run) {
   const startedAt = performance.now();
 
   run();
+
+  return {
+    durationMs: performance.now() - startedAt,
+    name,
+  };
+}
+
+async function benchmarkAsync(name, run) {
+  const startedAt = performance.now();
+
+  await run();
 
   return {
     durationMs: performance.now() - startedAt,

@@ -2,6 +2,7 @@ import {
   createDensityViewportSummary,
   createBinnedSeriesIndex,
   type BinnedSeries,
+  type BinnedSeriesBackend,
   type BinnedSeriesBin,
   type BinnedSeriesIndexOptions,
   type BinnedSeriesQuery,
@@ -24,6 +25,8 @@ export type ChartDensityValueMode = "average" | "count" | "max" | "min" | "sum";
 export type ChartDensityQuery = BinnedSeriesQuery & {
   valueMode?: ChartDensityValueMode;
 };
+
+export type ChartDensityBackend = BinnedSeriesBackend | "progressive";
 
 export type ChartDensitySample<TProperties = Record<string, unknown>> = {
   averageY: number | null;
@@ -71,12 +74,156 @@ export type ChartDensityIndex<TProperties = Record<string, unknown>> = {
   } | null;
 };
 
-export type ChartDensityIndexOptions<TProperties = Record<string, unknown>> =
-  BinnedSeriesIndexOptions<TProperties>;
+export type ChartDensityWarmupScheduler = (warmup: () => void) => void;
+
+export type ChartDensityProgressiveOptions<TProperties = Record<string, unknown>> = {
+  onError?: (error: unknown) => void;
+  onReady?: (index: ChartDensityIndex<TProperties>) => void;
+  scheduler?: ChartDensityWarmupScheduler;
+  warmup?: "manual" | "scheduled";
+};
+
+export type ChartDensityIndexOptions<TProperties = Record<string, unknown>> = Omit<
+  BinnedSeriesIndexOptions<TProperties>,
+  "backend"
+> & {
+  backend?: ChartDensityBackend;
+  progressive?: ChartDensityProgressiveOptions<TProperties>;
+};
+
+export type ChartDensityProgressiveStatus = {
+  activeBackend: BinnedSeriesBackend;
+  isWarming: boolean;
+  wasmError: unknown | null;
+  wasmReady: boolean;
+};
+
+export type ProgressiveChartDensityIndex<TProperties = Record<string, unknown>> =
+  ChartDensityIndex<TProperties> & {
+    getActiveBackend(): BinnedSeriesBackend;
+    getProgressiveStatus(): ChartDensityProgressiveStatus;
+    warmWasmIndex(): Promise<ChartDensityIndex<TProperties>>;
+    whenWasmReady(): Promise<ChartDensityIndex<TProperties>>;
+  };
 
 export function createChartDensityIndex<TProperties = Record<string, unknown>>(
   points: readonly ChartSeriesPoint<TProperties>[],
   options: ChartDensityIndexOptions<TProperties> = {},
+): ChartDensityIndex<TProperties> {
+  const { backend = "progressive", progressive, ...indexOptions } = options;
+
+  if (backend === "progressive") {
+    return createProgressiveChartDensityIndex(points, {
+      ...indexOptions,
+      progressive,
+    });
+  }
+
+  return createStaticChartDensityIndex(points, {
+    ...indexOptions,
+    backend,
+  });
+}
+
+export function createProgressiveChartDensityIndex<TProperties = Record<string, unknown>>(
+  points: readonly ChartSeriesPoint<TProperties>[],
+  options: Omit<ChartDensityIndexOptions<TProperties>, "backend"> = {},
+): ProgressiveChartDensityIndex<TProperties> {
+  const { progressive, ...indexOptions } = options;
+  let activeBackend: BinnedSeriesBackend = "hybrid-js";
+  let activeIndex = createStaticChartDensityIndex(points, {
+    ...indexOptions,
+    backend: "hybrid-js",
+  });
+  let wasmIndex: ChartDensityIndex<TProperties> | null = null;
+  let wasmError: unknown | null = null;
+  let isWarming = false;
+  let warmupPromise: Promise<ChartDensityIndex<TProperties>> | null = null;
+
+  const warmWasmIndex = () => {
+    if (wasmIndex) {
+      return Promise.resolve(wasmIndex);
+    }
+
+    if (warmupPromise) {
+      return warmupPromise;
+    }
+
+    isWarming = true;
+    wasmError = null;
+    warmupPromise = Promise.resolve()
+      .then(() => {
+        const nextIndex = createStaticChartDensityIndex(points, {
+          ...indexOptions,
+          backend: "wasm-index",
+        });
+
+        wasmIndex = nextIndex;
+        activeIndex = nextIndex;
+        activeBackend = "wasm-index";
+        progressive?.onReady?.(nextIndex);
+
+        return nextIndex;
+      })
+      .catch((error: unknown) => {
+        wasmError = error;
+        progressive?.onError?.(error);
+        throw error;
+      })
+      .finally(() => {
+        isWarming = false;
+      });
+
+    return warmupPromise;
+  };
+
+  if (progressive?.warmup !== "manual") {
+    scheduleChartDensityWarmup(progressive?.scheduler, () => {
+      void warmWasmIndex().catch(() => undefined);
+    });
+  }
+
+  return {
+    getActiveBackend() {
+      return activeBackend;
+    },
+
+    getBinnedSeries(query) {
+      return activeIndex.getBinnedSeries(query);
+    },
+
+    getChartSeries(query) {
+      return activeIndex.getChartSeries(query);
+    },
+
+    getPointById(pointId) {
+      return activeIndex.getPointById(pointId);
+    },
+
+    getProgressiveStatus() {
+      return {
+        activeBackend,
+        isWarming,
+        wasmError,
+        wasmReady: Boolean(wasmIndex),
+      };
+    },
+
+    getSeriesBounds() {
+      return activeIndex.getSeriesBounds();
+    },
+
+    warmWasmIndex,
+
+    whenWasmReady() {
+      return warmWasmIndex();
+    },
+  };
+}
+
+function createStaticChartDensityIndex<TProperties = Record<string, unknown>>(
+  points: readonly ChartSeriesPoint<TProperties>[],
+  options: BinnedSeriesIndexOptions<TProperties>,
 ): ChartDensityIndex<TProperties> {
   const binnedIndex = createBinnedSeriesIndex(points, options);
 
@@ -170,4 +317,29 @@ function getChartDensityValue<TProperties>(
     case "average":
       return bin.averageY;
   }
+}
+
+function scheduleChartDensityWarmup(
+  scheduler: ChartDensityWarmupScheduler | undefined,
+  warmup: () => void,
+) {
+  if (scheduler) {
+    scheduler(warmup);
+    return;
+  }
+
+  const runtime = globalThis as {
+    requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => unknown;
+    setTimeout?: (callback: () => void, delay: number) => unknown;
+  };
+
+  if (typeof runtime.requestIdleCallback === "function") {
+    runtime.requestIdleCallback(warmup, { timeout: 1_000 });
+    return;
+  }
+
+  const timeoutHandle = runtime.setTimeout?.(warmup, 0);
+  const maybeNodeTimer = timeoutHandle as { unref?: () => void } | undefined;
+
+  maybeNodeTimer?.unref?.();
 }

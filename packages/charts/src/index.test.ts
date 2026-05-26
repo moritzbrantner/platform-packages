@@ -4,6 +4,7 @@ import {
   createChartDensityIndex,
   createChartDensitySample,
   createChartDensityViewportSummary,
+  createProgressiveChartDensityIndex,
   type ChartDensityValueMode,
 } from "@moritzbrantner/charts";
 
@@ -183,5 +184,74 @@ describe("@moritzbrantner/charts", () => {
     expect(
       index.getChartSeries({ ...query, valueMode: "sum" }).samples.map((sample) => sample.y),
     ).toEqual([10, null, -4, null]);
+  });
+
+  test("progressively renders with hybrid-js and switches to wasm-index after warmup", async () => {
+    const scheduledWarmups: Array<() => void> = [];
+    const points = Array.from({ length: 200 }, (_, pointIndex) => ({
+      id: `point-${pointIndex}`,
+      metrics: { count: 1, revenue: pointIndex % 9 },
+      x: pointIndex % 2 === 0 ? pointIndex : 200 - pointIndex,
+      y: pointIndex % 17,
+    }));
+    const index = createProgressiveChartDensityIndex(points, {
+      progressive: {
+        scheduler(warmup) {
+          scheduledWarmups.push(warmup);
+        },
+      },
+    });
+    const query = {
+      includeEmptyBins: true,
+      targetBinCount: 16,
+      valueMode: "average" as const,
+      xDomain: [0, 200] as [number, number],
+    };
+    const firstSeries = index.getChartSeries(query);
+
+    expect(index.getProgressiveStatus()).toMatchObject({
+      activeBackend: "hybrid-js",
+      isWarming: false,
+      wasmReady: false,
+    });
+    expect(firstSeries.summary.pointCount).toBe(200);
+    expect(scheduledWarmups).toHaveLength(1);
+
+    scheduledWarmups[0]?.();
+    await index.whenWasmReady();
+
+    expect(index.getProgressiveStatus()).toMatchObject({
+      activeBackend: "wasm-index",
+      isWarming: false,
+      wasmError: null,
+      wasmReady: true,
+    });
+    expect(index.getChartSeries(query)).toEqual(firstSeries);
+  });
+
+  test("can defer wasm-index construction until an interaction warms it manually", async () => {
+    const index = createProgressiveChartDensityIndex(
+      Array.from({ length: 50 }, (_, pointIndex) => ({
+        id: `point-${pointIndex}`,
+        metrics: { count: 1 },
+        x: pointIndex,
+        y: pointIndex % 5,
+      })),
+      {
+        progressive: {
+          warmup: "manual",
+        },
+      },
+    );
+
+    expect(index.getActiveBackend()).toBe("hybrid-js");
+    expect(index.getChartSeries({ targetBinCount: 5, xDomain: [0, 49] }).summary.pointCount).toBe(
+      50,
+    );
+
+    await index.warmWasmIndex();
+
+    expect(index.getActiveBackend()).toBe("wasm-index");
+    expect(index.getPointById("point-20")?.y).toBe(0);
   });
 });
