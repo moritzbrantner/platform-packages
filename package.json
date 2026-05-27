@@ -53,11 +53,13 @@
   },
   "devDependencies": {
     "@react-three/fiber": "^9.4.0",
+    "@tailwindcss/vite": "^4.3.0",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/three": "^0.180.0",
+    "@vitejs/plugin-react": "^6.0.2",
     "jsdom": "^26.1.0",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
@@ -67,6 +69,7 @@
     "three": "^0.180.0",
     "tsup": "^8.5.0",
     "typescript": "6.0.2",
+    "vite": "^8.0.14",
     "vitest": "^4.1.2"
   },
   "publishConfig": {
@@ -74,6 +77,8 @@
     "access": "restricted"
   },
   "scripts": {
+    "dev": "vite --config example/vite.config.ts",
+    "build:example": "vite build --config example/vite.config.ts",
     "build": "tsup src/index.ts src/remotion.tsx src/three.tsx --format esm --dts --clean --out-dir dist",
     "check-types": "tsc --noEmit",
     "lint": "oxfmt --check && oxlint --format=github && node scripts/verify-package-imports.mjs ./src @/ next/ next-intl",

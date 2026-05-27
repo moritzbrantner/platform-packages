@@ -70,6 +70,17 @@ export function StoryExperience() {
 }
 ```
 
+## Example website
+
+Run the local example app from the repository root:
+
+```sh
+bun dev
+```
+
+The app shows `StoryPlayer`, `StoryScroller`, custom web stage renderers, branch
+presets, and the minimap/state helpers against the local source files.
+
 ## Renderer registry
 
 Renderer registries let the same story document target web, Remotion, and Three
