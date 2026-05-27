@@ -9,7 +9,6 @@ export default defineConfig({
     alias: {
       "@moritzbrantner/auth-contract": path.resolve(rootDir, "packages/auth-contract/src/index.ts"),
       "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
-      "@moritzbrantner/charts": path.resolve(rootDir, "packages/charts/src/index.ts"),
       "@moritzbrantner/collaboration": path.resolve(rootDir, "packages/collaboration/src/index.ts"),
       "@moritzbrantner/data-density": path.resolve(rootDir, "packages/data-density/src/index.ts"),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),

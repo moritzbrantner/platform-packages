@@ -33,7 +33,6 @@ local JavaScript inference.
 | ----------------------------------------------- | ----------------- | --------------------------------------------------------------------------- |
 | `@moritzbrantner/auth-contract`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/card-games`                    | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/charts`                        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/collaboration`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/data-density`                  | release-ready     | Included in the first standalone install wave.                              |
 | `@moritzbrantner/document-analysis`             | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
@@ -76,7 +75,6 @@ local JavaScript inference.
 
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
-- `@moritzbrantner/charts`: chart-ready density adapters for binned numeric series, sample extraction, and metric-preserving viewport summaries.
 - `@moritzbrantner/data-density`: reusable indexing, windowing, binning, clustering, and metric aggregation helpers for high-volume maps, charts, tables, and timeline-style views.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
 - `@moritzbrantner/graphs`: node-link graph density helpers for node windows, subgraph extraction, and edge metric aggregation.
@@ -116,7 +114,6 @@ local JavaScript inference.
 - `@moritzbrantner/linguistics-learning` sits above corpus so study-term extraction can aggregate across documents instead of only per-document text.
 - `@moritzbrantner/word-prediction` sits above word vectors and can use them for semantic backoff when exact n-gram context is sparse.
 - `@moritzbrantner/data-density` is the shared high-volume data layer for viewport queries, metric reductions, chart binning, table windows, and geo point clustering.
-- `@moritzbrantner/charts` consumes data-density binning and exposes chart-shaped samples without taking on a renderer dependency.
 - `@moritzbrantner/graphs` consumes data-density windows and metric reductions for node-link graph subgraphs.
 - `@moritzbrantner/tables` consumes data-density windows for virtualized row slices and metric-preserving table summaries.
 - Browser map consumers can use `@moritzbrantner/data-density` for clustering while keeping renderer-specific map interaction outside this package set.

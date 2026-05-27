@@ -23,7 +23,6 @@ export type PageKey =
   | "hex-tile-navigation"
   | "home"
   | "card-games"
-  | "charts"
   | "data-density"
   | "flat-design"
   | "linguistics-core"
@@ -185,18 +184,6 @@ export const playgroundExampleGroups: readonly PlaygroundExampleGroup[] = [
           "Query ordered row windows, chart-sized numeric bins, and viewport-aware geo aggregation while preserving metric totals for dashboards.",
         cta: "Open data-density demo",
         navDescription: "Virtual rows, bins, and geo summaries.",
-      },
-      {
-        key: "charts",
-        href: "/charts.html",
-        label: "Charts package",
-        eyebrow: "@moritzbrantner/charts",
-        title: "WASM-backed charts demo",
-        description:
-          "Render UI-compatible Recharts surfaces from dense chart samples, switch aggregation modes, zoom domains, and inspect progressive WASM warmup.",
-        cta: "Open charts demo",
-        navDescription: "ChartContainer parity plus dense WASM sampling.",
-        badge: "New",
       },
       {
         key: "flat-design",

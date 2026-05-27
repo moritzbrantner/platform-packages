@@ -28,7 +28,6 @@
       "name": "@moritzbrantner/playground",
       "dependencies": {
         "@moritzbrantner/card-games": "workspace:*",
-        "@moritzbrantner/charts": "workspace:*",
         "@moritzbrantner/data-density": "workspace:*",
         "@moritzbrantner/flat-design": "workspace:*",
         "@moritzbrantner/linguistics-core": "workspace:*",
@@ -83,22 +82,6 @@
       "peerDependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-      },
-    },
-    "packages/charts": {
-      "name": "@moritzbrantner/charts",
-      "version": "0.1.1",
-      "dependencies": {
-        "@moritzbrantner/data-density": "^0.1.1",
-        "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
-      },
-      "devDependencies": {
-        "react": "^19.2.0",
-        "recharts": "^3.8.1",
-      },
-      "peerDependencies": {
-        "react": "^19.0.0",
-        "recharts": "^3.0.0",
       },
     },
     "packages/collaboration": {
@@ -700,8 +683,6 @@
     "@moritzbrantner/auth-contract": ["@moritzbrantner/auth-contract@workspace:packages/auth-contract"],
 
     "@moritzbrantner/card-games": ["@moritzbrantner/card-games@workspace:packages/card-games"],
-
-    "@moritzbrantner/charts": ["@moritzbrantner/charts@workspace:packages/charts"],
 
     "@moritzbrantner/collaboration": ["@moritzbrantner/collaboration@workspace:packages/collaboration"],
 
