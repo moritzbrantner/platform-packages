@@ -120,14 +120,15 @@ Do not split them into separate packages until the base story schema and rendere
 registry stabilize and a downstream consumer needs independent adapter release
 cadence.
 
-## Split-readiness checklist
+## Standalone verification
 
-This package remains in the monorepo until its public API has enough docs,
-tests, and consumer smoke coverage for standalone release. Before moving it:
+This repository publishes `@moritzbrantner/storytelling` as a standalone package
+while keeping `./remotion` and `./three` as subpath exports.
 
 ```sh
-bun run --filter @moritzbrantner/storytelling verify:release
+bun run verify
 ```
 
-The release gate covers type checking, import linting, unit tests, build,
-package export smoke tests, and package dry-run contents.
+The release gate covers formatting, Oxlint diagnostics, forbidden import checks,
+type checking, unit tests, build output, package export smoke tests, temporary
+consumer install smoke coverage, and package dry-run contents.
