@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useMemo, useState, type JSX, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type JSX,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { Bar, BarChart, Line, LineChart } from "recharts";
 
 import {
+  CHART_VALUE_MODE_DEFINITIONS,
   createProgressiveChartDensityIndex,
   type ChartDensityIndex,
   type ChartDensityIndexOptions,
@@ -9,8 +18,9 @@ import {
   type ChartDensityQuery,
   type ChartDensitySample,
   type ChartDensitySeries,
-  type ChartDensityValueMode,
   type ChartSeriesPoint,
+  type ChartValueMode,
+  type ChartValueModeDefinition,
   type ProgressiveChartDensityIndex,
 } from "./density";
 import {
@@ -27,6 +37,8 @@ import {
   ItemDescription,
   ItemTitle,
   Progress,
+  ToggleGroup,
+  ToggleGroupItem,
 } from "@moritzbrantner/ui";
 
 export type ChartRange = {
@@ -63,25 +75,29 @@ export type ChartPanelProps = {
 };
 
 export type ChartRangeSelectorProps = {
-  activeRangeId: string;
+  "aria-label"?: string;
   className?: string;
   formatDomain?: (domain: [number, number]) => string;
-  onRangeChange: (rangeId: string) => void;
+  onValueChange: (rangeId: string) => void;
   ranges: ChartRange[];
+  value: string;
 };
 
 export type ChartValueModeSelectorProps = {
+  "aria-label"?: string;
   className?: string;
-  modes?: ChartDensityValueMode[];
-  onValueModeChange: (mode: ChartDensityValueMode) => void;
-  valueMode: ChartDensityValueMode;
+  definitions?: readonly ChartValueModeDefinition[];
+  onValueChange: (mode: ChartValueMode) => void;
+  value: ChartValueMode;
 };
 
 export type ChartBackendStatusProps = {
   className?: string;
+  formatError?: (error: unknown) => string;
   onWarmNow?: () => void | Promise<void>;
   progress?: number;
   status: ChartDensityProgressiveStatus;
+  warmLabel?: string;
 };
 
 export type ChartSampleSparklineProps<TProperties = Record<string, unknown>> = {
@@ -89,7 +105,12 @@ export type ChartSampleSparklineProps<TProperties = Record<string, unknown>> = {
   className?: string;
   domain: [number, number];
   formatDomainValue?: (value: number) => string;
+  formatSampleLabel?: (sample: ChartDensitySample<TProperties>) => string;
+  formatValue?: (value: number | null, sample: ChartDensitySample<TProperties>) => string;
+  onSampleHover?: (sample: ChartDensitySample<TProperties> | null) => void;
+  onSampleSelect?: (sample: ChartDensitySample<TProperties>) => void;
   samples: Array<ChartDensitySample<TProperties>>;
+  selectedSampleIndex?: number | null;
 };
 
 export type ChartHotBinRowProps<TProperties = Record<string, unknown>> = {
@@ -102,25 +123,26 @@ export type ChartHotBinRowProps<TProperties = Record<string, unknown>> = {
 export type ChartValueModePreviewProps<TProperties = Record<string, unknown>> = {
   active?: boolean;
   className?: string;
+  definition: ChartValueModeDefinition;
   measured: MeasuredChartSeries<TProperties>;
-  mode: ChartDensityValueMode;
   onSelect?: () => void;
 };
 
-const DEFAULT_VALUE_MODES: ChartDensityValueMode[] = ["average", "count", "max", "min", "sum"];
-
-const valuePreviewConfig = {
-  value: {
-    color: "var(--chart-1)",
-    label: "Value",
-  },
+export type UseChartBinCountOptions = {
+  defaultBinCount?: number;
+  maxBinCount?: number;
+  minBinCount?: number;
+  pixelsPerBin?: number;
+  step?: number;
 };
 
-const countPreviewConfig = {
-  count: {
-    color: "var(--chart-4)",
-    label: "Point count",
-  },
+export type UseChartBinCountResult<TElement extends Element = HTMLDivElement> = {
+  containerRef: (node: TElement | null) => void;
+  isAuto: boolean;
+  resetAuto: () => void;
+  setManualBinCount: (value: number) => void;
+  targetBinCount: number;
+  width: number | null;
 };
 
 export function ChartPanel({
@@ -180,27 +202,34 @@ export function ChartMetricStrip({ className, label, value }: ChartMetricStripPr
 }
 
 export function ChartRangeSelector({
-  activeRangeId,
+  "aria-label": ariaLabel = "Chart range",
   className,
   formatDomain = formatDomainRange,
-  onRangeChange,
+  onValueChange,
   ranges,
+  value,
 }: ChartRangeSelectorProps): JSX.Element {
   return (
-    <div className={joinClassNames("space-y-3", className)}>
+    <div
+      className={joinClassNames("space-y-3", className)}
+      role="radiogroup"
+      aria-label={ariaLabel}
+    >
       {ranges.map((range) => {
-        const active = range.id === activeRangeId;
+        const active = range.id === value;
 
         return (
           <Button
             key={range.id}
             type="button"
+            role="radio"
             variant="outline"
+            aria-checked={active}
             className={joinClassNames(
               "h-auto w-full justify-start rounded-none border p-4 text-left transition hover:border-primary/60",
               active ? "border-primary bg-primary/10" : "border-border/60 bg-muted/20",
             )}
-            onClick={() => onRangeChange(range.id)}
+            onClick={() => onValueChange(range.id)}
           >
             <span className="grid w-full gap-2">
               <span className="flex items-center justify-between gap-3">
@@ -221,37 +250,50 @@ export function ChartRangeSelector({
 }
 
 export function ChartValueModeSelector({
+  "aria-label": ariaLabel = "Chart value mode",
   className,
-  modes = DEFAULT_VALUE_MODES,
-  onValueModeChange,
-  valueMode,
+  definitions = CHART_VALUE_MODE_DEFINITIONS,
+  onValueChange,
+  value,
 }: ChartValueModeSelectorProps): JSX.Element {
   return (
-    <div className={joinClassNames("flex flex-wrap items-center gap-2", className)}>
-      {modes.map((mode) => (
-        <Button
-          key={mode}
-          type="button"
-          size="sm"
-          variant={mode === valueMode ? "default" : "outline"}
-          aria-pressed={mode === valueMode}
-          onClick={() => onValueModeChange(mode)}
-        >
-          {mode}
-        </Button>
+    <ToggleGroup
+      type="single"
+      value={value}
+      aria-label={ariaLabel}
+      className={joinClassNames("flex flex-wrap items-center gap-2", className)}
+      onValueChange={(nextValue) => {
+        if (nextValue) {
+          onValueChange(nextValue as ChartValueMode);
+        }
+      }}
+    >
+      {definitions.map((definition) => (
+        <ToggleGroupItem key={definition.id} value={definition.id} aria-label={definition.label}>
+          {definition.label}
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   );
 }
 
 export function ChartBackendStatus({
   className,
+  formatError = formatUnknownError,
   onWarmNow,
   progress,
   status,
+  warmLabel = "Warm WASM now",
 }: ChartBackendStatusProps): JSX.Element {
-  const stateLabel = status.wasmReady ? "ready" : status.isWarming ? "warming" : "scheduled";
+  const stateLabel = status.wasmReady
+    ? "ready"
+    : status.isWarming
+      ? "warming"
+      : status.wasmError
+        ? "fallback"
+        : "scheduled";
   const progressValue = progress ?? (status.wasmReady ? 100 : status.isWarming ? 62 : 22);
+  const warmDisabled = status.isWarming || status.wasmReady;
 
   return (
     <div className={joinClassNames("space-y-5", className)}>
@@ -262,9 +304,18 @@ export function ChartBackendStatus({
         </div>
         <Progress value={progressValue} />
       </div>
+      {status.wasmError ? (
+        <p className="text-sm leading-6 text-muted-foreground">{formatError(status.wasmError)}</p>
+      ) : null}
       {onWarmNow ? (
-        <Button type="button" variant="outline" className="w-full" onClick={onWarmNow}>
-          Warm WASM now
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={warmDisabled}
+          onClick={onWarmNow}
+        >
+          {warmLabel}
         </Button>
       ) : null}
     </div>
@@ -276,7 +327,12 @@ export function ChartSampleSparkline<TProperties = Record<string, unknown>>({
   className,
   domain,
   formatDomainValue = formatCompactNumber,
+  formatSampleLabel = formatDefaultSampleLabel,
+  formatValue = formatDefaultSampleValue,
+  onSampleHover,
+  onSampleSelect,
   samples,
+  selectedSampleIndex = null,
 }: ChartSampleSparklineProps<TProperties>): JSX.Element {
   const values = samples.filter((sample) => sample.y !== null);
 
@@ -297,15 +353,37 @@ export function ChartSampleSparkline<TProperties = Record<string, unknown>>({
   const maxY = Math.max(...values.map((sample) => sample.y ?? 0));
   const spread = Math.max(1, maxY - minY);
   const domainSpread = Math.max(1, domain[1] - domain[0]);
-  const points = values
-    .map((sample) => {
-      const x = ((sample.x - domain[0]) / domainSpread) * 100;
-      const y = 92 - (((sample.y ?? minY) - minY) / spread) * 84;
+  const plottedSamples = values.map((sample) => {
+    const x = ((sample.x - domain[0]) / domainSpread) * 100;
+    const y = 92 - (((sample.y ?? minY) - minY) / spread) * 84;
 
-      return `${clamp(x, 0, 100)},${clamp(y, 8, 92)}`;
-    })
-    .join(" ");
+    return {
+      sample,
+      x: clamp(x, 0, 100),
+      y: clamp(y, 8, 92),
+    };
+  });
+  const points = plottedSamples.map((point) => `${point.x},${point.y}`).join(" ");
   const gradientId = `charts-sparkline-fill-${hashString(points)}`;
+  const selectedPoint = plottedSamples.find((point) => point.sample.index === selectedSampleIndex);
+  const handlePointerMove = (event: PointerEvent<SVGSVGElement>) => {
+    if (!onSampleHover) {
+      return;
+    }
+
+    onSampleHover(getNearestSample(event, plottedSamples));
+  };
+  const handleClick = (event: PointerEvent<SVGSVGElement>) => {
+    if (!onSampleSelect) {
+      return;
+    }
+
+    const sample = getNearestSample(event, plottedSamples);
+
+    if (sample) {
+      onSampleSelect(sample);
+    }
+  };
 
   return (
     <div
@@ -314,7 +392,15 @@ export function ChartSampleSparkline<TProperties = Record<string, unknown>>({
         className,
       )}
     >
-      <svg viewBox="0 0 100 100" role="img" aria-label={ariaLabel} className="h-56 w-full">
+      <svg
+        viewBox="0 0 100 100"
+        role="img"
+        aria-label={ariaLabel}
+        className="h-56 w-full"
+        onClick={handleClick}
+        onPointerLeave={() => onSampleHover?.(null)}
+        onPointerMove={handlePointerMove}
+      >
         <defs>
           <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.28" />
@@ -323,7 +409,37 @@ export function ChartSampleSparkline<TProperties = Record<string, unknown>>({
         </defs>
         <polyline points={`0,96 ${points} 100,96`} fill={`url(#${gradientId})`} stroke="none" />
         <polyline points={points} fill="none" stroke="var(--primary)" strokeWidth="1.4" />
+        {selectedPoint ? (
+          <circle
+            cx={selectedPoint.x}
+            cy={selectedPoint.y}
+            r="2.4"
+            fill="var(--background)"
+            stroke="var(--primary)"
+            strokeWidth="1.4"
+          />
+        ) : null}
       </svg>
+      <p className="sr-only">
+        {ariaLabel}: {samples.length} samples from {formatDomainValue(domain[0])} to{" "}
+        {formatDomainValue(domain[1])}. Values range from {formatCompactNumber(minY)} to{" "}
+        {formatCompactNumber(maxY)}.
+      </p>
+      {onSampleSelect ? (
+        <div className="sr-only">
+          {values.map((sample) => (
+            <Button
+              key={sample.index}
+              type="button"
+              variant="ghost"
+              className="sr-only"
+              onClick={() => onSampleSelect(sample)}
+            >
+              {formatSampleLabel(sample)}: {formatValue(sample.y, sample)}
+            </Button>
+          ))}
+        </div>
+      ) : null}
       <div className="absolute bottom-3 left-3 text-xs text-muted-foreground">
         {samples.length} samples from {formatDomainValue(domain[0])} to{" "}
         {formatDomainValue(domain[1])}
@@ -370,24 +486,27 @@ export function ChartHotBinRow<TProperties = Record<string, unknown>>({
 export function ChartValueModePreview<TProperties = Record<string, unknown>>({
   active = false,
   className,
+  definition,
   measured,
-  mode,
   onSelect,
 }: ChartValueModePreviewProps<TProperties>): JSX.Element {
   const data = createPreviewData(measured.series.samples);
+  const previewConfig = {
+    value: {
+      color: definition.color,
+      label: definition.axisLabel,
+    },
+  };
   const content = (
     <>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="font-medium capitalize">{mode}</span>
+        <span className="font-medium">{definition.label}</span>
         <span className="text-xs text-muted-foreground">{measured.queryMs.toFixed(2)} ms</span>
       </div>
-      <ChartContainer
-        className="h-28 w-full"
-        config={mode === "count" ? countPreviewConfig : valuePreviewConfig}
-      >
-        {mode === "count" ? (
+      <ChartContainer className="h-28 w-full" config={previewConfig}>
+        {definition.renderer === "bar" ? (
           <BarChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 4 }}>
-            <Bar dataKey="count" fill="var(--color-count)" radius={0} />
+            <Bar dataKey="value" fill="var(--color-value)" radius={0} />
           </BarChart>
         ) : (
           <LineChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 4 }}>
@@ -489,6 +608,65 @@ export function useProgressiveChartDensity<TProperties = Record<string, unknown>
   };
 }
 
+export function useChartBinCount<TElement extends Element = HTMLDivElement>(
+  options: UseChartBinCountOptions = {},
+): UseChartBinCountResult<TElement> {
+  const {
+    defaultBinCount = 144,
+    maxBinCount = 360,
+    minBinCount = 48,
+    pixelsPerBin = 8,
+    step = 12,
+  } = options;
+  const [element, setElement] = useState<TElement | null>(null);
+  const [width, setWidth] = useState<number | null>(null);
+  const [manualBinCount, setManualBinCountState] = useState<number | null>(null);
+  const autoBinCount =
+    width === null
+      ? defaultBinCount
+      : roundToStep(width / Math.max(1, pixelsPerBin), step, minBinCount, maxBinCount);
+  const targetBinCount = manualBinCount ?? autoBinCount;
+  const containerRef = useCallback((node: TElement | null) => {
+    setElement(node);
+  }, []);
+  const setManualBinCount = useCallback(
+    (value: number) => {
+      setManualBinCountState(roundToStep(value, step, minBinCount, maxBinCount));
+    },
+    [maxBinCount, minBinCount, step],
+  );
+  const resetAuto = useCallback(() => {
+    setManualBinCountState(null);
+  }, []);
+
+  useEffect(() => {
+    if (!element || typeof ResizeObserver === "undefined") {
+      return undefined;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+
+      if (entry) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [element]);
+
+  return {
+    containerRef,
+    isAuto: manualBinCount === null,
+    resetAuto,
+    setManualBinCount,
+    targetBinCount,
+    width,
+  };
+}
+
 export function measureChartSeries<TProperties = Record<string, unknown>>(
   index: ChartDensityIndex<TProperties>,
   query: ChartDensityQuery,
@@ -532,6 +710,27 @@ function createPreviewData<TProperties>(samples: Array<ChartDensitySample<TPrope
   }));
 }
 
+function getNearestSample<TProperties>(
+  event: PointerEvent<SVGSVGElement>,
+  plottedSamples: Array<{ sample: ChartDensitySample<TProperties>; x: number; y: number }>,
+) {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const x = ((event.clientX - bounds.left) / Math.max(1, bounds.width)) * 100;
+  let nearest = plottedSamples[0] ?? null;
+  let nearestDistance = nearest ? Math.abs(nearest.x - x) : Number.POSITIVE_INFINITY;
+
+  for (const point of plottedSamples.slice(1)) {
+    const distance = Math.abs(point.x - x);
+
+    if (distance < nearestDistance) {
+      nearest = point;
+      nearestDistance = distance;
+    }
+  }
+
+  return nearest?.sample ?? null;
+}
+
 function formatDomainRange(domain: [number, number]) {
   return `${formatCompactNumber(domain[0])}-${formatCompactNumber(domain[1])}`;
 }
@@ -557,6 +756,21 @@ function formatNullableNumber(value: number | null) {
   return value === null ? "n/a" : formatCompactNumber(value);
 }
 
+function formatDefaultSampleLabel<TProperties>(sample: ChartDensitySample<TProperties>) {
+  return `Sample ${sample.index}`;
+}
+
+function formatDefaultSampleValue<TProperties>(
+  value: number | null,
+  _sample: ChartDensitySample<TProperties>,
+) {
+  return formatNullableNumber(value);
+}
+
+function formatUnknownError(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function joinClassNames(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
@@ -577,6 +791,12 @@ function hashString(value: string) {
 
 function isNumber(value: number | null): value is number {
   return value !== null;
+}
+
+function roundToStep(value: number, step: number, min: number, max: number) {
+  const stepped = Math.round(value / Math.max(1, step)) * Math.max(1, step);
+
+  return clamp(stepped, min, max);
 }
 
 function now() {

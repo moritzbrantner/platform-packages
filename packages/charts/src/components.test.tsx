@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import {
@@ -7,37 +7,52 @@ import {
   ChartSampleSparkline,
   ChartValueModeSelector,
   createChartDensityIndex,
+  getChartValueModeDefinitions,
   getChartSampleYBounds,
   measureChartSeries,
+  useChartBinCount,
 } from "@moritzbrantner/charts";
 
 describe("@moritzbrantner/charts", () => {
   test("renders default value modes and selects a mode", () => {
-    const onValueModeChange = vi.fn();
+    const onValueChange = vi.fn();
 
-    render(<ChartValueModeSelector valueMode="average" onValueModeChange={onValueModeChange} />);
+    render(<ChartValueModeSelector value="average" onValueChange={onValueChange} />);
 
-    for (const mode of ["average", "count", "max", "min", "sum"]) {
-      expect(screen.getByRole("button", { name: mode })).toBeTruthy();
+    for (const mode of ["Average", "Count", "Maximum", "Minimum", "Sum"]) {
+      expect(screen.getByRole("radio", { name: mode })).toBeTruthy();
     }
 
-    expect(screen.getByRole("button", { name: "average" }).getAttribute("aria-pressed")).toBe(
+    expect(screen.getByRole("radio", { name: "Average" }).getAttribute("aria-checked")).toBe(
       "true",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "count" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Count" }));
 
-    expect(onValueModeChange).toHaveBeenCalledWith("count");
+    expect(onValueChange).toHaveBeenCalledWith("count");
+  });
+
+  test("renders selected value mode definitions", () => {
+    render(
+      <ChartValueModeSelector
+        value="min"
+        definitions={getChartValueModeDefinitions(["min", "max"])}
+        onValueChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("radio", { name: "Minimum" })).toBeTruthy();
+    expect(screen.queryByRole("radio", { name: "Average" })).toBeNull();
   });
 
   test("renders chart ranges and selects a range", () => {
-    const onRangeChange = vi.fn();
+    const onValueChange = vi.fn();
 
     render(
       <ChartRangeSelector
-        activeRangeId="day"
+        value="day"
         formatDomain={(domain) => `${domain[0]} to ${domain[1]}`}
-        onRangeChange={onRangeChange}
+        onValueChange={onValueChange}
         ranges={[
           {
             description: "Full source domain.",
@@ -55,13 +70,15 @@ describe("@moritzbrantner/charts", () => {
       />,
     );
 
+    expect(screen.getByRole("radiogroup", { name: "Chart range" })).toBeTruthy();
     expect(screen.getByText("Day")).toBeTruthy();
     expect(screen.getByText("0 to 24")).toBeTruthy();
     expect(screen.getByText("Focused source domain.")).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /Day/ }).getAttribute("aria-checked")).toBe("true");
 
-    fireEvent.click(screen.getByRole("button", { name: /Focus/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /Focus/ }));
 
-    expect(onRangeChange).toHaveBeenCalledWith("focus");
+    expect(onValueChange).toHaveBeenCalledWith("focus");
   });
 
   test("renders backend status states and handles warmup", () => {
@@ -87,6 +104,7 @@ describe("@moritzbrantner/charts", () => {
 
     rerender(
       <ChartBackendStatus
+        onWarmNow={onWarmNow}
         status={{
           activeBackend: "hybrid-js",
           isWarming: true,
@@ -97,6 +115,9 @@ describe("@moritzbrantner/charts", () => {
     );
 
     expect(screen.getByText("warming")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Warm WASM now" }).hasAttribute("disabled")).toBe(
+      true,
+    );
 
     rerender(
       <ChartBackendStatus
@@ -111,6 +132,23 @@ describe("@moritzbrantner/charts", () => {
 
     expect(screen.getByText("wasm-index")).toBeTruthy();
     expect(screen.getByText("ready")).toBeTruthy();
+  });
+
+  test("renders backend fallback status and formats errors", () => {
+    render(
+      <ChartBackendStatus
+        formatError={(error) => `Fallback reason: ${String(error)}`}
+        status={{
+          activeBackend: "hybrid-js",
+          isWarming: false,
+          wasmError: "load failed",
+          wasmReady: false,
+        }}
+      />,
+    );
+
+    expect(screen.getByText("fallback")).toBeTruthy();
+    expect(screen.getByText("Fallback reason: load failed")).toBeTruthy();
   });
 
   test("renders sparkline samples and clamps SVG points", () => {
@@ -139,6 +177,58 @@ describe("@moritzbrantner/charts", () => {
       expect(y).toBeGreaterThanOrEqual(8);
       expect(y).toBeLessThanOrEqual(92);
     }
+  });
+
+  test("selects and hovers sparkline samples", () => {
+    const onSampleHover = vi.fn();
+    const onSampleSelect = vi.fn();
+    const index = createChartDensityIndex([
+      { id: "a", x: 0, y: 2 },
+      { id: "b", x: 5, y: 12 },
+      { id: "c", x: 10, y: 4 },
+    ]);
+    const series = index.getChartSeries({
+      includeEmptyBins: true,
+      targetBinCount: 3,
+      xDomain: [0, 10],
+    });
+    const { container } = render(
+      <ChartSampleSparkline
+        samples={series.samples}
+        domain={[0, 10]}
+        selectedSampleIndex={series.samples[0]?.index}
+        onSampleHover={onSampleHover}
+        onSampleSelect={onSampleSelect}
+      />,
+    );
+    const svg = screen.getByRole("img", {
+      name: "Dense chart sparkline",
+    }) as unknown as SVGSVGElement;
+    svg.getBoundingClientRect = () =>
+      ({
+        bottom: 100,
+        height: 100,
+        left: 0,
+        right: 100,
+        top: 0,
+        width: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect;
+
+    fireEvent.pointerMove(svg, { clientX: 0 });
+    fireEvent.click(svg, { clientX: 0 });
+    fireEvent.pointerLeave(svg);
+
+    expect(onSampleHover).toHaveBeenCalledWith(series.samples[0]);
+    expect(onSampleHover).toHaveBeenLastCalledWith(null);
+    expect(onSampleSelect).toHaveBeenCalledWith(series.samples[0]);
+    expect(container.querySelector("circle")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /Sample 1/ }));
+
+    expect(onSampleSelect).toHaveBeenCalledTimes(2);
   });
 
   test("renders sparkline empty state for empty samples", () => {
@@ -180,5 +270,55 @@ describe("@moritzbrantner/charts", () => {
       maxY: null,
       minY: null,
     });
+  });
+
+  test("measures responsive chart bin counts and manual overrides", () => {
+    let resizeCallback: ResizeObserverCallback | null = null;
+
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(callback: ResizeObserverCallback) {
+          resizeCallback = callback;
+        }
+
+        observe = vi.fn();
+        disconnect = vi.fn();
+      },
+    );
+
+    const element = document.createElement("div");
+    const { result } = renderHook(() => useChartBinCount());
+
+    act(() => {
+      result.current.containerRef(element);
+    });
+    act(() => {
+      resizeCallback?.(
+        [
+          {
+            contentRect: { width: 960 },
+          } as ResizeObserverEntry,
+        ],
+        {} as ResizeObserver,
+      );
+    });
+
+    expect(result.current.targetBinCount).toBe(120);
+    expect(result.current.isAuto).toBe(true);
+
+    act(() => {
+      result.current.setManualBinCount(999);
+    });
+
+    expect(result.current.targetBinCount).toBe(360);
+    expect(result.current.isAuto).toBe(false);
+
+    act(() => {
+      result.current.resetAuto();
+    });
+
+    expect(result.current.targetBinCount).toBe(120);
+    expect(result.current.isAuto).toBe(true);
   });
 });

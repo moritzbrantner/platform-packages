@@ -2,123 +2,78 @@
 
 Density-aware chart indexing helpers for large numeric series.
 
-## Main APIs
+The package adapts `@moritzbrantner/data-density` bins into chart-shaped samples,
+renderer data, viewport summaries, and chart-specific React controls. It does
+not own a primary chart renderer; Recharts, SVG, canvas, WebGL, or server-side
+renderers can all consume the same sample contract.
 
-The default export surface includes data helpers and chart-specific React UI:
+## Breaking migration
+
+This version intentionally cleans up the experimental public API:
+
+- `ChartDensityValueMode` is now `ChartValueMode`.
+- `ChartRangeSelector` uses `value` and `onValueChange` instead of
+  `activeRangeId` and `onRangeChange`.
+- `ChartValueModeSelector` uses `value`, `onValueChange`, and `definitions`
+  instead of `valueMode`, `onValueModeChange`, and `modes`.
+- `ChartValueModePreview` receives a `definition` instead of a raw `mode`.
+
+## Main APIs
 
 - `createChartDensityIndex(points, options)` / `createChartSeriesIndex(points, options)`
 - `createProgressiveChartDensityIndex(points, options)`
 - `index.getChartSeries(query)` / `index.getBinnedSeries(query)`
 - `createChartDensitySample(bin, valueMode)` / `createChartDensityViewportSummary(series)`
-- `useProgressiveChartDensity(points, options)`
+- `createChartRenderData(samples, options)` / `getChartGapAnnotations(samples)`
+- `CHART_VALUE_MODE_DEFINITIONS`, `getChartValueModeDefinition(mode)`,
+  `getChartValueModeDefinitions(modes)`
+- `useProgressiveChartDensity(points, options)` / `useChartBinCount(options)`
 - `ChartMetricCard`, `ChartMetricStrip`, `ChartRangeSelector`, `ChartValueModeSelector`
 - `ChartBackendStatus`, `ChartSampleSparkline`, `ChartHotBinRow`, `ChartValueModePreview`
 
-## Examples
-
-### UI-compatible Recharts rendering
-
-`@moritzbrantner/charts` returns plain chart samples, so it can feed the chart
-components and conventions from `@moritzbrantner/ui` while keeping large source
-arrays out of the renderer.
+## Responsive Recharts chart
 
 ```tsx
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { createChartDensityIndex } from "@moritzbrantner/charts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@moritzbrantner/ui";
-
-const index = createChartDensityIndex(points);
-const series = index.getChartSeries({
-  includeEmptyBins: true,
-  targetBinCount: 160,
-  valueMode: "average",
-  xDomain: [0, 1_440],
-});
-const chartData = series.samples.map((sample) => ({
-  average: sample.y,
-  label: `${Math.round(sample.x)}m`,
-}));
-
-export function DenseAreaChart() {
-  return (
-    <ChartContainer
-      className="min-h-72"
-      config={{ average: { label: "Average", color: "var(--chart-1)" } }}
-    >
-      <AreaChart data={chartData}>
-        <CartesianGrid vertical={false} />
-        <XAxis dataKey="label" tickLine={false} axisLine={false} />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Area
-          dataKey="average"
-          fill="var(--color-average)"
-          fillOpacity={0.16}
-          stroke="var(--color-average)"
-          type="monotone"
-        />
-      </AreaChart>
-    </ChartContainer>
-  );
-}
-```
-
-### Chart-owned frontend components
-
-Use `@moritzbrantner/charts` when chart-specific controls, backend status, or
-sample previews should live with the chart package instead of the shared UI
-design system.
-
-```tsx
-import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
-  ChartBackendStatus,
-  ChartMetricCard,
-  ChartRangeSelector,
-  ChartValueModeSelector,
-  createChartDensityViewportSummary,
-  measureChartSeries,
-  useProgressiveChartDensity,
-  type ChartDensityValueMode,
-  type ChartRange,
-  type ChartSeriesPoint,
+  createChartDensityIndex,
+  createChartRenderData,
+  useChartBinCount,
 } from "@moritzbrantner/charts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@moritzbrantner/ui";
 
-const ranges: ChartRange[] = [
-  { id: "day", label: "Day", domain: [0, 1_440] },
-  { id: "incident", label: "Incident", domain: [770, 900] },
-];
+const index = createChartDensityIndex(points);
 
-export function DenseChartPanel({ points }: { points: ChartSeriesPoint[] }) {
-  const [rangeId, setRangeId] = useState("day");
-  const [valueMode, setValueMode] = useState<ChartDensityValueMode>("average");
-  const { index, status, warmWasmNow } = useProgressiveChartDensity(points);
-  const activeRange = ranges.find((range) => range.id === rangeId) ?? ranges[0]!;
-  const measured = measureChartSeries(index, {
+export function DenseAreaChart() {
+  const { containerRef, targetBinCount } = useChartBinCount();
+  const series = index.getChartSeries({
     includeEmptyBins: true,
-    targetBinCount: 160,
-    valueMode,
-    xDomain: activeRange.domain,
+    targetBinCount,
+    valueMode: "average",
+    xDomain: [0, 1_440],
   });
-  const summary = createChartDensityViewportSummary(measured.series);
-  const chartData = measured.series.samples.map((sample) => ({
-    label: Math.round(sample.x),
-    value: sample.y,
-  }));
+  const chartData = createChartRenderData(series.samples, {
+    modes: ["average"],
+    xLabel: (sample) => `${Math.round(sample.x)}m`,
+  }).rows;
 
   return (
-    <div className="grid gap-4">
-      <ChartMetricCard label="Rendered samples" value={summary.sampleCount} />
-      <ChartBackendStatus status={status} onWarmNow={warmWasmNow} />
-      <ChartRangeSelector activeRangeId={rangeId} ranges={ranges} onRangeChange={setRangeId} />
-      <ChartValueModeSelector valueMode={valueMode} onValueModeChange={setValueMode} />
-      <ChartContainer config={{ value: { label: "Value", color: "var(--chart-1)" } }}>
+    <div ref={containerRef}>
+      <ChartContainer
+        className="min-h-72"
+        config={{ average: { label: "Average", color: "var(--chart-1)" } }}
+      >
         <AreaChart data={chartData}>
           <CartesianGrid vertical={false} />
-          <XAxis dataKey="label" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} />
           <ChartTooltip content={<ChartTooltipContent />} />
-          <Area dataKey="value" stroke="var(--color-value)" fill="var(--color-value)" />
+          <Area
+            dataKey="average"
+            fill="var(--color-average)"
+            fillOpacity={0.16}
+            stroke="var(--color-average)"
+            type="monotone"
+          />
         </AreaChart>
       </ChartContainer>
     </div>
@@ -126,91 +81,121 @@ export function DenseChartPanel({ points }: { points: ChartSeriesPoint[] }) {
 }
 ```
 
-### Progressive WASM warmup
+## Linked detail pane
 
-The default strategy renders immediately from `hybrid-js`, then warms a
-`wasm-index` in an idle slot and serves later queries from the WASM backend.
+```tsx
+import { useState } from "react";
+import { ChartSampleSparkline, useProgressiveChartDensity } from "@moritzbrantner/charts";
 
-```ts
-import { createProgressiveChartDensityIndex } from "@moritzbrantner/charts";
-
-const index = createProgressiveChartDensityIndex(points, {
-  progressive: {
-    onReady(nextIndex) {
-      console.log("WASM chart index ready", nextIndex.getSeriesBounds());
-    },
-  },
-});
-
-const firstPaint = index.getChartSeries({
-  targetBinCount: 120,
-  xDomain: [0, 1_440],
-});
-
-await index.whenWasmReady();
-
-const nextInteraction = index.getChartSeries({
-  targetBinCount: 240,
-  xDomain: [720, 900],
-});
-```
-
-### Alternate value modes
-
-Each bin includes average, count, min, max, and sum values. Use `valueMode` to
-choose the sample `y` value without changing chart code.
-
-```ts
-const modes = ["average", "count", "max", "min", "sum"] as const;
-
-const modeSeries = modes.map((valueMode) =>
-  index.getChartSeries({
+export function LinkedChartDetails({ points }) {
+  const { index } = useProgressiveChartDensity(points);
+  const [selectedSampleIndex, setSelectedSampleIndex] = useState<number | null>(null);
+  const series = index.getChartSeries({
     includeEmptyBins: true,
-    targetBinCount: 80,
-    valueMode,
+    targetBinCount: 120,
     xDomain: [0, 1_440],
-  }),
-);
+  });
+  const selectedSample =
+    series.samples.find((sample) => sample.index === selectedSampleIndex) ?? null;
+  const point = selectedSample?.firstPoint
+    ? index.getPointById(selectedSample.firstPoint.id)
+    : null;
+
+  return (
+    <>
+      <ChartSampleSparkline
+        samples={series.samples}
+        domain={series.summary.xDomain}
+        selectedSampleIndex={selectedSampleIndex}
+        onSampleSelect={(sample) => setSelectedSampleIndex(sample.index)}
+      />
+      <pre>{JSON.stringify(point?.properties ?? null, null, 2)}</pre>
+    </>
+  );
+}
 ```
 
-### Viewport summaries and point lookup
+## Manual WASM warmup and fallback display
 
-Chart samples preserve metrics and source-point references for dashboard totals,
-annotations, and drilldowns.
+```tsx
+import { ChartBackendStatus, useProgressiveChartDensity } from "@moritzbrantner/charts";
+
+export function BackendPanel({ points }) {
+  const { status, warmWasmNow } = useProgressiveChartDensity(points, {
+    progressive: {
+      warmup: "manual",
+    },
+  });
+
+  return (
+    <ChartBackendStatus
+      status={status}
+      onWarmNow={warmWasmNow}
+      formatError={(error) => `Using hybrid JS fallback: ${String(error)}`}
+    />
+  );
+}
+```
+
+## Server-side or renderer-agnostic data
 
 ```ts
-import { createChartDensityViewportSummary } from "@moritzbrantner/charts";
+import { createChartDensityIndex, createChartRenderData } from "@moritzbrantner/charts";
 
+const index = createChartDensityIndex(points, { backend: "hybrid-js" });
 const series = index.getChartSeries({
+  includeEmptyBins: true,
   targetBinCount: 96,
-  valueMode: "average",
+  valueMode: "sum",
   xDomain: [360, 720],
 });
-const summary = createChartDensityViewportSummary(series);
-const busiestBin = [...series.samples].sort((left, right) => right.pointCount - left.pointCount)[0];
-const firstSourcePoint = busiestBin?.firstPoint
-  ? index.getPointById(busiestBin.firstPoint.id)
-  : null;
-
-console.log(summary.metrics, firstSourcePoint?.properties);
+const payload = createChartRenderData(series.samples, {
+  gapBehavior: "preserve",
+  includeMetrics: true,
+  modes: ["sum", "count"],
+});
 ```
 
+## Choosing value modes
+
+Use value-mode definitions when controls, axes, previews, and tooltips need
+labels or formatting:
+
+```ts
+import { getChartValueModeDefinitions } from "@moritzbrantner/charts";
+
+const definitions = getChartValueModeDefinitions(["average", "count", "max"]);
+```
+
+- `average`: mean y value per bin, usually best for trend lines.
+- `count`: source-point count per bin, usually best as bars.
+- `max`: highest y in each bin, useful for peaks and thresholds.
+- `min`: lowest y in each bin, useful for floors and ranges.
+- `sum`: total y in each bin, useful for volume and totals.
+
+## Gap behavior
+
+`createChartRenderData` supports four empty-bin policies:
+
+- `preserve`: keep empty bins with `null` values. This is the default.
+- `connect`: drop empty bins from rows and return gap annotations.
+- `drop`: drop empty bins without annotations.
+- `zero-fill`: keep empty bins and convert missing values to `0`.
+
+```ts
+const connected = createChartRenderData(series.samples, { gapBehavior: "connect" });
+console.log(connected.annotations);
+```
+
+## Progressive strategy
+
+By default, `createChartDensityIndex` renders immediately from `hybrid-js`, warms
+a `wasm-index` in an idle slot, then serves later queries from the WASM backend.
+Pass `backend: "hybrid-js"` or `backend: "wasm-index"` to force one backend.
+
 Open `examples/playground/charts.html` in the local playground for a combined
-example with UI chart parity, dense WASM sampling, zoomed domains, value-mode
-previews, viewport totals, and source-point lookup.
-
-By default, `createChartDensityIndex` uses the progressive chart strategy:
-
-1. Build a `hybrid-js` index synchronously for immediate chart samples.
-2. Warm a `wasm-index` in the next idle slot.
-3. Switch subsequent queries to the `wasm-index` once it is ready.
-
-Pass `backend: "hybrid-js"` or `backend: "wasm-index"` to force one backend. Use
-`createProgressiveChartDensityIndex` when you need status inspection or manual
-warmup, for example after the first chart interaction.
-
-The `wasm-index` backend is provided by `@moritzbrantner/data-density` and powered
-by `@mb-rust/dense-data-wasm`.
+example with responsive binning, value-mode previews, viewport totals, sample
+selection, gap-safe render data, and source-point lookup.
 
 ## Verification
 

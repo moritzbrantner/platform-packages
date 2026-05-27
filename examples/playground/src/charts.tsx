@@ -10,17 +10,20 @@ import {
   ChartSampleSparkline,
   ChartValueModePreview,
   ChartValueModeSelector,
+  createChartRenderData,
   createChartDensityViewportSummary,
   getChartSampleYBounds,
+  getChartValueModeDefinitions,
   measureChartSeries,
+  useChartBinCount,
   useProgressiveChartDensity,
-  type ChartDensitySample,
-  type ChartDensityValueMode,
   type ChartRange,
   type ChartSeriesPoint,
+  type ChartValueMode,
 } from "@moritzbrantner/charts";
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
@@ -47,7 +50,8 @@ type TelemetryPointProperties = {
 const SOURCE_POINT_COUNT = 180_000;
 const DAY_DOMAIN = [0, 1_440] as [number, number];
 const DEFAULT_TARGET_BINS = 144;
-const VALUE_MODES: ChartDensityValueMode[] = ["average", "count", "max", "min", "sum"];
+const VALUE_MODES: ChartValueMode[] = ["average", "count", "max", "min", "sum"];
+const VALUE_MODE_DEFINITIONS = getChartValueModeDefinitions(VALUE_MODES);
 const telemetryPoints = createTelemetryPoints(SOURCE_POINT_COUNT);
 
 const chartRanges: ChartRange[] = [
@@ -82,20 +86,28 @@ const primaryChartConfig = {
     color: "var(--chart-1)",
     label: "Average",
   },
-  maximum: {
+  max: {
     color: "var(--chart-2)",
     label: "Maximum",
   },
-  minimum: {
+  min: {
     color: "var(--chart-3)",
     label: "Minimum",
   },
 };
 
 function ChartsPage() {
-  const [targetBinCount, setTargetBinCount] = useState(DEFAULT_TARGET_BINS);
-  const [valueMode, setValueMode] = useState<ChartDensityValueMode>("average");
+  const {
+    containerRef,
+    isAuto,
+    resetAuto,
+    setManualBinCount,
+    targetBinCount,
+    width: chartWidth,
+  } = useChartBinCount({ defaultBinCount: DEFAULT_TARGET_BINS });
+  const [valueMode, setValueMode] = useState<ChartValueMode>("average");
   const [rangeId, setRangeId] = useState("day");
+  const [selectedSampleIndex, setSelectedSampleIndex] = useState<number | null>(null);
   const { index: chartIndex, status, warmWasmNow } = useProgressiveChartDensity(telemetryPoints);
 
   const activeRange = chartRanges.find((range) => range.id === rangeId) ?? chartRanges[0]!;
@@ -115,7 +127,13 @@ function ChartsPage() {
     [measuredSeries.series],
   );
   const chartData = useMemo(
-    () => createChartData(measuredSeries.series.samples),
+    () =>
+      createChartRenderData(measuredSeries.series.samples, {
+        includeMetrics: true,
+        includeSample: true,
+        modes: ["average", "max", "min"],
+        xLabel: (sample) => formatMinute(sample.x),
+      }).rows,
     [measuredSeries.series],
   );
   const visibleYBounds = useMemo(
@@ -124,12 +142,12 @@ function ChartsPage() {
   );
   const modeSeries = useMemo(
     () =>
-      VALUE_MODES.map((mode) => ({
-        mode,
+      VALUE_MODE_DEFINITIONS.map((definition) => ({
+        definition,
         measured: measureChartSeries(chartIndex, {
           includeEmptyBins: true,
           targetBinCount: 64,
-          valueMode: mode,
+          valueMode: definition.id,
           xDomain: activeRange.domain,
         }),
       })),
@@ -143,12 +161,23 @@ function ChartsPage() {
         .slice(0, 6),
     [measuredSeries.series],
   );
+  const selectedSample =
+    measuredSeries.series.samples.find((sample) => sample.index === selectedSampleIndex) ?? null;
   const focusSample =
+    selectedSample ??
     measuredSeries.series.samples.find((sample) => sample.firstPoint && sample.lastPoint) ??
     measuredSeries.series.samples.find((sample) => sample.pointCount > 0);
   const focusPoint = focusSample?.firstPoint
     ? chartIndex.getPointById(focusSample.firstPoint.id)
     : null;
+  const selectRange = (nextRangeId: string) => {
+    setRangeId(nextRangeId);
+    setSelectedSampleIndex(null);
+  };
+  const selectValueMode = (nextValueMode: ChartValueMode) => {
+    setValueMode(nextValueMode);
+    setSelectedSampleIndex(null);
+  };
 
   return (
     <PlaygroundPage
@@ -183,7 +212,7 @@ function ChartsPage() {
         />
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-[1.35fr_0.65fr]">
+      <section className="mt-4">
         <Card className="rounded-none border-border/60 bg-background/80 shadow-lg shadow-black/5">
           <CardHeader>
             <div className="flex flex-wrap items-center gap-3">
@@ -194,7 +223,7 @@ function ChartsPage() {
                 {formatInteger(SOURCE_POINT_COUNT)} raw points
               </Badge>
               <Badge variant="outline" className="rounded-full px-3 py-1">
-                {targetBinCount} samples
+                {status.activeBackend}
               </Badge>
             </div>
             <CardTitle>Dense telemetry as a UI-compatible chart</CardTitle>
@@ -204,79 +233,81 @@ function ChartsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <ChartContainer className="min-h-[360px] w-full" config={primaryChartConfig}>
-              <AreaChart data={chartData} margin={{ bottom: 4, left: 8, right: 12, top: 12 }}>
-                <CartesianGrid vertical={false} />
-                <XAxis dataKey="label" minTickGap={32} tickLine={false} axisLine={false} />
-                <YAxis width={44} tickLine={false} axisLine={false} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Legend content={<ChartLegendContent />} />
-                <Area
-                  dataKey="average"
-                  fill="var(--color-average)"
-                  fillOpacity={0.14}
-                  name="Average"
-                  stroke="var(--color-average)"
-                  type="monotone"
+            <div className="grid gap-4 xl:grid-cols-[1fr_1fr_1fr_0.9fr]">
+              <ChartRangeSelector
+                value={activeRange.id}
+                formatDomain={(domain) => `${formatMinute(domain[0])}-${formatMinute(domain[1])}`}
+                onValueChange={selectRange}
+                ranges={chartRanges}
+              />
+              <div className="space-y-3">
+                <p className="text-sm font-medium">Value mode</p>
+                <ChartValueModeSelector
+                  definitions={VALUE_MODE_DEFINITIONS}
+                  value={valueMode}
+                  onValueChange={selectValueMode}
                 />
-                <Line
-                  dataKey="maximum"
-                  dot={false}
-                  name="Maximum"
-                  stroke="var(--color-maximum)"
-                  strokeWidth={1.4}
-                  type="monotone"
-                />
-                <Line
-                  dataKey="minimum"
-                  dot={false}
-                  name="Minimum"
-                  stroke="var(--color-minimum)"
-                  strokeWidth={1.4}
-                  type="monotone"
-                />
-              </AreaChart>
-            </ChartContainer>
-
-            <div className="grid gap-4 lg:grid-cols-[1fr_0.75fr]">
+              </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="font-medium">Target samples</span>
-                  <span className="text-muted-foreground">{targetBinCount}</span>
+                  <span className="text-muted-foreground">
+                    {targetBinCount}
+                    {isAuto ? " auto" : " manual"}
+                  </span>
                 </div>
                 <Slider
                   value={[targetBinCount]}
                   min={48}
                   max={360}
                   step={12}
-                  onValueChange={(value) => setTargetBinCount(value[0] ?? DEFAULT_TARGET_BINS)}
+                  aria-label="Target samples"
+                  onValueChange={(value) => setManualBinCount(value[0] ?? DEFAULT_TARGET_BINS)}
                 />
+                <Button type="button" variant="outline" size="sm" onClick={resetAuto}>
+                  Auto
+                </Button>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <ChartValueModeSelector
-                  modes={VALUE_MODES}
-                  valueMode={valueMode}
-                  onValueModeChange={setValueMode}
-                />
-              </div>
+              <ChartBackendStatus status={status} onWarmNow={warmWasmNow} />
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="rounded-none border-border/60 bg-background/80 shadow-lg shadow-black/5">
-          <CardHeader>
-            <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
-              Progressive backend
-            </Badge>
-            <CardTitle>Immediate render, WASM warmup after idle</CardTitle>
-            <CardDescription>
-              The page starts with a synchronous hybrid index and automatically switches to the WASM
-              index when it is ready.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <ChartBackendStatus status={status} onWarmNow={warmWasmNow} />
-            <div className="grid gap-3">
+            <div ref={containerRef}>
+              <ChartContainer className="min-h-[360px] w-full" config={primaryChartConfig}>
+                <AreaChart data={chartData} margin={{ bottom: 4, left: 8, right: 12, top: 12 }}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="label" minTickGap={32} tickLine={false} axisLine={false} />
+                  <YAxis width={44} tickLine={false} axisLine={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend content={<ChartLegendContent />} />
+                  <Area
+                    dataKey="average"
+                    fill="var(--color-average)"
+                    fillOpacity={0.14}
+                    name="Average"
+                    stroke="var(--color-average)"
+                    type="monotone"
+                  />
+                  <Line
+                    dataKey="max"
+                    dot={false}
+                    name="Maximum"
+                    stroke="var(--color-max)"
+                    strokeWidth={1.4}
+                    type="monotone"
+                  />
+                  <Line
+                    dataKey="min"
+                    dot={false}
+                    name="Minimum"
+                    stroke="var(--color-min)"
+                    strokeWidth={1.4}
+                    type="monotone"
+                  />
+                </AreaChart>
+              </ChartContainer>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-4">
               <ChartMetricStrip
                 label="Bins"
                 value={formatInteger(measuredSeries.series.summary.binCount)}
@@ -288,33 +319,16 @@ function ChartsPage() {
                 }
               />
               <ChartMetricStrip label="Mode" value={measuredSeries.series.summary.valueMode} />
+              <ChartMetricStrip
+                label="Chart width"
+                value={chartWidth === null ? "unmeasured" : `${Math.round(chartWidth)} px`}
+              />
             </div>
           </CardContent>
         </Card>
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <Card className="rounded-none border-border/60 bg-background/80 shadow-lg shadow-black/5">
-          <CardHeader>
-            <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
-              Domains
-            </Badge>
-            <CardTitle>Zoom without changing the renderer contract</CardTitle>
-            <CardDescription>
-              Each range queries the same index with a different x-domain and returns the same
-              sample shape.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <ChartRangeSelector
-              activeRangeId={activeRange.id}
-              formatDomain={(domain) => `${formatMinute(domain[0])}-${formatMinute(domain[1])}`}
-              onRangeChange={setRangeId}
-              ranges={chartRanges}
-            />
-          </CardContent>
-        </Card>
-
+      <section className="mt-4">
         <Card className="rounded-none border-border/60 bg-background/80 shadow-lg shadow-black/5">
           <CardHeader>
             <div className="flex flex-wrap items-center gap-3">
@@ -332,13 +346,13 @@ function ChartsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
-            {modeSeries.map(({ mode, measured }) => (
+            {modeSeries.map(({ definition, measured }) => (
               <ChartValueModePreview
-                key={mode}
-                mode={mode}
+                key={definition.id}
+                definition={definition}
                 measured={measured}
-                active={mode === valueMode}
-                onSelect={() => setValueMode(mode)}
+                active={definition.id === valueMode}
+                onSelect={() => selectValueMode(definition.id)}
               />
             ))}
           </CardContent>
@@ -427,6 +441,11 @@ function ChartsPage() {
               samples={measuredSeries.series.samples}
               domain={activeRange.domain}
               formatDomainValue={formatMinute}
+              formatSampleLabel={(sample) =>
+                `${formatMinute(sample.x0)}-${formatMinute(sample.x1)}`
+              }
+              onSampleSelect={(sample) => setSelectedSampleIndex(sample.index)}
+              selectedSampleIndex={selectedSampleIndex}
             />
             <div className="grid gap-3 sm:grid-cols-3">
               <ChartMetricStrip label="Max y" value={formatDecimal(visibleYBounds.maxY)} />
@@ -463,19 +482,6 @@ function ChartsPage() {
       </section>
     </PlaygroundPage>
   );
-}
-
-function createChartData(samples: Array<ChartDensitySample<TelemetryPointProperties>>) {
-  return samples.map((sample) => ({
-    average: sample.averageY,
-    count: sample.pointCount,
-    label: formatMinute(sample.x),
-    maximum: sample.maxY,
-    minimum: sample.minY,
-    revenue: sample.metrics.revenue ?? 0,
-    value: sample.y,
-    x: sample.x,
-  }));
 }
 
 function createTelemetryPoints(count: number): Array<ChartSeriesPoint<TelemetryPointProperties>> {

@@ -4,8 +4,12 @@ import {
   createChartDensityIndex,
   createChartDensitySample,
   createChartDensityViewportSummary,
+  createChartRenderData,
   createProgressiveChartDensityIndex,
-  type ChartDensityValueMode,
+  getChartGapAnnotations,
+  getChartValueModeDefinition,
+  getChartValueModeDefinitions,
+  type ChartValueMode,
 } from "@moritzbrantner/charts";
 
 describe("@moritzbrantner/charts", () => {
@@ -67,7 +71,7 @@ describe("@moritzbrantner/charts", () => {
     ];
     const hybrid = createChartDensityIndex(points, { backend: "hybrid-js" });
     const wasm = createChartDensityIndex(points, { backend: "wasm-index" });
-    const valueModes: ChartDensityValueMode[] = ["average", "count", "max", "min", "sum"];
+    const valueModes: ChartValueMode[] = ["average", "count", "max", "min", "sum"];
 
     for (const valueMode of valueModes) {
       const query = {
@@ -184,6 +188,84 @@ describe("@moritzbrantner/charts", () => {
     expect(
       index.getChartSeries({ ...query, valueMode: "sum" }).samples.map((sample) => sample.y),
     ).toEqual([10, null, -4, null]);
+  });
+
+  test("exposes chart value mode definitions", () => {
+    expect(getChartValueModeDefinition("count")).toMatchObject({
+      axisLabel: "Point count",
+      id: "count",
+      label: "Count",
+      renderer: "bar",
+    });
+    expect(getChartValueModeDefinitions(["min", "max"]).map((definition) => definition.id)).toEqual(
+      ["min", "max"],
+    );
+    expect(() => getChartValueModeDefinition("median" as ChartValueMode)).toThrow(
+      "Unknown chart value mode: median",
+    );
+  });
+
+  test("creates renderer data with configurable gap behavior", () => {
+    const index = createChartDensityIndex(
+      [
+        { id: "a", x: 0, y: 2, metrics: { orders: 1 } },
+        { id: "b", x: 20, y: 8, metrics: { orders: 2 } },
+      ],
+      { backend: "hybrid-js" },
+    );
+    const samples = index.getChartSeries({
+      includeEmptyBins: true,
+      targetBinCount: 5,
+      valueMode: "average",
+      xDomain: [0, 50],
+    }).samples;
+
+    expect(createChartRenderData(samples).rows.map((row) => row.value)).toEqual([
+      2,
+      null,
+      8,
+      null,
+      null,
+    ]);
+    expect(
+      createChartRenderData(samples, {
+        gapBehavior: "connect",
+        includeMetrics: true,
+        includeSample: true,
+        xLabel: (sample) => `x-${sample.index}`,
+      }),
+    ).toMatchObject({
+      annotations: [
+        { endIndex: 1, sampleCount: 1, startIndex: 1 },
+        { endIndex: 4, sampleCount: 2, startIndex: 3 },
+      ],
+      rows: [
+        { label: "x-0", metrics: { orders: 1 }, sample: samples[0], value: 2 },
+        { label: "x-2", metrics: { orders: 2 }, sample: samples[2], value: 8 },
+      ],
+    });
+    expect(createChartRenderData(samples, { gapBehavior: "drop" }).annotations).toEqual([]);
+    expect(createChartRenderData(samples, { gapBehavior: "drop" }).rows).toHaveLength(2);
+    expect(
+      createChartRenderData(samples, { gapBehavior: "zero-fill" }).rows.map((row) => row.value),
+    ).toEqual([2, 0, 8, 0, 0]);
+  });
+
+  test("describes one or more empty chart sample runs", () => {
+    const index = createChartDensityIndex([
+      { id: "a", x: 0, y: 2 },
+      { id: "b", x: 30, y: 8 },
+    ]);
+    const samples = index.getChartSeries({
+      includeEmptyBins: true,
+      targetBinCount: 6,
+      xDomain: [0, 60],
+    }).samples;
+
+    expect(getChartGapAnnotations(samples)).toMatchObject([
+      { endIndex: 2, sampleCount: 2, startIndex: 1 },
+      { endIndex: 5, sampleCount: 2, startIndex: 4 },
+    ]);
   });
 
   test("progressively renders with hybrid-js and switches to wasm-index after warmup", async () => {

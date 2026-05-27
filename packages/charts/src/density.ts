@@ -20,10 +20,62 @@ export type IndexedChartSeriesPoint<TProperties = Record<string, unknown>> =
   IndexedNumericSeriesPoint<TProperties>;
 export type ChartDensityBin<TProperties = Record<string, unknown>> = BinnedSeriesBin<TProperties>;
 
-export type ChartDensityValueMode = "average" | "count" | "max" | "min" | "sum";
+export type ChartValueMode = "average" | "count" | "max" | "min" | "sum";
+
+export type ChartValueModeRenderer = "line" | "bar";
+
+export type ChartValueModeDefinition = {
+  axisLabel: string;
+  color: string;
+  description: string;
+  formatValue: (value: number | null, sample: ChartDensitySample) => string;
+  id: ChartValueMode;
+  label: string;
+  renderer: ChartValueModeRenderer;
+};
+
+export type ChartGapBehavior = "preserve" | "connect" | "drop" | "zero-fill";
+
+export type ChartGapAnnotation = {
+  endIndex: number;
+  endX: number;
+  sampleCount: number;
+  startIndex: number;
+  startX: number;
+};
+
+export type ChartRenderDataOptions<TProperties = Record<string, unknown>> = {
+  gapBehavior?: ChartGapBehavior;
+  includeMetrics?: boolean;
+  includeSample?: boolean;
+  modes?: readonly ChartValueMode[];
+  xLabel?: (sample: ChartDensitySample<TProperties>) => string;
+};
+
+export type ChartRenderDatum<TProperties = Record<string, unknown>> = {
+  average: number | null;
+  count: number | null;
+  index: number;
+  label: string;
+  max: number | null;
+  metrics?: ChartMetricRecord;
+  min: number | null;
+  pointCount: number;
+  sample?: ChartDensitySample<TProperties>;
+  sum: number | null;
+  value: number | null;
+  x: number;
+  x0: number;
+  x1: number;
+};
+
+export type ChartRenderData<TProperties = Record<string, unknown>> = {
+  annotations: ChartGapAnnotation[];
+  rows: Array<ChartRenderDatum<TProperties>>;
+};
 
 export type ChartDensityQuery = BinnedSeriesQuery & {
-  valueMode?: ChartDensityValueMode;
+  valueMode?: ChartValueMode;
 };
 
 export type ChartDensityBackend = BinnedSeriesBackend | "progressive";
@@ -46,13 +98,13 @@ export type ChartDensitySample<TProperties = Record<string, unknown>> = {
 
 export type ChartDensitySummary = BinnedSeriesSummary & {
   sampleCount: number;
-  valueMode: ChartDensityValueMode;
+  valueMode: ChartValueMode;
 };
 
 export type ChartDensityViewportSummary = DataDensityViewportSummary & {
   binCount: number;
   sampleCount: number;
-  valueMode: ChartDensityValueMode;
+  valueMode: ChartValueMode;
   xDomain: BinnedSeriesSummary["xDomain"];
 };
 
@@ -105,6 +157,74 @@ export type ProgressiveChartDensityIndex<TProperties = Record<string, unknown>> 
     warmWasmIndex(): Promise<ChartDensityIndex<TProperties>>;
     whenWasmReady(): Promise<ChartDensityIndex<TProperties>>;
   };
+
+export const CHART_VALUE_MODE_DEFINITIONS: readonly ChartValueModeDefinition[] = [
+  {
+    axisLabel: "Average y",
+    color: "var(--chart-1)",
+    description: "Mean y value across every source point in each bin.",
+    formatValue: formatNullableCompactNumber,
+    id: "average",
+    label: "Average",
+    renderer: "line",
+  },
+  {
+    axisLabel: "Point count",
+    color: "var(--chart-4)",
+    description: "Number of source points represented by each bin.",
+    formatValue: formatNullableCompactNumber,
+    id: "count",
+    label: "Count",
+    renderer: "bar",
+  },
+  {
+    axisLabel: "Maximum y",
+    color: "var(--chart-2)",
+    description: "Highest y value found inside each bin.",
+    formatValue: formatNullableCompactNumber,
+    id: "max",
+    label: "Maximum",
+    renderer: "line",
+  },
+  {
+    axisLabel: "Minimum y",
+    color: "var(--chart-3)",
+    description: "Lowest y value found inside each bin.",
+    formatValue: formatNullableCompactNumber,
+    id: "min",
+    label: "Minimum",
+    renderer: "line",
+  },
+  {
+    axisLabel: "Sum y",
+    color: "var(--chart-5)",
+    description: "Total y value across every source point in each bin.",
+    formatValue: formatNullableCompactNumber,
+    id: "sum",
+    label: "Sum",
+    renderer: "line",
+  },
+];
+
+export function getChartValueModeDefinition(mode: ChartValueMode): ChartValueModeDefinition {
+  const definition = CHART_VALUE_MODE_DEFINITIONS.find((item) => item.id === mode);
+
+  if (!definition) {
+    throw new Error(`Unknown chart value mode: ${mode}`);
+  }
+
+  return definition;
+}
+
+export function getChartValueModeDefinitions(
+  modes?: readonly ChartValueMode[],
+): ChartValueModeDefinition[] {
+  if (!modes) {
+    return [...CHART_VALUE_MODE_DEFINITIONS];
+  }
+
+  return modes.map((mode) => getChartValueModeDefinition(mode));
+}
 
 export function createChartDensityIndex<TProperties = Record<string, unknown>>(
   points: readonly ChartSeriesPoint<TProperties>[],
@@ -262,7 +382,7 @@ export const createChartSeriesIndex = createChartDensityIndex;
 
 export function createChartDensitySample<TProperties = Record<string, unknown>>(
   bin: ChartDensityBin<TProperties>,
-  valueMode: ChartDensityValueMode = "average",
+  valueMode: ChartValueMode = "average",
 ): ChartDensitySample<TProperties> {
   return {
     averageY: bin.averageY,
@@ -297,9 +417,94 @@ export function createChartDensityViewportSummary<TProperties = Record<string, u
   };
 }
 
+export function getChartGapAnnotations<TProperties>(
+  samples: Array<ChartDensitySample<TProperties>>,
+): ChartGapAnnotation[] {
+  const annotations: ChartGapAnnotation[] = [];
+  let startSample: ChartDensitySample<TProperties> | null = null;
+  let previousSample: ChartDensitySample<TProperties> | null = null;
+
+  for (const sample of samples) {
+    if (sample.y === null) {
+      startSample ??= sample;
+      previousSample = sample;
+      continue;
+    }
+
+    if (startSample && previousSample) {
+      annotations.push(createGapAnnotation(startSample, previousSample));
+    }
+
+    startSample = null;
+    previousSample = null;
+  }
+
+  if (startSample && previousSample) {
+    annotations.push(createGapAnnotation(startSample, previousSample));
+  }
+
+  return annotations;
+}
+
+export function createChartRenderData<TProperties>(
+  samples: Array<ChartDensitySample<TProperties>>,
+  options: ChartRenderDataOptions<TProperties> = {},
+): ChartRenderData<TProperties> {
+  const {
+    gapBehavior = "preserve",
+    includeMetrics = false,
+    includeSample = false,
+    modes,
+    xLabel = (sample) => String(sample.x),
+  } = options;
+  const includedModes = new Set<ChartValueMode>(modes ?? ["average", "count", "max", "min", "sum"]);
+  const includeEmptySamples = gapBehavior === "preserve" || gapBehavior === "zero-fill";
+  const zeroFill = gapBehavior === "zero-fill";
+  const annotations = gapBehavior === "connect" ? getChartGapAnnotations(samples) : [];
+  const rows = samples
+    .filter((sample) => includeEmptySamples || sample.y !== null)
+    .map((sample) => {
+      const row: ChartRenderDatum<TProperties> = {
+        average: includedModes.has("average")
+          ? normalizeRenderValue(sample.averageY, zeroFill)
+          : null,
+        count: includedModes.has("count")
+          ? normalizeRenderValue(sample.pointCount > 0 ? sample.pointCount : null, zeroFill)
+          : null,
+        index: sample.index,
+        label: xLabel(sample),
+        max: includedModes.has("max") ? normalizeRenderValue(sample.maxY, zeroFill) : null,
+        min: includedModes.has("min") ? normalizeRenderValue(sample.minY, zeroFill) : null,
+        pointCount: sample.pointCount,
+        sum: includedModes.has("sum")
+          ? normalizeRenderValue(sample.pointCount > 0 ? sample.sumY : null, zeroFill)
+          : null,
+        value: normalizeRenderValue(sample.y, zeroFill),
+        x: sample.x,
+        x0: sample.x0,
+        x1: sample.x1,
+      };
+
+      if (includeMetrics) {
+        row.metrics = sample.metrics;
+      }
+
+      if (includeSample) {
+        row.sample = sample;
+      }
+
+      return row;
+    });
+
+  return {
+    annotations,
+    rows,
+  };
+}
+
 function getChartDensityValue<TProperties>(
   bin: ChartDensityBin<TProperties>,
-  valueMode: ChartDensityValueMode,
+  valueMode: ChartValueMode,
 ) {
   if (bin.pointCount === 0) {
     return null;
@@ -317,6 +522,34 @@ function getChartDensityValue<TProperties>(
     case "average":
       return bin.averageY;
   }
+}
+
+function createGapAnnotation<TProperties>(
+  startSample: ChartDensitySample<TProperties>,
+  endSample: ChartDensitySample<TProperties>,
+): ChartGapAnnotation {
+  return {
+    endIndex: endSample.index,
+    endX: endSample.x,
+    sampleCount: endSample.index - startSample.index + 1,
+    startIndex: startSample.index,
+    startX: startSample.x,
+  };
+}
+
+function normalizeRenderValue(value: number | null, zeroFill: boolean) {
+  return value === null && zeroFill ? 0 : value;
+}
+
+function formatNullableCompactNumber(value: number | null) {
+  if (value === null) {
+    return "n/a";
+  }
+
+  return new Intl.NumberFormat("en", {
+    maximumFractionDigits: 1,
+    notation: Math.abs(value) >= 10_000 ? "compact" : "standard",
+  }).format(value);
 }
 
 function scheduleChartDensityWarmup(
