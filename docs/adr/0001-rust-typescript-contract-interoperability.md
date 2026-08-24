@@ -44,7 +44,7 @@ they do not gain a Rust or WASM owner through this decision.
 
 | Exchange or package surface | Semantic owner | Publication owner | TypeScript disposition |
 | --- | --- | --- | --- |
-| Text document, text span, and transcript document/segment/word/character JSON | `moritzbrantner/nlp-stack` (`moenarch-text-core` and `moenarch-text-transcripts`) | `nlp-stack`; `@moritzbrantner/text-core-wasm` and `@moritzbrantner/text-transcripts-wasm` | `@moritzbrantner/speech` and `@moritzbrantner/subtitles` validate exchange payloads against the released transcript schema and map their browser models at that boundary. |
+| Text document, text span, and transcript document/segment/word/character JSON | `moritzbrantner/nlp-stack` (`moenarch-text-core` and `moenarch-text-transcripts`) | `nlp-stack`; `@moritzbrantner/text-core-wasm` and `@moritzbrantner/text-transcripts-wasm` | `@moritzbrantner/linguistics-core` keeps its existing public `TextSpan`, `TextDocument`, paragraph, sentence, token, chunk, and related types as platform-local processing models, not stable exchange DTOs. It consumes the released NLP contract through a validating adapter and maps at that boundary. `@moritzbrantner/speech` and `@moritzbrantner/subtitles` likewise validate exchange payloads against the released transcript schema and map their browser models. |
 | Browser microphone capture, websocket reconnect state, live-provider response mapping, and React hooks | `moritzbrantner/platform-packages` | `platform-packages` publishes `@moritzbrantner/speech` | The current websocket protocol is an application transport. It is not a replacement for the transcript exchange schema; finalized transcript data converts to the NLP contract. |
 | Rust transcription execution request and result envelopes | `moritzbrantner/audio-analysis` (`moenarch-audio-analysis-transcription`) | `audio-analysis`; `@moritzbrantner/audio-analysis-transcription-wasm` | Browser applications use a released wrapper or a versioned envelope adapter; they do not redefine the execution DTO. Finalized transcript payloads use the NLP contract. |
 | Timed-text parsing, editor state, ASS/SSA/SRT/WebVTT/YouTube file handling, and cue-local metadata | `moritzbrantner/platform-packages` | `platform-packages` publishes `@moritzbrantner/subtitles` | `TimedTextDocument` remains the browser editing model. Its transcript JSON import/export adapter validates the NLP transcript schema and explicitly converts seconds to the package's millisecond cue fields. |
@@ -75,7 +75,9 @@ versioned release inputs together:
 
 1. a JSON Schema Draft 2020-12 artifact derived from the Rust serialized
    contract, including its schema identifier and semantic version;
-2. canonical valid and invalid JSON fixtures, serialized by the Rust contract;
+2. canonical valid JSON fixtures serialized by the Rust contract, plus invalid JSON
+   fixtures deliberately mutated from canonical fixtures or independently authored
+   to violate the contract;
 3. generated TypeScript declarations or a deterministic generator input; and
 4. a compatibility note identifying additive, deprecated, and breaking fields.
 
@@ -105,8 +107,10 @@ wrapper is released. The commands are a release checklist pattern, not an
 authorization to publish from this repository.
 
 1. In the semantic-owner repository, generate the schema and declarations from
-   the exact Rust release commit, then validate the valid and invalid fixtures
-   using both Rust and the generated TypeScript runtime validator.
+   the exact Rust release commit. Deserialize the Rust-produced valid fixtures
+   successfully with Rust and accept them with the generated TypeScript runtime
+   validator. Reject each deliberately invalid fixture with both the Rust
+   deserializer or validator and the generated TypeScript runtime validator.
 2. Pack the exact wrapper with its normal package command (`wasm-pack pack` for
    a Rust WASM package or `bun pm pack` for a TypeScript package); inspect the
    tarball for generated declarations, schema, and runtime assets rather than
