@@ -27,7 +27,27 @@ export default defineConfig({
       },
       {
         find: /^@moritzbrantner\/flat-design\/core$/,
-        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/core.ts"),
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/core-entry.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/document$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/document-contract.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/motion$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/motion.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/playback$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/playback.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/sampling$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/sampling.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/schema$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/schema-contract.ts"),
       },
       {
         find: /^@moritzbrantner\/flat-design\/react$/,
@@ -120,6 +140,11 @@ export default defineConfig({
       "@moritzbrantner/data-density",
       "@moritzbrantner/flat-design",
       "@moritzbrantner/flat-design/core",
+      "@moritzbrantner/flat-design/document",
+      "@moritzbrantner/flat-design/motion",
+      "@moritzbrantner/flat-design/playback",
+      "@moritzbrantner/flat-design/sampling",
+      "@moritzbrantner/flat-design/schema",
       "@moritzbrantner/flat-design/react",
       "@moritzbrantner/linguistics-core",
       "@moritzbrantner/linguistics-corpus",
