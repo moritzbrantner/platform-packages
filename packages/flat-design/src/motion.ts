@@ -143,6 +143,20 @@ function retimePresetMotion(
   };
 }
 
+function getPresetRotateCenter(
+  preset: FlatBuiltInFigureAnimationPreset,
+  options?: FlatFigureAnimationOptions,
+) {
+  if (preset !== "spin" && preset !== "sway") {
+    return undefined;
+  }
+
+  return {
+    cx: options?.cx ?? 0,
+    cy: options?.cy ?? 0,
+  };
+}
+
 export function resolveFlatMotion(motion: FlatMotionSpec): FlatTimelineMotionSpec {
   if (motion.kind === "timeline") {
     return normalizeTimelineMotion(motion);
@@ -158,6 +172,7 @@ export function resolveFlatMotion(motion: FlatMotionSpec): FlatTimelineMotionSpe
     delayMs: parseClockValue(motion.options?.begin),
     easing: inferLegacyPresetEasing(motion.preset, motion.options),
     fillMode: motion.options?.fillMode ?? "remove",
+    rotateCenter: timeline.rotateCenter ?? getPresetRotateCenter(motion.preset, motion.options),
   });
 }
 
