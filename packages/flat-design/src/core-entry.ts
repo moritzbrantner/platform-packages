@@ -40,6 +40,24 @@ export {
   type ParseFlatDesignDocumentOptions,
 } from "./document-contract";
 export { compileFlatMotion, resolveFlatMotion } from "./motion";
+export {
+  advanceFlatPlayback,
+  createFlatPlaybackState,
+  restartFlatPlayback,
+  seekFlatPlayback,
+  setFlatPlaybackPlaying,
+  type CreateFlatPlaybackStateOptions,
+  type FlatPlaybackState,
+} from "./playback";
+export {
+  getFlatAnimationProgress,
+  getFlatShapeAnimations,
+  sampleFlatAnimationAtTime,
+  sampleFlatSceneAtTime,
+  sampleFlatShapeAtTime,
+  type FlatAnimatedTransformValue,
+  type FlatAnimationSample,
+} from "./sampling";
 export type {
   FlatAnimation,
   FlatAnimationTiming,

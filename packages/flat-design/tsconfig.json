@@ -11,6 +11,8 @@
       "@moritzbrantner/flat-design/core": ["./src/core-entry.ts"],
       "@moritzbrantner/flat-design/document": ["./src/document-contract.ts"],
       "@moritzbrantner/flat-design/motion": ["./src/motion.ts"],
+      "@moritzbrantner/flat-design/playback": ["./src/playback.ts"],
+      "@moritzbrantner/flat-design/sampling": ["./src/sampling.ts"],
       "@moritzbrantner/flat-design/schema": ["./src/schema-contract.ts"],
       "@moritzbrantner/flat-design/react": ["./src/react.tsx"]
     }

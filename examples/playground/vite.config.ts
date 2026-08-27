@@ -38,6 +38,14 @@ export default defineConfig({
         replacement: path.resolve(workspaceRoot, "packages/flat-design/src/motion.ts"),
       },
       {
+        find: /^@moritzbrantner\/flat-design\/playback$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/playback.ts"),
+      },
+      {
+        find: /^@moritzbrantner\/flat-design\/sampling$/,
+        replacement: path.resolve(workspaceRoot, "packages/flat-design/src/sampling.ts"),
+      },
+      {
         find: /^@moritzbrantner\/flat-design\/schema$/,
         replacement: path.resolve(workspaceRoot, "packages/flat-design/src/schema-contract.ts"),
       },
@@ -134,6 +142,8 @@ export default defineConfig({
       "@moritzbrantner/flat-design/core",
       "@moritzbrantner/flat-design/document",
       "@moritzbrantner/flat-design/motion",
+      "@moritzbrantner/flat-design/playback",
+      "@moritzbrantner/flat-design/sampling",
       "@moritzbrantner/flat-design/schema",
       "@moritzbrantner/flat-design/react",
       "@moritzbrantner/linguistics-core",
