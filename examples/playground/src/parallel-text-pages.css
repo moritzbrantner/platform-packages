@@ -1,0 +1,21 @@
+@import "@moritzbrantner/ui/bobba/styles.css";
+@import "@moritzbrantner/parallel-text/styles.css";
+
+@source "./parallel-text-pages.tsx";
+
+html {
+  background: var(--background);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
