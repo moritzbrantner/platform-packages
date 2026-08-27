@@ -39,8 +39,8 @@ export {
   type FlatDesignDocumentIssueCode,
   type FlatDesignDocumentIssueSeverity,
   type ParseFlatDesignDocumentOptions,
-} from "./document";
-export { flatDesignDocumentJsonSchema } from "./schema";
+} from "./document-contract";
+export { flatDesignDocumentJsonSchema } from "./schema-contract";
 export {
   FlatSceneEditor,
   type FlatSceneEditorFigureDefinition,
