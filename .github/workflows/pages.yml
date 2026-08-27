@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/pages.yml"
+      - "examples/playground/package.json"
       - "examples/playground/parallel-text-pages.html"
       - "examples/playground/src/parallel-text-pages.css"
       - "examples/playground/src/parallel-text-pages.tsx"
@@ -17,57 +18,19 @@ on:
 
 permissions:
   contents: read
-  packages: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: github-pages
-  cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.12
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build parallel text Pages demo
-        working-directory: examples/playground
-        run: bunx vite build --config vite.pages.config.ts
-
-      - name: Prepare Pages artifact
-        run: |
-          cp examples/playground/dist-pages/parallel-text-pages.html examples/playground/dist-pages/index.html
-          mkdir -p examples/playground/dist-pages/parallel-text
-          cp examples/playground/dist-pages/parallel-text-pages.html examples/playground/dist-pages/parallel-text/index.html
-          touch examples/playground/dist-pages/.nojekyll
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: examples/playground/dist-pages
-
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Deploy Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    name: Deploy Parallel Text Pages
+    permissions:
+      contents: read
+      packages: read
+      pages: write
+      id-token: write
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.2
+    with:
+      working_directory: "."
+      build_command: bun run --filter @moritzbrantner/playground build:pages
+      artifact_path: examples/playground/dist-pages
+      concurrency_group: parallel-text-pages
+      cancel_in_progress: false
