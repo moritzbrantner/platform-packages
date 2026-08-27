@@ -9,8 +9,8 @@
     "paths": {
       "@moritzbrantner/flat-design": ["./src/index.ts"],
       "@moritzbrantner/flat-design/core": ["./src/core.ts"],
-      "@moritzbrantner/flat-design/document": ["./src/document.ts"],
-      "@moritzbrantner/flat-design/schema": ["./src/schema.ts"],
+      "@moritzbrantner/flat-design/document": ["./src/document-contract.ts"],
+      "@moritzbrantner/flat-design/schema": ["./src/schema-contract.ts"],
       "@moritzbrantner/flat-design/react": ["./src/react.tsx"]
     }
   },
