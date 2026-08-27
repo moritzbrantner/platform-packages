@@ -42,7 +42,7 @@ function ParallelTextPage() {
     <PlaygroundPage
       activePage="parallel-text"
       title="Parallel text package examples"
-      description="A browser-ready demo for aligned bilingual reading with translation switching, paragraph flow, and layered inline outlines for words, phrases, and sentences."
+      description="A browser-ready demo for aligned bilingual reading with translation switching, provenance-aware token links, and sentence-level keyboard inspection."
     >
       <section className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
         <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
@@ -58,16 +58,17 @@ function ParallelTextPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
-              Hover a word and confirm the text itself carries the interaction: word highlighting
-              inside sentence and phrase outlines, on both sides.
+              Hover a word with an explicit model link and confirm its counterpart highlights on the
+              other side. Unlinked words should keep sentence context without inventing an exact word
+              translation.
             </p>
             <p>
-              Switch translations and make sure the right panel updates without disturbing the
-              source text or the hover behavior.
+              Tab to a sentence, then use Left/Right Arrow, Home, and End to inspect tokens without
+              creating a tab stop for every word.
             </p>
             <p>
-              Move across whitespace inside a sentence and confirm phrase and sentence-level
-              alignment remains visible even when no token is active.
+              Switch translations and make sure the aligned rows update without disturbing the source
+              text or its language metadata.
             </p>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Compare with storytelling demo</a>
@@ -80,14 +81,16 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Multiple translations</CardTitle>
               <CardDescription>
-                Automatic alignment still works, but the reader can now swap between different
-                translations of the same source without leaving the layout.
+                Sentence alignment stays visible while token highlights only claim links with explicit
+                provenance or safe literal matches.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ParallelTextView
                 originalText={sourceExcerpt}
                 originalLabel="English excerpt"
+                originalLanguage="English"
+                originalLanguageCode="en"
                 translatedLabel="Translation"
                 translations={[
                   {
@@ -95,12 +98,52 @@ function ParallelTextPage() {
                     label: "German",
                     translatedLabel: "German translation",
                     translatedText: germanTranslation,
+                    language: "German",
+                    languageCode: "de",
+                    tokenAlignments: [
+                      {
+                        originalSentence: 0,
+                        translatedSentence: 0,
+                        originalToken: 2,
+                        translatedToken: 2,
+                        source: "model",
+                        confidence: 0.98,
+                      },
+                      {
+                        originalSentence: 2,
+                        translatedSentence: 2,
+                        originalToken: 14,
+                        translatedToken: 14,
+                        source: "model",
+                        confidence: 0.99,
+                      },
+                    ],
                   },
                   {
                     id: "fr",
                     label: "French",
                     translatedLabel: "French translation",
                     translatedText: frenchTranslation,
+                    language: "French",
+                    languageCode: "fr",
+                    tokenAlignments: [
+                      {
+                        originalSentence: 0,
+                        translatedSentence: 0,
+                        originalToken: 2,
+                        translatedToken: 2,
+                        source: "model",
+                        confidence: 0.97,
+                      },
+                      {
+                        originalSentence: 2,
+                        translatedSentence: 2,
+                        originalToken: 14,
+                        translatedToken: 15,
+                        source: "model",
+                        confidence: 0.96,
+                      },
+                    ],
                   },
                 ]}
               />
@@ -111,8 +154,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Manual sentence alignment</CardTitle>
               <CardDescription>
-                This example reverses the sentence order in translation, so explicit alignment
-                metadata keeps the inline phrase and sentence outlines meaningful.
+                This example reverses the sentence order in translation, so each explicit alignment
+                renders as one source/translation row instead of drifting in independent columns.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -120,7 +163,11 @@ function ParallelTextPage() {
                 originalText={reorderedSource}
                 translatedText={reorderedTranslation}
                 originalLabel="Original sequence"
+                originalLanguage="English"
+                originalLanguageCode="en"
                 translatedLabel="Reordered translation"
+                translationLanguage="German"
+                translationLanguageCode="de"
                 sentenceAlignments={[
                   { original: 2, translated: 0 },
                   { original: [0, 1], translated: 1 },

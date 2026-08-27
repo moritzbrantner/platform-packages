@@ -9,7 +9,11 @@
     "directory": "packages/parallel-text"
   },
   "files": [
-    "dist"
+    "dist",
+    "styles.css"
+  ],
+  "sideEffects": [
+    "*.css"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,7 +25,8 @@
     "./model": {
       "types": "./dist/model.d.ts",
       "import": "./dist/model.js"
-    }
+    },
+    "./styles.css": "./styles.css"
   },
   "dependencies": {
     "@moritzbrantner/linguistics-core": "^0.1.1",
