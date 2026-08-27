@@ -39,7 +39,8 @@ function parseClockValue(value: string | undefined, fallbackMs = 0) {
     return Number.isFinite(parsed) ? Math.max(parsed * 1_000, 0) : fallbackMs;
   }
 
-  return fallbackMs;
+  const parsed = Number.parseFloat(trimmed);
+  return Number.isFinite(parsed) ? Math.max(parsed * 1_000, 0) : fallbackMs;
 }
 
 function formatSeconds(durationMs: number) {
@@ -120,12 +121,37 @@ function normalizeTimelineMotion(motion: FlatTimelineMotionSpec): FlatTimelineMo
   };
 }
 
+function retimePresetMotion(
+  motion: FlatTimelineMotionSpec,
+  durationValue: string | undefined,
+): FlatTimelineMotionSpec {
+  const durationMs = parseClockValue(durationValue, motion.durationMs);
+
+  if (durationMs === motion.durationMs || motion.durationMs <= 0) {
+    return motion;
+  }
+
+  const timeScale = durationMs / motion.durationMs;
+
+  return {
+    ...motion,
+    durationMs,
+    keyframes: motion.keyframes.map((keyframe) => ({
+      ...cloneKeyframe(keyframe),
+      timeMs: keyframe.timeMs * timeScale,
+    })),
+  };
+}
+
 export function resolveFlatMotion(motion: FlatMotionSpec): FlatTimelineMotionSpec {
   if (motion.kind === "timeline") {
     return normalizeTimelineMotion(motion);
   }
 
-  const timeline = createEditableMotionFromPreset(motion.preset, motion.options);
+  const timeline = retimePresetMotion(
+    createEditableMotionFromPreset(motion.preset, motion.options),
+    motion.options?.dur,
+  );
 
   return normalizeTimelineMotion({
     ...timeline,
