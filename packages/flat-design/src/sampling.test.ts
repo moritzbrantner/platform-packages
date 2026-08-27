@@ -146,6 +146,36 @@ describe("flat-design deterministic sampling", () => {
     expect(sampleFlatAnimationAtTime(animation, 2_001)).toBeUndefined();
   });
 
+  test("freezes fractional finite repeats at their actual terminal phase", () => {
+    const animation = {
+      kind: "attribute" as const,
+      attributeName: "opacity",
+      values: [0, 1],
+      dur: "1s",
+      repeatCount: "1.5",
+      fillMode: "freeze" as const,
+    };
+
+    expect(getFlatAnimationProgress(animation, 1_500)).toBe(0.5);
+    expect(getFlatAnimationProgress(animation, 2_000)).toBe(0.5);
+    expect(sampleFlatAnimationAtTime(animation, 2_000)).toMatchObject({
+      kind: "attribute",
+      value: 0.5,
+    });
+  });
+
+  test("keeps negative time before the animation start", () => {
+    const animation = {
+      kind: "attribute" as const,
+      attributeName: "opacity",
+      values: [0, 1],
+      dur: "1s",
+    };
+
+    expect(getFlatAnimationProgress(animation, -1)).toBeUndefined();
+    expect(sampleFlatAnimationAtTime(animation, -1)).toBeUndefined();
+  });
+
   test("is deterministic for cubic-bezier sampling", () => {
     const animation = {
       kind: "attribute" as const,
