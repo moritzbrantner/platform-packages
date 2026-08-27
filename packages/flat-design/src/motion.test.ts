@@ -31,6 +31,22 @@ describe("flat-design authored motion", () => {
     });
   });
 
+  test("preserves millisecond SVG clock values when resolving presets", () => {
+    const motion = resolveFlatMotion({
+      kind: "preset",
+      preset: "bobbing",
+      options: {
+        begin: "50ms",
+        dur: "250ms",
+        distance: 8,
+      },
+    });
+
+    expect(motion.durationMs).toBe(250);
+    expect(motion.delayMs).toBe(50);
+    expect(motion.keyframes.map((keyframe) => keyframe.timeMs)).toEqual([0, 125, 250]);
+  });
+
   test("compiles typed timing and easing into SVG animation timing", () => {
     const animations = compileFlatMotion({
       kind: "timeline",
