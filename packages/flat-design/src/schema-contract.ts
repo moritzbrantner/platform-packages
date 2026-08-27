@@ -26,9 +26,7 @@ const attributeAnimation = {
     attributeName: { minLength: 1, type: "string" },
     kind: { const: "attribute" },
     values: {
-      items: {
-        anyOf: [{ type: "number" }, { type: "string" }],
-      },
+      items: { anyOf: [{ type: "number" }, { type: "string" }] },
       minItems: 1,
       type: "array",
     },
@@ -46,10 +44,7 @@ const translateAnimation = {
     values: {
       items: {
         additionalProperties: false,
-        properties: {
-          x: { type: "number" },
-          y: { type: "number" },
-        },
+        properties: { x: { type: "number" }, y: { type: "number" } },
         required: ["x", "y"],
         type: "object",
       },
@@ -73,10 +68,7 @@ const scaleAnimation = {
           { type: "number" },
           {
             additionalProperties: false,
-            properties: {
-              x: { type: "number" },
-              y: { type: "number" },
-            },
+            properties: { x: { type: "number" }, y: { type: "number" } },
             required: ["x", "y"],
             type: "object",
           },
@@ -123,10 +115,7 @@ const rotateAnimation = {
 const gradientOffset = {
   anyOf: [
     { maximum: 1, minimum: 0, type: "number" },
-    {
-      pattern: "^(?:100|\\d{1,2})(?:\\.\\d+)?%$",
-      type: "string",
-    },
+    { pattern: "^(?:100|\\d{1,2})(?:\\.\\d+)?%$", type: "string" },
   ],
 } as const;
 
