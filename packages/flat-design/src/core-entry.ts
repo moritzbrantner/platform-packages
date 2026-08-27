@@ -38,7 +38,7 @@ export {
   type FlatDesignDocumentIssueCode,
   type FlatDesignDocumentIssueSeverity,
   type ParseFlatDesignDocumentOptions,
-} from "./document";
+} from "./document-contract";
 export { compileFlatMotion, resolveFlatMotion } from "./motion";
 export {
   advanceFlatPlayback,
