@@ -23,12 +23,12 @@
       "import": "./dist/core.js"
     },
     "./document": {
-      "types": "./dist/document.d.ts",
-      "import": "./dist/document.js"
+      "types": "./dist/document-contract.d.ts",
+      "import": "./dist/document-contract.js"
     },
     "./schema": {
-      "types": "./dist/schema.d.ts",
-      "import": "./dist/schema.js"
+      "types": "./dist/schema-contract.d.ts",
+      "import": "./dist/schema-contract.js"
     },
     "./react": {
       "types": "./dist/react.d.ts",
@@ -53,7 +53,7 @@
     "access": "restricted"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/core.ts src/document.ts src/schema.ts src/react.tsx --format esm --dts --clean --out-dir dist",
+    "build": "tsup src/index.ts src/core.ts src/document-contract.ts src/schema-contract.ts src/react.tsx --format esm --dts --clean --out-dir dist",
     "lint": "node ../../scripts/verify-package-imports.mjs ./src @/ next/",
     "prepack": "bun run build",
     "check-types": "tsc --noEmit",
