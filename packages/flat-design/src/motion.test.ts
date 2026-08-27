@@ -47,6 +47,31 @@ describe("flat-design authored motion", () => {
     expect(motion.keyframes.map((keyframe) => keyframe.timeMs)).toEqual([0, 125, 250]);
   });
 
+  test("preserves spin and sway rotation centers when resolving presets", () => {
+    const spin = resolveFlatMotion({
+      kind: "preset",
+      preset: "spin",
+      options: { cx: 48, cy: 32 },
+    });
+    const swayAnimations = compileFlatMotion({
+      kind: "preset",
+      preset: "sway",
+      options: { cx: 12, cy: 18 },
+    });
+
+    expect(spin.rotateCenter).toEqual({ cx: 48, cy: 32 });
+    expect(swayAnimations).toHaveLength(1);
+    expect(swayAnimations[0]).toMatchObject({
+      kind: "transform",
+      transformType: "rotate",
+      values: [
+        expect.objectContaining({ cx: 12, cy: 18 }),
+        expect.objectContaining({ cx: 12, cy: 18 }),
+        expect.objectContaining({ cx: 12, cy: 18 }),
+      ],
+    });
+  });
+
   test("compiles typed timing and easing into SVG animation timing", () => {
     const animations = compileFlatMotion({
       kind: "timeline",
