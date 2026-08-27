@@ -23,6 +23,25 @@ export {
   type FlatSceneMetadataPatch,
 } from "./core";
 export {
+  FLAT_DESIGN_SCHEMA_VERSION,
+  FlatDesignDocumentError,
+  analyzeFlatDesignDocument,
+  assertFlatDesignDocument,
+  defineFlatDesignDocument,
+  isFlatDesignDocument,
+  migrateFlatDesignDocument,
+  parseFlatDesignDocument,
+  serializeFlatDesignDocument,
+  validateFlatDesignDocument,
+  type FlatDesignDocument,
+  type FlatDesignDocumentAnalysis,
+  type FlatDesignDocumentIssue,
+  type FlatDesignDocumentIssueCode,
+  type FlatDesignDocumentIssueSeverity,
+  type ParseFlatDesignDocumentOptions,
+} from "./document";
+export { flatDesignDocumentJsonSchema } from "./schema";
+export {
   FlatSceneEditor,
   type FlatSceneEditorFigureDefinition,
   type FlatSceneEditorFigureFactoryOptions,
