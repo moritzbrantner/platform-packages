@@ -66,6 +66,23 @@ export const flatDesignDocumentJsonSchema = {
         },
       ],
     },
+    easing: {
+      anyOf: [
+        { enum: ["linear", "ease-in", "ease-out", "ease-in-out"] },
+        {
+          additionalProperties: false,
+          properties: {
+            type: { const: "cubic-bezier" },
+            x1: { maximum: 1, minimum: 0, type: "number" },
+            x2: { maximum: 1, minimum: 0, type: "number" },
+            y1: number,
+            y2: number,
+          },
+          required: ["type", "x1", "y1", "x2", "y2"],
+          type: "object",
+        },
+      ],
+    },
     gradient: {
       additionalProperties: false,
       properties: {
@@ -161,8 +178,11 @@ export const flatDesignDocumentJsonSchema = {
         {
           additionalProperties: false,
           properties: {
+            delayMs: nonNegativeNumber,
             direction: { enum: ["normal", "reverse", "alternate"] },
             durationMs: { exclusiveMinimum: 0, type: "number" },
+            easing: { $ref: "#/$defs/easing" },
+            fillMode: { enum: ["freeze", "remove"] },
             keyframes: {
               items: { $ref: "#/$defs/keyframe" },
               minItems: 2,
