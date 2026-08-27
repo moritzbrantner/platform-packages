@@ -1,4 +1,4 @@
-import { compileFlatMotion } from "./core";
+import { compileFlatMotion } from "./motion";
 import {
   formatAnimationValues,
   formatKeySplines,
