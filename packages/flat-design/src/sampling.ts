@@ -31,7 +31,7 @@ export type FlatAnimationSample =
  * their sampled values have been applied.
  */
 export function sampleFlatSceneAtTime(scene: FlatDesignScene, timeInMs: number): FlatDesignScene {
-  const resolvedTimeInMs = Number.isFinite(timeInMs) ? Math.max(timeInMs, 0) : 0;
+  const resolvedTimeInMs = Number.isFinite(timeInMs) ? timeInMs : 0;
 
   return {
     ...scene,
@@ -108,7 +108,7 @@ export function sampleFlatAnimationAtTime(
   animation: FlatAnimation,
   timeInMs: number,
 ): FlatAnimationSample | undefined {
-  const resolvedTimeInMs = Number.isFinite(timeInMs) ? Math.max(timeInMs, 0) : 0;
+  const resolvedTimeInMs = Number.isFinite(timeInMs) ? timeInMs : 0;
 
   if (animation.kind === "attribute") {
     const value = sampleFlatAttributeAnimation(animation, resolvedTimeInMs);
@@ -277,13 +277,15 @@ export function getFlatAnimationProgress(
 
   if (repeatCount !== "indefinite") {
     const totalDurationInMs = durationInMs * repeatCount;
+    const fractionalIteration = repeatCount % 1;
+    const terminalProgress = fractionalIteration === 0 ? 1 : fractionalIteration;
 
     if (elapsed > totalDurationInMs) {
-      return animation.fillMode === "freeze" ? 1 : undefined;
+      return animation.fillMode === "freeze" ? terminalProgress : undefined;
     }
 
     if (elapsed === totalDurationInMs) {
-      return 1;
+      return terminalProgress;
     }
   }
 
