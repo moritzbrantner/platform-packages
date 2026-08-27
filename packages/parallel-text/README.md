@@ -10,6 +10,10 @@ Parallel-text alignment models and a React reading view for original text and tr
 
 Model helpers are also available from the `@moritzbrantner/parallel-text/model` subpath.
 
+## Demo
+
+The focused GitHub Pages example is published at `https://moritzbrantner.github.io/platform-packages/parallel-text/` after changes reach `main` and Pages is enabled for the repository.
+
 ## Styling
 
 Import `@moritzbrantner/parallel-text/styles.css` alongside the selected `@moritzbrantner/ui` theme stylesheet. The package uses Tailwind utilities and shared UI CSS variables instead of owning a separate hard-coded visual system.
