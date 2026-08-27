@@ -2,7 +2,6 @@ export {
   addMotionKeyframe,
   clearFlatNodeMotion,
   clampMotionKeyframes,
-  compileFlatMotion,
   createEditableMotionFromPreset,
   duplicateFlatNode,
   findFlatNodeById,
@@ -61,6 +60,7 @@ export {
   type FlatMotionKeyframe,
   type FlatTimelineAnimationOptions,
 } from "./animation-presets";
+export { compileFlatMotion, resolveFlatMotion } from "./motion";
 export {
   EditableFlatScene,
   FlatMotionTimelineEditor,
@@ -105,6 +105,11 @@ export type {
   FlatLayer,
   FlatLength,
   FlatLine,
+  FlatMotionCubicBezierEasing,
+  FlatMotionDirection,
+  FlatMotionEasing,
+  FlatMotionEasingPreset,
+  FlatMotionFillMode,
   FlatMotionSpec,
   FlatNodePath,
   FlatNodeRef,
