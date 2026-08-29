@@ -56,7 +56,7 @@ local JavaScript inference.
 | `@moritzbrantner/sentiment-analysis`            | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/source-ingestion`              | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/speech`                        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/speed-reading`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/speed-reading`                 | deprecated        | Legacy package; migrate to the canonical `speedreader` repository.          |
 | `@moritzbrantner/storytelling`                  | scaffold-critical | Shared scaffold contract surface.                                           |
 | `@moritzbrantner/subtitles`                     | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/syntax-analysis`               | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
@@ -145,7 +145,11 @@ or reusable data contracts beyond raw model invocation.
 
 ## Package plans
 
-- See [docs/speed-reading-plan.md](./docs/speed-reading-plan.md) for the current improvement plan for `@moritzbrantner/speed-reading`.
+- `@moritzbrantner/speed-reading` is retained as a deprecated compatibility
+  package. New speed-reading product and reader-core work belongs in the
+  [canonical speedreader repository](https://github.com/moritzbrantner/speedreader).
+  See [docs/speed-reading-plan.md](./docs/speed-reading-plan.md) for the
+  migration handoff and the legacy roadmap record.
 
 ## Styling rule
 

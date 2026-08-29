@@ -2,11 +2,11 @@
   "name": "@moritzbrantner/speed-reading",
   "version": "0.1.1",
   "private": false,
+  "deprecated": "This legacy package has moved to https://github.com/moritzbrantner/speedreader. Do not start new work here; migrate deliberately and verify the new reader API before replacing imports.",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moritzbrantner/platform-packages.git",
-    "directory": "packages/speed-reading"
+    "url": "git+https://github.com/moritzbrantner/speedreader.git"
   },
   "files": [
     "dist"
