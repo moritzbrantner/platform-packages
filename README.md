@@ -1,6 +1,6 @@
 # platform-packages
 
-Shared packages for the maintained scaffold family. This repo stays broad on purpose, but only part of it is scaffold-critical for cross-repo alignment.
+Shared packages for the maintained scaffold family and a transitional incubator for reusable capabilities. The repository remains maintained, but its long-term direction is **extraction first, retirement later** rather than permanent catch-all ownership. Useful packages should be made independently coherent, moved to clear canonical repositories when that boundary is justified, and removed here only after consumers migrate. See [docs/extraction-first-retirement.md](./docs/extraction-first-retirement.md).
 
 ## Scaffold-critical package set
 
@@ -131,11 +131,13 @@ or reusable data contracts beyond raw model invocation.
 
 ## Repository scope
 
-- The repository remains broad and can host shared runtime, tooling, and domain packages.
-- The scaffold-critical set is limited to external `@moritzbrantner/ui`, plus local `storytelling`, `oxfmt-config`, and `typescript-config`.
-- Unrelated packages stay in place and are not blocked on the template-family release cadence.
-- GitHub Packages publishing is configured through Changesets.
-- Includes a local playground app for manually testing package behavior.
+- The repository remains maintained while package extraction is in progress; it is not the intended permanent home for unrelated new shared capabilities.
+- Existing package work may continue when it fixes behavior, strengthens contracts, or makes a useful package safer to extract.
+- Before adding new long-term ownership, prefer an existing canonical repository; temporary incubation here should have a clear domain rationale.
+- The scaffold-critical set is limited to external `@moritzbrantner/ui`, plus local `storytelling`, `oxfmt-config`, and `typescript-config` until those consumers are deliberately migrated.
+- Unrelated retained packages are not blocked on the template-family release cadence, but their canonical ownership should be reassessed over time.
+- GitHub Packages publishing remains configured through Changesets while packages are still owned here.
+- The local playground remains the integrated validation surface during the transition.
 
 ## Engineering standards
 
