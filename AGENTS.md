@@ -4,6 +4,17 @@
 
 `platform-packages` is a Bun/Turbo TypeScript monorepo for shared `@moritzbrantner/*` runtime, UI-adjacent, domain, and tooling packages. It also includes a Vite playground used to exercise package behavior locally.
 
+## Lifecycle Direction
+
+This repository is maintained, but its long-term direction is extraction first and retirement later. Read `docs/extraction-first-retirement.md` before adding a package or substantially expanding an existing package.
+
+- Do not treat this repository as the permanent catch-all for new shared capabilities.
+- Existing packages may continue to receive fixes, tests, documentation, compatibility work, and focused feature work that makes their boundaries safer to extract.
+- Before creating a new package, prefer an existing canonical repository when one already owns the domain. If temporary incubation here is still justified, keep the package boundary focused and record a plausible future owner when known.
+- Do not remove a package until known consumers have migrated and replacement/parity evidence is adequate.
+- Active work that strengthens a coherent package boundary should not be discarded merely because the repository is expected to shrink over time.
+- Update the README inventory and migration documentation whenever canonical ownership changes.
+
 ## Key Directories
 
 - `packages/*`: publishable or incubating workspace packages. Keep package changes inside the relevant package unless a shared contract requires root changes.

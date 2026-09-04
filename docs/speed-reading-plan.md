@@ -1,8 +1,33 @@
-# Speed Reading Plan
+# Legacy Speed Reading Plan and Migration Handoff
+
+## Ownership status
+
+`@moritzbrantner/speed-reading` in this repository is deprecated. The canonical
+source for the speed-reading product and shared reader core is now
+[moritzbrantner/speedreader](https://github.com/moritzbrantner/speedreader).
+
+This plan is retained as historical context for existing consumers. Do not
+implement its phases here. New product work, persistence contracts, and
+cross-platform parity checks belong in the canonical repository. The old package
+remains available during migration so consumers are neither removed nor silently
+redirected.
+
+## Consumer migration
+
+1. Inventory each consumer of `@moritzbrantner/speed-reading`.
+2. Migrate it deliberately to the canonical reader package and its platform
+   adapter; do not assume the legacy React view is API-compatible.
+3. Validate chunking, pacing, Unicode text, and progress restore with the
+   canonical shared parity fixtures.
+4. Keep this compatibility source and its explicit deprecation metadata until
+   every known consumer is migrated. Any final removal or published deprecation
+   release is separate release work.
+
+## Historical plan
 
 ## Goal
 
-Move `@moritzbrantner/speed-reading` from a compact demo-friendly package toward a reusable reading primitive with clearer package boundaries, better pacing behavior, and stronger library ergonomics.
+Move `@moritzbrantner/speed-reading` from a compact demo-friendly package toward a reusable reading primitive with clearer package boundaries, better pacing behavior, and stronger library ergonomics. This goal has moved to the canonical repository above.
 
 ## Phase 1: Split core behavior from presentation
 
