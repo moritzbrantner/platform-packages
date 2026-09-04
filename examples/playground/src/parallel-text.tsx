@@ -1,4 +1,4 @@
-import { ParallelTextView } from "@moritzbrantner/parallel-text";
+import { MultilingualText, ParallelTextView } from "@moritzbrantner/parallel-text";
 import {
   Badge,
   Button,
@@ -37,13 +37,96 @@ const reorderedTranslation = [
   "Dann lege ich den Brief sorgfaeltig unter die blaue Tasse am Fenster.",
 ].join(" ");
 
+const aquinasSegments = [
+  {
+    id: "response-opening",
+    cells: {
+      latin: (
+        <p>
+          Respondeo dicendum quod Deum esse quinque viis probari potest.
+        </p>
+      ),
+      english: (
+        <p>I answer that the existence of God can be proved in five ways.</p>
+      ),
+      german: (
+        <p>Ich antworte: Dass Gott ist, kann auf fünf Wegen bewiesen werden.</p>
+      ),
+    },
+  },
+  {
+    id: "first-way",
+    cells: {
+      latin: (
+        <p>
+          Prima autem et manifestior via est, quae sumitur ex parte motus.
+          Certum est enim, et sensu constat, aliqua moveri in hoc mundo.
+        </p>
+      ),
+      english: (
+        <p>
+          The first and more evident way is taken from motion. For it is certain,
+          and evident to the senses, that some things are moved in this world.
+        </p>
+      ),
+      german: (
+        <p>
+          Der erste und deutlichste Weg wird von der Bewegung her genommen. Denn
+          es ist gewiss und den Sinnen offenbar, dass sich in dieser Welt manches
+          bewegt.
+        </p>
+      ),
+    },
+  },
+] as const;
+
 function ParallelTextPage() {
   return (
     <PlaygroundPage
       activePage="parallel-text"
       title="Parallel text package examples"
-      description="A browser-ready demo for aligned bilingual reading with translation switching, provenance-aware token links, and sentence-level keyboard inspection."
+      description="A browser-ready demo for aligned bilingual reading, reusable multilingual columns, translation switching, provenance-aware token links, and sentence-level keyboard inspection."
     >
+      <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="w-fit rounded-full px-3 py-1">
+              Thomistisch dogfood
+            </Badge>
+            <Badge variant="outline" className="w-fit rounded-full px-3 py-1">
+              3 columns
+            </Badge>
+          </div>
+          <CardTitle>Latin, English, and German on one stable passage grid</CardTitle>
+          <CardDescription>
+            This is the generic presentation primitive needed by the Thomistisch
+            canonical reader. It knows only columns, aligned segment IDs, language
+            metadata, and cells; Aquinas identity and provenance remain outside the
+            package.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+            <a className="underline underline-offset-4" href="#response-opening">
+              Jump to response opening
+            </a>
+            <span aria-hidden="true">·</span>
+            <a className="underline underline-offset-4" href="#first-way">
+              Jump to first way
+            </a>
+          </div>
+          <MultilingualText
+            aria-label="Aquinas Latin English German comparison"
+            columns={[
+              { id: "latin", label: "Latin", lang: "la", dir: "ltr" },
+              { id: "english", label: "English", lang: "en", dir: "ltr" },
+              { id: "german", label: "Deutsch", lang: "de", dir: "ltr" },
+            ]}
+            segments={aquinasSegments}
+          />
+        </CardContent>
+      </Card>
+
       <section className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
         <Card className="rounded-[1.75rem] border-border/60 bg-background/80 shadow-lg shadow-black/5">
           <CardHeader>
@@ -52,23 +135,27 @@ function ParallelTextPage() {
             </Badge>
             <CardTitle>What to inspect on this page</CardTitle>
             <CardDescription>
-              The first example switches between translations. The second keeps explicit sentence
-              mappings when the translation reorders the source.
+              The first example above checks N-column reading. The examples beside
+              this checklist exercise translation selection and explicit alignment.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
-              Hover a word with an explicit model link and confirm its counterpart highlights on the
-              other side. Unlinked words should keep sentence context without inventing an exact word
-              translation.
+              Resize the browser and confirm the Latin, English, and German columns
+              collapse cleanly instead of forcing horizontal overflow.
             </p>
             <p>
-              Tab to a sentence, then use Left/Right Arrow, Home, and End to inspect tokens without
-              creating a tab stop for every word.
+              Follow the Aquinas segment links and confirm stable IDs target the
+              aligned row rather than a generated DOM position.
             </p>
             <p>
-              Switch translations and make sure the aligned rows update without disturbing the source
-              text or its language metadata.
+              Hover a word with an explicit model link and confirm its counterpart
+              highlights on the other side. Unlinked words should keep sentence
+              context without inventing an exact word translation.
+            </p>
+            <p>
+              Tab to a sentence, then use Left/Right Arrow, Home, and End to inspect
+              tokens without creating a tab stop for every word.
             </p>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Compare with storytelling demo</a>
@@ -81,8 +168,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Multiple translations</CardTitle>
               <CardDescription>
-                Sentence alignment stays visible while token highlights only claim links with explicit
-                provenance or safe literal matches.
+                Sentence alignment stays visible while token highlights only claim
+                links with explicit provenance or safe literal matches.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -154,8 +241,9 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Manual sentence alignment</CardTitle>
               <CardDescription>
-                This example reverses the sentence order in translation, so each explicit alignment
-                renders as one source/translation row instead of drifting in independent columns.
+                This example reverses the sentence order in translation, so each
+                explicit alignment renders as one source/translation row instead of
+                drifting in independent columns.
               </CardDescription>
             </CardHeader>
             <CardContent>
