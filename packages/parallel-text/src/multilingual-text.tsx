@@ -16,6 +16,7 @@ export type MultilingualTextProps = Omit<HTMLAttributes<HTMLOListElement>, "chil
   columns: readonly MultilingualTextColumn[];
   segments: readonly MultilingualTextSegment[];
   emptyCell?: ReactNode;
+  ariaLabel?: string;
 };
 
 export type ParallelTextSegment = {
@@ -31,6 +32,7 @@ export type ParallelTextProps = Omit<HTMLAttributes<HTMLOListElement>, "children
   targetLang?: string;
   sourceDir?: HTMLAttributes<HTMLElement>["dir"];
   targetDir?: HTMLAttributes<HTMLElement>["dir"];
+  ariaLabel?: string;
   segments: readonly ParallelTextSegment[];
 };
 
@@ -46,12 +48,16 @@ export function MultilingualText({
   columns,
   segments,
   emptyCell = null,
+  ariaLabel,
   className,
   ...listProps
 }: MultilingualTextProps) {
+  const resolvedAriaLabel = ariaLabel ?? listProps["aria-label"];
+
   return (
     <ol
       {...listProps}
+      aria-label={resolvedAriaLabel}
       data-slot="multilingual-text"
       className={joinClassNames("grid min-w-0 gap-4", className)}
     >
@@ -95,12 +101,14 @@ export function ParallelText({
   targetLang,
   sourceDir,
   targetDir,
+  ariaLabel,
   segments,
   ...listProps
 }: ParallelTextProps) {
   return (
     <MultilingualText
       {...listProps}
+      ariaLabel={ariaLabel}
       columns={[
         {
           id: "source",
