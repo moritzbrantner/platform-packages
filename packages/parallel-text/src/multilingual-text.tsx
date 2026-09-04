@@ -40,7 +40,7 @@ function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
 
-function getSegmentId(index: number, segment: MultilingualTextSegment) {
+function getSegmentKey(index: number, segment: MultilingualTextSegment) {
   return segment.id ?? `segment-${index + 1}`;
 }
 
@@ -62,13 +62,13 @@ export function MultilingualText({
       className={joinClassNames("grid min-w-0 gap-4", className)}
     >
       {segments.map((segment, index) => {
-        const segmentId = getSegmentId(index, segment);
+        const segmentKey = getSegmentKey(index, segment);
 
         return (
           <li
-            id={segmentId}
-            key={segmentId}
-            data-segment-id={segmentId}
+            id={segment.id}
+            key={segmentKey}
+            data-segment-id={segmentKey}
             className="grid min-w-0 gap-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4 text-[color:var(--card-foreground)] shadow-sm [grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))]"
           >
             {columns.map((column) => (
