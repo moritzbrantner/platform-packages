@@ -7,7 +7,7 @@ describe("MultilingualText", () => {
   test("renders three aligned editions with stable segment anchors", () => {
     const { container } = render(
       <MultilingualText
-        aria-label="Aquinas multilingual passage"
+        ariaLabel="Aquinas multilingual passage"
         columns={[
           { id: "la", label: "Latin", lang: "la" },
           { id: "en", label: "English", lang: "en" },
@@ -26,6 +26,7 @@ describe("MultilingualText", () => {
       />,
     );
 
+    expect(screen.getByLabelText("Aquinas multilingual passage")).toBeTruthy();
     expect(screen.getByText("Latin")).toBeTruthy();
     expect(screen.getByText("English")).toBeTruthy();
     expect(screen.getByText("Deutsch")).toBeTruthy();
@@ -59,6 +60,7 @@ describe("MultilingualText", () => {
   test("keeps the two-column ParallelText compatibility API", () => {
     const { container } = render(
       <ParallelText
+        ariaLabel="Latin with English translation"
         sourceLabel="Latin"
         targetLabel="English"
         sourceLang="la"
@@ -75,6 +77,7 @@ describe("MultilingualText", () => {
       />,
     );
 
+    expect(screen.getByLabelText("Latin with English translation")).toBeTruthy();
     expect(screen.getByText("Ens et essentia...")).toBeTruthy();
     expect(screen.getByText("Being and essence...")).toBeTruthy();
     expect(container.querySelector('[data-column-id="source"]')?.getAttribute("lang")).toBe("la");
