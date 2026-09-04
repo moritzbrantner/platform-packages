@@ -26,7 +26,7 @@ describe("MultilingualText", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Aquinas multilingual passage")).toBeTruthy();
+    expect(screen.getByRole("list", { name: "Aquinas multilingual passage" })).toBeTruthy();
     expect(screen.getByText("Latin")).toBeTruthy();
     expect(screen.getByText("English")).toBeTruthy();
     expect(screen.getByText("Deutsch")).toBeTruthy();
@@ -34,6 +34,25 @@ describe("MultilingualText", () => {
       "response-opening",
     );
     expect(container.querySelector('[data-column-id="la"]')?.getAttribute("lang")).toBe("la");
+  });
+
+  test("does not invent DOM anchors for anonymous segments", () => {
+    const { container } = render(
+      <MultilingualText
+        columns={[{ id: "la", label: "Latin" }]}
+        segments={[
+          {
+            cells: {
+              la: "Sed contra est quod dicitur...",
+            },
+          },
+        ]}
+      />,
+    );
+
+    const segment = container.querySelector('[data-segment-id="segment-1"]');
+    expect(segment).toBeTruthy();
+    expect(segment?.getAttribute("id")).toBeNull();
   });
 
   test("preserves empty aligned cells without dropping the column", () => {
@@ -77,7 +96,7 @@ describe("MultilingualText", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Latin with English translation")).toBeTruthy();
+    expect(screen.getByRole("list", { name: "Latin with English translation" })).toBeTruthy();
     expect(screen.getByText("Ens et essentia...")).toBeTruthy();
     expect(screen.getByText("Being and essence...")).toBeTruthy();
     expect(container.querySelector('[data-column-id="source"]')?.getAttribute("lang")).toBe("la");
