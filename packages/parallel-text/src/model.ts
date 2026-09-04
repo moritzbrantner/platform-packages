@@ -4,7 +4,9 @@ import {
   type TextDocument,
 } from "@moritzbrantner/linguistics-core";
 
-export interface ParallelTextToken {
+export type ParallelTextAlignmentSource = "manual" | "model" | "heuristic" | "unverified";
+
+export type ParallelTextToken = {
   id: string;
   sentenceId: string;
   sentenceIndex: number;
@@ -13,9 +15,9 @@ export interface ParallelTextToken {
   normalized: string;
   leadingText: string;
   isWord: boolean;
-}
+};
 
-export interface ParallelTextSentence {
+export type ParallelTextSentence = {
   id: string;
   index: number;
   paragraphId: string;
@@ -23,38 +25,40 @@ export interface ParallelTextSentence {
   text: string;
   tokens: ParallelTextToken[];
   trailingText: string;
-}
+};
 
-export interface ParallelTextParagraph {
+export type ParallelTextParagraph = {
   id: string;
   index: number;
   text: string;
   sentences: ParallelTextSentence[];
-}
+};
 
-export interface SentenceAlignmentInput {
+export type SentenceAlignmentInput = {
   original: number | number[];
   translated: number | number[];
   confidence?: number;
-}
+  source?: ParallelTextAlignmentSource;
+};
 
-export interface TokenAlignmentInput {
+export type TokenAlignmentInput = {
   originalSentence: number;
   translatedSentence: number;
   originalToken: number;
   translatedToken: number;
   confidence?: number;
-}
+  source?: ParallelTextAlignmentSource;
+};
 
-export interface ParallelTextTokenLink {
+export type ParallelTextTokenLink = {
   id: string;
   originalTokenId: string;
   translatedTokenId: string;
   confidence?: number;
-  source: "auto" | "manual";
-}
+  source: ParallelTextAlignmentSource;
+};
 
-export interface ParallelTextAlignmentRow {
+export type ParallelTextAlignmentRow = {
   id: string;
   originalSentenceIndices: number[];
   translatedSentenceIndices: number[];
@@ -62,48 +66,48 @@ export interface ParallelTextAlignmentRow {
   translatedSentences: ParallelTextSentence[];
   tokenLinks: ParallelTextTokenLink[];
   confidence?: number;
-  source: "auto" | "manual";
-}
+  source: ParallelTextAlignmentSource;
+};
 
-export interface ParallelTextModel {
+export type ParallelTextModel = {
   originalParagraphs: ParallelTextParagraph[];
   originalSentences: ParallelTextSentence[];
   translatedParagraphs: ParallelTextParagraph[];
   translatedSentences: ParallelTextSentence[];
   rows: ParallelTextAlignmentRow[];
-}
+};
 
-export interface CreateParallelTextModelOptions {
+export type CreateParallelTextModelOptions = {
   originalText: string;
   translatedText: string;
   sentenceAlignments?: SentenceAlignmentInput[];
   tokenAlignments?: TokenAlignmentInput[];
-}
+};
 
-export interface CreateAlignmentModelOptions {
+export type CreateAlignmentModelOptions = {
   original: string | TextDocument;
   translated: string | TextDocument;
   sentenceAlignments?: SentenceAlignmentInput[];
   tokenAlignments?: TokenAlignmentInput[];
-}
+};
 
-export interface SerializedAlignment {
+export type SerializedAlignment = {
   version: 1;
   sentenceAlignments: SentenceAlignmentInput[];
   tokenAlignments: TokenAlignmentInput[];
-}
+};
 
-interface AlignmentRowSeed {
+type AlignmentRowSeed = {
   originalSentenceIndices: number[];
   translatedSentenceIndices: number[];
   confidence?: number;
-  source: "auto" | "manual";
-}
+  source: ParallelTextAlignmentSource;
+};
 
-interface SegmentedDocument {
+type SegmentedDocument = {
   paragraphs: ParallelTextParagraph[];
   sentences: ParallelTextSentence[];
-}
+};
 
 export function createParallelTextModel(
   options: CreateParallelTextModelOptions,
@@ -125,7 +129,7 @@ export function createAlignmentModel({
   const originalDocument = segmentDocument(original, "original");
   const translatedDocument = segmentDocument(translated, "translated");
   const rowSeeds = sentenceAlignments?.length
-    ? createManualRows(
+    ? createExplicitRows(
         sentenceAlignments,
         originalDocument.sentences.length,
         translatedDocument.sentences.length,
@@ -178,17 +182,18 @@ export function serializeAlignment(
       ? {
           version: 1,
           sentenceAlignments: value.rows
-            .filter((row) => row.source === "manual")
+            .filter((row) => isDurableAlignmentSource(row.source))
             .map((row) => ({
               original: row.originalSentenceIndices,
               translated: row.translatedSentenceIndices,
               confidence: row.confidence,
+              source: row.source,
             })),
           tokenAlignments: value.rows.flatMap((row) => {
             const alignments: TokenAlignmentInput[] = [];
 
-            for (const link of row.tokenLinks.filter(
-              (candidate) => candidate.source === "manual",
+            for (const link of row.tokenLinks.filter((candidate) =>
+              isDurableAlignmentSource(candidate.source),
             )) {
               const originalToken = row.originalSentences
                 .flatMap((sentence) => sentence.tokens)
@@ -212,6 +217,7 @@ export function serializeAlignment(
                 originalToken: originalToken.wordIndex,
                 translatedToken: translatedToken.wordIndex,
                 confidence: link.confidence,
+                source: link.source,
               });
             }
 
@@ -317,7 +323,7 @@ function ensureSegmentedDocument(
       });
 }
 
-function createManualRows(
+function createExplicitRows(
   sentenceAlignments: SentenceAlignmentInput[],
   originalCount: number,
   translatedCount: number,
@@ -326,7 +332,7 @@ function createManualRows(
     originalSentenceIndices: normalizeIndices(alignment.original, originalCount),
     translatedSentenceIndices: normalizeIndices(alignment.translated, translatedCount),
     confidence: alignment.confidence,
-    source: "manual" as const,
+    source: alignment.source ?? "manual",
   }));
 
   const usedOriginal = new Set(rows.flatMap((row) => row.originalSentenceIndices));
@@ -337,7 +343,7 @@ function createManualRows(
       rows.push({
         originalSentenceIndices: [index],
         translatedSentenceIndices: [],
-        source: "auto" as const,
+        source: "unverified",
       });
     }
   }
@@ -347,7 +353,7 @@ function createManualRows(
       rows.push({
         originalSentenceIndices: [],
         translatedSentenceIndices: [index],
-        source: "auto" as const,
+        source: "unverified",
       });
     }
   }
@@ -364,7 +370,7 @@ function createAutomaticRows(originalCount: number, translatedCount: number): Al
     return Array.from({ length: translatedCount }, (_, index) => ({
       originalSentenceIndices: [],
       translatedSentenceIndices: [index],
-      source: "auto" as const,
+      source: "unverified" as const,
     }));
   }
 
@@ -372,7 +378,7 @@ function createAutomaticRows(originalCount: number, translatedCount: number): Al
     return Array.from({ length: originalCount }, (_, index) => ({
       originalSentenceIndices: [index],
       translatedSentenceIndices: [],
-      source: "auto" as const,
+      source: "unverified" as const,
     }));
   }
 
@@ -380,7 +386,7 @@ function createAutomaticRows(originalCount: number, translatedCount: number): Al
     return Array.from({ length: originalCount }, (_, index) => ({
       originalSentenceIndices: [index],
       translatedSentenceIndices: [index],
-      source: "auto" as const,
+      source: "heuristic" as const,
     }));
   }
 
@@ -394,7 +400,7 @@ function createAutomaticRows(originalCount: number, translatedCount: number): Al
         ),
       ),
       translatedSentenceIndices: [translatedIndex],
-      source: "auto" as const,
+      source: "heuristic" as const,
     }));
   }
 
@@ -407,7 +413,7 @@ function createAutomaticRows(originalCount: number, translatedCount: number): Al
         Math.floor((originalIndex * translatedCount) / originalCount),
       ),
     ),
-    source: "auto" as const,
+    source: "heuristic" as const,
   }));
 }
 
@@ -433,7 +439,7 @@ function createTokenLinksForRow(
   const pushLink = (
     originalToken: ParallelTextToken | undefined,
     translatedToken: ParallelTextToken | undefined,
-    source: "auto" | "manual",
+    source: ParallelTextAlignmentSource,
     confidence?: number,
   ) => {
     if (!originalToken || !translatedToken) {
@@ -476,7 +482,7 @@ function createTokenLinksForRow(
     pushLink(
       getWordTokenByIndex(originalSentence, alignment.originalToken),
       getWordTokenByIndex(translatedSentence, alignment.translatedToken),
-      "manual",
+      alignment.source ?? "manual",
       alignment.confidence,
     );
   }
@@ -486,34 +492,7 @@ function createTokenLinksForRow(
   const uniqueMatches = createUniqueMatches(originalCandidates, translatedCandidates);
 
   for (const match of uniqueMatches) {
-    pushLink(match.originalToken, match.translatedToken, "auto");
-  }
-
-  const remainingOriginal = originalTokens.filter((token) => !pairedOriginal.has(token.id));
-  const remainingTranslated = translatedTokens.filter((token) => !pairedTranslated.has(token.id));
-
-  if (remainingTranslated.length) {
-    for (let index = 0; index < remainingOriginal.length; index += 1) {
-      pushLink(
-        remainingOriginal[index],
-        remainingTranslated[
-          relativeIndex(index, remainingOriginal.length, remainingTranslated.length)
-        ],
-        "auto",
-      );
-    }
-  }
-
-  if (remainingOriginal.length) {
-    for (let index = 0; index < remainingTranslated.length; index += 1) {
-      pushLink(
-        remainingOriginal[
-          relativeIndex(index, remainingTranslated.length, remainingOriginal.length)
-        ],
-        remainingTranslated[index],
-        "auto",
-      );
-    }
+    pushLink(match.originalToken, match.translatedToken, "heuristic", 0.5);
   }
 
   return links;
@@ -573,6 +552,10 @@ function flattenWordTokens(sentences: ParallelTextSentence[]) {
 
 function getWordTokenByIndex(sentence: ParallelTextSentence | undefined, wordIndex: number) {
   return sentence?.tokens.find((token) => token.wordIndex === wordIndex);
+}
+
+function isDurableAlignmentSource(source: ParallelTextAlignmentSource) {
+  return source === "manual" || source === "model";
 }
 
 function normalizeIndices(value: number | number[], maxCount: number) {

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:pages": "vite build --config vite.pages.config.ts && cp dist-pages/parallel-text-pages.html dist-pages/index.html && mkdir -p dist-pages/parallel-text && cp dist-pages/parallel-text-pages.html dist-pages/parallel-text/index.html && touch dist-pages/.nojekyll",
     "preview": "vite preview",
     "check-types": "tsc --noEmit"
   },

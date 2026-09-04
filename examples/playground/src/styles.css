@@ -1,5 +1,6 @@
 @import "@moritzbrantner/ui/bobba/styles.css";
 @import "@moritzbrantner/maps/styles.css";
+@import "@moritzbrantner/parallel-text/styles.css";
 
 @source "./**/*.{ts,tsx}";
 @source "../../../packages/card-games/src/**/*.{ts,tsx}";

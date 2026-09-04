@@ -7,6 +7,7 @@ export {
   type CreateAlignmentModelOptions,
   type CreateParallelTextModelOptions,
   type ParallelTextAlignmentRow,
+  type ParallelTextAlignmentSource,
   type ParallelTextModel,
   type ParallelTextParagraph,
   type ParallelTextSentence,
@@ -18,6 +19,7 @@ export {
 } from "./model";
 export {
   ParallelTextView,
+  type ParallelTextLayout,
   type ParallelTextTranslationOption,
   type ParallelTextViewProps,
 } from "./parallel-text-view";

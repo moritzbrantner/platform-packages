@@ -1,0 +1,36 @@
+name: Parallel Text Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pages.yml"
+      - "examples/playground/package.json"
+      - "examples/playground/parallel-text-pages.html"
+      - "examples/playground/src/parallel-text-pages.css"
+      - "examples/playground/src/parallel-text-pages.tsx"
+      - "examples/playground/vite.pages.config.ts"
+      - "packages/linguistics-core/**"
+      - "packages/parallel-text/**"
+      - "bun.lock"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Parallel Text Pages
+    permissions:
+      contents: read
+      packages: read
+      pages: write
+      id-token: write
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.2
+    with:
+      working_directory: "."
+      build_command: bun run --filter @moritzbrantner/playground build:pages
+      artifact_path: examples/playground/dist-pages
+      concurrency_group: parallel-text-pages
+      cancel_in_progress: false
