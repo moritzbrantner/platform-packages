@@ -199,6 +199,21 @@ export type FlatLine = FlatRenderableBase & {
   y2: number;
 };
 
+/**
+ * Plain editable SVG text. Rich text runs, tspans, textPath, shaping controls,
+ * and external font resources intentionally remain outside the v2 contract.
+ */
+export type FlatText = FlatRenderableBase & {
+  kind: "text";
+  x: number;
+  y: number;
+  text: string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: number | string;
+  textAnchor?: "start" | "middle" | "end";
+};
+
 export type FlatShape =
   | FlatCircle
   | FlatEllipse
@@ -206,7 +221,8 @@ export type FlatShape =
   | FlatLine
   | FlatPath
   | FlatPolygon
-  | FlatRect;
+  | FlatRect
+  | FlatText;
 
 export type FlatLayer = {
   id?: string;
