@@ -4,7 +4,6 @@ import { useId, useRef, useState } from "react";
 
 import { Button, Input, Label } from "@moritzbrantner/ui";
 
-import { FlatSceneEditor, type FlatSceneEditorProps } from "./editor";
 import {
   importFlatSceneFromSvg,
   renderFlatSceneAnimationToSvg,
@@ -12,8 +11,9 @@ import {
   type FlatSvgImportIssue,
 } from "./svg-interchange";
 import type { FlatDesignScene } from "./scene-types";
+import { FlatDesignWorkbench, type FlatDesignWorkbenchProps } from "./workbench";
 
-export type FlatSvgSceneEditorProps = Omit<FlatSceneEditorProps, "onSceneChange"> & {
+export type FlatSvgSceneEditorProps = Omit<FlatDesignWorkbenchProps, "onSceneChange"> & {
   onSceneChange: (scene: FlatDesignScene) => void;
   exportFileName?: string;
   initialFrameTimeMs?: number;
@@ -21,7 +21,7 @@ export type FlatSvgSceneEditorProps = Omit<FlatSceneEditorProps, "onSceneChange"
 };
 
 /**
- * FlatSceneEditor with a file-oriented SVG interchange toolbar.
+ * Direct-manipulation flat-design workbench with a file-oriented SVG interchange toolbar.
  *
  * Imported SVG is converted to FlatDesignScene data before editing; raw markup,
  * scripts, and unsupported foreign content are never inserted into the editor.
@@ -133,7 +133,7 @@ export function FlatSvgSceneEditor({
         </div>
       ) : null}
 
-      <FlatSceneEditor
+      <FlatDesignWorkbench
         {...editorProps}
         scene={scene}
         readOnly={readOnly}
