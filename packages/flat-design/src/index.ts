@@ -48,6 +48,20 @@ export {
   type FlatSceneEditorSelection,
 } from "./editor";
 export {
+  FlatSvgSceneEditor,
+  type FlatSvgSceneEditorProps,
+} from "./svg-editor";
+export {
+  FlatSvgImportError,
+  importFlatSceneFromSvg,
+  renderFlatSceneAnimationToSvg,
+  renderFlatSceneFrameToSvg,
+  type FlatSvgImportIssue,
+  type FlatSvgImportIssueCode,
+  type FlatSvgImportResult,
+  type ImportFlatSceneFromSvgOptions,
+} from "./svg-interchange";
+export {
   createBobbingAnimation,
   createDriftAnimation,
   createFloatAnimation,

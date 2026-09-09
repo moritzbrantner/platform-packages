@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import {
-  FlatSceneEditor,
+  FlatSvgSceneEditor,
   createFlatBadgeFigure,
   createFlatCardFigure,
   createFlatCloudFigure,
@@ -101,7 +101,7 @@ export function FlatDesignPlaygroundPage() {
     <PlaygroundPage
       activePage="flat-design"
       title="Flat design editor"
-      description="The playground now consumes the package-backed `FlatSceneEditor` instead of implementing scene editing logic locally."
+      description="Import SVG artwork as editable scene data, continue editing it, and export either a deterministic frame or the SVG animation."
     >
       <div className="space-y-6">
         <Card className="rounded-[1.75rem] border-border/60 bg-background/85 shadow-lg shadow-black/5">
@@ -112,14 +112,14 @@ export function FlatDesignPlaygroundPage() {
             <div className="space-y-2">
               <CardTitle className="text-2xl">Scene-native SVG editor</CardTitle>
               <CardDescription className="max-w-3xl text-sm leading-6">
-                Edit a typed `FlatDesignScene`, add packaged figure nodes, adjust safe node
-                properties, switch between preset and timeline motion, and export raw SVG from the
-                same scene object.
+                Import supported SVG geometry and animation as typed scene data, edit packaged
+                figures and motion, then download a static frame or animated SVG from the same
+                scene object.
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
-            <FlatSceneEditor scene={scene} onSceneChange={setScene} showExportPanel />
+            <FlatSvgSceneEditor scene={scene} onSceneChange={setScene} />
           </CardContent>
         </Card>
       </div>
