@@ -4,7 +4,14 @@ import { useId, useRef, useState } from "react";
 
 import { Button, Input, Label } from "@moritzbrantner/ui";
 
-import { FlatSceneEditor, type FlatSceneEditorProps } from "./editor";
+import type { FlatSceneEditorFigureDefinition } from "./editor";
+import {
+  createFlatBadgeFigure,
+  createFlatCardFigure,
+  createFlatCloudFigure,
+  createFlatSparkleFigure,
+  createFlatSunFigure,
+} from "./figures";
 import {
   importFlatSceneFromSvg,
   renderFlatSceneAnimationToSvg,
@@ -12,16 +19,45 @@ import {
   type FlatSvgImportIssue,
 } from "./svg-interchange";
 import type { FlatDesignScene } from "./scene-types";
+import { FlatDesignWorkbench, type FlatDesignWorkbenchProps } from "./workbench";
 
-export type FlatSvgSceneEditorProps = Omit<FlatSceneEditorProps, "onSceneChange"> & {
+export type FlatSvgSceneEditorProps = Omit<FlatDesignWorkbenchProps, "onSceneChange"> & {
   onSceneChange: (scene: FlatDesignScene) => void;
   exportFileName?: string;
   initialFrameTimeMs?: number;
   onSvgImportIssues?: (issues: FlatSvgImportIssue[]) => void;
 };
 
+const defaultSvgEditorFigures: FlatSceneEditorFigureDefinition[] = [
+  {
+    id: "cloud",
+    label: "Add Cloud",
+    create: ({ id, x, y }) => createFlatCloudFigure({ id, x, y }),
+  },
+  {
+    id: "badge",
+    label: "Add Badge",
+    create: ({ id, x, y }) => createFlatBadgeFigure({ id, x, y }),
+  },
+  {
+    id: "card",
+    label: "Add Card",
+    create: ({ id, x, y }) => createFlatCardFigure({ id, x, y }),
+  },
+  {
+    id: "sparkle",
+    label: "Add Sparkle",
+    create: ({ id, x, y }) => createFlatSparkleFigure({ id, x, y }),
+  },
+  {
+    id: "sun",
+    label: "Add Sun",
+    create: ({ id, x, y }) => createFlatSunFigure({ id, x, y }),
+  },
+];
+
 /**
- * FlatSceneEditor with a file-oriented SVG interchange toolbar.
+ * Direct-manipulation flat-design workbench with a file-oriented SVG interchange toolbar.
  *
  * Imported SVG is converted to FlatDesignScene data before editing; raw markup,
  * scripts, and unsupported foreign content are never inserted into the editor.
@@ -33,6 +69,7 @@ export function FlatSvgSceneEditor({
   initialFrameTimeMs = 0,
   onSvgImportIssues,
   readOnly = false,
+  availableFigures,
   ...editorProps
 }: FlatSvgSceneEditorProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -80,6 +117,7 @@ export function FlatSvgSceneEditor({
 
   return (
     <div className="space-y-3">
+      <span className="sr-only">Flat Scene Editor</span>
       <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border/60 bg-background/70 p-3">
         <input
           ref={fileInputRef}
@@ -133,10 +171,11 @@ export function FlatSvgSceneEditor({
         </div>
       ) : null}
 
-      <FlatSceneEditor
+      <FlatDesignWorkbench
         {...editorProps}
         scene={scene}
         readOnly={readOnly}
+        availableFigures={availableFigures ?? defaultSvgEditorFigures}
         onSceneChange={onSceneChange}
       />
     </div>

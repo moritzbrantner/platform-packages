@@ -48,6 +48,31 @@ export {
   type FlatSceneEditorSelection,
 } from "./editor";
 export {
+  applyFlatEditorCommand,
+  createFlatPrimitive,
+  flatNodeRefsEqual,
+  getFlatNodeBounds,
+  getFlatShapeBounds,
+  getFlatShapeRotation,
+  normalizeFlatNodeRefs,
+  resizeFlatShape,
+  rotateFlatShape,
+  scaleFlatShape,
+  toFlatNodeRefKey,
+  translateFlatShape,
+  type FlatBounds,
+  type FlatEditorCommand,
+  type FlatPoint,
+  type FlatPrimitiveKind,
+} from "./editor-commands";
+export {
+  FlatDesignWorkbench,
+  getEffectiveFlatViewBox,
+  remapFlatLayerIndexSetForDelete,
+  remapFlatLayerIndexSetForMove,
+  type FlatDesignWorkbenchProps,
+} from "./workbench";
+export {
   FlatSvgSceneEditor,
   type FlatSvgSceneEditorProps,
 } from "./svg-editor";
