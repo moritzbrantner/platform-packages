@@ -168,6 +168,16 @@ function serializeShape(shape: FlatShape): string {
         x2: shape.x2,
         y2: shape.y2,
       })}>${animations}</line>`;
+    case "text":
+      return `<text ${serializeAttributes({
+        ...common,
+        x: shape.x,
+        y: shape.y,
+        "font-size": shape.fontSize,
+        "font-family": shape.fontFamily,
+        "font-weight": shape.fontWeight,
+        "text-anchor": shape.textAnchor,
+      })}>${escapeText(shape.text)}${animations}</text>`;
   }
 }
 
