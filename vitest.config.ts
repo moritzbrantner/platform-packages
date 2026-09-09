@@ -23,6 +23,14 @@ export default defineConfig({
         rootDir,
         "packages/flat-design/src/motion.ts",
       ),
+      "@moritzbrantner/flat-design/playback": path.resolve(
+        rootDir,
+        "packages/flat-design/src/playback.ts",
+      ),
+      "@moritzbrantner/flat-design/sampling": path.resolve(
+        rootDir,
+        "packages/flat-design/src/sampling.ts",
+      ),
       "@moritzbrantner/flat-design/schema": path.resolve(
         rootDir,
         "packages/flat-design/src/schema-contract.ts",
