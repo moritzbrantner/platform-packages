@@ -212,6 +212,22 @@ function renderShape(
           {animations}
         </line>
       );
+    case "text":
+      return (
+        <text
+          key={key}
+          {...commonProps}
+          x={shape.x}
+          y={shape.y}
+          fontSize={shape.fontSize}
+          fontFamily={shape.fontFamily}
+          fontWeight={shape.fontWeight}
+          textAnchor={shape.textAnchor}
+        >
+          {shape.text}
+          {animations}
+        </text>
+      );
   }
 }
 
