@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { listFlatNodes } from "./core";
 import {
   applyFlatEditorCommand,
   createFlatPrimitive,
@@ -41,23 +42,43 @@ describe("flat-design editor commands", () => {
     }
   });
 
-  test("translates and resizes geometry without mutating the source", () => {
-    const source = createFlatPrimitive("rect", "rect", 10, 20);
+  test("translates in rendered parent coordinates without rewriting source geometry", () => {
+    const source = {
+      kind: "rect" as const,
+      id: "rect",
+      x: 10,
+      y: 20,
+      width: 96,
+      height: 64,
+      transform: "scale(2)",
+    };
     const translated = translateFlatShape(source, 8, -4);
-    const resized = resizeFlatShape(translated, 160, 90);
 
-    expect(source).toMatchObject({ x: 10, y: 20, width: 96, height: 64 });
-    expect(translated).toMatchObject({ x: 18, y: 16 });
-    expect(getFlatShapeBounds(resized)).toMatchObject({ x: 18, y: 16, width: 160, height: 90 });
+    expect(source.transform).toBe("scale(2)");
+    expect(translated).toMatchObject({ x: 10, y: 20, width: 96, height: 64 });
+    expect(translated.transform).toBe("translate(8 -4) scale(2)");
   });
 
-  test("rotates around the current shape center and replaces prior editor rotation", () => {
-    const source = { kind: "rect" as const, x: 10, y: 20, width: 80, height: 40 };
-    const rotated = rotateFlatShape(source, 30);
-    const rerotated = rotateFlatShape(rotated, -15);
+  test("resizes by adding an outer scale around the geometry bounds", () => {
+    const source = createFlatPrimitive("rect", "rect", 10, 20);
+    const resized = resizeFlatShape(source, 192, 32);
 
-    expect(rotated.transform).toBe("rotate(30 50 40)");
-    expect(rerotated.transform).toBe("rotate(-15 50 40)");
+    expect(resized).toMatchObject({ kind: "rect", x: 10, y: 20, width: 96, height: 64 });
+    expect(resized.transform).toBe("translate(10 20) scale(2 0.5) translate(-10 -20)");
+  });
+
+  test("adds rotation in parent space without deleting existing transforms", () => {
+    const source = {
+      kind: "rect" as const,
+      x: 10,
+      y: 20,
+      width: 80,
+      height: 40,
+      transform: "scale(2)",
+    };
+    const rotated = rotateFlatShape(source, 30, { x: 50, y: 40 });
+
+    expect(rotated.transform).toBe("rotate(30 50 40) scale(2)");
   });
 
   test("normalizes overlapping group selections before destructive commands", () => {
@@ -89,6 +110,40 @@ describe("flat-design editor commands", () => {
       ref: { layerIndex: 0, path: [0] },
     });
     expect(ungrouped.layers[0]?.shapes.map((shape) => shape.id)).toEqual(["card", "dot"]);
+  });
+
+  test("duplicates complete subtrees with document-wide unique IDs", () => {
+    const grouped = applyFlatEditorCommand(createScene(), {
+      kind: "group",
+      refs: [cardRef, dotRef],
+      id: "pair",
+    });
+    const duplicatedOnce = applyFlatEditorCommand(grouped, {
+      kind: "duplicate",
+      refs: [{ layerIndex: 0, path: [0] }],
+    });
+    const duplicatedTwice = applyFlatEditorCommand(duplicatedOnce, {
+      kind: "duplicate",
+      refs: [{ layerIndex: 0, path: [1] }],
+    });
+    const ids = listFlatNodes(duplicatedTwice)
+      .map((node) => node.id)
+      .filter((id): id is string => Boolean(id));
+
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "pair",
+        "card",
+        "dot",
+        "pair-copy",
+        "card-copy",
+        "dot-copy",
+        "pair-copy-copy",
+        "card-copy-copy",
+        "dot-copy-copy",
+      ]),
+    );
   });
 
   test("moves selected shapes across layers without losing order", () => {
@@ -130,7 +185,7 @@ describe("flat-design editor commands", () => {
       dy: 5,
     });
 
-    expect(translated.layers[0]?.shapes[0]).toMatchObject({ x: 20, y: 25 });
-    expect(translated.layers[0]?.shapes[1]).toMatchObject({ cx: 160, cy: 85 });
+    expect(translated.layers[0]?.shapes[0]?.transform).toBe("translate(10 5)");
+    expect(translated.layers[0]?.shapes[1]?.transform).toBe("translate(10 5)");
   });
 });
