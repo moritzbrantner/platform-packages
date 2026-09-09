@@ -17,7 +17,7 @@ import {
   renderFlatSceneAnimationToSvg,
   renderFlatSceneFrameToSvg,
   type FlatSvgImportIssue,
-} from "./svg-interchange";
+} from "./svg-interchange-v2";
 import type { FlatDesignScene } from "./scene-types";
 import { FlatDesignWorkbench, type FlatDesignWorkbenchProps } from "./workbench";
 
@@ -29,6 +29,19 @@ export type FlatSvgSceneEditorProps = Omit<FlatDesignWorkbenchProps, "onSceneCha
 };
 
 const defaultSvgEditorFigures: FlatSceneEditorFigureDefinition[] = [
+  {
+    id: "text",
+    label: "Add Text",
+    create: ({ id, x, y }) => ({
+      kind: "text",
+      id,
+      x,
+      y: y + 24,
+      text: "Text",
+      fontSize: 24,
+      fill: "#1f2937",
+    }),
+  },
   {
     id: "cloud",
     label: "Add Cloud",
