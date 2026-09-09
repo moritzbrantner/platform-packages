@@ -57,14 +57,19 @@ export {
   normalizeFlatNodeRefs,
   resizeFlatShape,
   rotateFlatShape,
+  scaleFlatShape,
   toFlatNodeRefKey,
   translateFlatShape,
   type FlatBounds,
   type FlatEditorCommand,
+  type FlatPoint,
   type FlatPrimitiveKind,
 } from "./editor-commands";
 export {
   FlatDesignWorkbench,
+  getEffectiveFlatViewBox,
+  remapFlatLayerIndexSetForDelete,
+  remapFlatLayerIndexSetForMove,
   type FlatDesignWorkbenchProps,
 } from "./workbench";
 export {
