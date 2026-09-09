@@ -62,6 +62,24 @@ export {
 } from "./animation-presets";
 export { compileFlatMotion, resolveFlatMotion } from "./motion";
 export {
+  advanceFlatPlayback,
+  createFlatPlaybackState,
+  restartFlatPlayback,
+  seekFlatPlayback,
+  setFlatPlaybackPlaying,
+  type CreateFlatPlaybackStateOptions,
+  type FlatPlaybackState,
+} from "./playback";
+export {
+  getFlatAnimationProgress,
+  getFlatShapeAnimations,
+  sampleFlatAnimationAtTime,
+  sampleFlatSceneAtTime,
+  sampleFlatShapeAtTime,
+  type FlatAnimatedTransformValue,
+  type FlatAnimationSample,
+} from "./sampling";
+export {
   EditableFlatScene,
   FlatMotionTimelineEditor,
   useFlatSceneSelection,
