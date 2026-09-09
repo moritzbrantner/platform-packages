@@ -87,6 +87,7 @@ export type {
   FlatPresetMotionSpec,
   FlatRect,
   FlatShape,
+  FlatText,
   FlatTimelineMotionSpec,
   FlatTransformAnimation,
 } from "./scene-types";
