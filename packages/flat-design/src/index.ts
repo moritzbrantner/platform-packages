@@ -85,7 +85,7 @@ export {
   type FlatSvgImportIssueCode,
   type FlatSvgImportResult,
   type ImportFlatSceneFromSvgOptions,
-} from "./svg-interchange";
+} from "./svg-interchange-v2";
 export {
   createBobbingAnimation,
   createDriftAnimation,
@@ -176,6 +176,7 @@ export type {
   FlatPresetMotionSpec,
   FlatRect,
   FlatShape,
+  FlatText,
   FlatTimelineMotionSpec,
   FlatTransformAnimation,
 } from "./scene-types";
