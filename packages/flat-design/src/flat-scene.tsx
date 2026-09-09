@@ -1,6 +1,6 @@
 import { useId, type CSSProperties, type ReactNode, type SVGAttributes } from "react";
 
-import { compileFlatMotion } from "./core";
+import { compileFlatMotion } from "./motion";
 import {
   formatAnimationValues,
   formatKeySplines,

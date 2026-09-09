@@ -149,7 +149,10 @@ describe("flat-design document contract", () => {
 
     expect(validateFlatDesignDocument(invalid)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: "invalid-motion", path: "$.layers[0].shapes[0].motion.preset" }),
+        expect.objectContaining({
+          code: "invalid-motion",
+          path: "$.layers[0].shapes[0].motion.preset",
+        }),
       ]),
     );
   });
@@ -181,7 +184,10 @@ describe("flat-design document contract", () => {
 
     expect(validateFlatDesignDocument(invalid)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: "invalid-animation", path: "$.layers[0].shapes[0].animations[0].values[0]" }),
+        expect.objectContaining({
+          code: "invalid-animation",
+          path: "$.layers[0].shapes[0].animations[0].values[0]",
+        }),
       ]),
     );
   });
@@ -239,6 +245,42 @@ describe("flat-design document contract", () => {
     expect(paths).toContain("$.layers[0].shapes[0].mystery");
   });
 
+  test("rejects invalid delay, easing, and fill values before motion compilation", () => {
+    const base = defineFlatDesignDocument(createScene());
+    const invalid = {
+      ...base,
+      layers: [
+        {
+          shapes: [
+            {
+              kind: "circle",
+              cx: 20,
+              cy: 20,
+              r: 10,
+              motion: {
+                kind: "timeline",
+                durationMs: 1_000,
+                delayMs: -20,
+                easing: null,
+                fillMode: "keep",
+                keyframes: [{ timeMs: 0 }, { timeMs: 1_000 }],
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const paths = validateFlatDesignDocument(invalid).map((issue) => issue.path);
+
+    expect(paths).toContain("$.layers[0].shapes[0].motion.delayMs");
+    expect(paths).toContain("$.layers[0].shapes[0].motion.easing");
+    expect(paths).toContain("$.layers[0].shapes[0].motion.fillMode");
+    expect(() => parseFlatDesignDocument(JSON.stringify(invalid), { acceptLegacyScene: false })).toThrow(
+      FlatDesignDocumentError,
+    );
+  });
+
   test("keeps CSS-facing compatibility fields as portability warnings", () => {
     const document = defineFlatDesignDocument({
       ...createScene(),
@@ -273,8 +315,7 @@ describe("flat-design document contract", () => {
     expect(flatDesignDocumentJsonSchema.properties.schemaVersion.const).toBe(1);
     expect(flatDesignDocumentJsonSchema.required).toContain("layers");
 
-    const offset =
-      flatDesignDocumentJsonSchema.$defs.gradient.properties.stops.items.properties.offset;
+    const offset = flatDesignDocumentJsonSchema.$defs.gradient.properties.stops.items.properties.offset;
     expect(offset.anyOf[0]).toMatchObject({ minimum: 0, maximum: 1, type: "number" });
     expect(offset.anyOf[1]).toMatchObject({ type: "string" });
 

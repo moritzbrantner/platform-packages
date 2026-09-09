@@ -39,57 +39,7 @@ export {
   type FlatDesignDocumentIssueSeverity,
   type ParseFlatDesignDocumentOptions,
 } from "./document-contract";
-export { flatDesignDocumentJsonSchema } from "./schema-contract";
-export {
-  FlatSceneEditor,
-  type FlatSceneEditorFigureDefinition,
-  type FlatSceneEditorFigureFactoryOptions,
-  type FlatSceneEditorProps,
-  type FlatSceneEditorSelection,
-} from "./editor";
-export {
-  createBobbingAnimation,
-  createDriftAnimation,
-  createFloatAnimation,
-  createOpacityPulseAnimation,
-  createPopAnimation,
-  createPulseAnimation,
-  createSpinAnimation,
-  createSwayAnimation,
-  createTimelineAnimations,
-  type FlatMotionKeyframe,
-  type FlatTimelineAnimationOptions,
-} from "./animation-presets";
 export { compileFlatMotion, resolveFlatMotion } from "./motion";
-export {
-  EditableFlatScene,
-  FlatMotionTimelineEditor,
-  useFlatSceneSelection,
-  type EditableFlatSceneProps,
-  type FlatMotionTimelineEditorProps,
-  type UseFlatSceneSelectionResult,
-} from "./react";
-export { FlatScene, type FlatSceneProps, type FlatSceneShapeRenderContext } from "./flat-scene";
-export {
-  createFlatBadgeFigure,
-  createFlatCardFigure,
-  createFlatCloudFigure,
-  createFlatFigureAnimations,
-  createFlatSparkleFigure,
-  createFlatSunFigure,
-  type FlatBuiltInFigureAnimationPreset,
-  type FlatBadgeFigureOptions,
-  type FlatCardFigureOptions,
-  type FlatCloudFigureOptions,
-  type FlatFigureAnimationOptions,
-  type FlatFigureAnimationPreset,
-  type FlatFigureMotion,
-  type FlatSparkleFigureOptions,
-  type FlatSunFigureOptions,
-} from "./figures";
-export { createFlatDesignPalette, defaultFlatDesignPalette } from "./palette";
-export { createFlatShowcaseScene, type FlatShowcaseSceneOptions } from "./presets";
-export { renderFlatSceneToSvg, type RenderFlatSceneOptions } from "./render-svg";
 export type {
   FlatAnimation,
   FlatAnimationTiming,

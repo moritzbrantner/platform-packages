@@ -24,6 +24,7 @@ const builtInPresets = new Set([
   "spin",
   "blink",
 ]);
+const easingPresets = new Set(["linear", "ease-in", "ease-out", "ease-in-out"]);
 
 const rootKeys = new Set([
   "schemaVersion",
@@ -65,11 +66,15 @@ const presetMotionKeys = new Set(["kind", "preset", "options"]);
 const timelineMotionKeys = new Set([
   "kind",
   "durationMs",
+  "delayMs",
   "repeatCount",
   "direction",
+  "fillMode",
+  "easing",
   "keyframes",
   "rotateCenter",
 ]);
+const easingKeys = new Set(["type", "x1", "y1", "x2", "y2"]);
 const keyframeKeys = new Set(["timeMs", "x", "y", "scale", "rotate", "opacity"]);
 const rotateKeys = new Set(["angle", "cx", "cy"]);
 const scaleKeys = new Set(["x", "y"]);
@@ -259,6 +264,45 @@ function inspectKeyframe(
   }
 }
 
+function inspectEasing(easing: unknown, issues: FlatDesignDocumentIssue[], path: string) {
+  if (typeof easing === "string") {
+    if (!easingPresets.has(easing)) {
+      pushIssue(issues, "invalid-motion", path, `Unknown flat-design easing "${easing}".`);
+    }
+    return;
+  }
+
+  if (!isRecord(easing)) {
+    pushIssue(
+      issues,
+      "invalid-motion",
+      path,
+      "Motion easing must be a named easing or cubic-bezier object.",
+    );
+    return;
+  }
+
+  rejectUnknownKeys(easing, easingKeys, issues, path);
+  if (
+    easing.type !== "cubic-bezier" ||
+    !isFiniteNumber(easing.x1) ||
+    easing.x1 < 0 ||
+    easing.x1 > 1 ||
+    !isFiniteNumber(easing.x2) ||
+    easing.x2 < 0 ||
+    easing.x2 > 1 ||
+    !isFiniteNumber(easing.y1) ||
+    !isFiniteNumber(easing.y2)
+  ) {
+    pushIssue(
+      issues,
+      "invalid-motion",
+      path,
+      "Cubic-bezier easing requires finite x1/y1/x2/y2 values with x controls between 0 and 1.",
+    );
+  }
+}
+
 function inspectMotion(motion: unknown, issues: FlatDesignDocumentIssue[], path: string) {
   if (!isRecord(motion)) {
     return;
@@ -282,6 +326,31 @@ function inspectMotion(motion: unknown, issues: FlatDesignDocumentIssue[], path:
   }
 
   rejectUnknownKeys(motion, timelineMotionKeys, issues, path);
+
+  if (motion.delayMs !== undefined && (!isFiniteNumber(motion.delayMs) || motion.delayMs < 0)) {
+    pushIssue(
+      issues,
+      "invalid-motion",
+      `${path}.delayMs`,
+      "Motion delayMs must be a finite number greater than or equal to zero.",
+    );
+  }
+  if (
+    motion.fillMode !== undefined &&
+    motion.fillMode !== "freeze" &&
+    motion.fillMode !== "remove"
+  ) {
+    pushIssue(
+      issues,
+      "invalid-motion",
+      `${path}.fillMode`,
+      'Motion fillMode must be "freeze" or "remove".',
+    );
+  }
+  if (motion.easing !== undefined) {
+    inspectEasing(motion.easing, issues, `${path}.easing`);
+  }
+
   if (Array.isArray(motion.keyframes)) {
     motion.keyframes.forEach((keyframe, index) =>
       inspectKeyframe(keyframe, issues, `${path}.keyframes[${index}]`),

@@ -11,8 +11,27 @@ export default defineConfig({
       "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
       "@moritzbrantner/collaboration": path.resolve(rootDir, "packages/collaboration/src/index.ts"),
       "@moritzbrantner/data-density": path.resolve(rootDir, "packages/data-density/src/index.ts"),
+      "@moritzbrantner/flat-design/core": path.resolve(
+        rootDir,
+        "packages/flat-design/src/core-entry.ts",
+      ),
+      "@moritzbrantner/flat-design/document": path.resolve(
+        rootDir,
+        "packages/flat-design/src/document-contract.ts",
+      ),
+      "@moritzbrantner/flat-design/motion": path.resolve(
+        rootDir,
+        "packages/flat-design/src/motion.ts",
+      ),
+      "@moritzbrantner/flat-design/schema": path.resolve(
+        rootDir,
+        "packages/flat-design/src/schema-contract.ts",
+      ),
+      "@moritzbrantner/flat-design/react": path.resolve(
+        rootDir,
+        "packages/flat-design/src/react.tsx",
+      ),
       "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
-      "@moritzbrantner/flat-design/core": path.resolve(rootDir, "packages/flat-design/src/core.ts"),
       "@moritzbrantner/graphs": path.resolve(rootDir, "packages/graphs/src/index.ts"),
       "@moritzbrantner/hexagon-grids": path.resolve(rootDir, "packages/hexagon-grids/src/index.ts"),
       "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
