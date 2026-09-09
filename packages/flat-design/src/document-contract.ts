@@ -1,11 +1,6 @@
 import {
-  FLAT_DESIGN_SCHEMA_VERSION,
   FlatDesignDocumentError,
   analyzeFlatDesignDocument as analyzeLegacyFlatDesignDocument,
-  defineFlatDesignDocument as defineLegacyFlatDesignDocument,
-  migrateFlatDesignDocument,
-  parseFlatDesignDocument as parseLegacyFlatDesignDocument,
-  type FlatDesignDocument,
   type FlatDesignDocumentAnalysis,
   type FlatDesignDocumentIssue,
   type FlatDesignDocumentIssueCode,
@@ -13,6 +8,16 @@ import {
   type ParseFlatDesignDocumentOptions,
 } from "./document";
 import type { FlatDesignScene } from "./scene-types";
+
+/**
+ * v2 adds the plain-text shape vocabulary. Existing v1 documents migrate
+ * losslessly because every v1 shape remains valid in v2.
+ */
+export const FLAT_DESIGN_SCHEMA_VERSION = 2 as const;
+
+export type FlatDesignDocument = FlatDesignScene & {
+  schemaVersion: typeof FLAT_DESIGN_SCHEMA_VERSION;
+};
 
 const builtInPresets = new Set([
   "bobbing",
@@ -37,7 +42,20 @@ const rootKeys = new Set([
   "gradients",
   "layers",
 ]);
-const gradientKeys = new Set(["id", "kind", "stops", "x1", "y1", "x2", "y2", "cx", "cy", "r", "fx", "fy"]);
+const gradientKeys = new Set([
+  "id",
+  "kind",
+  "stops",
+  "x1",
+  "y1",
+  "x2",
+  "y2",
+  "cx",
+  "cy",
+  "r",
+  "fx",
+  "fy",
+]);
 const gradientStopKeys = new Set(["offset", "color", "opacity"]);
 const layerKeys = new Set(["id", "className", "opacity", "transform", "shapes"]);
 const renderableKeys = [
@@ -61,6 +79,17 @@ const shapeKeys: Record<string, ReadonlySet<string>> = {
   path: new Set([...renderableKeys, "kind", "d"]),
   polygon: new Set([...renderableKeys, "kind", "points"]),
   line: new Set([...renderableKeys, "kind", "x1", "y1", "x2", "y2"]),
+  text: new Set([
+    ...renderableKeys,
+    "kind",
+    "x",
+    "y",
+    "text",
+    "fontSize",
+    "fontFamily",
+    "fontWeight",
+    "textAnchor",
+  ]),
 };
 const presetMotionKeys = new Set(["kind", "preset", "options"]);
 const timelineMotionKeys = new Set([
@@ -140,6 +169,71 @@ function rejectUnknownKeys(
       );
     }
   }
+}
+
+/**
+ * Reuse the mature v1 semantic validator for unchanged vocabulary. Text nodes
+ * are represented as zero-size rect proxies only for that internal validation
+ * pass; v2-specific text validation below remains authoritative.
+ */
+function toLegacyValidationShape(shape: unknown): unknown {
+  if (!isRecord(shape)) {
+    return shape;
+  }
+
+  if (shape.kind === "group") {
+    return {
+      ...shape,
+      children: Array.isArray(shape.children)
+        ? shape.children.map((child) => toLegacyValidationShape(child))
+        : shape.children,
+    };
+  }
+
+  if (shape.kind !== "text") {
+    return shape;
+  }
+
+  const {
+    text: _text,
+    fontSize: _fontSize,
+    fontFamily: _fontFamily,
+    fontWeight: _fontWeight,
+    textAnchor: _textAnchor,
+    ...common
+  } = shape;
+
+  return {
+    ...common,
+    kind: "rect",
+    x: isFiniteNumber(shape.x) ? shape.x : 0,
+    y: isFiniteNumber(shape.y) ? shape.y : 0,
+    width: 0,
+    height: 0,
+  };
+}
+
+function toLegacyValidationInput(input: unknown): unknown {
+  if (!isRecord(input)) {
+    return input;
+  }
+
+  return {
+    ...input,
+    schemaVersion: 1,
+    layers: Array.isArray(input.layers)
+      ? input.layers.map((layer) =>
+          isRecord(layer)
+            ? {
+                ...layer,
+                shapes: Array.isArray(layer.shapes)
+                  ? layer.shapes.map((shape) => toLegacyValidationShape(shape))
+                  : layer.shapes,
+              }
+            : layer,
+        )
+      : input.layers,
+  };
 }
 
 function validateTransformValue(
@@ -388,6 +482,71 @@ function registerRenderedId(
   ids.set(id, owner);
 }
 
+function inspectTextShape(
+  shape: Record<string, unknown>,
+  issues: FlatDesignDocumentIssue[],
+  path: string,
+) {
+  if (!isFiniteNumber(shape.x)) {
+    pushIssue(issues, "invalid-geometry", `${path}.x`, "Text x must be a finite number.");
+  }
+  if (!isFiniteNumber(shape.y)) {
+    pushIssue(issues, "invalid-geometry", `${path}.y`, "Text y must be a finite number.");
+  }
+  if (typeof shape.text !== "string") {
+    pushIssue(issues, "invalid-geometry", `${path}.text`, "Text content must be a string.");
+  }
+  if (
+    shape.fontSize !== undefined &&
+    (!isFiniteNumber(shape.fontSize) || shape.fontSize <= 0)
+  ) {
+    pushIssue(
+      issues,
+      "invalid-geometry",
+      `${path}.fontSize`,
+      "Text fontSize must be a finite number greater than zero.",
+    );
+  }
+  if (
+    shape.fontFamily !== undefined &&
+    (typeof shape.fontFamily !== "string" || !shape.fontFamily.trim())
+  ) {
+    pushIssue(
+      issues,
+      "invalid-document",
+      `${path}.fontFamily`,
+      "Text fontFamily must be a non-blank string when provided.",
+    );
+  }
+  if (
+    shape.fontWeight !== undefined &&
+    !(
+      (isFiniteNumber(shape.fontWeight) && shape.fontWeight >= 1 && shape.fontWeight <= 1_000) ||
+      (typeof shape.fontWeight === "string" && Boolean(shape.fontWeight.trim()))
+    )
+  ) {
+    pushIssue(
+      issues,
+      "invalid-document",
+      `${path}.fontWeight`,
+      "Text fontWeight must be a non-blank string or a finite number from 1 to 1000.",
+    );
+  }
+  if (
+    shape.textAnchor !== undefined &&
+    shape.textAnchor !== "start" &&
+    shape.textAnchor !== "middle" &&
+    shape.textAnchor !== "end"
+  ) {
+    pushIssue(
+      issues,
+      "invalid-document",
+      `${path}.textAnchor`,
+      'Text textAnchor must be "start", "middle", or "end".',
+    );
+  }
+}
+
 function inspectShape(
   shape: unknown,
   issues: FlatDesignDocumentIssue[],
@@ -412,6 +571,10 @@ function inspectShape(
     );
   }
 
+  if (shape.kind === "text") {
+    inspectTextShape(shape, issues, path);
+  }
+
   if (shape.kind === "group" && Array.isArray(shape.children)) {
     shape.children.forEach((child, index) =>
       inspectShape(child, issues, ids, `${path}.children[${index}]`),
@@ -425,6 +588,15 @@ function inspectStrictContract(input: unknown, issues: FlatDesignDocumentIssue[]
   }
 
   rejectUnknownKeys(input, rootKeys, issues, "$");
+  if (input.schemaVersion !== FLAT_DESIGN_SCHEMA_VERSION) {
+    pushIssue(
+      issues,
+      "unsupported-schema-version",
+      "$.schemaVersion",
+      `schemaVersion must be ${FLAT_DESIGN_SCHEMA_VERSION}.`,
+    );
+  }
+
   const ids = new Map<string, RenderedIdOwner>();
 
   if (Array.isArray(input.gradients)) {
@@ -463,7 +635,7 @@ function inspectStrictContract(input: unknown, issues: FlatDesignDocumentIssue[]
 }
 
 export function analyzeFlatDesignDocument(input: unknown): FlatDesignDocumentAnalysis {
-  const base = analyzeLegacyFlatDesignDocument(input);
+  const base = analyzeLegacyFlatDesignDocument(toLegacyValidationInput(input));
   const issues = [...base.issues];
   inspectStrictContract(input, issues);
 
@@ -488,10 +660,25 @@ export function assertFlatDesignDocument(input: unknown): asserts input is FlatD
   }
 }
 
+export function migrateFlatDesignDocument(input: unknown): unknown {
+  if (!isRecord(input)) {
+    return input;
+  }
+
+  if (input.schemaVersion === undefined || input.schemaVersion === 1) {
+    return {
+      ...input,
+      schemaVersion: FLAT_DESIGN_SCHEMA_VERSION,
+    };
+  }
+
+  return input;
+}
+
 export function defineFlatDesignDocument(
   scene: FlatDesignScene | FlatDesignDocument,
 ): FlatDesignDocument {
-  const document = defineLegacyFlatDesignDocument(scene);
+  const document = migrateFlatDesignDocument(scene);
   assertFlatDesignDocument(document);
   return document;
 }
@@ -500,9 +687,24 @@ export function parseFlatDesignDocument(
   serialized: string,
   options: ParseFlatDesignDocumentOptions = {},
 ): FlatDesignDocument {
-  const document = parseLegacyFlatDesignDocument(serialized, options);
-  assertFlatDesignDocument(document);
-  return document;
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(serialized) as unknown;
+  } catch (error) {
+    throw new FlatDesignDocumentError([
+      {
+        code: "invalid-document",
+        message: error instanceof Error ? error.message : "Document JSON could not be parsed.",
+        path: "$",
+        severity: "error",
+      },
+    ]);
+  }
+
+  const candidate = options.acceptLegacyScene === false ? parsed : migrateFlatDesignDocument(parsed);
+  assertFlatDesignDocument(candidate);
+  return candidate;
 }
 
 export function serializeFlatDesignDocument(
@@ -512,13 +714,8 @@ export function serializeFlatDesignDocument(
   return JSON.stringify(defineFlatDesignDocument(scene), null, space);
 }
 
-export {
-  FLAT_DESIGN_SCHEMA_VERSION,
-  FlatDesignDocumentError,
-  migrateFlatDesignDocument,
-};
+export { FlatDesignDocumentError };
 export type {
-  FlatDesignDocument,
   FlatDesignDocumentAnalysis,
   FlatDesignDocumentIssue,
   FlatDesignDocumentIssueCode,
