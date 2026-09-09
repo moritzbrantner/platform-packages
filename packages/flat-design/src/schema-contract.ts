@@ -1,4 +1,5 @@
 import { flatDesignDocumentJsonSchema as baseSchema } from "./schema";
+import { FLAT_DESIGN_SCHEMA_VERSION } from "./document-contract";
 
 const clockValue = {
   pattern: "^\\d+(?:\\.\\d+)?(?:ms|s)$",
@@ -129,8 +130,45 @@ const presetMotion = {
   },
 } as const;
 
+const renderableProperties = {
+  animations: { items: { $ref: "#/$defs/animation" }, type: "array" },
+  className: { type: "string" },
+  fill: { type: "string" },
+  id: { minLength: 1, type: "string" },
+  motion: { $ref: "#/$defs/motion" },
+  opacity: { maximum: 1, minimum: 0, type: "number" },
+  stroke: { type: "string" },
+  strokeLinecap: { enum: ["butt", "round", "square"] },
+  strokeLinejoin: { enum: ["bevel", "miter", "round"] },
+  strokeWidth: { minimum: 0, type: "number" },
+  transform: { type: "string" },
+} as const;
+
+const textShape = {
+  additionalProperties: false,
+  properties: {
+    ...renderableProperties,
+    fontFamily: { minLength: 1, type: "string" },
+    fontSize: { exclusiveMinimum: 0, type: "number" },
+    fontWeight: {
+      anyOf: [
+        { maximum: 1_000, minimum: 1, type: "number" },
+        { minLength: 1, type: "string" },
+      ],
+    },
+    kind: { const: "text" },
+    text: { type: "string" },
+    textAnchor: { enum: ["start", "middle", "end"] },
+    x: { type: "number" },
+    y: { type: "number" },
+  },
+  required: ["kind", "x", "y", "text"],
+  type: "object",
+} as const;
+
 export const flatDesignDocumentJsonSchema = {
   ...baseSchema,
+  $id: "https://moritzbrantner.dev/schemas/flat-design/document-v2.schema.json",
   $defs: {
     ...baseSchema.$defs,
     animation: {
@@ -156,5 +194,13 @@ export const flatDesignDocumentJsonSchema = {
       ...baseSchema.$defs.motion,
       oneOf: [presetMotion, baseSchema.$defs.motion.oneOf[1]],
     },
+    shape: {
+      ...baseSchema.$defs.shape,
+      oneOf: [...baseSchema.$defs.shape.oneOf, textShape],
+    },
+  },
+  properties: {
+    ...baseSchema.properties,
+    schemaVersion: { const: FLAT_DESIGN_SCHEMA_VERSION },
   },
 } as const;
