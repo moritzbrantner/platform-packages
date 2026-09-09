@@ -1,6 +1,8 @@
 import {
+  duplicateFlatNode,
   getFlatNode,
   insertFlatNode,
+  listFlatNodes,
   removeFlatNode,
   updateFlatNode,
   type FlatNodeInsertPosition,
@@ -21,6 +23,11 @@ export type FlatBounds = {
   height: number;
 };
 
+export type FlatPoint = {
+  x: number;
+  y: number;
+};
+
 export type FlatPrimitiveKind = "circle" | "ellipse" | "line" | "path" | "polygon" | "rect";
 
 export type FlatEditorCommand =
@@ -33,8 +40,19 @@ export type FlatEditorCommand =
       y: number;
     }
   | { kind: "translate"; refs: FlatNodeRef[]; dx: number; dy: number }
-  | { kind: "resize"; ref: FlatNodeRef; width: number; height: number }
-  | { kind: "rotate"; refs: FlatNodeRef[]; angle: number }
+  | {
+      kind: "resize";
+      ref: FlatNodeRef;
+      scaleX: number;
+      scaleY: number;
+      origin: FlatPoint;
+    }
+  | {
+      kind: "rotate";
+      refs: FlatNodeRef[];
+      angle: number;
+      center: FlatPoint;
+    }
   | { kind: "delete"; refs: FlatNodeRef[] }
   | { kind: "duplicate"; refs: FlatNodeRef[]; idSuffix?: string }
   | { kind: "group"; refs: FlatNodeRef[]; id: string }
@@ -49,6 +67,10 @@ const minimumSize = 1;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function round(value: number) {
+  return Number(value.toFixed(3));
 }
 
 function isGroup(shape: FlatShape): shape is FlatGroup {
@@ -68,10 +90,7 @@ export function flatNodeRefsEqual(left: FlatNodeRef, right: FlatNodeRef) {
 }
 
 function isAncestorPath(parent: FlatNodePath, child: FlatNodePath) {
-  return (
-    parent.length < child.length &&
-    parent.every((segment, index) => child[index] === segment)
-  );
+  return parent.length < child.length && parent.every((segment, index) => child[index] === segment);
 }
 
 /**
@@ -109,19 +128,19 @@ function compareRefsForRemoval(left: FlatNodeRef, right: FlatNodeRef) {
 
 function parsePointString(points: string) {
   const values = points.match(/-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi)?.map(Number) ?? [];
-  if (values.length < 2 || values.length % 2 !== 0 || values.some((value) => !Number.isFinite(value))) {
+  if (
+    values.length < 2 ||
+    values.length % 2 !== 0 ||
+    values.some((value) => !Number.isFinite(value))
+  ) {
     return undefined;
   }
 
-  const parsed: Array<{ x: number; y: number }> = [];
+  const parsed: FlatPoint[] = [];
   for (let index = 0; index < values.length; index += 2) {
     parsed.push({ x: values[index]!, y: values[index + 1]! });
   }
   return parsed;
-}
-
-function formatPoints(points: Array<{ x: number; y: number }>) {
-  return points.map((point) => `${round(point.x)},${round(point.y)}`).join(" ");
 }
 
 function pathApproximatePoints(d: string) {
@@ -130,7 +149,7 @@ function pathApproximatePoints(d: string) {
     return undefined;
   }
 
-  const points: Array<{ x: number; y: number }> = [];
+  const points: FlatPoint[] = [];
   for (let index = 0; index + 1 < values.length; index += 2) {
     const x = values[index]!;
     const y = values[index + 1]!;
@@ -152,7 +171,7 @@ function unionBounds(bounds: FlatBounds[]) {
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
 
-function boundsFromPoints(points: Array<{ x: number; y: number }>) {
+function boundsFromPoints(points: FlatPoint[]) {
   if (points.length === 0) {
     return undefined;
   }
@@ -206,141 +225,55 @@ export function getFlatNodeBounds(scene: FlatDesignScene, ref: FlatNodeRef) {
   return shape ? getFlatShapeBounds(shape) : undefined;
 }
 
-function round(value: number) {
-  return Number(value.toFixed(3));
+function prependTransform(shape: FlatShape, transform: string): FlatShape {
+  return {
+    ...shape,
+    transform: shape.transform?.trim() ? `${transform} ${shape.transform.trim()}` : transform,
+  };
 }
 
-function translateTransform(transform: string | undefined, dx: number, dy: number) {
-  const prefix = `translate(${round(dx)} ${round(dy)})`;
-  return transform?.trim() ? `${prefix} ${transform.trim()}` : prefix;
-}
-
+/**
+ * Translate in the node's parent coordinate space by prepending an outer SVG
+ * transform. Mutating raw geometry is incorrect once a node already carries a
+ * scale/rotate transform because that transform would also change the requested
+ * drag delta.
+ */
 export function translateFlatShape(shape: FlatShape, dx: number, dy: number): FlatShape {
   if (dx === 0 && dy === 0) {
     return shape;
   }
-
-  switch (shape.kind) {
-    case "rect":
-      return { ...shape, x: shape.x + dx, y: shape.y + dy };
-    case "circle":
-      return { ...shape, cx: shape.cx + dx, cy: shape.cy + dy };
-    case "ellipse":
-      return { ...shape, cx: shape.cx + dx, cy: shape.cy + dy };
-    case "line":
-      return {
-        ...shape,
-        x1: shape.x1 + dx,
-        y1: shape.y1 + dy,
-        x2: shape.x2 + dx,
-        y2: shape.y2 + dy,
-      };
-    case "polygon": {
-      const points = typeof shape.points === "string" ? parsePointString(shape.points) : shape.points;
-      if (!points) {
-        return { ...shape, transform: translateTransform(shape.transform, dx, dy) };
-      }
-      const translated = points.map((point) => ({ x: point.x + dx, y: point.y + dy }));
-      return {
-        ...shape,
-        points: typeof shape.points === "string" ? formatPoints(translated) : translated,
-      };
-    }
-    case "path":
-      return { ...shape, transform: translateTransform(shape.transform, dx, dy) };
-    case "group":
-      return { ...shape, children: shape.children.map((child) => translateFlatShape(child, dx, dy)) };
-  }
+  return prependTransform(shape, `translate(${round(dx)} ${round(dy)})`);
 }
 
-function scalePoint(
-  point: { x: number; y: number },
-  origin: { x: number; y: number },
-  scaleX: number,
-  scaleY: number,
-) {
-  return {
-    x: origin.x + (point.x - origin.x) * scaleX,
-    y: origin.y + (point.y - origin.y) * scaleY,
-  };
-}
-
-function scaleShapeAroundBounds(
+/** Apply a parent-space scale around a parent-space origin. */
+export function scaleFlatShape(
   shape: FlatShape,
-  originalBounds: FlatBounds,
   scaleX: number,
   scaleY: number,
+  origin: FlatPoint,
 ): FlatShape {
-  const origin = { x: originalBounds.x, y: originalBounds.y };
-
-  switch (shape.kind) {
-    case "rect": {
-      const point = scalePoint({ x: shape.x, y: shape.y }, origin, scaleX, scaleY);
-      return {
-        ...shape,
-        x: point.x,
-        y: point.y,
-        width: Math.max(minimumSize, shape.width * scaleX),
-        height: Math.max(minimumSize, shape.height * scaleY),
-      };
-    }
-    case "circle": {
-      const center = scalePoint({ x: shape.cx, y: shape.cy }, origin, scaleX, scaleY);
-      return {
-        ...shape,
-        cx: center.x,
-        cy: center.y,
-        r: Math.max(minimumSize / 2, shape.r * Math.max(Math.abs(scaleX), Math.abs(scaleY))),
-      };
-    }
-    case "ellipse": {
-      const center = scalePoint({ x: shape.cx, y: shape.cy }, origin, scaleX, scaleY);
-      return {
-        ...shape,
-        cx: center.x,
-        cy: center.y,
-        rx: Math.max(minimumSize / 2, shape.rx * Math.abs(scaleX)),
-        ry: Math.max(minimumSize / 2, shape.ry * Math.abs(scaleY)),
-      };
-    }
-    case "line": {
-      const start = scalePoint({ x: shape.x1, y: shape.y1 }, origin, scaleX, scaleY);
-      const end = scalePoint({ x: shape.x2, y: shape.y2 }, origin, scaleX, scaleY);
-      return { ...shape, x1: start.x, y1: start.y, x2: end.x, y2: end.y };
-    }
-    case "polygon": {
-      const points = typeof shape.points === "string" ? parsePointString(shape.points) : shape.points;
-      if (!points) {
-        return shape;
-      }
-      const scaled = points.map((point) => scalePoint(point, origin, scaleX, scaleY));
-      return { ...shape, points: typeof shape.points === "string" ? formatPoints(scaled) : scaled };
-    }
-    case "path": {
-      const transform = `translate(${round(origin.x)} ${round(origin.y)}) scale(${round(scaleX)} ${round(scaleY)}) translate(${-round(origin.x)} ${-round(origin.y)})`;
-      return { ...shape, transform: shape.transform ? `${transform} ${shape.transform}` : transform };
-    }
-    case "group":
-      return {
-        ...shape,
-        children: shape.children.map((child) =>
-          scaleShapeAroundBounds(child, originalBounds, scaleX, scaleY),
-        ),
-      };
+  if (scaleX === 1 && scaleY === 1) {
+    return shape;
   }
+  const transform = `translate(${round(origin.x)} ${round(origin.y)}) scale(${round(scaleX)} ${round(scaleY)}) translate(${-round(origin.x)} ${-round(origin.y)})`;
+  return prependTransform(shape, transform);
 }
 
+/**
+ * Convenience resize for untransformed authoring code. The workbench uses the
+ * rendered selection bounds and `scaleFlatShape()` directly so imported
+ * transforms stay authoritative.
+ */
 export function resizeFlatShape(shape: FlatShape, width: number, height: number): FlatShape {
   const bounds = getFlatShapeBounds(shape);
   if (!bounds) {
     return shape;
   }
-
   const safeWidth = Math.max(minimumSize, width);
   const safeHeight = Math.max(minimumSize, height);
   const scaleX = bounds.width === 0 ? 1 : safeWidth / bounds.width;
   const scaleY = bounds.height === 0 ? 1 : safeHeight / bounds.height;
-  return scaleShapeAroundBounds(shape, bounds, scaleX, scaleY);
+  return scaleFlatShape(shape, scaleX, scaleY, { x: bounds.x, y: bounds.y });
 }
 
 export function getFlatShapeRotation(shape: FlatShape) {
@@ -348,23 +281,21 @@ export function getFlatShapeRotation(shape: FlatShape) {
   return match ? Number(match[1]) : 0;
 }
 
-function withRotationTransform(
-  transform: string | undefined,
-  angle: number,
-  center: { x: number; y: number },
-) {
-  const withoutRotate = (transform ?? "").replace(/\s*rotate\([^)]*\)/gi, "").trim();
-  const rotate = `rotate(${round(angle)} ${round(center.x)} ${round(center.y)})`;
-  return withoutRotate ? `${withoutRotate} ${rotate}` : rotate;
-}
-
-export function rotateFlatShape(shape: FlatShape, angle: number): FlatShape {
-  const bounds = getFlatShapeBounds(shape);
-  if (!bounds) {
+/** Rotate by a delta angle in the node's parent coordinate space. */
+export function rotateFlatShape(shape: FlatShape, angle: number, center?: FlatPoint): FlatShape {
+  if (angle === 0) {
     return shape;
   }
-  const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  return { ...shape, transform: withRotationTransform(shape.transform, angle, center) };
+  const bounds = center ? undefined : getFlatShapeBounds(shape);
+  const resolvedCenter =
+    center ??
+    (bounds
+      ? { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+      : { x: 0, y: 0 });
+  return prependTransform(
+    shape,
+    `rotate(${round(angle)} ${round(resolvedCenter.x)} ${round(resolvedCenter.y)})`,
+  );
 }
 
 export function createFlatPrimitive(
@@ -379,9 +310,26 @@ export function createFlatPrimitive(
     case "circle":
       return { kind: "circle", id, cx: x + 36, cy: y + 36, r: 36, fill: "#5b8def" };
     case "ellipse":
-      return { kind: "ellipse", id, cx: x + 48, cy: y + 32, rx: 48, ry: 32, fill: "#5b8def" };
+      return {
+        kind: "ellipse",
+        id,
+        cx: x + 48,
+        cy: y + 32,
+        rx: 48,
+        ry: 32,
+        fill: "#5b8def",
+      };
     case "line":
-      return { kind: "line", id, x1: x, y1: y, x2: x + 96, y2: y + 64, stroke: "#1f2937", strokeWidth: 4 };
+      return {
+        kind: "line",
+        id,
+        x1: x,
+        y1: y,
+        x2: x + 96,
+        y2: y + 64,
+        stroke: "#1f2937",
+        strokeWidth: 4,
+      };
     case "polygon":
       return {
         kind: "polygon",
@@ -438,7 +386,9 @@ function groupSelected(scene: FlatDesignScene, refs: readonly FlatNodeRef[], id:
     return scene;
   }
 
-  const ordered = [...normalized].sort((left, right) => (left.path.at(-1) ?? 0) - (right.path.at(-1) ?? 0));
+  const ordered = [...normalized].sort(
+    (left, right) => (left.path.at(-1) ?? 0) - (right.path.at(-1) ?? 0),
+  );
   const children = ordered
     .map((ref) => getFlatNode(scene, ref))
     .filter((shape): shape is FlatShape => Boolean(shape));
@@ -538,6 +488,46 @@ function moveRefsToLayer(scene: FlatDesignScene, refs: readonly FlatNodeRef[], l
   return nextScene;
 }
 
+function createUniqueDuplicateId(existingIds: Set<string>, sourceId: string, suffix: string) {
+  const base = `${sourceId}${suffix}`;
+  let candidate = base;
+  let sequence = 2;
+  while (existingIds.has(candidate)) {
+    candidate = `${base}-${sequence}`;
+    sequence += 1;
+  }
+  existingIds.add(candidate);
+  return candidate;
+}
+
+function duplicateRefs(scene: FlatDesignScene, refs: readonly FlatNodeRef[], suffix: string) {
+  const existingIds = new Set(
+    listFlatNodes(scene)
+      .map((node) => node.id)
+      .filter((id): id is string => Boolean(id)),
+  );
+  const normalized = normalizeFlatNodeRefs(refs).sort(compareRefsForRemoval);
+  let nextScene = scene;
+
+  for (const ref of normalized) {
+    if (!getFlatNode(nextScene, ref)) {
+      continue;
+    }
+    const destinationRef: FlatNodeRef = {
+      layerIndex: ref.layerIndex,
+      path: [...ref.path.slice(0, -1), (ref.path.at(-1) ?? 0) + 1],
+    };
+    nextScene = duplicateFlatNode(nextScene, ref, {
+      idSuffix: (id) => createUniqueDuplicateId(existingIds, id, suffix),
+    });
+    nextScene = updateFlatNode(nextScene, destinationRef, (shape) =>
+      translateFlatShape(shape, 12, 12),
+    );
+  }
+
+  return nextScene;
+}
+
 export function applyFlatEditorCommand(scene: FlatDesignScene, command: FlatEditorCommand) {
   switch (command.kind) {
     case "insert-primitive":
@@ -547,35 +537,21 @@ export function applyFlatEditorCommand(scene: FlatDesignScene, command: FlatEdit
         createFlatPrimitive(command.primitive, command.id, command.x, command.y),
       );
     case "translate":
-      return applyToRefs(scene, command.refs, (shape) => translateFlatShape(shape, command.dx, command.dy));
+      return applyToRefs(scene, command.refs, (shape) =>
+        translateFlatShape(shape, command.dx, command.dy),
+      );
     case "resize":
-      return updateFlatNode(scene, command.ref, (shape) => resizeFlatShape(shape, command.width, command.height));
+      return updateFlatNode(scene, command.ref, (shape) =>
+        scaleFlatShape(shape, command.scaleX, command.scaleY, command.origin),
+      );
     case "rotate":
-      return applyToRefs(scene, command.refs, (shape) => rotateFlatShape(shape, command.angle));
+      return applyToRefs(scene, command.refs, (shape) =>
+        rotateFlatShape(shape, command.angle, command.center),
+      );
     case "delete":
       return removeRefs(scene, command.refs);
-    case "duplicate": {
-      const normalized = normalizeFlatNodeRefs(command.refs);
-      let nextScene = scene;
-      for (const ref of normalized) {
-        const shape = getFlatNode(scene, ref);
-        if (!shape) {
-          continue;
-        }
-        const index = ref.path.at(-1) ?? 0;
-        const duplicate = translateFlatShape(
-          shape.id ? { ...shape, id: `${shape.id}${command.idSuffix ?? "-copy"}` } : shape,
-          12,
-          12,
-        );
-        nextScene = insertFlatNode(nextScene, {
-          layerIndex: ref.layerIndex,
-          parentPath: ref.path.slice(0, -1),
-          index: index + 1,
-        }, duplicate);
-      }
-      return nextScene;
-    }
+    case "duplicate":
+      return duplicateRefs(scene, command.refs, command.idSuffix ?? "-copy");
     case "group":
       return groupSelected(scene, command.refs, command.id);
     case "ungroup":
