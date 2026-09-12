@@ -1,0 +1,33 @@
+name: Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pages.yml"
+      - "examples/playground/flat-design-pages/**"
+      - "examples/playground/package.json"
+      - "examples/playground/vite.flat-design-pages.config.ts"
+      - "packages/flat-design/**"
+      - "bun.lock"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Pages
+    permissions:
+      contents: read
+      packages: read
+      pages: write
+      id-token: write
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.2
+    with:
+      working_directory: "."
+      build_command: bun run --filter @moritzbrantner/playground build:flat-design-pages
+      artifact_path: examples/playground/dist-flat-design-pages
+      concurrency_group: platform-packages-pages
+      cancel_in_progress: false
