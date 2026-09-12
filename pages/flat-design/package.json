@@ -2,6 +2,7 @@
   "name": "@moritzbrantner/flat-design-pages",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.3.12",
   "scripts": {
     "build": "vite build"
   },
