@@ -34,11 +34,6 @@ jobs:
           bun-version: "1.3.12"
       - name: Install focused Pages dependencies
         run: bun install
-      - name: Capture focused lockfile
-        run: |
-          echo '---BEGIN FOCUSED BUN LOCK---'
-          cat bun.lock
-          echo '---END FOCUSED BUN LOCK---'
       - name: Build focused Pages site
         run: bun run build
 
