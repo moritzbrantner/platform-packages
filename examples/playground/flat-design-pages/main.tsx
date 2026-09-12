@@ -11,6 +11,7 @@ import {
   setFlatNodeMotion,
   type FlatDesignScene,
 } from "@moritzbrantner/flat-design";
+import { Button } from "@moritzbrantner/ui";
 
 import "./styles.css";
 
@@ -102,9 +103,9 @@ function App() {
           </p>
         </div>
         <div className="pages-actions">
-          <button type="button" onClick={() => setScene(createDemoScene())}>
+          <Button type="button" variant="outline" onClick={() => setScene(createDemoScene())}>
             Reset demo
-          </button>
+          </Button>
           <a
             href="https://github.com/moritzbrantner/platform-packages/tree/main/packages/flat-design"
             rel="noreferrer"
