@@ -10,10 +10,22 @@ const packagesRoot = path.join(repoRoot, "packages");
 const registry = "https://npm.pkg.github.com";
 const authToken = process.env.GH_PACKAGES_TOKEN;
 const npmUserConfig = createGitHubPackagesUserConfig();
+const publishableStatuses = new Set(["scaffold-critical", "release-ready"]);
+const releaseInventory = readReleaseInventory();
 
 function readPackageJson(relativeDir) {
   const packageJsonPath = path.join(repoRoot, relativeDir, "package.json");
   return JSON.parse(readFileSync(packageJsonPath, "utf8"));
+}
+
+function readReleaseInventory() {
+  const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
+  return new Map(
+    Array.from(
+      readme.matchAll(/^\|\s*`(@moritzbrantner\/[^`]+)`\s*\|\s*([^|]+?)\s*\|/gm),
+      (match) => [match[1], match[2].trim()],
+    ),
+  );
 }
 
 function getWorkspacePackages() {
@@ -30,6 +42,15 @@ function getWorkspacePackages() {
     })
     .filter(({ packageJson }) => packageJson.private === false)
     .filter(({ packageJson }) => packageJson.publishConfig?.registry === registry)
+    .filter(({ packageJson }) => {
+      const status = releaseInventory.get(packageJson.name);
+
+      if (!status) {
+        throw new Error(`Missing release inventory status for ${packageJson.name}`);
+      }
+
+      return publishableStatuses.has(status);
+    })
     .sort((a, b) => a.packageJson.name.localeCompare(b.packageJson.name));
 }
 

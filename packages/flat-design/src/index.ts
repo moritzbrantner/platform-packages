@@ -72,10 +72,7 @@ export {
   remapFlatLayerIndexSetForMove,
   type FlatDesignWorkbenchProps,
 } from "./workbench";
-export {
-  FlatSvgSceneEditor,
-  type FlatSvgSceneEditorProps,
-} from "./svg-editor";
+export { FlatSvgSceneEditor, type FlatSvgSceneEditorProps } from "./svg-editor";
 export {
   FlatSvgImportError,
   importFlatSceneFromSvg,

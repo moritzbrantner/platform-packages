@@ -73,9 +73,22 @@ test("publishing guide describes the full workspace release path", () => {
 
   expect(publishingGuide).toContain("Prepare or publish the full workspace package set");
   expect(publishingGuide).toContain("validates every public package");
+  expect(publishingGuide).toContain("Experimental packages stay in the normal");
   expect(publishingGuide).toContain("Public npm packages");
   expect(publishingGuide).toContain("consumer repos should adopt these first");
   expect(publishingGuide).toContain("Release-readiness categories");
+});
+
+test("private package publisher honors release readiness inventory", () => {
+  const publisher = readFileSync(
+    path.join(repoRoot, "scripts/publish-workspace-packages.mjs"),
+    "utf8",
+  );
+
+  expect(publisher).toContain('new Set(["scaffold-critical", "release-ready"])');
+  expect(publisher).toContain("readReleaseInventory");
+  expect(publisher).toContain("Missing release inventory status");
+  expect(publisher).toContain("publishableStatuses.has(status)");
 });
 
 test("root quality tooling is wired for Oxc linting and formatting", () => {
