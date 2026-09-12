@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -98,21 +98,91 @@ function sortPackagesForPublishing(packages) {
   return sorted;
 }
 
-function getPublishedVersion(name) {
+function getPublishedVersion(name, version) {
   try {
-    return execFileSync("npm", ["view", name, "version", "--registry", registry], {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-      env: {
-        ...process.env,
-        GH_PACKAGES_TOKEN: authToken,
-        npm_config_userconfig: npmUserConfig,
+    const output = execFileSync(
+      "npm",
+      ["view", `${name}@${version}`, "version", "--registry", registry, "--json"],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        env: packageRegistryEnv(),
       },
-    }).trim();
-  } catch {
-    return null;
+    ).trim();
+    const publishedVersion = JSON.parse(output);
+
+    if (typeof publishedVersion !== "string") {
+      throw new Error(`Unexpected registry response for ${name}@${version}: ${output}`);
+    }
+
+    return publishedVersion;
+  } catch (error) {
+    if (isMissingPackageVersion(error)) {
+      return null;
+    }
+
+    throw new Error(
+      `Failed to query ${name}@${version} from GitHub Packages: ${getCommandErrorText(error)}`,
+      { cause: error },
+    );
   }
+}
+
+function publishPackage(packageDir, pkg) {
+  const result = spawnSync("npm", ["publish"], {
+    cwd: packageDir,
+    encoding: "utf8",
+    env: {
+      ...packageRegistryEnv(),
+      npm_config_registry: registry,
+    },
+  });
+
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
+  }
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
+
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status === 0) {
+    return "published";
+  }
+
+  const output = [result.stdout, result.stderr].filter(Boolean).join("\n");
+  if (isDuplicateVersionError(output)) {
+    return "already-published";
+  }
+
+  throw new Error(`npm publish failed for ${pkg.name}@${pkg.version} with exit ${result.status}.`);
+}
+
+function packageRegistryEnv() {
+  return {
+    ...process.env,
+    GH_PACKAGES_TOKEN: authToken,
+    npm_config_userconfig: npmUserConfig,
+  };
+}
+
+function isMissingPackageVersion(error) {
+  const output = getCommandErrorText(error);
+  return /\bE404\b|404 Not Found|is not in this registry/i.test(output);
+}
+
+function isDuplicateVersionError(output) {
+  return /cannot publish over the previously published versions|EPUBLISHCONFLICT/i.test(output);
+}
+
+function getCommandErrorText(error) {
+  const stdout = typeof error?.stdout === "string" ? error.stdout : "";
+  const stderr = typeof error?.stderr === "string" ? error.stderr : "";
+  const message = error instanceof Error ? error.message : String(error);
+  return [stderr.trim(), stdout.trim(), message].filter(Boolean).join("\n");
 }
 
 if (!authToken) {
@@ -123,7 +193,7 @@ if (!authToken) {
 const releasePackages = sortPackagesForPublishing(getWorkspacePackages());
 
 for (const { relativeDir, packageDir, packageJson: pkg } of releasePackages) {
-  const publishedVersion = getPublishedVersion(pkg.name);
+  const publishedVersion = getPublishedVersion(pkg.name, pkg.version);
 
   if (publishedVersion === pkg.version) {
     console.log(`Skipping ${pkg.name}@${pkg.version}; already published.`);
@@ -131,16 +201,13 @@ for (const { relativeDir, packageDir, packageJson: pkg } of releasePackages) {
   }
 
   console.log(`Publishing ${pkg.name}@${pkg.version} from ${relativeDir}`);
-  execFileSync("npm", ["publish"], {
-    cwd: packageDir,
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      GH_PACKAGES_TOKEN: authToken,
-      npm_config_registry: registry,
-      npm_config_userconfig: npmUserConfig,
-    },
-  });
+  const result = publishPackage(packageDir, pkg);
+
+  if (result === "already-published") {
+    console.log(
+      `Skipping ${pkg.name}@${pkg.version}; registry rejected the upload as an existing version.`,
+    );
+  }
 }
 
 function createGitHubPackagesUserConfig() {
