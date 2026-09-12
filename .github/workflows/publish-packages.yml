@@ -7,6 +7,8 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  GH_PACKAGES_TOKEN: ${{ github.token }}
+  NODE_AUTH_TOKEN: ${{ github.token }}
 
 permissions:
   contents: read
@@ -30,6 +32,9 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@moritzbrantner"
 
+      - name: Prepare compatibility WASM dependencies
+        run: bash scripts/prepare-compat-wasm-deps.sh
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -47,5 +52,3 @@ jobs:
 
       - name: Publish workspace packages
         run: bun run release:publish
-        env:
-          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
