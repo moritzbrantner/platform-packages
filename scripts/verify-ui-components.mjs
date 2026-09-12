@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 const [, , ...rawDirs] = process.argv;
-const targetDirs = rawDirs.length > 0 ? rawDirs : ["packages", "examples/playground/src"];
+const targetDirs = rawDirs.length > 0 ? rawDirs : ["packages", "examples/playground"];
 const exts = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const forbiddenElementPattern = /<button[\s>]/;
 
