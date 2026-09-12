@@ -28,6 +28,6 @@ jobs:
     with:
       working_directory: "."
       build_command: bun run --filter @moritzbrantner/playground build:flat-design-pages
-      artifact_path: examples/playground/dist-flat-design-pages
+      artifact_path: examples/playground/dist/flat-design-pages
       concurrency_group: platform-packages-pages
       cancel_in_progress: false
