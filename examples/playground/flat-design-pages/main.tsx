@@ -92,37 +92,41 @@ function App() {
   const [scene, setScene] = useState<FlatDesignScene>(() => createDemoScene());
 
   return (
-    <main className="pages-shell">
-      <header className="pages-header">
+    <main className="mx-auto min-h-screen w-full max-w-[1600px] p-4 md:p-8">
+      <header className="mb-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="pages-eyebrow">@moritzbrantner/flat-design</p>
-          <h1>Flat design editor</h1>
-          <p className="pages-description">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            @moritzbrantner/flat-design
+          </p>
+          <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">Flat design editor</h1>
+          <p className="mt-4 max-w-4xl text-sm leading-7 text-muted-foreground md:text-base">
             Edit typed SVG scene data directly in the browser. Move, resize, rotate, group, layer,
             animate, import supported SVG, and export deterministic static or animated SVG output.
           </p>
         </div>
-        <div className="pages-actions">
+        <div className="flex flex-wrap gap-3">
           <Button type="button" variant="outline" onClick={() => setScene(createDemoScene())}>
             Reset demo
           </Button>
-          <a
-            href="https://github.com/moritzbrantner/platform-packages/tree/main/packages/flat-design"
-            rel="noreferrer"
-            target="_blank"
-          >
-            View source
-          </a>
+          <Button asChild variant="outline">
+            <a
+              href="https://github.com/moritzbrantner/platform-packages/tree/main/packages/flat-design"
+              rel="noreferrer"
+              target="_blank"
+            >
+              View source
+            </a>
+          </Button>
         </div>
       </header>
 
-      <p className="pages-note">
+      <p className="mb-5 border-y py-3 text-sm leading-6 text-muted-foreground">
         This is the package-backed GitHub Pages acceptance surface. Changes here exercise the same
         document, motion, sampling, SVG interchange, and workbench boundaries published by the
         package.
       </p>
 
-      <section className="editor-surface" aria-label="Flat design editor demo">
+      <section className="min-w-0" aria-label="Flat design editor demo">
         <FlatSvgSceneEditor scene={scene} onSceneChange={setScene} />
       </section>
     </main>
