@@ -15,16 +15,20 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  pages: write
 
 jobs:
   deploy:
     name: Deploy Pages
     permissions:
+      actions: read
       contents: read
       packages: read
       pages: write
       id-token: write
     uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.2
+    secrets: inherit
     with:
       working_directory: "."
       build_command: bun run --filter @moritzbrantner/playground build:flat-design-pages
