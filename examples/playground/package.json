@@ -4,8 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && bun run build:flat-design-pages",
-    "build:flat-design-pages": "vite build --config vite.flat-design-pages.config.ts",
+    "build": "vite build",
     "preview": "vite preview",
     "check-types": "tsc --noEmit"
   },
