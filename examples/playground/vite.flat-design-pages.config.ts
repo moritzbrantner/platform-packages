@@ -25,7 +25,7 @@ export default defineConfig({
     exclude: ["@moritzbrantner/flat-design", "@moritzbrantner/ui"],
   },
   build: {
-    outDir: path.resolve(playgroundRoot, "dist-flat-design-pages"),
+    outDir: path.resolve(playgroundRoot, "dist/flat-design-pages"),
     emptyOutDir: true,
   },
 });
