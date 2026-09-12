@@ -190,10 +190,7 @@ export const flatDesignDocumentJsonSchema = {
             },
             kind: { const: "timeline" },
             repeatCount: {
-              anyOf: [
-                { const: "indefinite" },
-                { exclusiveMinimum: 0, type: "number" },
-              ],
+              anyOf: [{ const: "indefinite" }, { exclusiveMinimum: 0, type: "number" }],
             },
             rotateCenter: {
               additionalProperties: false,

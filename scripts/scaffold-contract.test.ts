@@ -80,7 +80,10 @@ test("publishing guide describes the full workspace release path", () => {
 });
 
 test("private package publisher honors release readiness inventory", () => {
-  const publisher = readFileSync(path.join(repoRoot, "scripts/publish-workspace-packages.mjs"), "utf8");
+  const publisher = readFileSync(
+    path.join(repoRoot, "scripts/publish-workspace-packages.mjs"),
+    "utf8",
+  );
 
   expect(publisher).toContain('new Set(["scaffold-critical", "release-ready"])');
   expect(publisher).toContain("readReleaseInventory");

@@ -37,7 +37,20 @@ const rootKeys = new Set([
   "gradients",
   "layers",
 ]);
-const gradientKeys = new Set(["id", "kind", "stops", "x1", "y1", "x2", "y2", "cx", "cy", "r", "fx", "fy"]);
+const gradientKeys = new Set([
+  "id",
+  "kind",
+  "stops",
+  "x1",
+  "y1",
+  "x2",
+  "y2",
+  "cx",
+  "cy",
+  "r",
+  "fx",
+  "fy",
+]);
 const gradientStopKeys = new Set(["offset", "color", "opacity"]);
 const layerKeys = new Set(["id", "className", "opacity", "transform", "shapes"]);
 const renderableKeys = [
@@ -89,18 +102,8 @@ const animationTimingKeys = [
   "additive",
   "fillMode",
 ] as const;
-const attributeAnimationKeys = new Set([
-  "kind",
-  "attributeName",
-  "values",
-  ...animationTimingKeys,
-]);
-const transformAnimationKeys = new Set([
-  "kind",
-  "transformType",
-  "values",
-  ...animationTimingKeys,
-]);
+const attributeAnimationKeys = new Set(["kind", "attributeName", "values", ...animationTimingKeys]);
+const transformAnimationKeys = new Set(["kind", "transformType", "values", ...animationTimingKeys]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -117,7 +120,9 @@ function pushIssue(
   message: string,
   severity: FlatDesignDocumentIssueSeverity = "error",
 ) {
-  if (issues.some((issue) => issue.code === code && issue.path === path && issue.message === message)) {
+  if (
+    issues.some((issue) => issue.code === code && issue.path === path && issue.message === message)
+  ) {
     return;
   }
 
@@ -195,11 +200,7 @@ function validateTransformValue(
   }
 }
 
-function inspectAnimation(
-  animation: unknown,
-  issues: FlatDesignDocumentIssue[],
-  path: string,
-) {
+function inspectAnimation(animation: unknown, issues: FlatDesignDocumentIssue[], path: string) {
   if (!isRecord(animation)) {
     return;
   }
@@ -245,11 +246,7 @@ function inspectAnimation(
   }
 }
 
-function inspectKeyframe(
-  keyframe: unknown,
-  issues: FlatDesignDocumentIssue[],
-  path: string,
-) {
+function inspectKeyframe(keyframe: unknown, issues: FlatDesignDocumentIssue[], path: string) {
   if (!isRecord(keyframe)) {
     return;
   }
@@ -438,7 +435,12 @@ function inspectStrictContract(input: unknown, issues: FlatDesignDocumentIssue[]
       if (Array.isArray(gradient.stops)) {
         gradient.stops.forEach((stop, stopIndex) => {
           if (isRecord(stop)) {
-            rejectUnknownKeys(stop, gradientStopKeys, issues, `${gradientPath}.stops[${stopIndex}]`);
+            rejectUnknownKeys(
+              stop,
+              gradientStopKeys,
+              issues,
+              `${gradientPath}.stops[${stopIndex}]`,
+            );
           }
         });
       }
@@ -512,11 +514,7 @@ export function serializeFlatDesignDocument(
   return JSON.stringify(defineFlatDesignDocument(scene), null, space);
 }
 
-export {
-  FLAT_DESIGN_SCHEMA_VERSION,
-  FlatDesignDocumentError,
-  migrateFlatDesignDocument,
-};
+export { FLAT_DESIGN_SCHEMA_VERSION, FlatDesignDocumentError, migrateFlatDesignDocument };
 export type {
   FlatDesignDocument,
   FlatDesignDocumentAnalysis,
