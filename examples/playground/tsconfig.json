@@ -39,11 +39,5 @@
     },
     "types": ["vite/client"]
   },
-  "include": [
-    "flat-design-pages/**/*.ts",
-    "flat-design-pages/**/*.tsx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "vite*.config.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"]
 }

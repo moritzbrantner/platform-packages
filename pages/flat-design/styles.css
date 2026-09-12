@@ -1,7 +1,7 @@
 @import "@moritzbrantner/ui/bobba/styles.css";
 
 @source "./main.tsx";
-@source "../../../packages/flat-design/src/**/*.{ts,tsx}";
+@source "../../packages/flat-design/src/**/*.{ts,tsx}";
 
 html {
   background: var(--background);

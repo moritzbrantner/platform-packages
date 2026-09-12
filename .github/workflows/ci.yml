@@ -12,6 +12,8 @@ jobs:
       contents: read
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/validate-repo.yml@scaffold-v2-initial
+    secrets:
+      node_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       lint_command: bun run lint
       typecheck_command: bun run typecheck
