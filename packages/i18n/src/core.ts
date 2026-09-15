@@ -57,7 +57,7 @@ export function resolveLocale<Locale extends string>(
 ): ResolvedLocale<Locale> {
   assertSupportedFallback(options.fallbackLocale, options.supportedLocales);
 
-  const candidates: readonly [LocaleSource, string | null | undefined][] = [
+  const candidates: ReadonlyArray<readonly [LocaleSource, string | null | undefined]> = [
     ["url", options.urlLocale],
     ["stored", options.storedLocale],
     ...((options.browserLocales ?? []).map((locale) => ["browser", locale] as const)),
