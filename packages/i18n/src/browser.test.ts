@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, test } from "vitest";
+
 import { createI18n } from "./core";
 import {
   persistBrowserLocale,
