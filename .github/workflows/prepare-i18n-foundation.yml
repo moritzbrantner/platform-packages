@@ -29,8 +29,12 @@ jobs:
         with:
           bun-version: 1.3.12
 
-      - name: Prepare compatibility WASM dependencies
-        run: bash scripts/prepare-compat-wasm-deps.sh
+      - name: Prepare compatibility package manifests
+        run: |
+          git init ../rust-packages
+          git -C ../rust-packages remote add origin https://github.com/moritzbrantner/rust-packages.git
+          git -C ../rust-packages fetch --depth=1 origin da291014dd40f62307a9825a9f938ccf18fddcbc
+          git -C ../rust-packages checkout --detach FETCH_HEAD
 
       - name: Install dependencies and refresh lockfile
         run: bun install
