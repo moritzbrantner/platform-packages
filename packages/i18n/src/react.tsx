@@ -99,7 +99,7 @@ export function useLocale<Locale extends string = string>(): LocaleController<Lo
   const context = useContext(LocaleContext);
   if (!context) throw new Error("useLocale must be used inside LocalizationProvider.");
 
-  return context as LocaleController<Locale>;
+  return context as unknown as LocaleController<Locale>;
 }
 
 export { Trans, useTranslation };
