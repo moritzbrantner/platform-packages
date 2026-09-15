@@ -9,11 +9,7 @@ import {
 } from "react";
 import type { i18n as I18nInstance } from "i18next";
 import { I18nextProvider, Trans, useTranslation } from "react-i18next";
-import {
-  setBrowserLocale,
-  syncDocumentLocale,
-  type BrowserLocaleOptions,
-} from "./browser";
+import { setBrowserLocale, syncDocumentLocale, type BrowserLocaleOptions } from "./browser";
 import { matchSupportedLocale } from "./core";
 
 type LocaleContextValue = {

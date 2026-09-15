@@ -60,7 +60,7 @@ export function resolveLocale<Locale extends string>(
   const candidates: ReadonlyArray<readonly [LocaleSource, string | null | undefined]> = [
     ["url", options.urlLocale],
     ["stored", options.storedLocale],
-    ...((options.browserLocales ?? []).map((locale) => ["browser", locale] as const)),
+    ...(options.browserLocales ?? []).map((locale) => ["browser", locale] as const),
   ];
 
   for (const [source, candidate] of candidates) {
