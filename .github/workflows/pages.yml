@@ -46,7 +46,7 @@ jobs:
       packages: read
       pages: write
       id-token: write
-    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.2
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.3
     with:
       working_directory: "pages/flat-design"
       install_command: bun install
