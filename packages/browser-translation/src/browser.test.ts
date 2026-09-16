@@ -47,12 +47,10 @@ describe("browser translation adapter", () => {
       targetLanguage: "de",
       modelId: "onnx-community/opus-mt-en-de",
     });
-    expect(() => resolveBrowserTranslationPair("fr", "en")).toThrow(
-      "does not support fr → en",
+    expect(() => resolveBrowserTranslationPair("fr", "en")).toThrow("does not support fr → en");
+    expect(() => resolveBrowserTranslationPair("en", "de", "onnx-community/opus-mt-de-en")).toThrow(
+      "does not match en → de",
     );
-    expect(() =>
-      resolveBrowserTranslationPair("en", "de", "onnx-community/opus-mt-de-en"),
-    ).toThrow("does not match en → de");
     expect(() => resolveBrowserTranslationPair("de", "de")).toThrow(
       "source and target languages must differ",
     );
@@ -61,9 +59,7 @@ describe("browser translation adapter", () => {
   test("returns defensive pair metadata", () => {
     const pairs = browserTranslationPairs();
     pairs[0]!.modelId = "modified";
-    expect(browserTranslationPairs()[0]!.modelId).toBe(
-      "onnx-community/opus-mt-de-en",
-    );
+    expect(browserTranslationPairs()[0]!.modelId).toBe("onnx-community/opus-mt-de-en");
   });
 
   test("preserves segment identity/order and caches a pair model", async () => {
@@ -98,10 +94,7 @@ describe("browser translation adapter", () => {
       ],
       request,
     );
-    const second = await adapter.translateSegments(
-      [{ id: 8, text: "Danke" }],
-      request,
-    );
+    const second = await adapter.translateSegments([{ id: 8, text: "Danke" }], request);
 
     expect(loads).toBe(1);
     expect(first.segments).toEqual([
@@ -117,9 +110,7 @@ describe("browser translation adapter", () => {
       modelProvisioning: "browser-cache",
     });
     expect(
-      progress.some(
-        (update) => update.stage === "model" && update.detail?.status === "cached",
-      ),
+      progress.some((update) => update.stage === "model" && update.detail?.status === "cached"),
     ).toBe(true);
   });
 
@@ -142,10 +133,7 @@ describe("browser translation adapter", () => {
       targetLanguage: "de",
     });
 
-    expect(loadedModels).toEqual([
-      "onnx-community/opus-mt-de-en",
-      "onnx-community/opus-mt-en-de",
-    ]);
+    expect(loadedModels).toEqual(["onnx-community/opus-mt-de-en", "onnx-community/opus-mt-en-de"]);
   });
 
   test("fails closed without WebGPU", async () => {

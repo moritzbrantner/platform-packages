@@ -117,8 +117,7 @@ export function resolveBrowserTranslationPair(
   }
 
   const pair = PAIRS.find(
-    (candidate) =>
-      candidate.sourceLanguage === source && candidate.targetLanguage === target,
+    (candidate) => candidate.sourceLanguage === source && candidate.targetLanguage === target,
   );
   if (!pair) {
     throw new RangeError(
@@ -135,9 +134,7 @@ export function resolveBrowserTranslationPair(
   return { ...pair };
 }
 
-export function createBrowserTranslationAdapter(
-  options: BrowserTranslationAdapterOptions = {},
-) {
+export function createBrowserTranslationAdapter(options: BrowserTranslationAdapterOptions = {}) {
   const loadPipeline = options.loadPipeline ?? loadBrowserTranslationPipeline;
   const webGpuAvailable = options.webGpuAvailable ?? supportsBrowserTranslation;
   const pipelineCache = new Map<string, Promise<TranslationPipeline>>();
@@ -313,9 +310,7 @@ function importTransformers(): Promise<TransformersModule> {
   return transformersModulePromise;
 }
 
-function normalizeSegments(
-  segments: BrowserTranslationSegment[],
-): BrowserTranslationSegment[] {
+function normalizeSegments(segments: BrowserTranslationSegment[]): BrowserTranslationSegment[] {
   if (!Array.isArray(segments)) {
     throw new TypeError("Browser translation requires an array of text segments.");
   }
@@ -324,9 +319,7 @@ function normalizeSegments(
       throw new TypeError(`Browser translation segment ${index} must be an object.`);
     }
     if (typeof segment.id !== "string" && typeof segment.id !== "number") {
-      throw new TypeError(
-        `Browser translation segment ${index} requires a string or number id.`,
-      );
+      throw new TypeError(`Browser translation segment ${index} requires a string or number id.`);
     }
     const text = typeof segment.text === "string" ? segment.text.trim() : "";
     if (!text) {
