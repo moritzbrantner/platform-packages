@@ -27,14 +27,12 @@ jobs:
         with:
           bun-version: "1.3.12"
 
-      - name: Prepare compatibility dependencies
-        run: bash scripts/prepare-compat-wasm-deps.sh
-
-      - name: Install frozen workspace
-        run: bun install --frozen-lockfile
-
-      - name: Format repository
-        run: bun run format
+      - name: Format browser translation slice with pinned Oxfmt
+        run: |
+          bunx oxfmt@0.46.0 \
+            README.md \
+            packages/browser-translation/src/browser.ts \
+            packages/browser-translation/src/browser.test.ts
 
       - name: Commit slice formatting if changed
         run: |
