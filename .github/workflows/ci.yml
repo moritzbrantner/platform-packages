@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/validate-repo.yml@workflow-standard-v1.2
+    uses: moritzbrantner/reusable-workflows/.github/workflows/validate-repo.yml@workflow-standard-v1.3
     with:
       install_command: bash scripts/prepare-compat-wasm-deps.sh && bun install --frozen-lockfile
       lint_command: bun run lint
