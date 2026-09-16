@@ -70,6 +70,10 @@
       "name": "@moritzbrantner/auth-contract",
       "version": "0.1.1",
     },
+    "packages/browser-translation": {
+      "name": "@moritzbrantner/browser-translation",
+      "version": "0.1.0",
+    },
     "packages/card-games": {
       "name": "@moritzbrantner/card-games",
       "version": "0.1.1",
@@ -696,6 +700,8 @@
     "@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.29.0", "", { "dependencies": { "@hono/node-server": "1.19.12", "ajv": "8.18.0", "ajv-formats": "3.0.1", "content-type": "1.0.5", "cors": "2.8.6", "cross-spawn": "7.0.6", "eventsource": "3.0.7", "eventsource-parser": "3.0.6", "express": "5.2.1", "express-rate-limit": "8.3.2", "hono": "4.12.9", "jose": "6.2.2", "json-schema-typed": "8.0.2", "pkce-challenge": "5.0.1", "raw-body": "3.0.2", "zod-to-json-schema": "3.25.2" }, "peerDependencies": { "zod": "3.25.76" } }, "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="],
 
     "@moritzbrantner/auth-contract": ["@moritzbrantner/auth-contract@workspace:packages/auth-contract"],
+
+    "@moritzbrantner/browser-translation": ["@moritzbrantner/browser-translation@workspace:packages/browser-translation"],
 
     "@moritzbrantner/card-games": ["@moritzbrantner/card-games@workspace:packages/card-games"],
 
