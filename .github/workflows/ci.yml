@@ -5,16 +5,14 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   verify:
     permissions:
       contents: read
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/validate-repo.yml@workflow-standard-v1.2
+    uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@45042e56be120b438096e774027637cac0280075
     with:
       install_command: bash scripts/prepare-compat-wasm-deps.sh && bun install --frozen-lockfile
-      lint_command: bun run lint
-      typecheck_command: bun run typecheck
-      test_command: bun run test
-      build_command: bun run build
+      command: ${{ github.event_name == 'pull_request' && 'bun run lint && bun run typecheck && bun run test' || 'bun run lint && bun run typecheck && bun run test && bun run build' }}
