@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
-    "motion": "^12.35.0"
+    "motion": "^13.2.0"
   },
   "devDependencies": {
     "@react-three/fiber": "^9.4.0",
