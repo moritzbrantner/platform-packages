@@ -237,11 +237,7 @@ function validateDocumentMetadata(value: Record<string, unknown>, analysis: Muta
   }
 }
 
-function validateGradientStop(
-  stop: unknown,
-  analysis: MutableAnalysis,
-  path: string,
-) {
+function validateGradientStop(stop: unknown, analysis: MutableAnalysis, path: string) {
   if (!isRecord(stop)) {
     addIssue(analysis, "invalid-gradient", path, "Gradient stops must be objects.");
     return;
@@ -265,7 +261,10 @@ function validateGradientStop(
     addIssue(analysis, "invalid-gradient", `${path}.color`, "Gradient stop color is required.");
   }
 
-  if (stop.opacity !== undefined && (!isFiniteNumber(stop.opacity) || stop.opacity < 0 || stop.opacity > 1)) {
+  if (
+    stop.opacity !== undefined &&
+    (!isFiniteNumber(stop.opacity) || stop.opacity < 0 || stop.opacity > 1)
+  ) {
     addIssue(
       analysis,
       "invalid-gradient",
@@ -311,7 +310,9 @@ function validateGradient(gradient: unknown, analysis: MutableAnalysis, path: st
       "A gradient must contain at least one stop.",
     );
   } else {
-    gradient.stops.forEach((stop, index) => validateGradientStop(stop, analysis, `${path}.stops[${index}]`));
+    gradient.stops.forEach((stop, index) =>
+      validateGradientStop(stop, analysis, `${path}.stops[${index}]`),
+    );
   }
 
   for (const field of ["x1", "y1", "x2", "y2", "cx", "cy", "r", "fx", "fy"] as const) {
@@ -327,11 +328,7 @@ function validateGradient(gradient: unknown, analysis: MutableAnalysis, path: st
   }
 }
 
-function validateGradientReference(
-  analysis: MutableAnalysis,
-  value: unknown,
-  path: string,
-) {
+function validateGradientReference(analysis: MutableAnalysis, value: unknown, path: string) {
   if (typeof value !== "string") {
     return;
   }
@@ -447,8 +444,18 @@ function validateMotionKeyframe(
           "Keyframe rotate must be a finite angle or an angle object.",
         );
       } else {
-        validateOptionalFiniteNumber(analysis, keyframe.rotate.cx, `${path}.rotate.cx`, "Rotation center x");
-        validateOptionalFiniteNumber(analysis, keyframe.rotate.cy, `${path}.rotate.cy`, "Rotation center y");
+        validateOptionalFiniteNumber(
+          analysis,
+          keyframe.rotate.cx,
+          `${path}.rotate.cx`,
+          "Rotation center x",
+        );
+        validateOptionalFiniteNumber(
+          analysis,
+          keyframe.rotate.cy,
+          `${path}.rotate.cy`,
+          "Rotation center y",
+        );
       }
     }
   }
@@ -575,10 +582,20 @@ function validateAnimation(animation: unknown, analysis: MutableAnalysis, path: 
   }
 
   if (!parseClockValue(animation.begin)) {
-    addIssue(analysis, "invalid-animation", `${path}.begin`, "Animation begin must use ms or s units.");
+    addIssue(
+      analysis,
+      "invalid-animation",
+      `${path}.begin`,
+      "Animation begin must use ms or s units.",
+    );
   }
   if (!parseClockValue(animation.dur)) {
-    addIssue(analysis, "invalid-animation", `${path}.dur`, "Animation duration must use ms or s units.");
+    addIssue(
+      analysis,
+      "invalid-animation",
+      `${path}.dur`,
+      "Animation duration must use ms or s units.",
+    );
   }
 
   if (
@@ -632,17 +649,16 @@ function validateAnimation(animation: unknown, analysis: MutableAnalysis, path: 
   }
 }
 
-function validateCommonShapeFields(shape: Record<string, unknown>, analysis: MutableAnalysis, path: string) {
+function validateCommonShapeFields(
+  shape: Record<string, unknown>,
+  analysis: MutableAnalysis,
+  path: string,
+) {
   if (shape.id !== undefined) {
     if (!isNonBlankString(shape.id)) {
       addIssue(analysis, "invalid-document", `${path}.id`, "Node ids must be non-blank strings.");
     } else if (analysis.nodeIds.has(shape.id)) {
-      addIssue(
-        analysis,
-        "duplicate-node-id",
-        `${path}.id`,
-        `Node id "${shape.id}" is duplicated.`,
-      );
+      addIssue(analysis, "duplicate-node-id", `${path}.id`, `Node id "${shape.id}" is duplicated.`);
     } else {
       analysis.nodeIds.add(shape.id);
     }
@@ -676,7 +692,10 @@ function validateCommonShapeFields(shape: Record<string, unknown>, analysis: Mut
     }
   }
 
-  if (shape.opacity !== undefined && (!isFiniteNumber(shape.opacity) || shape.opacity < 0 || shape.opacity > 1)) {
+  if (
+    shape.opacity !== undefined &&
+    (!isFiniteNumber(shape.opacity) || shape.opacity < 0 || shape.opacity > 1)
+  ) {
     addIssue(
       analysis,
       "invalid-opacity",
@@ -685,7 +704,10 @@ function validateCommonShapeFields(shape: Record<string, unknown>, analysis: Mut
     );
   }
 
-  if (shape.strokeWidth !== undefined && (!isFiniteNumber(shape.strokeWidth) || shape.strokeWidth < 0)) {
+  if (
+    shape.strokeWidth !== undefined &&
+    (!isFiniteNumber(shape.strokeWidth) || shape.strokeWidth < 0)
+  ) {
     addIssue(
       analysis,
       "invalid-stroke-width",
@@ -709,15 +731,23 @@ function validateCommonShapeFields(shape: Record<string, unknown>, analysis: Mut
   }
 }
 
-function validateShapeGeometry(shape: Record<string, unknown>, analysis: MutableAnalysis, path: string) {
+function validateShapeGeometry(
+  shape: Record<string, unknown>,
+  analysis: MutableAnalysis,
+  path: string,
+) {
   switch (shape.kind) {
     case "group":
       return;
     case "rect":
       validateRequiredFiniteNumber(analysis, shape.x, `${path}.x`, "Rectangle x");
       validateRequiredFiniteNumber(analysis, shape.y, `${path}.y`, "Rectangle y");
-      validateRequiredFiniteNumber(analysis, shape.width, `${path}.width`, "Rectangle width", { min: 0 });
-      validateRequiredFiniteNumber(analysis, shape.height, `${path}.height`, "Rectangle height", { min: 0 });
+      validateRequiredFiniteNumber(analysis, shape.width, `${path}.width`, "Rectangle width", {
+        min: 0,
+      });
+      validateRequiredFiniteNumber(analysis, shape.height, `${path}.height`, "Rectangle height", {
+        min: 0,
+      });
       validateOptionalFiniteNumber(analysis, shape.rx, `${path}.rx`, "Rectangle rx", { min: 0 });
       validateOptionalFiniteNumber(analysis, shape.ry, `${path}.ry`, "Rectangle ry", { min: 0 });
       return;
@@ -734,13 +764,23 @@ function validateShapeGeometry(shape: Record<string, unknown>, analysis: Mutable
       return;
     case "path":
       if (!isNonBlankString(shape.d)) {
-        addIssue(analysis, "invalid-geometry", `${path}.d`, "Path data d must be a non-blank string.");
+        addIssue(
+          analysis,
+          "invalid-geometry",
+          `${path}.d`,
+          "Path data d must be a non-blank string.",
+        );
       }
       return;
     case "polygon":
       if (typeof shape.points === "string") {
         if (!shape.points.trim()) {
-          addIssue(analysis, "invalid-geometry", `${path}.points`, "Polygon points cannot be blank.");
+          addIssue(
+            analysis,
+            "invalid-geometry",
+            `${path}.points`,
+            "Polygon points cannot be blank.",
+          );
         }
         return;
       }
@@ -793,9 +833,16 @@ function validateShape(shape: unknown, analysis: MutableAnalysis, path: string) 
 
   if (shape.kind === "group") {
     if (!Array.isArray(shape.children)) {
-      addIssue(analysis, "invalid-geometry", `${path}.children`, "Groups must contain a children array.");
+      addIssue(
+        analysis,
+        "invalid-geometry",
+        `${path}.children`,
+        "Groups must contain a children array.",
+      );
     } else {
-      shape.children.forEach((child, index) => validateShape(child, analysis, `${path}.children[${index}]`));
+      shape.children.forEach((child, index) =>
+        validateShape(child, analysis, `${path}.children[${index}]`),
+      );
     }
   }
 }
@@ -838,7 +885,10 @@ function validateLayer(layer: unknown, analysis: MutableAnalysis, path: string) 
     }
   }
 
-  if (layer.opacity !== undefined && (!isFiniteNumber(layer.opacity) || layer.opacity < 0 || layer.opacity > 1)) {
+  if (
+    layer.opacity !== undefined &&
+    (!isFiniteNumber(layer.opacity) || layer.opacity < 0 || layer.opacity > 1)
+  ) {
     addIssue(
       analysis,
       "invalid-opacity",
@@ -850,7 +900,9 @@ function validateLayer(layer: unknown, analysis: MutableAnalysis, path: string) 
   if (!Array.isArray(layer.shapes)) {
     addIssue(analysis, "invalid-document", `${path}.shapes`, "Layers must contain a shapes array.");
   } else {
-    layer.shapes.forEach((shape, index) => validateShape(shape, analysis, `${path}.shapes[${index}]`));
+    layer.shapes.forEach((shape, index) =>
+      validateShape(shape, analysis, `${path}.shapes[${index}]`),
+    );
   }
 }
 
@@ -943,7 +995,8 @@ export function parseFlatDesignDocument(
     ]);
   }
 
-  const candidate = options.acceptLegacyScene === false ? parsed : migrateFlatDesignDocument(parsed);
+  const candidate =
+    options.acceptLegacyScene === false ? parsed : migrateFlatDesignDocument(parsed);
   assertFlatDesignDocument(candidate);
   return candidate;
 }
@@ -955,9 +1008,4 @@ export function serializeFlatDesignDocument(
   return JSON.stringify(defineFlatDesignDocument(scene), null, space);
 }
 
-export type {
-  FlatAnimation,
-  FlatDesignScene,
-  FlatGradient,
-  FlatShape,
-};
+export type { FlatAnimation, FlatDesignScene, FlatGradient, FlatShape };

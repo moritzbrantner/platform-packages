@@ -32,6 +32,7 @@ local JavaScript inference.
 | Package                                         | Status            | Notes                                                                       |
 | ----------------------------------------------- | ----------------- | --------------------------------------------------------------------------- |
 | `@moritzbrantner/auth-contract`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/browser-translation`           | experimental      | WebGPU-only browser translation adapter with curated pair/model resolution. |
 | `@moritzbrantner/card-games`                    | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/collaboration`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/data-density`                  | release-ready     | Included in the first standalone install wave.                              |
@@ -44,6 +45,7 @@ local JavaScript inference.
 | `@moritzbrantner/graphs`                        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/hexagon-grids`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/information-extraction`        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/i18n`                          | release-ready     | Shared locale resolution, formatting, validation, and React adapters.       |
 | `@moritzbrantner/keyboard`                      | experimental      | Browser-safe shortcut registry and matching helpers.                        |
 | `@moritzbrantner/linguistics-core`              | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/linguistics-corpus`            | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
@@ -73,12 +75,14 @@ local JavaScript inference.
 
 ## Packages
 
+- `@moritzbrantner/browser-translation`: WebGPU-only Transformers.js translation execution with curated German/English pair-to-model resolution, browser-cache reuse, progress reporting, and fail-closed output validation.
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
 - `@moritzbrantner/data-density`: reusable indexing, windowing, binning, clustering, and metric aggregation helpers for high-volume maps, charts, tables, and timeline-style views.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
 - `@moritzbrantner/graphs`: node-link graph density helpers for node windows, subgraph extraction, and edge metric aggregation.
 - `@moritzbrantner/hexagon-grids`: globe-aware H3 hex indexing, polygon coverage, neighborhood/path helpers, and point aggregation into hex cells.
+- `@moritzbrantner/i18n`: shared locale resolution, i18next initialization, browser URL/preferences, `Intl` formatting, React bindings, and deterministic translation validation.
 - `@moritzbrantner/keyboard`: browser-safe shortcut parsing, platform-aware modifier labels, editable-target guards, and scoped command registry helpers.
 - `@moritzbrantner/document-analysis`: orchestration layer that combines OCR/text normalization with summarization, sentiment, text analysis, and question answering into one document report.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.

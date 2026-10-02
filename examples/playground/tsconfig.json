@@ -12,7 +12,9 @@
       "@moritzbrantner/data-density": ["../../packages/data-density/src/index.ts"],
       "@moritzbrantner/flat-design": ["../../packages/flat-design/src/index.ts"],
       "@moritzbrantner/flat-design/core": ["../../packages/flat-design/src/core-entry.ts"],
-      "@moritzbrantner/flat-design/document": ["../../packages/flat-design/src/document-contract.ts"],
+      "@moritzbrantner/flat-design/document": [
+        "../../packages/flat-design/src/document-contract.ts"
+      ],
       "@moritzbrantner/flat-design/motion": ["../../packages/flat-design/src/motion.ts"],
       "@moritzbrantner/flat-design/playback": ["../../packages/flat-design/src/playback.ts"],
       "@moritzbrantner/flat-design/sampling": ["../../packages/flat-design/src/sampling.ts"],

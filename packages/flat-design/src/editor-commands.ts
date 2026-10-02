@@ -187,7 +187,12 @@ export function getFlatShapeBounds(shape: FlatShape): FlatBounds | undefined {
     case "rect":
       return { x: shape.x, y: shape.y, width: shape.width, height: shape.height };
     case "circle":
-      return { x: shape.cx - shape.r, y: shape.cy - shape.r, width: shape.r * 2, height: shape.r * 2 };
+      return {
+        x: shape.cx - shape.r,
+        y: shape.cy - shape.r,
+        width: shape.r * 2,
+        height: shape.r * 2,
+      };
     case "ellipse":
       return {
         x: shape.cx - shape.rx,
@@ -289,9 +294,7 @@ export function rotateFlatShape(shape: FlatShape, angle: number, center?: FlatPo
   const bounds = center ? undefined : getFlatShapeBounds(shape);
   const resolvedCenter =
     center ??
-    (bounds
-      ? { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
-      : { x: 0, y: 0 });
+    (bounds ? { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 } : { x: 0, y: 0 });
   return prependTransform(
     shape,
     `rotate(${round(angle)} ${round(resolvedCenter.x)} ${round(resolvedCenter.y)})`,

@@ -94,10 +94,7 @@ describe("flat-design authored motion", () => {
       expect(animation.repeatCount).toBe("3");
       expect(animation.fillMode).toBe("freeze");
       expect(animation.calcMode).toBe("spline");
-      expect(animation.keySplines).toEqual([
-        "0.42 0 0.58 1",
-        "0.42 0 0.58 1",
-      ]);
+      expect(animation.keySplines).toEqual(["0.42 0 0.58 1", "0.42 0 0.58 1"]);
     }
   });
 

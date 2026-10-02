@@ -193,7 +193,12 @@ function parseRootLayer(
   return {
     id: root.attributes.id,
     className: root.attributes.class,
-    opacity: parseOptionalNumber(readPresentation(root, styles, "opacity"), "opacity", root, context),
+    opacity: parseOptionalNumber(
+      readPresentation(root, styles, "opacity"),
+      "opacity",
+      root,
+      context,
+    ),
     transform: root.attributes.transform,
     shapes,
   };
@@ -354,7 +359,12 @@ function parseShape(element: XmlElement, context: SvgImportContext): FlatShape |
       }
 
       if (!isValidPointList(points, 3)) {
-        addIssue(context, "invalid-value", "<polygon> has invalid points and was skipped.", element);
+        addIssue(
+          context,
+          "invalid-value",
+          "<polygon> has invalid points and was skipped.",
+          element,
+        );
         return undefined;
       }
 
@@ -607,9 +617,7 @@ function parseOptionalNumber(
 }
 
 function parseSvgNumber(value: string): number | undefined {
-  const match = value
-    .trim()
-    .match(/^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)(?:px)?$/i);
+  const match = value.trim().match(/^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)(?:px)?$/i);
 
   if (!match) {
     return undefined;
@@ -631,7 +639,12 @@ function parseViewBox(
   const values = splitNumberList(value);
 
   if (values.length !== 4 || values[2]! <= 0 || values[3]! <= 0) {
-    addIssue(context, "invalid-value", `Invalid viewBox ${JSON.stringify(value)} was ignored.`, root);
+    addIssue(
+      context,
+      "invalid-value",
+      `Invalid viewBox ${JSON.stringify(value)} was ignored.`,
+      root,
+    );
     return undefined;
   }
 
@@ -712,7 +725,13 @@ function parseGradient(element: XmlElement, context: SvgImportContext): FlatGrad
     return undefined;
   }
 
-  for (const attribute of ["gradientTransform", "gradientUnits", "href", "spreadMethod", "xlink:href"]) {
+  for (const attribute of [
+    "gradientTransform",
+    "gradientUnits",
+    "href",
+    "spreadMethod",
+    "xlink:href",
+  ]) {
     if (element.attributes[attribute] !== undefined) {
       addIssue(
         context,
@@ -972,19 +991,14 @@ function parseTransformAnimation(
       return undefined;
     }
     values.push(
-      numbers.length === 1
-        ? numbers[0]!
-        : { angle: numbers[0]!, cx: numbers[1]!, cy: numbers[2]! },
+      numbers.length === 1 ? numbers[0]! : { angle: numbers[0]!, cx: numbers[1]!, cy: numbers[2]! },
     );
   }
 
   return { kind: "transform", transformType: "rotate", values, ...timing };
 }
 
-function readAnimationValues(
-  element: XmlElement,
-  context: SvgImportContext,
-): string[] | undefined {
+function readAnimationValues(element: XmlElement, context: SvgImportContext): string[] | undefined {
   const values = element.attributes.values
     ?.split(";")
     .map((value) => value.trim())
@@ -1010,10 +1024,7 @@ function readAnimationValues(
   return undefined;
 }
 
-function parseAnimationTiming(
-  element: XmlElement,
-  context: SvgImportContext,
-): FlatAnimationTiming {
+function parseAnimationTiming(element: XmlElement, context: SvgImportContext): FlatAnimationTiming {
   const calcMode = element.attributes.calcMode;
   const additive = element.attributes.additive;
   const fill = element.attributes.fill;
@@ -1029,10 +1040,20 @@ function parseAnimationTiming(
   };
 
   if (calcMode !== undefined) {
-    if (calcMode === "discrete" || calcMode === "linear" || calcMode === "paced" || calcMode === "spline") {
+    if (
+      calcMode === "discrete" ||
+      calcMode === "linear" ||
+      calcMode === "paced" ||
+      calcMode === "spline"
+    ) {
       timing.calcMode = calcMode;
     } else {
-      addIssue(context, "invalid-value", `Unsupported calcMode ${JSON.stringify(calcMode)} was ignored.`, element);
+      addIssue(
+        context,
+        "invalid-value",
+        `Unsupported calcMode ${JSON.stringify(calcMode)} was ignored.`,
+        element,
+      );
     }
   }
 
@@ -1040,7 +1061,12 @@ function parseAnimationTiming(
     if (additive === "replace" || additive === "sum") {
       timing.additive = additive;
     } else {
-      addIssue(context, "invalid-value", `Unsupported additive ${JSON.stringify(additive)} was ignored.`, element);
+      addIssue(
+        context,
+        "invalid-value",
+        `Unsupported additive ${JSON.stringify(additive)} was ignored.`,
+        element,
+      );
     }
   }
 
@@ -1105,7 +1131,9 @@ function validateAnimationTiming(
     addIssue(
       context,
       "unsupported-animation",
-      "calcMode=" + JSON.stringify("paced") + " is preserved by SVG but is not yet reproduced by the deterministic sampler, so this animation was skipped.",
+      "calcMode=" +
+        JSON.stringify("paced") +
+        " is preserved by SVG but is not yet reproduced by the deterministic sampler, so this animation was skipped.",
       element,
     );
     return false;
@@ -1203,10 +1231,7 @@ function isValidKeyTimes(values: number[], valueCount: number) {
   }
 
   return values.every(
-    (value, index) =>
-      value >= 0 &&
-      value <= 1 &&
-      (index === 0 || value >= values[index - 1]!),
+    (value, index) => value >= 0 && value <= 1 && (index === 0 || value >= values[index - 1]!),
   );
 }
 

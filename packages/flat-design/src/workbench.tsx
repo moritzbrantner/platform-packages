@@ -276,9 +276,16 @@ function marqueeBounds(interaction: Extract<Interaction, { kind: "marquee" }>): 
 }
 
 function createUniqueId(scene: FlatDesignScene, prefix: string) {
-  const existing = new Set(listFlatNodes(scene).map((node) => node.id).filter(Boolean));
+  const existing = new Set(
+    listFlatNodes(scene)
+      .map((node) => node.id)
+      .filter(Boolean),
+  );
   const normalized =
-    prefix.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "node";
+    prefix
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "node";
   if (!existing.has(normalized)) {
     return normalized;
   }
@@ -402,7 +409,10 @@ function remapRefsForLayerMove(
 function remapRefsForLayerDelete(refs: readonly FlatNodeRef[], deleted: number) {
   return refs
     .filter((ref) => ref.layerIndex !== deleted)
-    .map((ref) => ({ ...ref, layerIndex: ref.layerIndex > deleted ? ref.layerIndex - 1 : ref.layerIndex }));
+    .map((ref) => ({
+      ...ref,
+      layerIndex: ref.layerIndex > deleted ? ref.layerIndex - 1 : ref.layerIndex,
+    }));
 }
 
 export function FlatDesignWorkbench({
@@ -470,8 +480,12 @@ export function FlatDesignWorkbench({
   }, [onSelectedNodeChange, scene, selectedRefs]);
 
   useEffect(() => {
-    setHiddenLayers((current) => new Set([...current].filter((index) => index < scene.layers.length)));
-    setLockedLayers((current) => new Set([...current].filter((index) => index < scene.layers.length)));
+    setHiddenLayers(
+      (current) => new Set([...current].filter((index) => index < scene.layers.length)),
+    );
+    setLockedLayers(
+      (current) => new Set([...current].filter((index) => index < scene.layers.length)),
+    );
   }, [scene.layers.length]);
 
   useLayoutEffect(() => {
@@ -767,7 +781,8 @@ export function FlatDesignWorkbench({
             !hiddenLayers.has(node.ref.layerIndex) && !lockedLayers.has(node.ref.layerIndex),
         )
         .filter((node) => {
-          const nodeBounds = renderedBounds.get(toFlatNodeRefKey(node.ref)) ?? getFlatNodeBounds(scene, node.ref);
+          const nodeBounds =
+            renderedBounds.get(toFlatNodeRefKey(node.ref)) ?? getFlatNodeBounds(scene, node.ref);
           return nodeBounds ? boundsIntersect(bounds, nodeBounds) : false;
         })
         .map((node) => node.ref);
@@ -810,8 +825,7 @@ export function FlatDesignWorkbench({
       y: selectedBounds.y + selectedBounds.height / 2,
     };
     const point = pointFromPointer(event, event.currentTarget.ownerSVGElement, viewBox);
-    const startPointerAngle =
-      Math.atan2(point.y - center.y, point.x - center.x) * (180 / Math.PI);
+    const startPointerAngle = Math.atan2(point.y - center.y, point.x - center.x) * (180 / Math.PI);
     const nextInteraction: Interaction = {
       kind: "rotate",
       startScene: scene,
@@ -883,31 +897,72 @@ export function FlatDesignWorkbench({
   return (
     <div className={cn("grid gap-4", className)}>
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-background/80 p-2">
-        <Button type="button" size="sm" variant="outline" disabled={pastRef.current.length === 0 || readOnly} onClick={undo}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={pastRef.current.length === 0 || readOnly}
+          onClick={undo}
+        >
           Undo
         </Button>
-        <Button type="button" size="sm" variant="outline" disabled={futureRef.current.length === 0 || readOnly} onClick={redo}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={futureRef.current.length === 0 || readOnly}
+          onClick={redo}
+        >
           Redo
         </Button>
         <Separator orientation="vertical" className="h-7" />
-        <Button type="button" size="sm" variant={snapEnabled ? "secondary" : "outline"} onClick={() => setSnapEnabled((value) => !value)}>
+        <Button
+          type="button"
+          size="sm"
+          variant={snapEnabled ? "secondary" : "outline"}
+          onClick={() => setSnapEnabled((value) => !value)}
+        >
           Snap {gridSize}px
         </Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => setZoom((value) => clamp(value - 0.1, 0.35, 3))}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setZoom((value) => clamp(value - 0.1, 0.35, 3))}
+        >
           −
         </Button>
         <Badge variant="secondary">{Math.round(zoom * 100)}%</Badge>
-        <Button type="button" size="sm" variant="outline" onClick={() => setZoom((value) => clamp(value + 0.1, 0.35, 3))}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setZoom((value) => clamp(value + 0.1, 0.35, 3))}
+        >
           +
         </Button>
         <Separator orientation="vertical" className="h-7" />
         {primitiveKinds.map((primitive) => (
-          <Button key={primitive.kind} type="button" size="sm" variant="outline" disabled={readOnly || insertionLayerLocked} onClick={() => handleInsertPrimitive(primitive.kind)}>
+          <Button
+            key={primitive.kind}
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={readOnly || insertionLayerLocked}
+            onClick={() => handleInsertPrimitive(primitive.kind)}
+          >
             {primitive.label}
           </Button>
         ))}
         {availableFigures.map((figure) => (
-          <Button key={figure.id} type="button" size="sm" variant="ghost" disabled={readOnly || insertionLayerLocked} onClick={() => handleInsertFigure(figure)}>
+          <Button
+            key={figure.id}
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={readOnly || insertionLayerLocked}
+            onClick={() => handleInsertFigure(figure)}
+          >
             {figure.label}
           </Button>
         ))}
@@ -917,9 +972,17 @@ export function FlatDesignWorkbench({
         <aside className="space-y-4 rounded-xl border border-border/60 bg-background/70 p-3">
           <div>
             <div className="text-sm font-semibold">Layers</div>
-            <p className="text-xs text-muted-foreground">Drag to reorder. Visibility and locks are workspace-only.</p>
+            <p className="text-xs text-muted-foreground">
+              Drag to reorder. Visibility and locks are workspace-only.
+            </p>
           </div>
-          <Button type="button" size="sm" className="w-full" disabled={readOnly} onClick={() => run({ kind: "add-layer", id: createUniqueLayerId(scene) })}>
+          <Button
+            type="button"
+            size="sm"
+            className="w-full"
+            disabled={readOnly}
+            onClick={() => run({ kind: "add-layer", id: createUniqueLayerId(scene) })}
+          >
             Add layer
           </Button>
           <div className="space-y-2">
@@ -928,16 +991,27 @@ export function FlatDesignWorkbench({
                 key={`${layer.id ?? "layer"}-${layerIndex}`}
                 draggable={!readOnly}
                 className="rounded-lg border border-border/60 p-2"
-                onDragStart={(event) => event.dataTransfer.setData("text/flat-layer-index", String(layerIndex))}
+                onDragStart={(event) =>
+                  event.dataTransfer.setData("text/flat-layer-index", String(layerIndex))
+                }
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
                   event.preventDefault();
                   const source = Number(event.dataTransfer.getData("text/flat-layer-index"));
                   if (!Number.isInteger(source) || source === layerIndex) return;
                   const length = scene.layers.length;
-                  setHiddenLayers((current) => remapFlatLayerIndexSetForMove(current, source, layerIndex, length));
-                  setLockedLayers((current) => remapFlatLayerIndexSetForMove(current, source, layerIndex, length));
-                  const remappedSelection = remapRefsForLayerMove(selectedRefs, source, layerIndex, length);
+                  setHiddenLayers((current) =>
+                    remapFlatLayerIndexSetForMove(current, source, layerIndex, length),
+                  );
+                  setLockedLayers((current) =>
+                    remapFlatLayerIndexSetForMove(current, source, layerIndex, length),
+                  );
+                  const remappedSelection = remapRefsForLayerMove(
+                    selectedRefs,
+                    source,
+                    layerIndex,
+                    length,
+                  );
                   run({ kind: "move-layer", layerIndex: source, toIndex: layerIndex });
                   setSelection(remappedSelection);
                 }}
@@ -946,19 +1020,23 @@ export function FlatDesignWorkbench({
                   value={layer.id ?? ""}
                   aria-label={`Layer ${layerIndex + 1} name`}
                   disabled={readOnly}
-                  onChange={(event) => run({ kind: "rename-layer", layerIndex, id: event.target.value || undefined })}
+                  onChange={(event) =>
+                    run({ kind: "rename-layer", layerIndex, id: event.target.value || undefined })
+                  }
                 />
                 <div className="mt-2 grid grid-cols-3 gap-1">
                   <Button
                     type="button"
                     size="sm"
                     variant={hiddenLayers.has(layerIndex) ? "secondary" : "ghost"}
-                    onClick={() => setHiddenLayers((current) => {
-                      const next = new Set(current);
-                      if (next.has(layerIndex)) next.delete(layerIndex);
-                      else next.add(layerIndex);
-                      return next;
-                    })}
+                    onClick={() =>
+                      setHiddenLayers((current) => {
+                        const next = new Set(current);
+                        if (next.has(layerIndex)) next.delete(layerIndex);
+                        else next.add(layerIndex);
+                        return next;
+                      })
+                    }
                   >
                     {hiddenLayers.has(layerIndex) ? "Show" : "Hide"}
                   </Button>
@@ -966,12 +1044,14 @@ export function FlatDesignWorkbench({
                     type="button"
                     size="sm"
                     variant={lockedLayers.has(layerIndex) ? "secondary" : "ghost"}
-                    onClick={() => setLockedLayers((current) => {
-                      const next = new Set(current);
-                      if (next.has(layerIndex)) next.delete(layerIndex);
-                      else next.add(layerIndex);
-                      return next;
-                    })}
+                    onClick={() =>
+                      setLockedLayers((current) => {
+                        const next = new Set(current);
+                        if (next.has(layerIndex)) next.delete(layerIndex);
+                        else next.add(layerIndex);
+                        return next;
+                      })
+                    }
                   >
                     {lockedLayers.has(layerIndex) ? "Unlock" : "Lock"}
                   </Button>
@@ -982,8 +1062,12 @@ export function FlatDesignWorkbench({
                     disabled={readOnly || scene.layers.length <= 1}
                     onClick={() => {
                       const remapped = remapRefsForLayerDelete(selectedRefs, layerIndex);
-                      setHiddenLayers((current) => remapFlatLayerIndexSetForDelete(current, layerIndex));
-                      setLockedLayers((current) => remapFlatLayerIndexSetForDelete(current, layerIndex));
+                      setHiddenLayers((current) =>
+                        remapFlatLayerIndexSetForDelete(current, layerIndex),
+                      );
+                      setLockedLayers((current) =>
+                        remapFlatLayerIndexSetForDelete(current, layerIndex),
+                      );
                       run({ kind: "delete-layer", layerIndex });
                       setSelection(remapped);
                     }}
@@ -997,7 +1081,9 @@ export function FlatDesignWorkbench({
           <Separator />
           <div>
             <div className="text-sm font-semibold">Scene tree</div>
-            <p className="text-xs text-muted-foreground">Shift-click on canvas or tree for multi-selection.</p>
+            <p className="text-xs text-muted-foreground">
+              Shift-click on canvas or tree for multi-selection.
+            </p>
           </div>
           <ScrollArea className="h-72 rounded-lg border border-border/60">
             <div className="space-y-1 p-2">
@@ -1023,7 +1109,9 @@ export function FlatDesignWorkbench({
                   }}
                 >
                   <span className="truncate">{node.label}</span>
-                  {lockedLayers.has(node.ref.layerIndex) ? <span className="text-[0.65rem] text-muted-foreground">locked</span> : null}
+                  {lockedLayers.has(node.ref.layerIndex) ? (
+                    <span className="text-[0.65rem] text-muted-foreground">locked</span>
+                  ) : null}
                 </Button>
               ))}
             </div>
@@ -1036,7 +1124,11 @@ export function FlatDesignWorkbench({
               disabled={!canGroup}
               onClick={() => {
                 const groupId = createUniqueId(scene, "group");
-                const next = applyFlatEditorCommand(scene, { kind: "group", refs: selectedRefs, id: groupId });
+                const next = applyFlatEditorCommand(scene, {
+                  kind: "group",
+                  refs: selectedRefs,
+                  id: groupId,
+                });
                 commit(next);
                 const ref = listFlatNodes(next).find((node) => node.id === groupId)?.ref;
                 setSelection(ref ? [ref] : []);
@@ -1044,13 +1136,33 @@ export function FlatDesignWorkbench({
             >
               Group
             </Button>
-            <Button type="button" size="sm" variant="outline" disabled={!nodeEditable || primaryShape?.kind !== "group"} onClick={() => primaryRef && run({ kind: "ungroup", ref: primaryRef }, { clearSelection: true })}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!nodeEditable || primaryShape?.kind !== "group"}
+              onClick={() =>
+                primaryRef && run({ kind: "ungroup", ref: primaryRef }, { clearSelection: true })
+              }
+            >
               Ungroup
             </Button>
-            <Button type="button" size="sm" variant="outline" disabled={!nodeEditable || selectedRefs.length === 0} onClick={() => run({ kind: "duplicate", refs: selectedRefs })}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!nodeEditable || selectedRefs.length === 0}
+              onClick={() => run({ kind: "duplicate", refs: selectedRefs })}
+            >
               Duplicate
             </Button>
-            <Button type="button" size="sm" variant="outline" disabled={!nodeEditable || selectedRefs.length === 0} onClick={() => run({ kind: "delete", refs: selectedRefs }, { clearSelection: true })}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!nodeEditable || selectedRefs.length === 0}
+              onClick={() => run({ kind: "delete", refs: selectedRefs }, { clearSelection: true })}
+            >
               Delete
             </Button>
           </div>
@@ -1058,14 +1170,21 @@ export function FlatDesignWorkbench({
 
         <main className="min-w-0 rounded-xl border border-border/60 bg-muted/20 p-4">
           <div className="mb-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-            <span>Drag shapes. Drag the square handle to resize and the round handle to rotate.</span>
+            <span>
+              Drag shapes. Drag the square handle to resize and the round handle to rotate.
+            </span>
             <span>Arrow: 1px · Shift+Arrow: 10px</span>
           </div>
           <div className="overflow-auto">
             <div
               ref={canvasRef}
               className="relative mx-auto origin-top-left touch-none select-none bg-background shadow-sm"
-              style={{ width: scene.width, height: scene.height, transform: `scale(${zoom})`, transformOrigin: "top left" }}
+              style={{
+                width: scene.width,
+                height: scene.height,
+                transform: `scale(${zoom})`,
+                transformOrigin: "top left",
+              }}
               onPointerDown={handleCanvasPointerDown}
               onPointerMove={handleCanvasPointerMove}
               onPointerUp={handleCanvasPointerUp}
@@ -1080,7 +1199,10 @@ export function FlatDesignWorkbench({
                   "data-flat-node-ref": toFlatNodeRefKey(ref),
                   style: {
                     cursor: lockedLayers.has(ref.layerIndex) ? "not-allowed" : "move",
-                    pointerEvents: hiddenLayers.has(ref.layerIndex) || lockedLayers.has(ref.layerIndex) ? "none" : undefined,
+                    pointerEvents:
+                      hiddenLayers.has(ref.layerIndex) || lockedLayers.has(ref.layerIndex)
+                        ? "none"
+                        : undefined,
                   },
                   onPointerDown: (event) => handleShapePointerDown(event, ref),
                 })}
@@ -1095,16 +1217,48 @@ export function FlatDesignWorkbench({
               >
                 {guides ? (
                   <>
-                    <line x1={guides.x} y1={viewBox.minY} x2={guides.x} y2={viewBox.minY + viewBox.height} stroke="currentColor" strokeDasharray="4 4" opacity={0.45} />
-                    <line x1={viewBox.minX} y1={guides.y} x2={viewBox.minX + viewBox.width} y2={guides.y} stroke="currentColor" strokeDasharray="4 4" opacity={0.45} />
+                    <line
+                      x1={guides.x}
+                      y1={viewBox.minY}
+                      x2={guides.x}
+                      y2={viewBox.minY + viewBox.height}
+                      stroke="currentColor"
+                      strokeDasharray="4 4"
+                      opacity={0.45}
+                    />
+                    <line
+                      x1={viewBox.minX}
+                      y1={guides.y}
+                      x2={viewBox.minX + viewBox.width}
+                      y2={guides.y}
+                      stroke="currentColor"
+                      strokeDasharray="4 4"
+                      opacity={0.45}
+                    />
                   </>
                 ) : null}
                 {selectedBounds ? (
-                  <rect x={selectedBounds.x} y={selectedBounds.y} width={selectedBounds.width} height={selectedBounds.height} fill="none" stroke="currentColor" strokeWidth={1.5 / zoom} strokeDasharray={`${5 / zoom} ${3 / zoom}`} />
+                  <rect
+                    x={selectedBounds.x}
+                    y={selectedBounds.y}
+                    width={selectedBounds.width}
+                    height={selectedBounds.height}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5 / zoom}
+                    strokeDasharray={`${5 / zoom} ${3 / zoom}`}
+                  />
                 ) : null}
                 {selectedBounds && nodeEditable ? (
                   <>
-                    <line x1={selectedBounds.x + selectedBounds.width / 2} y1={selectedBounds.y} x2={selectedBounds.x + selectedBounds.width / 2} y2={selectedBounds.y - 26 / zoom} stroke="currentColor" strokeWidth={1 / zoom} />
+                    <line
+                      x1={selectedBounds.x + selectedBounds.width / 2}
+                      y1={selectedBounds.y}
+                      x2={selectedBounds.x + selectedBounds.width / 2}
+                      y2={selectedBounds.y - 26 / zoom}
+                      stroke="currentColor"
+                      strokeWidth={1 / zoom}
+                    />
                     <circle
                       cx={selectedBounds.x + selectedBounds.width / 2}
                       cy={selectedBounds.y - 30 / zoom}
@@ -1126,7 +1280,17 @@ export function FlatDesignWorkbench({
                   />
                 ) : null}
                 {marquee ? (
-                  <rect x={marquee.x} y={marquee.y} width={marquee.width} height={marquee.height} fill="currentColor" fillOpacity={0.08} stroke="currentColor" strokeWidth={1 / zoom} strokeDasharray={`${4 / zoom} ${3 / zoom}`} />
+                  <rect
+                    x={marquee.x}
+                    y={marquee.y}
+                    width={marquee.width}
+                    height={marquee.height}
+                    fill="currentColor"
+                    fillOpacity={0.08}
+                    stroke="currentColor"
+                    strokeWidth={1 / zoom}
+                    strokeDasharray={`${4 / zoom} ${3 / zoom}`}
+                  />
                 ) : null}
               </svg>
             </div>
@@ -1137,7 +1301,11 @@ export function FlatDesignWorkbench({
           <div>
             <div className="text-sm font-semibold">Inspector</div>
             <p className="text-xs text-muted-foreground">
-              {selectedRefs.length === 0 ? "Nothing selected" : selectionLocked ? `${selectedRefs.length} selected · locked` : `${selectedRefs.length} selected`}
+              {selectedRefs.length === 0
+                ? "Nothing selected"
+                : selectionLocked
+                  ? `${selectedRefs.length} selected · locked`
+                  : `${selectedRefs.length} selected`}
             </p>
           </div>
           {primaryShape && primaryRef ? (
@@ -1148,17 +1316,51 @@ export function FlatDesignWorkbench({
                   id="flat-workbench-node-id"
                   value={primaryShape.id ?? ""}
                   disabled={!nodeEditable}
-                  onChange={(event) => nodeEditable && commit(updateFlatNode(scene, primaryRef, (shape) => ({ ...shape, id: event.target.value || undefined })))}
+                  onChange={(event) =>
+                    nodeEditable &&
+                    commit(
+                      updateFlatNode(scene, primaryRef, (shape) => ({
+                        ...shape,
+                        id: event.target.value || undefined,
+                      })),
+                    )
+                  }
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label htmlFor="flat-workbench-fill">Fill</Label>
-                  <Input id="flat-workbench-fill" value={primaryShape.fill ?? ""} disabled={!nodeEditable} onChange={(event) => nodeEditable && commit(updateFlatNode(scene, primaryRef, (shape) => ({ ...shape, fill: event.target.value || undefined })))} />
+                  <Input
+                    id="flat-workbench-fill"
+                    value={primaryShape.fill ?? ""}
+                    disabled={!nodeEditable}
+                    onChange={(event) =>
+                      nodeEditable &&
+                      commit(
+                        updateFlatNode(scene, primaryRef, (shape) => ({
+                          ...shape,
+                          fill: event.target.value || undefined,
+                        })),
+                      )
+                    }
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="flat-workbench-stroke">Stroke</Label>
-                  <Input id="flat-workbench-stroke" value={primaryShape.stroke ?? ""} disabled={!nodeEditable} onChange={(event) => nodeEditable && commit(updateFlatNode(scene, primaryRef, (shape) => ({ ...shape, stroke: event.target.value || undefined })))} />
+                  <Input
+                    id="flat-workbench-stroke"
+                    value={primaryShape.stroke ?? ""}
+                    disabled={!nodeEditable}
+                    onChange={(event) =>
+                      nodeEditable &&
+                      commit(
+                        updateFlatNode(scene, primaryRef, (shape) => ({
+                          ...shape,
+                          stroke: event.target.value || undefined,
+                        })),
+                      )
+                    }
+                  />
                 </div>
               </div>
               <div className="space-y-1">
@@ -1174,7 +1376,12 @@ export function FlatDesignWorkbench({
                   onChange={(event) => {
                     if (!nodeEditable) return;
                     const value = Number(event.target.value);
-                    commit(updateFlatNode(scene, primaryRef, (shape) => ({ ...shape, opacity: clamp(Number.isFinite(value) ? value : 1, 0, 1) })));
+                    commit(
+                      updateFlatNode(scene, primaryRef, (shape) => ({
+                        ...shape,
+                        opacity: clamp(Number.isFinite(value) ? value : 1, 0, 1),
+                      })),
+                    );
                   }}
                 />
               </div>
@@ -1186,13 +1393,24 @@ export function FlatDesignWorkbench({
                   disabled={!nodeEditable}
                   onChange={(event) => {
                     const layerIndex = Number(event.target.value);
-                    if (Number.isInteger(layerIndex) && layerIndex !== primaryRef.layerIndex && !lockedLayers.has(layerIndex)) {
-                      run({ kind: "move-to-layer", refs: selectedRefs, layerIndex }, { clearSelection: true });
+                    if (
+                      Number.isInteger(layerIndex) &&
+                      layerIndex !== primaryRef.layerIndex &&
+                      !lockedLayers.has(layerIndex)
+                    ) {
+                      run(
+                        { kind: "move-to-layer", refs: selectedRefs, layerIndex },
+                        { clearSelection: true },
+                      );
                     }
                   }}
                 >
                   {scene.layers.map((layer, index) => (
-                    <NativeSelectOption key={`${layer.id ?? "layer"}-${index}`} value={String(index)} disabled={lockedLayers.has(index)}>
+                    <NativeSelectOption
+                      key={`${layer.id ?? "layer"}-${index}`}
+                      value={String(index)}
+                      disabled={lockedLayers.has(index)}
+                    >
                       {layer.id || `Layer ${index + 1}`}
                     </NativeSelectOption>
                   ))}
@@ -1203,18 +1421,42 @@ export function FlatDesignWorkbench({
                 <div className="text-sm font-semibold">Motion</div>
                 <div className="flex flex-wrap gap-1">
                   {motionPresets.map((preset) => (
-                    <Button key={preset} type="button" size="sm" variant="outline" disabled={!nodeEditable || selectedRefs.length !== 1} onClick={() => nodeEditable && commit(setFlatNodeMotion(scene, primaryRef, { kind: "preset", preset }))}>
+                    <Button
+                      key={preset}
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={!nodeEditable || selectedRefs.length !== 1}
+                      onClick={() =>
+                        nodeEditable &&
+                        commit(setFlatNodeMotion(scene, primaryRef, { kind: "preset", preset }))
+                      }
+                    >
                       {preset}
                     </Button>
                   ))}
-                  <Button type="button" size="sm" variant="secondary" disabled={!nodeEditable || selectedRefs.length !== 1} onClick={() => nodeEditable && commit(setFlatNodeMotion(scene, primaryRef, primaryTimeline))}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={!nodeEditable || selectedRefs.length !== 1}
+                    onClick={() =>
+                      nodeEditable && commit(setFlatNodeMotion(scene, primaryRef, primaryTimeline))
+                    }
+                  >
                     Timeline
                   </Button>
                 </div>
                 <FlatMotionTimelineEditor
                   motion={primaryTimeline}
-                  readOnly={!nodeEditable || selectedRefs.length !== 1 || primaryShape.motion?.kind === "preset"}
-                  onMotionChange={(motion) => nodeEditable && commit(setFlatNodeMotion(scene, primaryRef, motion))}
+                  readOnly={
+                    !nodeEditable ||
+                    selectedRefs.length !== 1 ||
+                    primaryShape.motion?.kind === "preset"
+                  }
+                  onMotionChange={(motion) =>
+                    nodeEditable && commit(setFlatNodeMotion(scene, primaryRef, motion))
+                  }
                 />
               </div>
             </>

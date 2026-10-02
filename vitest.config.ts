@@ -1,16 +1,46 @@
-import { defineConfig } from "vitest/config";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
 
 const rootDir = fileURLToPath(new URL("./", import.meta.url));
+
+function discoverWorkspaceAliases() {
+  const packagesRoot = path.resolve(rootDir, "packages");
+  const aliases: Record<string, string> = {};
+
+  for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const packageRoot = path.join(packagesRoot, entry.name);
+    const packageJsonPath = path.join(packageRoot, "package.json");
+
+    if (!existsSync(packageJsonPath)) {
+      continue;
+    }
+
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as { name?: string };
+    if (!packageJson.name?.startsWith("@moritzbrantner/")) {
+      continue;
+    }
+
+    const sourceEntry = ["index.ts", "index.tsx", "index.js", "index.jsx"]
+      .map((fileName) => path.join(packageRoot, "src", fileName))
+      .find((candidate) => existsSync(candidate));
+
+    if (sourceEntry) {
+      aliases[packageJson.name] = sourceEntry;
+    }
+  }
+
+  return aliases;
+}
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@moritzbrantner/auth-contract": path.resolve(rootDir, "packages/auth-contract/src/index.ts"),
-      "@moritzbrantner/card-games": path.resolve(rootDir, "packages/card-games/src/index.ts"),
-      "@moritzbrantner/collaboration": path.resolve(rootDir, "packages/collaboration/src/index.ts"),
-      "@moritzbrantner/data-density": path.resolve(rootDir, "packages/data-density/src/index.ts"),
       "@moritzbrantner/flat-design/core": path.resolve(
         rootDir,
         "packages/flat-design/src/core-entry.ts",
@@ -39,34 +69,9 @@ export default defineConfig({
         rootDir,
         "packages/flat-design/src/react.tsx",
       ),
-      "@moritzbrantner/flat-design": path.resolve(rootDir, "packages/flat-design/src/index.ts"),
-      "@moritzbrantner/graphs": path.resolve(rootDir, "packages/graphs/src/index.ts"),
-      "@moritzbrantner/hexagon-grids": path.resolve(rootDir, "packages/hexagon-grids/src/index.ts"),
-      "@moritzbrantner/keyboard": path.resolve(rootDir, "packages/keyboard/src/index.ts"),
-      "@moritzbrantner/media-editor": path.resolve(rootDir, "packages/media-editor/src/index.ts"),
-      "@moritzbrantner/ocr": path.resolve(rootDir, "packages/ocr/src/index.ts"),
-      "@moritzbrantner/parallel-text": path.resolve(rootDir, "packages/parallel-text/src/index.ts"),
-      "@moritzbrantner/question-answering": path.resolve(
-        rootDir,
-        "packages/question-answering/src/index.ts",
-      ),
-      "@moritzbrantner/speech": path.resolve(rootDir, "packages/speech/src/index.ts"),
       "@moritzbrantner/speech/core": path.resolve(rootDir, "packages/speech/src/core.ts"),
       "@moritzbrantner/speech/react": path.resolve(rootDir, "packages/speech/src/react.ts"),
-      "@moritzbrantner/speed-reading": path.resolve(rootDir, "packages/speed-reading/src/index.ts"),
-      "@moritzbrantner/storytelling": path.resolve(rootDir, "packages/storytelling/src/index.ts"),
-      "@moritzbrantner/subtitles": path.resolve(rootDir, "packages/subtitles/src/index.ts"),
-      "@moritzbrantner/tables": path.resolve(rootDir, "packages/tables/src/index.ts"),
-      "@moritzbrantner/text-analysis": path.resolve(rootDir, "packages/text-analysis/src/index.ts"),
-      "@moritzbrantner/text-inference": path.resolve(
-        rootDir,
-        "packages/text-inference/src/index.ts",
-      ),
-      "@moritzbrantner/text-summarization": path.resolve(
-        rootDir,
-        "packages/text-summarization/src/index.ts",
-      ),
-      "@moritzbrantner/word-vectors": path.resolve(rootDir, "packages/word-vectors/src/index.ts"),
+      ...discoverWorkspaceAliases(),
     },
   },
   server: {

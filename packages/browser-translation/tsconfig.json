@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@moritzbrantner/browser-translation": ["./src/index.ts"],
+      "@moritzbrantner/browser-translation/browser": ["./src/browser.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

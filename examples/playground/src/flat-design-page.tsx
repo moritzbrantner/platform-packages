@@ -113,8 +113,8 @@ export function FlatDesignPlaygroundPage() {
               <CardTitle className="text-2xl">Scene-native SVG editor</CardTitle>
               <CardDescription className="max-w-3xl text-sm leading-6">
                 Import supported SVG geometry and animation as typed scene data, edit packaged
-                figures and motion, then download a static frame or animated SVG from the same
-                scene object.
+                figures and motion, then download a static frame or animated SVG from the same scene
+                object.
               </CardDescription>
             </div>
           </CardHeader>

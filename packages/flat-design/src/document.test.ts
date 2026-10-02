@@ -276,9 +276,9 @@ describe("flat-design document contract", () => {
     expect(paths).toContain("$.layers[0].shapes[0].motion.delayMs");
     expect(paths).toContain("$.layers[0].shapes[0].motion.easing");
     expect(paths).toContain("$.layers[0].shapes[0].motion.fillMode");
-    expect(() => parseFlatDesignDocument(JSON.stringify(invalid), { acceptLegacyScene: false })).toThrow(
-      FlatDesignDocumentError,
-    );
+    expect(() =>
+      parseFlatDesignDocument(JSON.stringify(invalid), { acceptLegacyScene: false }),
+    ).toThrow(FlatDesignDocumentError);
   });
 
   test("keeps CSS-facing compatibility fields as portability warnings", () => {
@@ -315,7 +315,8 @@ describe("flat-design document contract", () => {
     expect(flatDesignDocumentJsonSchema.properties.schemaVersion.const).toBe(1);
     expect(flatDesignDocumentJsonSchema.required).toContain("layers");
 
-    const offset = flatDesignDocumentJsonSchema.$defs.gradient.properties.stops.items.properties.offset;
+    const offset =
+      flatDesignDocumentJsonSchema.$defs.gradient.properties.stops.items.properties.offset;
     expect(offset.anyOf[0]).toMatchObject({ minimum: 0, maximum: 1, type: "number" });
     expect(offset.anyOf[1]).toMatchObject({ type: "string" });
 

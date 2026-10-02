@@ -6,10 +6,11 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["node"],
     "paths": {
-      "@moritzbrantner/flat-design": ["../flat-design/src/index.ts"],
-      "@moritzbrantner/remotion": ["./src/index.tsx"]
+      "@moritzbrantner/i18n": ["./src/index.ts"],
+      "@moritzbrantner/i18n/browser": ["./src/browser.ts"],
+      "@moritzbrantner/i18n/core": ["./src/core.ts"],
+      "@moritzbrantner/i18n/react": ["./src/react.tsx"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
