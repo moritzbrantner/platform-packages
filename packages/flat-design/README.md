@@ -11,8 +11,10 @@ Typed SVG primitives for building flat-design illustrations, lightweight motion,
 - `@moritzbrantner/flat-design/core` for node traversal, immutable scene updates, and motion editing helpers.
 - `@moritzbrantner/flat-design/react` for `EditableFlatScene`, `FlatMotionTimelineEditor`, and `useFlatSceneSelection`.
 - `FlatSceneEditor` for a package-backed SVG scene editor that composes canvas, tree, inspector, motion timeline, and SVG export.
+- `FlatSvgSceneEditor` for SVG file import plus static-frame and animated SVG download workflows.
 - A `FlatScene` React component for direct rendering.
-- A `renderFlatSceneToSvg()` helper for exporting raw SVG strings.
+- `importFlatSceneFromSvg()` for converting a safe, editable SVG subset into scene data with explicit compatibility diagnostics.
+- `renderFlatSceneToSvg()` / `renderFlatSceneAnimationToSvg()` for animated SVG strings and `renderFlatSceneFrameToSvg()` for deterministic static frames.
 - A ready-made `createFlatShowcaseScene()` preset you can customize or use as a starting point.
 
 ## Motion vs. animations
@@ -20,8 +22,34 @@ Typed SVG primitives for building flat-design illustrations, lightweight motion,
 - Use `motion` when you want editable scene data. It is higher-level, timeline-aware, and compiles into SVG animation tags at render time.
 - Use `animations` when you want to author raw low-level SVG animation arrays yourself.
 - If both are present on a node, `motion` compiles first and `animations` are appended after it.
+- Imported SVG `<animate>` / `<animateTransform>` elements stay in the low-level compatibility representation. Canonical authored motion remains the preferred model for new animation editing.
 
-This release focuses on editing `FlatDesignScene` data created inside the package. It does not parse arbitrary external SVG files into editable scene data.
+## SVG interchange
+
+The importer is allow-list based rather than a raw-markup passthrough. It currently imports:
+
+- `<g>`, `<rect>`, `<circle>`, `<ellipse>`, `<line>`, `<path>`, `<polygon>`, and `<polyline>` (converted to a path);
+- IDs, classes, fill/stroke, stroke width/caps/joins, opacity, transforms, and the same presentation properties from inline `style`;
+- linear/radial gradients and stops;
+- `<animate attributeName="opacity">` and `<animateTransform>` for translate, scale, and rotate.
+
+Unsupported constructs such as text, images, `<use>`, stylesheet rules, filters, masks, clip paths, scripts, foreign objects, motion-path animation, and unsupported presentation features are skipped and returned as `FlatSvgImportIssue` diagnostics. DTD-bearing XML is rejected. This makes an imported SVG a safe editable starting point without claiming that arbitrary SVG can be represented losslessly by the current scene schema.
+
+A whole-animation export is normal SVG: authored `motion` is compiled to `<animate>` / `<animateTransform>` elements. A single-frame export first samples the scene deterministically at the requested `timeInMs`, removes the animation data from that sampled scene, and serializes the static SVG.
+
+```ts
+import {
+  importFlatSceneFromSvg,
+  renderFlatSceneAnimationToSvg,
+  renderFlatSceneFrameToSvg,
+} from "@moritzbrantner/flat-design";
+
+const imported = importFlatSceneFromSvg(svgText);
+const frame = renderFlatSceneFrameToSvg(imported.scene, 1_250);
+const animation = renderFlatSceneAnimationToSvg(imported.scene);
+```
+
+For a file-oriented editor surface, use `FlatSvgSceneEditor`. It keeps the normal `FlatSceneEditor` controlled-scene contract and adds SVG import, frame-time selection, static-frame download, animated-SVG download, and import compatibility notes.
 
 ## Quick start
 

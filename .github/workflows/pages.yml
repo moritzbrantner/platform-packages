@@ -1,36 +1,57 @@
-name: Parallel Text Pages
+name: Pages
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/pages.yml"
+      - "pages/flat-design/**"
+      - "packages/flat-design/**"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/pages.yml"
-      - "examples/playground/package.json"
-      - "examples/playground/parallel-text-pages.html"
-      - "examples/playground/src/parallel-text-pages.css"
-      - "examples/playground/src/parallel-text-pages.tsx"
-      - "examples/playground/vite.pages.config.ts"
-      - "packages/linguistics-core/**"
-      - "packages/parallel-text/**"
-      - "bun.lock"
+      - "pages/flat-design/**"
+      - "packages/flat-design/**"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  validate:
+    name: Validate Pages
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: pages/flat-design
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.12"
+      - name: Install focused Pages dependencies
+        run: bun install
+      - name: Build focused Pages site
+        run: bun run build
+
   deploy:
-    name: Deploy Parallel Text Pages
+    name: Deploy Pages
+    if: ${{ github.event_name != 'pull_request' }}
     permissions:
+      actions: read
       contents: read
       packages: read
       pages: write
       id-token: write
     uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.2
     with:
-      working_directory: "."
-      build_command: bun run --filter @moritzbrantner/playground build:pages
-      artifact_path: examples/playground/dist-pages
-      concurrency_group: parallel-text-pages
+      working_directory: "pages/flat-design"
+      install_command: bun install
+      build_command: bun run build
+      artifact_path: dist
+      cache_bun: false
+      concurrency_group: platform-packages-pages
       cancel_in_progress: false

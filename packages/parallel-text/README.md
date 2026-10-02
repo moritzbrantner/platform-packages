@@ -12,7 +12,7 @@ Model helpers are also available from the `@moritzbrantner/parallel-text/model` 
 
 ## Demo
 
-The focused GitHub Pages example is published at `https://moritzbrantner.github.io/platform-packages/parallel-text/` after changes reach `main` and Pages is enabled for the repository.
+The focused standalone example builds locally with `bun run --filter @moritzbrantner/playground build:pages` (output in `examples/playground/dist-pages`). It is not deployed: the repository GitHub Pages site belongs to `flat-design`.
 
 ## Styling
 

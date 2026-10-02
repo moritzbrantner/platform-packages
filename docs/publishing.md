@@ -9,7 +9,7 @@
 5. Open a pull request and merge it into `main`.
 6. Wait for the `Publish Private Packages` workflow to finish on `main`.
 
-The current workflow validates every public package under `packages/*` and publishes packages whose `publishConfig.registry` is `https://npm.pkg.github.com`. `@moritzbrantner/ui` is published from the standalone `moritzbrantner/ui` repository and is consumed here as an external package.
+The current workflow validates every public package under `packages/*`, but the GitHub Packages publish step only releases packages marked `scaffold-critical` or `release-ready` in the README inventory. Experimental packages stay in the normal lint, typecheck, test, and build gates without being published accidentally. `@moritzbrantner/ui` is published from the standalone `moritzbrantner/ui` repository and is consumed here as an external package.
 
 ## Later releases
 
@@ -17,7 +17,7 @@ The current workflow validates every public package under `packages/*` and publi
 2. Run `bun run changeset`.
 3. Select the packages that changed and choose the appropriate version bump: use `minor` for significant changes and `patch` for minor adjustments.
 4. Commit the generated changeset file with your code changes.
-5. Merge to `main` and let the publish workflow publish packages whose current version is not already present in GitHub Packages.
+5. Merge to `main` and let the publish workflow publish eligible packages whose current version is not already present in GitHub Packages.
 
 The repo can keep publishing unrelated packages, but the maintained template family should treat the scaffold-critical set as the shared contract surface for `scaffold-v2`. `@moritzbrantner/ui` is part of that contract, but its release workflow lives in the standalone UI repository.
 

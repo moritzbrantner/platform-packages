@@ -2,7 +2,6 @@ export {
   addMotionKeyframe,
   clearFlatNodeMotion,
   clampMotionKeyframes,
-  compileFlatMotion,
   createEditableMotionFromPreset,
   duplicateFlatNode,
   findFlatNodeById,
@@ -23,12 +22,67 @@ export {
   type FlatSceneMetadataPatch,
 } from "./core";
 export {
+  FLAT_DESIGN_SCHEMA_VERSION,
+  FlatDesignDocumentError,
+  analyzeFlatDesignDocument,
+  assertFlatDesignDocument,
+  defineFlatDesignDocument,
+  isFlatDesignDocument,
+  migrateFlatDesignDocument,
+  parseFlatDesignDocument,
+  serializeFlatDesignDocument,
+  validateFlatDesignDocument,
+  type FlatDesignDocument,
+  type FlatDesignDocumentAnalysis,
+  type FlatDesignDocumentIssue,
+  type FlatDesignDocumentIssueCode,
+  type FlatDesignDocumentIssueSeverity,
+  type ParseFlatDesignDocumentOptions,
+} from "./document-contract";
+export { flatDesignDocumentJsonSchema } from "./schema-contract";
+export {
   FlatSceneEditor,
   type FlatSceneEditorFigureDefinition,
   type FlatSceneEditorFigureFactoryOptions,
   type FlatSceneEditorProps,
   type FlatSceneEditorSelection,
 } from "./editor";
+export {
+  applyFlatEditorCommand,
+  createFlatPrimitive,
+  flatNodeRefsEqual,
+  getFlatNodeBounds,
+  getFlatShapeBounds,
+  getFlatShapeRotation,
+  normalizeFlatNodeRefs,
+  resizeFlatShape,
+  rotateFlatShape,
+  scaleFlatShape,
+  toFlatNodeRefKey,
+  translateFlatShape,
+  type FlatBounds,
+  type FlatEditorCommand,
+  type FlatPoint,
+  type FlatPrimitiveKind,
+} from "./editor-commands";
+export {
+  FlatDesignWorkbench,
+  getEffectiveFlatViewBox,
+  remapFlatLayerIndexSetForDelete,
+  remapFlatLayerIndexSetForMove,
+  type FlatDesignWorkbenchProps,
+} from "./workbench";
+export { FlatSvgSceneEditor, type FlatSvgSceneEditorProps } from "./svg-editor";
+export {
+  FlatSvgImportError,
+  importFlatSceneFromSvg,
+  renderFlatSceneAnimationToSvg,
+  renderFlatSceneFrameToSvg,
+  type FlatSvgImportIssue,
+  type FlatSvgImportIssueCode,
+  type FlatSvgImportResult,
+  type ImportFlatSceneFromSvgOptions,
+} from "./svg-interchange";
 export {
   createBobbingAnimation,
   createDriftAnimation,
@@ -42,6 +96,25 @@ export {
   type FlatMotionKeyframe,
   type FlatTimelineAnimationOptions,
 } from "./animation-presets";
+export { compileFlatMotion, resolveFlatMotion } from "./motion";
+export {
+  advanceFlatPlayback,
+  createFlatPlaybackState,
+  restartFlatPlayback,
+  seekFlatPlayback,
+  setFlatPlaybackPlaying,
+  type CreateFlatPlaybackStateOptions,
+  type FlatPlaybackState,
+} from "./playback";
+export {
+  getFlatAnimationProgress,
+  getFlatShapeAnimations,
+  sampleFlatAnimationAtTime,
+  sampleFlatSceneAtTime,
+  sampleFlatShapeAtTime,
+  type FlatAnimatedTransformValue,
+  type FlatAnimationSample,
+} from "./sampling";
 export {
   EditableFlatScene,
   FlatMotionTimelineEditor,
@@ -86,6 +159,11 @@ export type {
   FlatLayer,
   FlatLength,
   FlatLine,
+  FlatMotionCubicBezierEasing,
+  FlatMotionDirection,
+  FlatMotionEasing,
+  FlatMotionEasingPreset,
+  FlatMotionFillMode,
   FlatMotionSpec,
   FlatNodePath,
   FlatNodeRef,
