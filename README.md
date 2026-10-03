@@ -1,6 +1,6 @@
 # platform-packages
 
-Shared packages for the maintained scaffold family and a transitional incubator for reusable capabilities. The repository remains maintained, but its long-term direction is **extraction first, retirement later** rather than permanent catch-all ownership. Useful packages should be made independently coherent, moved to clear canonical repositories when that boundary is justified, and removed here only after consumers migrate. See [docs/extraction-first-retirement.md](./docs/extraction-first-retirement.md).
+Shared packages for the maintained scaffold family. This repo stays broad on purpose, but only part of it is scaffold-critical for cross-repo alignment.
 
 ## Scaffold-critical package set
 
@@ -32,6 +32,7 @@ local JavaScript inference.
 | Package                                         | Status            | Notes                                                                       |
 | ----------------------------------------------- | ----------------- | --------------------------------------------------------------------------- |
 | `@moritzbrantner/auth-contract`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/browser-translation`           | experimental      | WebGPU-only browser translation adapter with curated pair/model resolution. |
 | `@moritzbrantner/card-games`                    | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/collaboration`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/data-density`                  | release-ready     | Included in the first standalone install wave.                              |
@@ -44,6 +45,7 @@ local JavaScript inference.
 | `@moritzbrantner/graphs`                        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/hexagon-grids`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/information-extraction`        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
+| `@moritzbrantner/i18n`                          | release-ready     | Shared locale resolution, formatting, validation, and React adapters.       |
 | `@moritzbrantner/keyboard`                      | experimental      | Browser-safe shortcut registry and matching helpers.                        |
 | `@moritzbrantner/linguistics-core`              | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/linguistics-corpus`            | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
@@ -56,7 +58,7 @@ local JavaScript inference.
 | `@moritzbrantner/sentiment-analysis`            | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/source-ingestion`              | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/speech`                        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
-| `@moritzbrantner/speed-reading`                 | deprecated        | Legacy package; migrate to the canonical `speedreader` repository.          |
+| `@moritzbrantner/speed-reading`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/storytelling`                  | scaffold-critical | Shared scaffold contract surface.                                           |
 | `@moritzbrantner/subtitles`                     | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/syntax-analysis`               | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
@@ -73,12 +75,14 @@ local JavaScript inference.
 
 ## Packages
 
+- `@moritzbrantner/browser-translation`: WebGPU-only Transformers.js translation execution with curated German/English pair-to-model resolution, browser-cache reuse, progress reporting, and fail-closed output validation.
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
 - `@moritzbrantner/data-density`: reusable indexing, windowing, binning, clustering, and metric aggregation helpers for high-volume maps, charts, tables, and timeline-style views.
 - `@moritzbrantner/flat-design`: typed SVG scene builder for flat-design illustrations, reusable animation presets, and a React renderer/exporter for image pipelines.
 - `@moritzbrantner/graphs`: node-link graph density helpers for node windows, subgraph extraction, and edge metric aggregation.
 - `@moritzbrantner/hexagon-grids`: globe-aware H3 hex indexing, polygon coverage, neighborhood/path helpers, and point aggregation into hex cells.
+- `@moritzbrantner/i18n`: shared locale resolution, i18next initialization, browser URL/preferences, `Intl` formatting, React bindings, and deterministic translation validation.
 - `@moritzbrantner/keyboard`: browser-safe shortcut parsing, platform-aware modifier labels, editable-target guards, and scoped command registry helpers.
 - `@moritzbrantner/document-analysis`: orchestration layer that combines OCR/text normalization with summarization, sentiment, text analysis, and question answering into one document report.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
@@ -131,13 +135,11 @@ or reusable data contracts beyond raw model invocation.
 
 ## Repository scope
 
-- The repository remains maintained while package extraction is in progress; it is not the intended permanent home for unrelated new shared capabilities.
-- Existing package work may continue when it fixes behavior, strengthens contracts, or makes a useful package safer to extract.
-- Before adding new long-term ownership, prefer an existing canonical repository; temporary incubation here should have a clear domain rationale.
-- The scaffold-critical set is limited to external `@moritzbrantner/ui`, plus local `storytelling`, `oxfmt-config`, and `typescript-config` until those consumers are deliberately migrated.
-- Unrelated retained packages are not blocked on the template-family release cadence, but their canonical ownership should be reassessed over time.
-- GitHub Packages publishing remains configured through Changesets while packages are still owned here.
-- The local playground remains the integrated validation surface during the transition.
+- The repository remains broad and can host shared runtime, tooling, and domain packages.
+- The scaffold-critical set is limited to external `@moritzbrantner/ui`, plus local `storytelling`, `oxfmt-config`, and `typescript-config`.
+- Unrelated packages stay in place and are not blocked on the template-family release cadence.
+- GitHub Packages publishing is configured through Changesets.
+- Includes a local playground app for manually testing package behavior.
 
 ## Engineering standards
 
@@ -147,11 +149,7 @@ or reusable data contracts beyond raw model invocation.
 
 ## Package plans
 
-- `@moritzbrantner/speed-reading` is retained as a deprecated compatibility
-  package. New speed-reading product and reader-core work belongs in the
-  [canonical speedreader repository](https://github.com/moritzbrantner/speedreader).
-  See [docs/speed-reading-plan.md](./docs/speed-reading-plan.md) for the
-  migration handoff and the legacy roadmap record.
+- See [docs/speed-reading-plan.md](./docs/speed-reading-plan.md) for the current improvement plan for `@moritzbrantner/speed-reading`.
 
 ## Styling rule
 

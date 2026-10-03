@@ -1,6 +1,8 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 
+import { Button } from "@moritzbrantner/ui";
+
 import {
   ParallelTextView,
   type ParallelTextLayout,
@@ -127,20 +129,27 @@ function ParallelTextPagesDemo() {
               Reordered bilingual passage
             </h2>
             <p className="m-0 text-sm leading-6 text-muted-foreground">
-              Switch to French inside the component, or compare aligned and continuous reading modes.
+              Switch to French inside the component, or compare aligned and continuous reading
+              modes.
             </p>
           </div>
-          <div className="flex rounded-lg border border-border bg-muted/40 p-1" role="group" aria-label="Reading layout">
+          <div
+            className="flex rounded-lg border border-border bg-muted/40 p-1"
+            role="group"
+            aria-label="Reading layout"
+          >
             {(["aligned", "flow"] as const).map((option) => (
-              <button
+              <Button
                 key={option}
                 type="button"
+                variant={layout === option ? "secondary" : "ghost"}
+                size="sm"
                 aria-pressed={layout === option}
                 onClick={() => setLayout(option)}
-                className="min-h-10 rounded-md px-3 text-sm font-medium capitalize transition-colors aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-sm"
+                className="capitalize"
               >
                 {option}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -163,8 +172,8 @@ function ParallelTextPagesDemo() {
             Sentence alignment
           </span>
           <p className="m-0 text-sm leading-6">
-            The German sentences are intentionally reordered. In aligned mode, corresponding passages
-            still share one visual row.
+            The German sentences are intentionally reordered. In aligned mode, corresponding
+            passages still share one visual row.
           </p>
         </div>
         <div className="grid content-start gap-2">
@@ -210,8 +219,8 @@ function ParallelTextPagesDemo() {
       </section>
 
       <footer className="border-t border-border pt-5 text-sm text-muted-foreground">
-        Built from the package source in this repository. The production component remains independent
-        from this demo page.
+        Built from the package source in this repository. The production component remains
+        independent from this demo page.
       </footer>
     </main>
   );

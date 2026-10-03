@@ -83,9 +83,9 @@ describe("@moritzbrantner/parallel-text", () => {
       />,
     );
 
-    expect(container.querySelector('[data-slot="parallel-text-view"]')?.getAttribute("data-layout")).toBe(
-      "aligned",
-    );
+    expect(
+      container.querySelector('[data-slot="parallel-text-view"]')?.getAttribute("data-layout"),
+    ).toBe("aligned");
 
     const firstRow = container.querySelector('[data-alignment-row="row-0"]');
     const secondRow = container.querySelector('[data-alignment-row="row-1"]');
@@ -96,13 +96,19 @@ describe("@moritzbrantner/parallel-text", () => {
     expect(secondRow?.textContent).toContain("Erster Zielsatz");
   });
 
+  test("leaves unmatched aligned cells blank instead of repeating an empty state", () => {
+    const { container } = render(
+      <ParallelTextView originalText="First sentence. Second sentence." translatedText="" />,
+    );
+
+    expect(screen.queryByText("No text.")).toBeNull();
+    expect(container.textContent).toContain("First sentence.");
+    expect(container.textContent).toContain("Second sentence.");
+  });
+
   test("keeps flow layout available for continuous reading", () => {
     const { container } = render(
-      <ParallelTextView
-        originalText="One paragraph."
-        translatedText="Ein Absatz."
-        layout="flow"
-      />,
+      <ParallelTextView originalText="One paragraph." translatedText="Ein Absatz." layout="flow" />,
     );
 
     expect(container.querySelector('[data-slot="parallel-text-flow"]')).toBeTruthy();
@@ -126,7 +132,7 @@ describe("@moritzbrantner/parallel-text", () => {
       />,
     );
 
-    expect(container.querySelector('button[data-token-id]')).toBeNull();
+    expect(container.querySelector("button[data-token-id]")).toBeNull();
     expect(screen.queryByRole("button", { name: "Hello" })).toBeNull();
 
     const sourceSentence = container.querySelector(
@@ -163,9 +169,11 @@ describe("@moritzbrantner/parallel-text", () => {
 
     expect(hund.getAttribute("data-highlighted")).toBe("false");
     expect(translatedSentence.getAttribute("data-sentence-highlighted")).toBe("true");
-    expect(container.querySelector('[data-alignment-row="row-0"]')?.getAttribute("data-alignment-source")).toBe(
-      "heuristic",
-    );
+    expect(
+      container
+        .querySelector('[data-alignment-row="row-0"]')
+        ?.getAttribute("data-alignment-source"),
+    ).toBe("heuristic");
   });
 
   test("marks unique identical-token links as heuristic rather than verified", () => {

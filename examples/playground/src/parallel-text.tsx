@@ -41,17 +41,9 @@ const aquinasSegments = [
   {
     id: "response-opening",
     cells: {
-      latin: (
-        <p>
-          Respondeo dicendum quod Deum esse quinque viis probari potest.
-        </p>
-      ),
-      english: (
-        <p>I answer that the existence of God can be proved in five ways.</p>
-      ),
-      german: (
-        <p>Ich antworte: Dass Gott ist, kann auf fünf Wegen bewiesen werden.</p>
-      ),
+      latin: <p>Respondeo dicendum quod Deum esse quinque viis probari potest.</p>,
+      english: <p>I answer that the existence of God can be proved in five ways.</p>,
+      german: <p>Ich antworte: Dass Gott ist, kann auf fünf Wegen bewiesen werden.</p>,
     },
   },
   {
@@ -59,21 +51,20 @@ const aquinasSegments = [
     cells: {
       latin: (
         <p>
-          Prima autem et manifestior via est, quae sumitur ex parte motus.
-          Certum est enim, et sensu constat, aliqua moveri in hoc mundo.
+          Prima autem et manifestior via est, quae sumitur ex parte motus. Certum est enim, et sensu
+          constat, aliqua moveri in hoc mundo.
         </p>
       ),
       english: (
         <p>
-          The first and more evident way is taken from motion. For it is certain,
-          and evident to the senses, that some things are moved in this world.
+          The first and more evident way is taken from motion. For it is certain, and evident to the
+          senses, that some things are moved in this world.
         </p>
       ),
       german: (
         <p>
-          Der erste und deutlichste Weg wird von der Bewegung her genommen. Denn
-          es ist gewiss und den Sinnen offenbar, dass sich in dieser Welt manches
-          bewegt.
+          Der erste und deutlichste Weg wird von der Bewegung her genommen. Denn es ist gewiss und
+          den Sinnen offenbar, dass sich in dieser Welt manches bewegt.
         </p>
       ),
     },
@@ -99,10 +90,9 @@ function ParallelTextPage() {
           </div>
           <CardTitle>Latin, English, and German on one stable passage grid</CardTitle>
           <CardDescription>
-            This is the generic presentation primitive needed by the Thomistisch
-            canonical reader. It knows only columns, aligned segment IDs, language
-            metadata, and cells; Aquinas identity and provenance remain outside the
-            package.
+            This is the generic presentation primitive needed by the Thomistisch canonical reader.
+            It knows only columns, aligned segment IDs, language metadata, and cells; Aquinas
+            identity and provenance remain outside the package.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -135,27 +125,31 @@ function ParallelTextPage() {
             </Badge>
             <CardTitle>What to inspect on this page</CardTitle>
             <CardDescription>
-              The first example above checks N-column reading. The examples beside
-              this checklist exercise translation selection and explicit alignment.
+              The first example above checks N-column reading. The examples beside this checklist
+              exercise translation selection and explicit alignment.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
-              Resize the browser and confirm the Latin, English, and German columns
-              collapse cleanly instead of forcing horizontal overflow.
+              Resize the browser and confirm the Latin, English, and German columns collapse cleanly
+              instead of forcing horizontal overflow.
             </p>
             <p>
-              Follow the Aquinas segment links and confirm stable IDs target the
-              aligned row rather than a generated DOM position.
+              Follow the Aquinas segment links and confirm stable IDs target the aligned row rather
+              than a generated DOM position.
             </p>
             <p>
-              Hover a word with an explicit model link and confirm its counterpart
-              highlights on the other side. Unlinked words should keep sentence
-              context without inventing an exact word translation.
+              Hover a word with an explicit model link and confirm its counterpart highlights on the
+              other side. Unlinked words should keep sentence context without inventing an exact
+              word translation.
             </p>
             <p>
-              Tab to a sentence, then use Left/Right Arrow, Home, and End to inspect
-              tokens without creating a tab stop for every word.
+              Tab to a sentence, then use Left/Right Arrow, Home, and End to inspect tokens without
+              creating a tab stop for every word.
+            </p>
+            <p>
+              Switch translations and make sure the aligned rows update without disturbing the
+              source text or its language metadata.
             </p>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Compare with storytelling demo</a>
@@ -168,8 +162,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Multiple translations</CardTitle>
               <CardDescription>
-                Sentence alignment stays visible while token highlights only claim
-                links with explicit provenance or safe literal matches.
+                Sentence alignment stays visible while token highlights only claim links with
+                explicit provenance or safe literal matches.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -241,9 +235,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Manual sentence alignment</CardTitle>
               <CardDescription>
-                This example reverses the sentence order in translation, so each
-                explicit alignment renders as one source/translation row instead of
-                drifting in independent columns.
+                This example reverses the sentence order in translation, so each explicit alignment
+                renders as one source/translation row instead of drifting in independent columns.
               </CardDescription>
             </CardHeader>
             <CardContent>
