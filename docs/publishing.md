@@ -79,12 +79,20 @@ Every publishable package under `packages/*` must have:
 
 ## Installing from another repository
 
-Consumers need an `.npmrc` entry for the package scope you publish under and a token that can read packages:
+Consumers do not install from GitHub Packages and need no registry token, `.npmrc` scope entry or `GH_PACKAGES_TOKEN` (owner decision 2026-10-03). Owner packages are consumed as git source pins on a full commit SHA of the package's standalone repository:
 
-```ini
-@moritzbrantner:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GH_PACKAGES_TOKEN}
+```json
+{
+  "dependencies": {
+    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#<full-40-char-sha>"
+  },
+  "trustedDependencies": ["@moritzbrantner/ui"]
+}
 ```
+
+`trustedDependencies` lets bun run the package's `prepare` script, which builds it after install. The producer repository needs a committed `bun.lock` and a `prepare` script of the form `bun install --frozen-lockfile --ignore-scripts && bun run build`.
+
+Packages that live under `platform-packages/packages/*` cannot be pinned this way: bun cannot install a subdirectory of a git repository. A consumer that needs one of them must move to that package's standalone repository (for example `moritzbrantner/ui` instead of the legacy `packages/ui` 0.x line), or the package must first be extracted into its own repository. The GitHub Packages publishing described above remains for existing releases, but no consumer may depend on it.
 
 For the maintained scaffold family, consumer repos should adopt these first:
 

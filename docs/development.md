@@ -71,6 +71,8 @@ Publishing is documented in `docs/publishing.md`. In short:
 
 Do not run `release:publish` locally unless you intentionally want to publish and have configured `GH_PACKAGES_TOKEN`.
 
+Consumers never need `GH_PACKAGES_TOKEN`: they pin standalone package repositories by git commit SHA, and `packages/*` subdirectories cannot be git-pinned by bun. See "Installing from another repository" in `docs/publishing.md`.
+
 ## Troubleshooting
 
 - If `bun dev` is unavailable, install dependencies with `bun install` first.
