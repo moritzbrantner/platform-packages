@@ -29,7 +29,10 @@ function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
   const [target, setTarget] = React.useState<TElement | null>(null);
   const stateRef = React.useRef({ enabled, hasMore, isLoading, onLoadMore });
 
-  stateRef.current = { enabled, hasMore, isLoading, onLoadMore };
+  // Sync during commit so an abandoned concurrent render never leaks into observer callbacks.
+  React.useLayoutEffect(() => {
+    stateRef.current = { enabled, hasMore, isLoading, onLoadMore };
+  });
 
   const loadMore = React.useCallback(() => {
     const state = stateRef.current;
