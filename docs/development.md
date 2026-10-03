@@ -3,7 +3,7 @@
 ## Setup
 
 1. Install Bun `1.3.12`.
-2. Install dependencies with `bun install`.
+2. Export `GH_PACKAGES_TOKEN` with a token that can read GitHub Packages, then install dependencies with `bun install`. This repository's own install still needs it because `@moritzbrantner/maps` resolves from `npm.pkg.github.com` (see the root `.npmrc`); drop this step once `maps` is consumed as a git pin.
 3. Check the worktree with `git status --short`.
 
 The repository uses Bun workspaces and Turbo. The root lockfile is `bun.lock`.
@@ -71,7 +71,7 @@ Publishing is documented in `docs/publishing.md`. In short:
 
 Do not run `release:publish` locally unless you intentionally want to publish and have configured `GH_PACKAGES_TOKEN`.
 
-Consumers never need `GH_PACKAGES_TOKEN`: they pin standalone package repositories by git commit SHA, and `packages/*` subdirectories cannot be git-pinned by bun. See "Installing from another repository" in `docs/publishing.md`.
+Consumers of these packages never need `GH_PACKAGES_TOKEN`: they pin standalone package repositories by git commit SHA, and `packages/*` subdirectories cannot be git-pinned by bun. See "Installing from another repository" in `docs/publishing.md`.
 
 ## Troubleshooting
 
