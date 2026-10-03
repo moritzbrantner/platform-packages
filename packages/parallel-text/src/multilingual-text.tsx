@@ -40,8 +40,10 @@ function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
 
+// Explicit and anonymous keys use separate namespaces so caller IDs never collide
+// with generated positional keys.
 function getSegmentKey(index: number, segment: MultilingualTextSegment) {
-  return segment.id ?? `segment-${index + 1}`;
+  return segment.id === undefined ? `index:${index}` : `id:${segment.id}`;
 }
 
 export function MultilingualText({
@@ -68,7 +70,8 @@ export function MultilingualText({
           <li
             id={segment.id}
             key={segmentKey}
-            data-segment-id={segmentKey}
+            data-segment-id={segment.id}
+            data-segment-index={index + 1}
             className="grid min-w-0 gap-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4 text-[color:var(--card-foreground)] shadow-sm [grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))]"
           >
             {columns.map((column) => (

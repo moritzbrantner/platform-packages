@@ -50,9 +50,29 @@ describe("MultilingualText", () => {
       />,
     );
 
-    const segment = container.querySelector('[data-segment-id="segment-1"]');
+    const segment = container.querySelector('[data-segment-index="1"]');
     expect(segment).toBeTruthy();
     expect(segment?.getAttribute("id")).toBeNull();
+    expect(segment?.getAttribute("data-segment-id")).toBeNull();
+  });
+
+  test("keeps generated keys apart from caller segment IDs", () => {
+    const { container } = render(
+      <MultilingualText
+        columns={[{ id: "la", label: "Latin" }]}
+        segments={[
+          { cells: { la: "Primum." } },
+          { id: "segment-1", cells: { la: "Secundum." } },
+          { id: "index:0", cells: { la: "Tertium." } },
+        ]}
+      />,
+    );
+
+    const rows = container.querySelectorAll("[data-segment-index]");
+    expect(rows).toHaveLength(3);
+    expect(rows[0]?.getAttribute("data-segment-id")).toBeNull();
+    expect(rows[1]?.getAttribute("data-segment-id")).toBe("segment-1");
+    expect(rows[2]?.getAttribute("data-segment-id")).toBe("index:0");
   });
 
   test("preserves empty aligned cells without dropping the column", () => {
