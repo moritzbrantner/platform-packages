@@ -31,11 +31,7 @@ export function PostFeed({ hasMore, isLoading, loadMore }: Props) {
   return (
     <>
       <PostList />
-      <InfiniteScrollTrigger
-        hasMore={hasMore}
-        isLoading={isLoading}
-        onLoadMore={loadMore}
-      >
+      <InfiniteScrollTrigger hasMore={hasMore} isLoading={isLoading} onLoadMore={loadMore}>
         {isLoading ? <LoadingMore /> : null}
       </InfiniteScrollTrigger>
     </>
@@ -77,9 +73,11 @@ export function Posts() {
 
   return (
     <>
-      {query.data?.pages.flatMap((page) => page.items).map((post) => (
-        <Post key={post.id} post={post} />
-      ))}
+      {query.data?.pages
+        .flatMap((page) => page.items)
+        .map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
 
       <InfiniteScrollTrigger
         hasMore={query.hasNextPage}

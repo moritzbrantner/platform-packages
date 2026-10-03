@@ -108,9 +108,7 @@ describe("@moritzbrantner/infinite-scroll", () => {
 
   test("re-arms after a loading cycle so short pages can continue filling the viewport", () => {
     const onLoadMore = vi.fn();
-    const { rerender } = render(
-      <InfiniteScrollTrigger hasMore onLoadMore={onLoadMore} />,
-    );
+    const { rerender } = render(<InfiniteScrollTrigger hasMore onLoadMore={onLoadMore} />);
 
     intersect(observerRecords[0]!);
     expect(onLoadMore).toHaveBeenCalledTimes(1);

@@ -41,7 +41,13 @@ function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
   }, []);
 
   React.useEffect(() => {
-    if (!target || !enabled || !hasMore || isLoading || typeof IntersectionObserver === "undefined") {
+    if (
+      !target ||
+      !enabled ||
+      !hasMore ||
+      isLoading ||
+      typeof IntersectionObserver === "undefined"
+    ) {
       return;
     }
 
