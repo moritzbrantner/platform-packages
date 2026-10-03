@@ -34,6 +34,7 @@ export type FlatGradient = {
   fy?: FlatLength;
 };
 
+/** Low-level SVG animation timing kept as a compatibility/export target. */
 export type FlatAnimationTiming = {
   begin?: string;
   dur?: string;
@@ -79,17 +80,38 @@ export type FlatEditableKeyframe = {
   opacity?: number;
 };
 
+export type FlatMotionDirection = "normal" | "reverse" | "alternate";
+export type FlatMotionFillMode = "freeze" | "remove";
+export type FlatMotionEasingPreset = "linear" | "ease-in" | "ease-out" | "ease-in-out";
+
+export type FlatMotionCubicBezierEasing = {
+  type: "cubic-bezier";
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
+export type FlatMotionEasing = FlatMotionEasingPreset | FlatMotionCubicBezierEasing;
+
 export type FlatPresetMotionSpec = {
   kind: "preset";
   preset: FlatBuiltInFigureAnimationPreset;
   options?: FlatFigureAnimationOptions;
 };
 
+/**
+ * Canonical authored motion contract. Renderer-specific SVG animation arrays are
+ * compiler output / compatibility data rather than the preferred authoring API.
+ */
 export type FlatTimelineMotionSpec = {
   kind: "timeline";
   durationMs: number;
+  delayMs?: number;
   repeatCount?: "indefinite" | number;
-  direction?: "normal" | "reverse" | "alternate";
+  direction?: FlatMotionDirection;
+  fillMode?: FlatMotionFillMode;
+  easing?: FlatMotionEasing;
   keyframes: FlatEditableKeyframe[];
   rotateCenter?: { cx: number; cy: number };
 };
@@ -123,7 +145,9 @@ type FlatRenderableBase = {
   strokeLinejoin?: "bevel" | "miter" | "round";
   opacity?: number;
   transform?: string;
+  /** Preferred authored animation model. */
   motion?: FlatMotionSpec;
+  /** Low-level SVG animation escape hatch kept for compatibility. */
   animations?: FlatAnimation[];
 };
 

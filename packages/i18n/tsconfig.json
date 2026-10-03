@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@moritzbrantner/i18n": ["./src/index.ts"],
+      "@moritzbrantner/i18n/browser": ["./src/browser.ts"],
+      "@moritzbrantner/i18n/core": ["./src/core.ts"],
+      "@moritzbrantner/i18n/react": ["./src/react.tsx"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
