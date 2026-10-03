@@ -32,7 +32,7 @@
     "@moritzbrantner/word-prediction": "workspace:*",
     "@moritzbrantner/word-vectors": "workspace:*",
     "next-themes": "^0.4.6",
-    "pdfjs-dist": "^5.4.296",
+    "pdfjs-dist": "^6.3.289",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.8.1",
