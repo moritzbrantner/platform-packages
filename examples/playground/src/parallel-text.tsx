@@ -59,16 +59,16 @@ function ParallelTextPage() {
           <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
             <p>
               Hover a word with an explicit model link and confirm its counterpart highlights on the
-              other side. Unlinked words should keep sentence context without inventing an exact word
-              translation.
+              other side. Unlinked words should keep sentence context without inventing an exact
+              word translation.
             </p>
             <p>
               Tab to a sentence, then use Left/Right Arrow, Home, and End to inspect tokens without
               creating a tab stop for every word.
             </p>
             <p>
-              Switch translations and make sure the aligned rows update without disturbing the source
-              text or its language metadata.
+              Switch translations and make sure the aligned rows update without disturbing the
+              source text or its language metadata.
             </p>
             <Button asChild variant="outline">
               <a href="/storytelling.html">Compare with storytelling demo</a>
@@ -81,8 +81,8 @@ function ParallelTextPage() {
             <CardHeader>
               <CardTitle>Multiple translations</CardTitle>
               <CardDescription>
-                Sentence alignment stays visible while token highlights only claim links with explicit
-                provenance or safe literal matches.
+                Sentence alignment stays visible while token highlights only claim links with
+                explicit provenance or safe literal matches.
               </CardDescription>
             </CardHeader>
             <CardContent>

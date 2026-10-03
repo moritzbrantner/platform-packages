@@ -310,7 +310,9 @@ function AlignedTextLayout({
           </div>
         ))
       ) : (
-        <p className="p-4 text-sm italic text-[color:var(--muted-foreground)]">No text available.</p>
+        <p className="p-4 text-sm italic text-[color:var(--muted-foreground)]">
+          No text available.
+        </p>
       )}
     </div>
   );
@@ -434,7 +436,9 @@ function TextPanel({
           />
         ))
       ) : (
-        <p className="m-0 text-sm italic text-[color:var(--muted-foreground)]">No text available.</p>
+        <p className="m-0 text-sm italic text-[color:var(--muted-foreground)]">
+          No text available.
+        </p>
       )}
     </section>
   );
@@ -457,7 +461,11 @@ function SentenceParagraphs(props: SentenceParagraphsProps) {
   return (
     <div className="grid gap-3">
       {groups.map((sentences) => (
-        <SentenceParagraph key={sentences[0]?.paragraphId ?? "empty"} {...props} sentences={sentences} />
+        <SentenceParagraph
+          key={sentences[0]?.paragraphId ?? "empty"}
+          {...props}
+          sentences={sentences}
+        />
       ))}
     </div>
   );
@@ -565,7 +573,10 @@ function ColumnHeader({
   return (
     <div
       data-slot="parallel-text-column-header"
-      className={joinClassNames("flex min-w-0 flex-wrap items-baseline justify-between gap-2", compact && "gap-1")}
+      className={joinClassNames(
+        "flex min-w-0 flex-wrap items-baseline justify-between gap-2",
+        compact && "gap-1",
+      )}
       lang={languageCode}
       dir={direction}
     >
@@ -926,8 +937,7 @@ function getTokenClassName(
   return joinClassNames(
     "rounded-sm px-0.5 transition-colors",
     isActive && "bg-[color:var(--accent)] text-[color:var(--accent-foreground)]",
-    linkedSource === "manual" &&
-      "bg-[color:var(--accent)] text-[color:var(--accent-foreground)]",
+    linkedSource === "manual" && "bg-[color:var(--accent)] text-[color:var(--accent-foreground)]",
     linkedSource === "model" &&
       "bg-[color:var(--accent)] text-[color:var(--accent-foreground)] ring-1 ring-inset ring-[color:var(--ring)]",
     linkedSource === "heuristic" &&
