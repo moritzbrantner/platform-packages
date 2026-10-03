@@ -18,6 +18,15 @@ export {
   type TokenAlignmentInput,
 } from "./model";
 export {
+  MultilingualText,
+  ParallelText,
+  type MultilingualTextColumn,
+  type MultilingualTextProps,
+  type MultilingualTextSegment,
+  type ParallelTextProps,
+  type ParallelTextSegment,
+} from "./multilingual-text";
+export {
   ParallelTextView,
   type ParallelTextLayout,
   type ParallelTextTranslationOption,
