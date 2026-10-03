@@ -96,6 +96,13 @@ describe("@moritzbrantner/parallel-text", () => {
     expect(secondRow?.textContent).toContain("Erster Zielsatz");
   });
 
+  test("leaves unmatched aligned cells blank instead of repeating an empty state", () => {
+    render(<ParallelTextView originalText="First sentence. Second sentence." translatedText="" />);
+
+    expect(screen.queryByText("No text.")).toBeNull();
+    expect(screen.getByText("First sentence.")).toBeTruthy();
+  });
+
   test("keeps flow layout available for continuous reading", () => {
     const { container } = render(
       <ParallelTextView

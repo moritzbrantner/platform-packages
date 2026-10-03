@@ -451,7 +451,7 @@ function SentenceParagraphs(props: SentenceParagraphsProps) {
   const groups = groupSentencesByParagraph(props.sentences);
 
   if (!groups.length) {
-    return <p className="m-0 text-sm italic text-[color:var(--muted-foreground)]">No text.</p>;
+    return null;
   }
 
   return (
