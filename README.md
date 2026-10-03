@@ -46,6 +46,7 @@ local JavaScript inference.
 | `@moritzbrantner/hexagon-grids`                 | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/information-extraction`        | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/i18n`                          | release-ready     | Shared locale resolution, formatting, validation, and React adapters.       |
+| `@moritzbrantner/infinite-scroll`               | experimental      | Headless cursor-page helpers and a React IntersectionObserver trigger.      |
 | `@moritzbrantner/keyboard`                      | experimental      | Browser-safe shortcut registry and matching helpers.                        |
 | `@moritzbrantner/linguistics-core`              | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
 | `@moritzbrantner/linguistics-corpus`            | experimental      | Implemented or incubating runtime package outside the scaffold release set. |
@@ -83,6 +84,7 @@ local JavaScript inference.
 - `@moritzbrantner/graphs`: node-link graph density helpers for node windows, subgraph extraction, and edge metric aggregation.
 - `@moritzbrantner/hexagon-grids`: globe-aware H3 hex indexing, polygon coverage, neighborhood/path helpers, and point aggregation into hex cells.
 - `@moritzbrantner/i18n`: shared locale resolution, i18next initialization, browser URL/preferences, `Intl` formatting, React bindings, and deterministic translation validation.
+- `@moritzbrantner/infinite-scroll`: headless cursor-page helpers and a React `IntersectionObserver` trigger for incrementally loaded feeds and lists.
 - `@moritzbrantner/keyboard`: browser-safe shortcut parsing, platform-aware modifier labels, editable-target guards, and scoped command registry helpers.
 - `@moritzbrantner/document-analysis`: orchestration layer that combines OCR/text normalization with summarization, sentiment, text analysis, and question answering into one document report.
 - `@moritzbrantner/linguistics-core`: Unicode-first text documents, normalization, segmentation, and span anchoring for browser-safe language tooling.
