@@ -77,6 +77,9 @@ test("publishing guide describes the full workspace release path", () => {
   expect(publishingGuide).toContain("Public npm packages");
   expect(publishingGuide).toContain("consumer repos should adopt these first");
   expect(publishingGuide).toContain("Release-readiness categories");
+  expect(publishingGuide).toContain("git+https://github.com/moritzbrantner/ui.git#");
+  expect(publishingGuide).toContain("cannot be pinned this way");
+  expect(publishingGuide).not.toContain("_authToken=${GH_PACKAGES_TOKEN}");
 });
 
 test("private package publisher honors release readiness inventory", () => {
