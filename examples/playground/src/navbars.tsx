@@ -1,16 +1,13 @@
 import { useMemo, useState, type SVGProps } from "react";
 
+import { Badge, Button, LanguageSwitcher, ThemeModeSwitch } from "@moritzbrantner/ui";
 import {
-  Badge,
-  Button,
-  LanguageSwitcher,
-  PlatformNavbar,
-  ThemeModeSwitch,
-  type PlatformNavbarGroup,
-  type PlatformNavbarItem,
-  type PlatformNavbarRenderLinkProps,
-  type PlatformNavbarVariant,
-} from "@moritzbrantner/ui";
+  Navbar,
+  type NavbarGroup,
+  type NavbarItem,
+  type NavbarRenderLinkProps,
+  type NavbarVariant,
+} from "@moritzbrantner/ui/shell";
 
 import { PlaygroundPage } from "./app-shell";
 import { mountPage } from "./mount";
@@ -175,7 +172,7 @@ const baseGroups = [
       },
     ],
   },
-] as const satisfies PlatformNavbarGroup[];
+] as const satisfies NavbarGroup[];
 
 const variantCopy = {
   mobile: {
@@ -200,7 +197,7 @@ const variantCopy = {
     shell: "mx-auto max-w-4xl",
   },
 } satisfies Record<
-  PlatformNavbarVariant,
+  NavbarVariant,
   {
     title: string;
     brand: string;
@@ -216,7 +213,7 @@ function DemoLink({
   children,
   onClick,
   "aria-current": ariaCurrent,
-}: PlatformNavbarRenderLinkProps) {
+}: NavbarRenderLinkProps) {
   return (
     <a
       href={href ?? "#"}
@@ -232,7 +229,7 @@ function DemoLink({
   );
 }
 
-function NavbarVariantPreview({ variant }: { variant: PlatformNavbarVariant }) {
+function NavbarVariantPreview({ variant }: { variant: NavbarVariant }) {
   const config = variantCopy[variant];
   const [activeItemId, setActiveItemId] = useState(config.active);
   const [lastSelection, setLastSelection] = useState(config.active);
@@ -262,7 +259,7 @@ function NavbarVariantPreview({ variant }: { variant: PlatformNavbarVariant }) {
       </div>
 
       <div className={config.shell}>
-        <PlatformNavbar
+        <Navbar
           aria-label={`${config.title} testcase navigation`}
           brand={config.brand}
           groups={groups}
@@ -288,7 +285,7 @@ function NavbarVariantPreview({ variant }: { variant: PlatformNavbarVariant }) {
               </div>
             </>
           }
-          onNavigate={(item: PlatformNavbarItem) => {
+          onNavigate={(item: NavbarItem) => {
             setActiveItemId(item.id);
             setLastSelection(String(item.label));
           }}

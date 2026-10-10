@@ -26,9 +26,10 @@
   },
   "dependencies": {
     "@moritzbrantner/flat-design": "^0.1.1",
-    "@moritzbrantner/maps": "^0.1.3"
+    "@moritzbrantner/maps": "git+https://github.com/moritzbrantner/maps.git#6c52ff8f582984321a4e959ff5ffac44905deb73"
   },
   "devDependencies": {
+    "@moritzbrantner/ui": "^1.0.0",
     "@remotion/player": "^4.0.379",
     "@storybook/react-vite": "^10.3.5",
     "@types/react": "^19.2.2",

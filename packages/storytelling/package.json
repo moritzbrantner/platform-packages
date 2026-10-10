@@ -48,7 +48,7 @@
     }
   },
   "dependencies": {
-    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
+    "@moritzbrantner/ui": "^1.0.0",
     "motion": "^12.35.0"
   },
   "devDependencies": {

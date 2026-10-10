@@ -3,15 +3,40 @@ import { fileURLToPath } from "node:url";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const workspaceRoot = path.resolve(rootDir, "../..");
 const rustPackagesRoot = path.resolve(workspaceRoot, "../rust-packages");
+const workflowEditorUiCompat = path.resolve(rootDir, "src/workflow-editor-ui-compat.ts");
+
+// Points workflow-editor's ui 0.8-era root imports at the ui 1.x adapter; see
+// src/workflow-editor-ui-compat.ts.
+function workflowEditorUiCompatPlugin(): Plugin {
+  return {
+    name: "playground:workflow-editor-ui-compat",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (
+        source === "@moritzbrantner/ui" &&
+        importer
+          ?.split(path.sep)
+          .join("/")
+          .includes("/node_modules/@moritzbrantner/workflow-editor/")
+      ) {
+        return workflowEditorUiCompat;
+      }
+      return null;
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [workflowEditorUiCompatPlugin(), react(), tailwindcss()],
   resolve: {
+    // Git-installed owner packages (graph-editor via workflow-editor) can get their own
+    // nested ui copy; every page must share the root ui instance (one theme, one context).
+    dedupe: ["@moritzbrantner/ui"],
     alias: [
       {
         find: /^@moritzbrantner\/card-games$/,
@@ -160,6 +185,7 @@ export default defineConfig({
       "@moritzbrantner/three-starters",
       "@moritzbrantner/word-prediction",
       "@moritzbrantner/word-vectors",
+      "@moritzbrantner/workflow-editor",
     ],
   },
   server: {

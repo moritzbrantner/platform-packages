@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz",
+    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#9892e374bfd760541b25c4480b5af03e87ee7e9d",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -15,5 +15,8 @@
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.1.2",
     "vite": "8.3.4"
-  }
+  },
+  "trustedDependencies": [
+    "@moritzbrantner/ui"
+  ]
 }
