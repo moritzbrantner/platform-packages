@@ -52,7 +52,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz"
+    "@moritzbrantner/ui": "^1.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",

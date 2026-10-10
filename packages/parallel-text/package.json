@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@moritzbrantner/linguistics-core": "^0.1.1",
-    "@moritzbrantner/ui": "https://registry.npmjs.org/@moritzbrantner/ui/-/ui-0.8.0.tgz"
+    "@moritzbrantner/ui": "^1.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
