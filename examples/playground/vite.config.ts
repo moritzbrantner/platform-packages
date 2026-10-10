@@ -34,6 +34,9 @@ function workflowEditorUiCompatPlugin(): Plugin {
 export default defineConfig({
   plugins: [workflowEditorUiCompatPlugin(), react(), tailwindcss()],
   resolve: {
+    // Git-installed owner packages (graph-editor via workflow-editor) can get their own
+    // nested ui copy; every page must share the root ui instance (one theme, one context).
+    dedupe: ["@moritzbrantner/ui"],
     alias: [
       {
         find: /^@moritzbrantner\/card-games$/,

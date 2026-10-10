@@ -987,7 +987,7 @@ function buildEditableGalleryItems(): EditableGalleryItem[] {
         id: "editable-chart",
         label: "ChartContainer",
         importName: "ChartContainer",
-        importFrom: "@moritzbrantner/ui",
+        importFrom: "./playground-chart",
         controls: [
           { id: "adoptionColor", label: "Adoption color", type: "color", value: "#2563eb" },
           { id: "qualityColor", label: "Quality color", type: "color", value: "#16a34a" },
@@ -1002,7 +1002,7 @@ function buildEditableGalleryItems(): EditableGalleryItem[] {
           },
         ],
         buildSnippet: (values) =>
-          `import { ChartContainer } from "@moritzbrantner/ui";\n\n<ChartContainer\n  config={{\n    adoption: { label: "Adoption", color: "${getEditorString(
+          `import { ChartContainer } from "./playground-chart";\n\n<ChartContainer\n  config={{\n    adoption: { label: "Adoption", color: "${getEditorString(
             values,
             "adoptionColor",
           )}" },\n    quality: { label: "Quality", color: "${getEditorString(
