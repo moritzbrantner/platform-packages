@@ -1,8 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const MAP_CANVAS_LABEL = "Clustered delivery demand map";
-const CLUSTER_MARKER_SELECTOR = ".mb-maps__cluster-marker";
-const POINT_MARKER_SELECTOR = ".mb-maps__point-marker";
+// Cluster and point markers are canvas-rendered MapLibre layers in current maps; the marker
+// class names live on each layer's flat-options metadata instead of on DOM elements.
+const CLUSTER_MARKER_CLASS = "mb-maps__cluster-marker";
+const POINT_MARKER_CLASS = "mb-maps__point-marker";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/maps.html?e2e=1");
@@ -30,7 +32,7 @@ test("keeps a single map instance alive while zooming", async ({ page }) => {
 });
 
 test("supports cluster expansion and individual point selection", async ({ page }) => {
-  const clusterTarget = await waitForFeatureTarget(page, CLUSTER_MARKER_SELECTOR);
+  const clusterTarget = await waitForFeatureTarget(page, CLUSTER_MARKER_CLASS);
   const zoomBeforeClusterClick = await getZoom(page);
 
   await page.mouse.click(clusterTarget.x, clusterTarget.y);
@@ -42,12 +44,13 @@ test("supports cluster expansion and individual point selection", async ({ page 
     const handle = (window as WindowWithMapHandle).__MB_MAPS_E2E__;
 
     handle?.map.stop();
-    handle?.map.setView([40.7128, -74.006], 13, { animate: false });
-    handle?.map.fire("moveend");
+    // MapLibre equivalent of Leaflet's non-animated setView([lat, lng], zoom); jumpTo emits
+    // moveend itself.
+    handle?.map.jumpTo({ center: [-74.006, 40.7128], zoom: 13 });
   });
   await expect.poll(() => getZoom(page)).toBeGreaterThan(12);
 
-  const pointTarget = await waitForFeatureTarget(page, POINT_MARKER_SELECTOR);
+  const pointTarget = await waitForFeatureTarget(page, POINT_MARKER_CLASS);
 
   await page.mouse.click(pointTarget.x, pointTarget.y);
 
@@ -69,17 +72,14 @@ async function getReadyCount(page: Page) {
   });
 }
 
-async function waitForFeatureTarget(page: Page, selector: string) {
+async function waitForFeatureTarget(page: Page, markerClass: string) {
   await page.getByLabel(MAP_CANVAS_LABEL).scrollIntoViewIfNeeded();
-  await page.waitForSelector(selector, {
-    state: "visible",
-  });
-  await expect.poll(() => getFeatureTarget(page, selector)).not.toBeNull();
+  await expect.poll(() => getFeatureTarget(page, markerClass)).not.toBeNull();
 
-  const target = await getFeatureTarget(page, selector);
+  const target = await getFeatureTarget(page, markerClass);
 
   if (!target) {
-    throw new Error(`Could not find a clickable feature for selector ${selector}.`);
+    throw new Error(`Could not find a clickable feature for marker class ${markerClass}.`);
   }
 
   return target;
@@ -91,51 +91,54 @@ async function getMetricValue(page: Page, testId: string) {
   return Number.parseInt((rawValue ?? "").replace(/[^\d]/g, ""), 10) || 0;
 }
 
-async function getFeatureTarget(page: Page, selector: string) {
-  return page.evaluate(
-    ({ mapLabel, targetSelector }) => {
-      const mapRegion = document.querySelector(`[aria-label="${mapLabel}"]`);
-      const markers = Array.from(mapRegion?.querySelectorAll<SVGElement>(targetSelector) ?? []);
+async function getFeatureTarget(page: Page, markerClass: string) {
+  return page.evaluate((className) => {
+    const map = (window as WindowWithMapHandle).__MB_MAPS_E2E__?.map;
 
-      for (const marker of markers) {
-        const rect = marker.getBoundingClientRect();
+    if (!map) {
+      return null;
+    }
 
-        if (rect.width <= 0 || rect.height <= 0) {
-          continue;
-        }
+    const canvas = map.getCanvas().getBoundingClientRect();
 
-        if (
-          rect.left > 48 &&
-          rect.top > 48 &&
-          rect.right < window.innerWidth - 48 &&
-          rect.bottom < window.innerHeight - 48
-        ) {
-          return {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2,
-          };
-        }
+    for (const feature of map.queryRenderedFeatures()) {
+      const classes = feature.layer?.metadata?.flatOptions?.className ?? "";
+
+      if (!classes.split(/\s+/).includes(className) || feature.geometry.type !== "Point") {
+        continue;
       }
 
-      return null;
-    },
-    { mapLabel: MAP_CANVAS_LABEL, targetSelector: selector },
-  );
+      const projected = map.project(feature.geometry.coordinates as [number, number]);
+      const x = canvas.left + projected.x;
+      const y = canvas.top + projected.y;
+
+      if (
+        x > Math.max(48, canvas.left + 24) &&
+        y > Math.max(48, canvas.top + 24) &&
+        x < Math.min(window.innerWidth - 48, canvas.right - 24) &&
+        y < Math.min(window.innerHeight - 48, canvas.bottom - 24)
+      ) {
+        return { x, y };
+      }
+    }
+
+    return null;
+  }, markerClass);
 }
 
 type WindowWithMapHandle = Window & {
   __MB_MAPS_E2E__?: {
+    // The MapLibre map handed to onMapReady by maps' default flat runtime.
     map: {
+      getCanvas(): HTMLCanvasElement;
       getZoom(): number;
-      fire(eventName: string): void;
+      jumpTo(options: { center: [number, number]; zoom: number }): void;
+      project(lngLat: [number, number]): { x: number; y: number };
+      queryRenderedFeatures(): Array<{
+        geometry: { coordinates: unknown; type: string };
+        layer?: { metadata?: { flatOptions?: { className?: string } } };
+      }>;
       stop(): void;
-      setView(
-        center: [number, number],
-        zoom: number,
-        options?: {
-          animate?: boolean;
-        },
-      ): void;
     };
     readyCount: number;
   };
