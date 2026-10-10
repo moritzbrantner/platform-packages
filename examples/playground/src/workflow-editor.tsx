@@ -21,25 +21,25 @@ const nodeTemplates: WorkflowEditorNodeTemplate[] = [
     label: "Input",
     kind: "source",
     category: "I/O",
-    outputs: [{ id: "text", label: "Text", kind: "text" }],
+    outputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
   },
   {
     id: "transform",
     label: "Transform",
     kind: "processor",
     category: "Compute",
-    inputs: [{ id: "text", label: "Text", kind: "text" }],
-    outputs: [{ id: "text", label: "Text", kind: "text" }],
+    inputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
+    outputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
   },
   {
     id: "decision",
     label: "Decision",
     kind: "router",
     category: "Logic",
-    inputs: [{ id: "text", label: "Text", kind: "text" }],
+    inputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
     outputs: [
-      { id: "pass", label: "Pass", kind: "text" },
-      { id: "review", label: "Review", kind: "text" },
+      { id: "pass", label: "Pass", type: { kind: "string" } },
+      { id: "review", label: "Review", type: { kind: "string" } },
     ],
   },
   {
@@ -47,7 +47,7 @@ const nodeTemplates: WorkflowEditorNodeTemplate[] = [
     label: "Output",
     kind: "sink",
     category: "I/O",
-    inputs: [{ id: "text", label: "Text", kind: "text" }],
+    inputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
   },
 ];
 
@@ -61,7 +61,7 @@ const initialDocument: WorkflowEditorDocument = normalizeWorkflowEditorDocument(
       category: "I/O",
       x: 40,
       y: 120,
-      outputs: [{ id: "text", label: "Text", kind: "text" }],
+      outputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
     },
     {
       id: "transform-1",
@@ -70,8 +70,8 @@ const initialDocument: WorkflowEditorDocument = normalizeWorkflowEditorDocument(
       category: "Compute",
       x: 300,
       y: 100,
-      inputs: [{ id: "text", label: "Text", kind: "text" }],
-      outputs: [{ id: "text", label: "Text", kind: "text" }],
+      inputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
+      outputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
     },
     {
       id: "decision-1",
@@ -80,10 +80,10 @@ const initialDocument: WorkflowEditorDocument = normalizeWorkflowEditorDocument(
       category: "Logic",
       x: 560,
       y: 120,
-      inputs: [{ id: "text", label: "Text", kind: "text" }],
+      inputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
       outputs: [
-        { id: "pass", label: "Pass", kind: "text" },
-        { id: "review", label: "Review", kind: "text" },
+        { id: "pass", label: "Pass", type: { kind: "string" } },
+        { id: "review", label: "Review", type: { kind: "string" } },
       ],
     },
     {
@@ -93,7 +93,7 @@ const initialDocument: WorkflowEditorDocument = normalizeWorkflowEditorDocument(
       category: "I/O",
       x: 840,
       y: 80,
-      inputs: [{ id: "text", label: "Text", kind: "text" }],
+      inputs: [{ id: "text", label: "Text", type: { kind: "string" } }],
     },
   ],
   edges: [

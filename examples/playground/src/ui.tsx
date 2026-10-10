@@ -30,10 +30,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  ChartContainer,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
   Checkbox,
   ConnectionStatus,
   Dialog,
@@ -112,7 +108,13 @@ import {
   type CalendarCellComponentProps,
   type CalendarIcsData,
   type ThemeMode,
-} from "@moritzbrantner/ui/bobba";
+} from "@moritzbrantner/ui";
+import {
+  ChartContainer,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "./playground-chart";
 import {
   ComponentEditorPanel,
   ComponentEditorPreviewFrame,
@@ -161,6 +163,21 @@ const uiStyleOptions = [
     label: "Paper",
     description: "Document and research style",
   },
+  {
+    value: "scholia",
+    label: "Scholia",
+    description: "Scholarly edition and apparatus style",
+  },
+  {
+    value: "pop",
+    label: "Pop",
+    description: "Playful motion-forward style",
+  },
+  {
+    value: "pulse",
+    label: "Pulse",
+    description: "Energetic live-status style",
+  },
 ] as const satisfies ReadonlyArray<{
   value: BuiltInUiThemeName;
   label: string;
@@ -172,6 +189,9 @@ const uiStyleLoaders = {
   atlas: () => import("@moritzbrantner/ui/atlas/styles.css?inline"),
   studio: () => import("@moritzbrantner/ui/studio/styles.css?inline"),
   paper: () => import("@moritzbrantner/ui/paper/styles.css?inline"),
+  scholia: () => import("@moritzbrantner/ui/scholia/styles.css?inline"),
+  pop: () => import("@moritzbrantner/ui/pop/styles.css?inline"),
+  pulse: () => import("@moritzbrantner/ui/pulse/styles.css?inline"),
 } as const satisfies Record<
   Exclude<BuiltInUiThemeName, "bobba">,
   () => Promise<{ default: string }>
@@ -183,7 +203,10 @@ function isUiThemeName(value: string | null): value is BuiltInUiThemeName {
     value === "zleek" ||
     value === "atlas" ||
     value === "studio" ||
-    value === "paper"
+    value === "paper" ||
+    value === "scholia" ||
+    value === "pop" ||
+    value === "pulse"
   );
 }
 

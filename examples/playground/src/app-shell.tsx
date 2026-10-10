@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 
 import {
-  AccountMenu,
   Badge,
   Button,
   Card,
@@ -12,12 +11,10 @@ import {
   CardHeader,
   CardTitle,
   cn,
-  NotificationMenu,
-  PlatformNavbar,
   ThemeModeSwitch,
-  type PlatformNavbarGroup,
   Toaster,
 } from "@moritzbrantner/ui";
+import { AccountMenu, NotificationMenu, Navbar, type NavbarGroup } from "@moritzbrantner/ui/shell";
 
 export type PageKey =
   | "hex-tile-navigation"
@@ -382,7 +379,7 @@ function getPlaygroundGroup(page: PageKey) {
   return playgroundExampleGroups.find((group) => group.items.some((item) => item.key === page));
 }
 
-function createNavbarGroups(activePage: PageKey): PlatformNavbarGroup[] {
+function createNavbarGroups(activePage: PageKey): NavbarGroup[] {
   return playgroundExampleGroups.map((group) => ({
     description: group.description,
     eyebrow: group.eyebrow,
@@ -425,7 +422,7 @@ function AppFrame({ activePage, title, description, children }: AppShellProps) {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <header className="rounded-none border border-border/60 bg-background/55 p-5 shadow-2xl shadow-black/10 supports-backdrop-filter:backdrop-blur-xl">
           <div className="flex flex-col gap-5">
-            <PlatformNavbar
+            <Navbar
               activeGroupId={activeGroup?.id}
               activeItemId={activePage}
               actions={

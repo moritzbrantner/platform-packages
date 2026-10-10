@@ -1,4 +1,5 @@
 @import "@moritzbrantner/ui/bobba/styles.css";
+@import "@moritzbrantner/ui/component-sources.css";
 @import "@moritzbrantner/parallel-text/styles.css";
 
 @source "./parallel-text-pages.tsx";

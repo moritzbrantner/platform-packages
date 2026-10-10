@@ -35,23 +35,22 @@ export type RemotionMapTimeAtFrameOptions = {
   timeRange: TemporalMapTimeRange;
 };
 
-export type UseRemotionMapTimeOptions<TProperties = Record<string, unknown>> =
+export type UseRemotionMapTimeOptions<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+> = RemotionMapTimingProps & {
+  tracks: readonly TemporalMapTrack<TProperties>[];
+};
+
+export type RemotionClusteredMapProps<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<ClusteredMapProps<TProperties>, "points"> &
   RemotionMapTimingProps & {
     tracks: readonly TemporalMapTrack<TProperties>[];
   };
 
-export type RemotionClusteredMapProps<TProperties = Record<string, unknown>> = Omit<
-  ClusteredMapProps<TProperties>,
-  "points"
-> &
-  RemotionMapTimingProps & {
-    tracks: readonly TemporalMapTrack<TProperties>[];
-  };
-
-export type RemotionHeatMapProps<TProperties = Record<string, unknown>> = Omit<
-  HeatMapProps<TProperties>,
-  "points"
-> &
+export type RemotionHeatMapProps<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<HeatMapProps<TProperties>, "points"> &
   RemotionMapTimingProps & {
     preserveTemporalScale?: boolean;
     tracks: readonly TemporalMapTrack<TProperties>[];
@@ -84,7 +83,9 @@ export function getRemotionMapTimeAtFrame({
   return timeRange.start + span * progress;
 }
 
-export function useRemotionMapTime<TProperties = Record<string, unknown>>({
+export function useRemotionMapTime<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+>({
   durationInFrames,
   endTime,
   frame,
@@ -126,7 +127,9 @@ export function useRemotionMapTime<TProperties = Record<string, unknown>>({
   }, [playback, resolvedDurationInFrames, resolvedFrame, resolvedTimeRange, timeStep]);
 }
 
-export function RemotionClusteredMap<TProperties = Record<string, unknown>>({
+export function RemotionClusteredMap<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+>({
   durationInFrames,
   endTime,
   frame,
@@ -155,7 +158,9 @@ export function RemotionClusteredMap<TProperties = Record<string, unknown>>({
   return <ClusteredMap {...mapProps} points={points} />;
 }
 
-export function RemotionHeatMap<TProperties = Record<string, unknown>>({
+export function RemotionHeatMap<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+>({
   durationInFrames,
   endTime,
   filterPoint,
