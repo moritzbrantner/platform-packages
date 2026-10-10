@@ -66,3 +66,8 @@ Do not add new release automation unless it preserves the existing GitHub Packag
 - Use existing package patterns and root scripts instead of introducing new task runners.
 - Keep changes project-local and avoid unrelated refactors.
 - Package-authored styling must follow the Tailwind rules in `README.md` and repository verifier scripts.
+
+## Shared coding tooling and conventions
+
+- Read `.conventions/index.md` and apply only the selected modules in `conventions.json`; this file remains authoritative for monorepo package ownership, publishing and verification.
+- Use `coding-tooling inspect --target <existing-path> --json` to select local source context and `coding-tooling plan --tier fast --json` to inspect declared checks. The semantic `lint` adapter invokes the existing single-tool `lint:ox` script so managed Oxlint configuration can be composed safely; it does not replace `bun run lint` or the full `bun run verify` completion gate.
