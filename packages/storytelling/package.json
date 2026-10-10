@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@moritzbrantner/ui": "^1.0.0",
-    "motion": "^12.35.0"
+    "motion": "^14.0.0"
   },
   "devDependencies": {
     "@react-three/fiber": "^9.4.0",
