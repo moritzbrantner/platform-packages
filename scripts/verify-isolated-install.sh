@@ -28,10 +28,12 @@ bun install --lockfile-only
 bun install --frozen-lockfile
 bun run --filter @moritzbrantner/data-density test
 bun run --filter @moritzbrantner/linguistics-core test
-bun -e '
+(
+  cd examples/playground
+  bun -e '
 import { readFileSync } from "node:fs";
 import { initSync, MapsFlatRasterRuntime } from "@moritzbrantner/maps/wasm";
-initSync({ module: readFileSync("vendor/prebuilt/maps/dist/wasm/maps_wasm_bg.wasm") });
+initSync({ module: readFileSync("../../vendor/prebuilt/maps/dist/wasm/maps_wasm_bg.wasm") });
 const runtime = new MapsFlatRasterRuntime({
   center: [13.405, 52.52], zoom: 4, width: 800, height: 600,
   source: { minZoom: 0, maxZoom: 18, tileSize: 256 },
@@ -44,4 +46,5 @@ try {
   runtime.free();
 }
 '
+)
 echo "Isolated dependency update, lockfile regeneration, frozen install and WASM smoke passed."
