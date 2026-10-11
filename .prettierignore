@@ -1,0 +1,3 @@
+# coding-tooling owns generated policy files and their integrity hashes.
+.conventions/
+conventions.lock.json

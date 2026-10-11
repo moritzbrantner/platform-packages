@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "profile": "repository-foundation-v1",
+  "tiers": {
+    "fast": ["format:check", "lint", "typecheck", "test"],
+    "full": ["format:check", "lint", "typecheck", "test", "build"]
+  },
+  "requiredCapabilities": ["format:check", "lint", "typecheck", "test", "build"],
+  "capabilityCommands": {
+    "platform-packages": {
+      "lint": ["bun", "run", "lint:ox"]
+    }
+  },
+  "taskKnowledge": {
+    "schemaVersion": 1,
+    "scopes": [],
+    "completion": {
+      "command": ["bun", "run", "verify"],
+      "source": "package.json"
+    }
+  }
+}
