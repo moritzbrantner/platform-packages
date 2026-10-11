@@ -33,7 +33,7 @@
     "@moritzbrantner/word-vectors": "workspace:*",
     "maplibre-gl": "6.4.1",
     "next-themes": "^0.4.6",
-    "pdfjs-dist": "^5.4.296",
+    "pdfjs-dist": "^6.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.8.1",
