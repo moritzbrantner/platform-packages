@@ -33,7 +33,7 @@
         "@moritzbrantner/linguistics-core": "workspace:*",
         "@moritzbrantner/linguistics-corpus": "workspace:*",
         "@moritzbrantner/linguistics-learning": "workspace:*",
-        "@moritzbrantner/maps": "git+https://github.com/moritzbrantner/maps.git#6c52ff8f582984321a4e959ff5ffac44905deb73",
+        "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps",
         "@moritzbrantner/media-editor": "workspace:*",
         "@moritzbrantner/ocr": "workspace:*",
         "@moritzbrantner/parallel-text": "workspace:*",
@@ -110,7 +110,7 @@
       "name": "@moritzbrantner/data-density",
       "version": "0.1.1",
       "dependencies": {
-        "@mb-rust/dense-data-wasm": "file:../../../rust-packages/packages/dense-data-wasm",
+        "@mb-rust/dense-data-wasm": "file:../../vendor/prebuilt/dense-data-wasm",
         "supercluster": "^8.0.1",
       },
       "devDependencies": {
@@ -222,7 +222,7 @@
       "name": "@moritzbrantner/linguistics-core",
       "version": "0.1.1",
       "dependencies": {
-        "@mb-rust/text-core-wasm": "file:../../../rust-packages/packages/text-core-wasm",
+        "@mb-rust/text-core-wasm": "file:../../vendor/prebuilt/text-core-wasm",
       },
     },
     "packages/linguistics-corpus": {
@@ -297,7 +297,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@moritzbrantner/flat-design": "^0.1.1",
-        "@moritzbrantner/maps": "git+https://github.com/moritzbrantner/maps.git#6c52ff8f582984321a4e959ff5ffac44905deb73",
+        "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps",
       },
       "devDependencies": {
         "@moritzbrantner/ui": "^1.0.0",
@@ -485,7 +485,6 @@
   "trustedDependencies": [
     "@moritzbrantner/workflow-editor",
     "@moritzbrantner/ui",
-    "@moritzbrantner/maps",
     "@moritzbrantner/timeline-editor",
   ],
   "overrides": {
@@ -757,8 +756,6 @@
     "@moritzbrantner/linguistics-corpus": ["@moritzbrantner/linguistics-corpus@workspace:packages/linguistics-corpus"],
 
     "@moritzbrantner/linguistics-learning": ["@moritzbrantner/linguistics-learning@workspace:packages/linguistics-learning"],
-
-    "@moritzbrantner/maps": ["@moritzbrantner/maps@github:moritzbrantner/maps#6c52ff8", { "dependencies": { "@turf/boolean-clockwise": "^7.3.5", "@turf/centroid": "^7.3.5", "@turf/helpers": "^7.3.5", "d3-delaunay": "^6.0.4", "maplibre-gl": "6.4.1", "polygon-clipping": "^0.15.7", "three": "^0.185.0" }, "peerDependencies": { "@moritzbrantner/timeline-editor": "^1.0.0", "@moritzbrantner/ui": "^1.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@moritzbrantner/timeline-editor"] }, "moritzbrantner-maps-6c52ff8", "sha512-PoL4xjUCMxZ+eCNMEEDeKI6eh1Anye1sFJs+ptklY+pWeaOoUtMcnRr2OWw2hoOYzBcy12XXTrrw82Vlx76mrg=="],
 
     "@moritzbrantner/media-editor": ["@moritzbrantner/media-editor@workspace:packages/media-editor"],
 
@@ -1904,17 +1901,15 @@
 
     "@maplibre/geojson-vt/kdbush": ["kdbush@4.1.0", "", {}, "sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ=="],
 
-    "@moritzbrantner/data-density/@mb-rust/dense-data-wasm": ["@moritzbrantner/dense-data-wasm@file:../rust-packages/packages/dense-data-wasm", {}],
+    "@moritzbrantner/data-density/@mb-rust/dense-data-wasm": ["@moritzbrantner/dense-data-wasm@file:vendor/prebuilt/dense-data-wasm", {}],
 
     "@moritzbrantner/graph-editor/@moritzbrantner/ui": ["@moritzbrantner/ui@github:moritzbrantner/ui#9892e37", { "dependencies": { "@base-ui/react": "^1.3.0", "@dnd-kit/react": "^0.5.0", "@tanstack/react-table": "^8.21.3", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "cmdk": "^1.1.1", "date-fns": "^4.1.0", "embla-carousel-react": "^8.6.0", "input-otp": "^1.4.2", "lucide-react": "^1.7.0", "motion": "^13.1.1", "radix-ui": "^1.4.3", "react-day-picker": "^9.14.0", "react-resizable-panels": "^4.9.0", "sonner": "^2.0.7", "tailwind-merge": "^3.4.0", "tailwindcss": "^4.1.14", "tw-animate-css": "^1.4.0", "vaul": "^1.1.2" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "moritzbrantner-ui-9892e37", "sha512-gTGAKUfCeo2g4DfMIs+OGGREZz05upe6vQvTLR/Z9z+zxErTLC5B8IoLc1M6+SlV2srV314VD263OiwPLp5ORg=="],
 
-    "@moritzbrantner/linguistics-core/@mb-rust/text-core-wasm": ["@moritzbrantner/text-core-wasm@file:../rust-packages/packages/text-core-wasm", {}],
+    "@moritzbrantner/linguistics-core/@mb-rust/text-core-wasm": ["@moritzbrantner/text-core-wasm@file:vendor/prebuilt/text-core-wasm", {}],
 
-    "@moritzbrantner/maps/three": ["three@0.185.1", "", {}, "sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg=="],
+    "@moritzbrantner/playground/@moritzbrantner/maps": ["@moritzbrantner/maps@file:vendor/prebuilt/maps", { "dependencies": { "@turf/boolean-clockwise": "^7.3.5", "@turf/centroid": "^7.3.5", "@turf/helpers": "^7.3.5", "d3-delaunay": "^6.0.4", "maplibre-gl": "6.4.1", "polygon-clipping": "^0.15.7", "three": "^0.185.0" }, "peerDependencies": { "@moritzbrantner/timeline-editor": "^1.0.0", "@moritzbrantner/ui": "^1.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@moritzbrantner/timeline-editor"] }],
 
-    "@moritzbrantner/remotion/@moritzbrantner/maps": ["@moritzbrantner/maps@github:moritzbrantner/maps#6c52ff8", { "dependencies": { "@turf/boolean-clockwise": "^7.3.5", "@turf/centroid": "^7.3.5", "@turf/helpers": "^7.3.5", "d3-delaunay": "^6.0.4", "maplibre-gl": "6.4.1", "polygon-clipping": "^0.15.7", "three": "^0.185.0" }, "peerDependencies": { "@moritzbrantner/timeline-editor": "^1.0.0", "@moritzbrantner/ui": "^1.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@moritzbrantner/timeline-editor"] }, "moritzbrantner-maps-6c52ff8", "sha512-PoL4xjUCMxZ+eCNMEEDeKI6eh1Anye1sFJs+ptklY+pWeaOoUtMcnRr2OWw2hoOYzBcy12XXTrrw82Vlx76mrg=="],
-
-    "@moritzbrantner/remotion/@moritzbrantner/ui": ["@moritzbrantner/ui@github:moritzbrantner/ui#9892e37", { "dependencies": { "@base-ui/react": "^1.3.0", "@dnd-kit/react": "^0.5.0", "@tanstack/react-table": "^8.21.3", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "cmdk": "^1.1.1", "date-fns": "^4.1.0", "embla-carousel-react": "^8.6.0", "input-otp": "^1.4.2", "lucide-react": "^1.7.0", "motion": "^13.1.1", "radix-ui": "^1.4.3", "react-day-picker": "^9.14.0", "react-resizable-panels": "^4.9.0", "sonner": "^2.0.7", "tailwind-merge": "^3.4.0", "tailwindcss": "^4.1.14", "tw-animate-css": "^1.4.0", "vaul": "^1.1.2" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "moritzbrantner-ui-9892e37", "sha512-gTGAKUfCeo2g4DfMIs+OGGREZz05upe6vQvTLR/Z9z+zxErTLC5B8IoLc1M6+SlV2srV314VD263OiwPLp5ORg=="],
+    "@moritzbrantner/remotion/@moritzbrantner/maps": ["@moritzbrantner/maps@file:vendor/prebuilt/maps", { "dependencies": { "@turf/boolean-clockwise": "^7.3.5", "@turf/centroid": "^7.3.5", "@turf/helpers": "^7.3.5", "d3-delaunay": "^6.0.4", "maplibre-gl": "6.4.1", "polygon-clipping": "^0.15.7", "three": "^0.185.0" }, "peerDependencies": { "@moritzbrantner/timeline-editor": "^1.0.0", "@moritzbrantner/ui": "^1.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@moritzbrantner/timeline-editor"] }],
 
     "@moritzbrantner/ui/motion": ["motion@13.5.1", "", { "dependencies": { "framer-motion": "13.5.1", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-eV9SUem6KnzEa9+eT+dVBeDlhy5TTdn09YWR1WhUsKoZCJPw/n4TcYhjbxq2Gy5PTwDr//4H3r5vxkcZnNnO1w=="],
 
@@ -1962,11 +1957,9 @@
 
     "@moritzbrantner/graph-editor/@moritzbrantner/ui/motion": ["motion@13.5.1", "", { "dependencies": { "framer-motion": "13.5.1", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-eV9SUem6KnzEa9+eT+dVBeDlhy5TTdn09YWR1WhUsKoZCJPw/n4TcYhjbxq2Gy5PTwDr//4H3r5vxkcZnNnO1w=="],
 
+    "@moritzbrantner/playground/@moritzbrantner/maps/three": ["three@0.185.1", "", {}, "sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg=="],
+
     "@moritzbrantner/remotion/@moritzbrantner/maps/three": ["three@0.185.1", "", {}, "sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg=="],
-
-    "@moritzbrantner/remotion/@moritzbrantner/ui/lucide-react": ["lucide-react@1.7.0", "", { "peerDependencies": { "react": "19.2.4" } }, "sha512-yI7BeItCLZJTXikmK4KNUGCKoGzSvbKlfCvw44bU4fXAL6v3gYS4uHD1jzsLkfwODYwI6Drw5Tu9Z5ulDe0TSg=="],
-
-    "@moritzbrantner/remotion/@moritzbrantner/ui/motion": ["motion@13.5.1", "", { "dependencies": { "framer-motion": "13.5.1", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-eV9SUem6KnzEa9+eT+dVBeDlhy5TTdn09YWR1WhUsKoZCJPw/n4TcYhjbxq2Gy5PTwDr//4H3r5vxkcZnNnO1w=="],
 
     "@moritzbrantner/ui/motion/framer-motion": ["framer-motion@13.5.1", "", { "dependencies": { "motion-dom": "13.5.1", "motion-utils": "13.5.0", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-HeWOaeHD3kyTSIEMT6+nw7fBn4saIfxxabZyAITbycAl4xr1kzGJKIvGt/OWghSlvIA9qTnZ1zTGelHAe6S8DA=="],
 
@@ -1984,8 +1977,6 @@
 
     "@moritzbrantner/graph-editor/@moritzbrantner/ui/motion/framer-motion": ["framer-motion@13.5.1", "", { "dependencies": { "motion-dom": "13.5.1", "motion-utils": "13.5.0", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-HeWOaeHD3kyTSIEMT6+nw7fBn4saIfxxabZyAITbycAl4xr1kzGJKIvGt/OWghSlvIA9qTnZ1zTGelHAe6S8DA=="],
 
-    "@moritzbrantner/remotion/@moritzbrantner/ui/motion/framer-motion": ["framer-motion@13.5.1", "", { "dependencies": { "motion-dom": "13.5.1", "motion-utils": "13.5.0", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-HeWOaeHD3kyTSIEMT6+nw7fBn4saIfxxabZyAITbycAl4xr1kzGJKIvGt/OWghSlvIA9qTnZ1zTGelHAe6S8DA=="],
-
     "@moritzbrantner/ui/motion/framer-motion/motion-dom": ["motion-dom@13.5.1", "", { "dependencies": { "motion-utils": "13.5.0" } }, "sha512-/7CVCD20Mz1KobktorpdgvowV0V41J7UxqE+qWS3GkSJqrRr5ft+2RloOYtEKv+wvBp3JaSFBclhxt4ja8ovHg=="],
 
     "@moritzbrantner/ui/motion/framer-motion/motion-utils": ["motion-utils@13.5.0", "", {}, "sha512-Hqe/sqjIKliPZg8sVjWAkdySDPJNIeKH+euVkDOG8ri3DUUU7ZjndmHsGqEPz2iHpiyVaV5I22iguCMHU2he+Q=="],
@@ -1997,9 +1988,5 @@
     "@moritzbrantner/graph-editor/@moritzbrantner/ui/motion/framer-motion/motion-dom": ["motion-dom@13.5.1", "", { "dependencies": { "motion-utils": "13.5.0" } }, "sha512-/7CVCD20Mz1KobktorpdgvowV0V41J7UxqE+qWS3GkSJqrRr5ft+2RloOYtEKv+wvBp3JaSFBclhxt4ja8ovHg=="],
 
     "@moritzbrantner/graph-editor/@moritzbrantner/ui/motion/framer-motion/motion-utils": ["motion-utils@13.5.0", "", {}, "sha512-Hqe/sqjIKliPZg8sVjWAkdySDPJNIeKH+euVkDOG8ri3DUUU7ZjndmHsGqEPz2iHpiyVaV5I22iguCMHU2he+Q=="],
-
-    "@moritzbrantner/remotion/@moritzbrantner/ui/motion/framer-motion/motion-dom": ["motion-dom@13.5.1", "", { "dependencies": { "motion-utils": "13.5.0" } }, "sha512-/7CVCD20Mz1KobktorpdgvowV0V41J7UxqE+qWS3GkSJqrRr5ft+2RloOYtEKv+wvBp3JaSFBclhxt4ja8ovHg=="],
-
-    "@moritzbrantner/remotion/@moritzbrantner/ui/motion/framer-motion/motion-utils": ["motion-utils@13.5.0", "", {}, "sha512-Hqe/sqjIKliPZg8sVjWAkdySDPJNIeKH+euVkDOG8ri3DUUU7ZjndmHsGqEPz2iHpiyVaV5I22iguCMHU2he+Q=="],
   }
 }

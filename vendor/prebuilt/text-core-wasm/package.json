@@ -1,0 +1,22 @@
+{
+  "name": "@moritzbrantner/text-core-wasm",
+  "version": "0.1.0",
+  "description": "WASM package for text-core.",
+  "license": "MIT OR Apache-2.0",
+  "files": [
+    "index.d.ts",
+    "index.js",
+    "pkg",
+    "README.md"
+  ],
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  }
+}

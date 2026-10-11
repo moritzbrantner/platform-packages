@@ -1,0 +1,29 @@
+{
+  "name": "moenarch-text-core-wasm",
+  "type": "module",
+  "description": "WASM bindings for text-core.",
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moritzbrantner/rust-packages"
+  },
+  "files": [
+    "moenarch_text_core_wasm_bg.wasm",
+    "moenarch_text_core_wasm.js",
+    "moenarch_text_core_wasm.d.ts"
+  ],
+  "main": "moenarch_text_core_wasm.js",
+  "homepage": "https://github.com/moritzbrantner/rust-packages",
+  "types": "moenarch_text_core_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "keywords": [
+    "video",
+    "audio",
+    "image",
+    "multimodal",
+    "analysis"
+  ]
+}
