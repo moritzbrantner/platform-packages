@@ -463,16 +463,12 @@ export function createDataDensityWindowIndex<TItem>(
   options: DataDensityWindowIndexOptions<TItem> = {},
 ): DataDensityWindowIndex<TItem> {
   const indexedItems = items
-    .map(
-      (item, index): IndexedDataDensityItem<TItem> => ({
-        id: String(options.getId?.(item, index) ?? readItemId(item, index)),
-        index,
-        item,
-        metrics: normalizeDensityMetrics(
-          options.getMetrics?.(item, index) ?? readItemMetrics(item),
-        ),
-      }),
-    )
+    .map((item, index): IndexedDataDensityItem<TItem> => ({
+      id: String(options.getId?.(item, index) ?? readItemId(item, index)),
+      index,
+      item,
+      metrics: normalizeDensityMetrics(options.getMetrics?.(item, index) ?? readItemMetrics(item)),
+    }))
     .filter((entry) => options.filterItem?.(entry.item, entry.index) ?? true);
   const itemLookup = new Map(indexedItems.map((item) => [item.id, item]));
   const metricKeys = collectDensityMetricKeys(indexedItems.map((item) => item.metrics));
@@ -563,27 +559,25 @@ function createHybridBinnedSeriesIndex<TProperties = Record<string, unknown>>(
         targetBinCount,
         xDomain,
       });
-      const visibleBins = kernelResult.bins.map(
-        (bin): BinnedSeriesBin<TProperties> => ({
-          averageY: bin.averageY,
-          firstPoint:
-            bin.firstPointIndex === null || bin.firstPointIndex === undefined
-              ? null
-              : (visiblePoints[bin.firstPointIndex] ?? null),
-          index: bin.index,
-          lastPoint:
-            bin.lastPointIndex === null || bin.lastPointIndex === undefined
-              ? null
-              : (visiblePoints[bin.lastPointIndex] ?? null),
-          maxY: bin.maxY,
-          metrics: normalizeDensityMetrics(bin.metrics),
-          minY: bin.minY,
-          pointCount: bin.pointCount,
-          sumY: bin.sumY,
-          x0: bin.x0,
-          x1: bin.x1,
-        }),
-      );
+      const visibleBins = kernelResult.bins.map((bin): BinnedSeriesBin<TProperties> => ({
+        averageY: bin.averageY,
+        firstPoint:
+          bin.firstPointIndex === null || bin.firstPointIndex === undefined
+            ? null
+            : (visiblePoints[bin.firstPointIndex] ?? null),
+        index: bin.index,
+        lastPoint:
+          bin.lastPointIndex === null || bin.lastPointIndex === undefined
+            ? null
+            : (visiblePoints[bin.lastPointIndex] ?? null),
+        maxY: bin.maxY,
+        metrics: normalizeDensityMetrics(bin.metrics),
+        minY: bin.minY,
+        pointCount: bin.pointCount,
+        sumY: bin.sumY,
+        x0: bin.x0,
+        x1: bin.x1,
+      }));
 
       return {
         bins: visibleBins,
@@ -655,27 +649,25 @@ function createWasmIndexedBinnedSeriesIndex<TProperties = Record<string, unknown
         targetBinCount,
         xDomain,
       }) as NumericSeriesKernelResult;
-      const visibleBins = kernelResult.bins.map(
-        (bin): BinnedSeriesBin<TProperties> => ({
-          averageY: bin.averageY,
-          firstPoint:
-            bin.firstPointIndex === null || bin.firstPointIndex === undefined
-              ? null
-              : (acceptedFinitePoints[bin.firstPointIndex] ?? null),
-          index: bin.index,
-          lastPoint:
-            bin.lastPointIndex === null || bin.lastPointIndex === undefined
-              ? null
-              : (acceptedFinitePoints[bin.lastPointIndex] ?? null),
-          maxY: bin.maxY,
-          metrics: normalizeDensityMetrics(bin.metrics),
-          minY: bin.minY,
-          pointCount: bin.pointCount,
-          sumY: bin.sumY,
-          x0: bin.x0,
-          x1: bin.x1,
-        }),
-      );
+      const visibleBins = kernelResult.bins.map((bin): BinnedSeriesBin<TProperties> => ({
+        averageY: bin.averageY,
+        firstPoint:
+          bin.firstPointIndex === null || bin.firstPointIndex === undefined
+            ? null
+            : (acceptedFinitePoints[bin.firstPointIndex] ?? null),
+        index: bin.index,
+        lastPoint:
+          bin.lastPointIndex === null || bin.lastPointIndex === undefined
+            ? null
+            : (acceptedFinitePoints[bin.lastPointIndex] ?? null),
+        maxY: bin.maxY,
+        metrics: normalizeDensityMetrics(bin.metrics),
+        minY: bin.minY,
+        pointCount: bin.pointCount,
+        sumY: bin.sumY,
+        x0: bin.x0,
+        x1: bin.x1,
+      }));
 
       return {
         bins: visibleBins,
