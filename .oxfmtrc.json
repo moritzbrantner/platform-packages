@@ -6,7 +6,5 @@
   "semi": true,
   "singleQuote": false,
   "trailingComma": "all",
-  "ignorePatterns": [
-    "vendor/prebuilt/**"
-  ]
+  "ignorePatterns": ["vendor/prebuilt/**"]
 }

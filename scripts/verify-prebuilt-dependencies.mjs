@@ -12,10 +12,12 @@ export function fileDigest(filename) {
 }
 
 export function listArtifactFiles(root) {
-  if (!existsSync(root)) throw new Error("Prebuilt dependencies are missing; run the producer refresh.");
+  if (!existsSync(root))
+    throw new Error("Prebuilt dependencies are missing; run the producer refresh.");
   const visit = (dir, prefix) =>
     readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-      if (entry.isSymbolicLink()) throw new Error("Symbolic link in prebuilt artifacts: " + entry.name);
+      if (entry.isSymbolicLink())
+        throw new Error("Symbolic link in prebuilt artifacts: " + entry.name);
       const name = prefix ? prefix + "/" + entry.name : entry.name;
       if (name === "provenance.json") return [];
       if (entry.isDirectory()) return visit(path.join(dir, entry.name), name);
@@ -45,15 +47,39 @@ export function verifyFileInventory(root, expectedFiles) {
 export function verifyPrebuiltDependencies(root = repositoryRoot) {
   const prebuilt = path.join(root, "vendor", "prebuilt");
   const provenance = JSON.parse(readFileSync(path.join(prebuilt, "provenance.json"), "utf8"));
-  const pins = JSON.parse(readFileSync(path.join(root, "scripts", "prebuilt-source-pins.json"), "utf8"));
-  if (provenance.schemaVersion !== 1 || JSON.stringify(provenance.sources) !== JSON.stringify(pins)) {
+  const pins = JSON.parse(
+    readFileSync(path.join(root, "scripts", "prebuilt-source-pins.json"), "utf8"),
+  );
+  if (
+    provenance.schemaVersion !== 1 ||
+    JSON.stringify(provenance.sources) !== JSON.stringify(pins)
+  ) {
     throw new Error("Prebuilt source identities disagree with pinned upstream revisions.");
   }
   verifyFileInventory(prebuilt, provenance.files);
   const packages = [
-    ["dense-data-wasm", "@moritzbrantner/dense-data-wasm", ["index.js", "index.d.ts", "pkg/moenarch_dense_data_wasm_bg.wasm"]],
-    ["text-core-wasm", "@moritzbrantner/text-core-wasm", ["index.js", "index.d.ts", "pkg/moenarch_text_core_wasm_bg.wasm"]],
-    ["maps", "@moritzbrantner/maps", ["dist/index.js", "dist/wasm/maps_wasm.js", "dist/wasm/maps_wasm_bg.wasm", "styles.css", "styles.full.css", "maplibre.css"]],
+    [
+      "dense-data-wasm",
+      "@moritzbrantner/dense-data-wasm",
+      ["index.js", "index.d.ts", "pkg/moenarch_dense_data_wasm_bg.wasm"],
+    ],
+    [
+      "text-core-wasm",
+      "@moritzbrantner/text-core-wasm",
+      ["index.js", "index.d.ts", "pkg/moenarch_text_core_wasm_bg.wasm"],
+    ],
+    [
+      "maps",
+      "@moritzbrantner/maps",
+      [
+        "dist/index.js",
+        "dist/wasm/maps_wasm.js",
+        "dist/wasm/maps_wasm_bg.wasm",
+        "styles.css",
+        "styles.full.css",
+        "maplibre.css",
+      ],
+    ],
   ];
   for (const [dir, name, targets] of packages) {
     const packageDir = path.join(prebuilt, dir);
@@ -62,7 +88,8 @@ export function verifyPrebuiltDependencies(root = repositoryRoot) {
       throw new Error("Unexpected package identity or install-time build in " + dir);
     }
     for (const target of targets) {
-      if (!existsSync(path.join(packageDir, target))) throw new Error("Missing prebuilt output: " + dir + "/" + target);
+      if (!existsSync(path.join(packageDir, target)))
+        throw new Error("Missing prebuilt output: " + dir + "/" + target);
     }
   }
   return provenance;
