@@ -171,10 +171,12 @@ function useInfiniteScrollRestoration<TItem, TCursor = string>({
   storage,
 }: UseInfiniteScrollRestorationOptions<TItem, TCursor>): UseInfiniteScrollRestorationResult {
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
-  // The snapshot whose offset has been applied. A snapshot that arrives after mount (or once
-  // `enabled` turns on) is a new identity and becomes eligible again.
-  const [appliedState, setAppliedState] = React.useState<typeof restoredState>(null);
-  const isRestoring = enabled && restoredState !== null && appliedState !== restoredState;
+  // Whether the current snapshot's offset has been applied. It resets only when there is no
+  // eligible snapshot, so a snapshot that arrives after mount (or once `enabled` turns on) is
+  // applied once, while a parent passing a fresh but equivalent object each render is not
+  // re-applied.
+  const [applied, setApplied] = React.useState(false);
+  const isRestoring = enabled && restoredState !== null && !applied;
   const offsetRef = React.useRef(0);
   const latestRef = React.useRef({
     contentKey,
@@ -190,14 +192,17 @@ function useInfiniteScrollRestoration<TItem, TCursor = string>({
     latestRef.current = { contentKey, enabled, isRestoring, key, pages, restoredState, storage };
   });
 
-  // Apply the saved offset exactly once per snapshot, in the first commit where the restored
-  // pages are rendered, so the viewport never shows the top of the feed and then jumps back.
+  // Apply the saved offset exactly once, in the first commit where the restored pages are
+  // rendered, so the viewport never shows the top of the feed and then jumps back.
   React.useLayoutEffect(() => {
-    if (!enabled || !restoredState || appliedState === restoredState || !container) {
+    if (!enabled || !restoredState) {
+      if (applied) {
+        setApplied(false);
+      }
       return;
     }
 
-    if (pages.length < restoredState.pages.length) {
+    if (applied || !container || pages.length < restoredState.pages.length) {
       return;
     }
 
@@ -209,8 +214,8 @@ function useInfiniteScrollRestoration<TItem, TCursor = string>({
     } else {
       container.scrollTop = offset;
     }
-    setAppliedState(restoredState);
-  }, [appliedState, container, enabled, pages.length, restoredState]);
+    setApplied(true);
+  }, [applied, container, enabled, pages.length, restoredState]);
 
   React.useEffect(() => {
     if (!container || !enabled) {

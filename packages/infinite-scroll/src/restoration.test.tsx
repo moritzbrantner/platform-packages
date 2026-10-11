@@ -703,6 +703,34 @@ describe("useInfiniteScrollRestoration (react)", () => {
     expect(screen.getByTestId("posts").dataset.restoring).toBe("false");
   });
 
+  // Review regression (implementation-authored): an equivalent snapshot object passed again on
+  // a later render must not re-apply the offset.
+  test("does not re-apply the offset for a fresh but equivalent snapshot object", () => {
+    const storage = createMemoryRestorationStorage();
+    const restoredState = saveInfiniteScrollRestoration(storage, "posts", {
+      pages: threePages,
+      scrollOffset: 450,
+    });
+
+    const { rerender } = render(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={threePages}
+        restoredState={restoredState}
+        storage={storage}
+      />,
+    );
+    rerender(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={threePages}
+        restoredState={{ ...restoredState }}
+        storage={storage}
+      />,
+    );
+    expect(probe("posts").writes).toEqual([{ itemsRendered: 9, value: 450 }]);
+  });
+
   test("changed page counts: clamps the offset to the restored content instead of overshooting", () => {
     const storage = createMemoryRestorationStorage();
     saveInfiniteScrollRestoration(storage, "posts", {
