@@ -1,0 +1,10 @@
+{
+  "rustPackages": {
+    "repository": "https://github.com/moritzbrantner/rust-packages.git",
+    "commit": "da291014dd40f62307a9825a9f938ccf18fddcbc"
+  },
+  "maps": {
+    "repository": "https://github.com/moritzbrantner/maps.git",
+    "commit": "6c52ff8f582984321a4e959ff5ffac44905deb73"
+  }
+}
