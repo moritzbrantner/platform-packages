@@ -16,4 +16,4 @@ jobs:
     with:
       bun_version: "1.4.2"
       install_command: node scripts/verify-prebuilt-dependencies.mjs && bun install --frozen-lockfile
-      command: ${{ github.event_name == 'pull_request' && 'bun run lint && bun run typecheck && bun run test && bash scripts/verify-isolated-install.sh' || 'bun run lint && bun run typecheck && bun run test && bun run build' }}
+      command: ${{ github.event_name == 'pull_request' && 'bun run lint && bun run typecheck && bun run test && bash scripts/verify-isolated-install.sh && bun run build' || 'bun run lint && bun run typecheck && bun run test && bun run build' }}
