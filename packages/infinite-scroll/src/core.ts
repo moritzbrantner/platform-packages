@@ -12,3 +12,5 @@ function hasNextCursor<TCursor>(page: Pick<CursorPage<unknown, TCursor>, "nextCu
 }
 
 export { flattenCursorPages, hasNextCursor };
+
+export * from "./restoration";
