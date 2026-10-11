@@ -305,9 +305,9 @@ function Feed({
         ))}
       </ul>
       <InfiniteScrollTrigger enabled={!isRestoring} hasMore={hasMore} onLoadMore={loadNext} />
-      <button onClick={save} type="button">
+      <span onClick={save} onKeyDown={save} role="button" tabIndex={0}>
         save {feedKey}
-      </button>
+      </span>
     </div>
   );
 }
