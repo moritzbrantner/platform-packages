@@ -731,6 +731,41 @@ describe("useInfiniteScrollRestoration (react)", () => {
     expect(probe("posts").writes).toEqual([{ itemsRendered: 9, value: 450 }]);
   });
 
+  // Review regression (implementation-authored): switching directly to another snapshot
+  // without unmounting (e.g. a route parameter change) must restore the new one.
+  test("applies a different snapshot supplied without unmounting", () => {
+    const storage = createMemoryRestorationStorage();
+    const first = saveInfiniteScrollRestoration(storage, "posts", {
+      pages: threePages,
+      scrollOffset: 450,
+    });
+    const second = saveInfiniteScrollRestoration(storage, "posts-other", {
+      pages: threePages,
+      scrollOffset: 150,
+    });
+
+    const { rerender } = render(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={threePages}
+        restoredState={first}
+        storage={storage}
+      />,
+    );
+    rerender(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={threePages}
+        restoredState={second}
+        storage={storage}
+      />,
+    );
+    expect(probe("posts").writes).toEqual([
+      { itemsRendered: 9, value: 450 },
+      { itemsRendered: 9, value: 150 },
+    ]);
+  });
+
   test("changed page counts: clamps the offset to the restored content instead of overshooting", () => {
     const storage = createMemoryRestorationStorage();
     saveInfiniteScrollRestoration(storage, "posts", {
