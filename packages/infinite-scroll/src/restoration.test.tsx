@@ -535,6 +535,16 @@ describe("restoration state (core)", () => {
       },
     ],
     [
+      // Review regression (implementation-authored): CursorPage requires nextCursor.
+      "a page without nextCursor",
+      {
+        pageParams: [null],
+        pages: [{ items: [{ id: "p1-0" }] }],
+        scrollOffset: 0,
+        version: 1,
+      },
+    ],
+    [
       "mismatched pageParams",
       {
         pageParams: [null, "x"],
@@ -654,6 +664,32 @@ describe("useInfiniteScrollRestoration (react)", () => {
       />,
     );
     expect(probe("posts").writes).toEqual([]);
+
+    rerender(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={threePages}
+        restoredState={restoredState}
+        storage={storage}
+      />,
+    );
+    expect(probe("posts").writes).toEqual([{ itemsRendered: 9, value: 450 }]);
+    expect(screen.getByTestId("posts").dataset.restoring).toBe("false");
+  });
+
+  // Review regression (implementation-authored): a snapshot read after mount, e.g. in an
+  // effect to avoid hydration mismatches, must still be applied once.
+  test("applies a restoration snapshot that arrives after mount", () => {
+    const storage = createMemoryRestorationStorage();
+    const restoredState = saveInfiniteScrollRestoration(storage, "posts", {
+      pages: threePages,
+      scrollOffset: 450,
+    });
+
+    const { rerender } = render(
+      <ExternalPagesFeed feedKey="posts" pages={[]} restoredState={null} storage={storage} />,
+    );
+    expect(screen.getByTestId("posts").dataset.restoring).toBe("false");
 
     rerender(
       <ExternalPagesFeed

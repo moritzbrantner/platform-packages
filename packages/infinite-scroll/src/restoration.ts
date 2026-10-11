@@ -112,7 +112,12 @@ function isRestorationState(
     Array.isArray(state.pages) &&
     state.pages.length > 0 &&
     state.pages.every(
-      (page) => typeof page === "object" && page !== null && Array.isArray(page.items),
+      (page) =>
+        typeof page === "object" &&
+        page !== null &&
+        Array.isArray(page.items) &&
+        "nextCursor" in page &&
+        page.nextCursor !== undefined,
     ) &&
     Array.isArray(state.pageParams) &&
     state.pageParams.length === state.pages.length &&
