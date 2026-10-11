@@ -766,6 +766,43 @@ describe("useInfiniteScrollRestoration (react)", () => {
     ]);
   });
 
+  // Review regression (implementation-authored): a different snapshot with the same offset and
+  // page count (other cursors) is still a new restoration.
+  test("applies a different snapshot with the same offset and page count", () => {
+    const storage = createMemoryRestorationStorage();
+    const first = saveInfiniteScrollRestoration(storage, "posts", {
+      pages: threePages,
+      scrollOffset: 450,
+    });
+    const otherPages = [makePage(7, "cursor-7"), makePage(8, "cursor-8"), makePage(9, null)];
+    const second = saveInfiniteScrollRestoration(storage, "posts-other", {
+      pages: otherPages,
+      scrollOffset: 450,
+    });
+
+    const { rerender } = render(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={threePages}
+        restoredState={first}
+        storage={storage}
+      />,
+    );
+    act(() => probe("posts").userScroll(100));
+    rerender(
+      <ExternalPagesFeed
+        feedKey="posts"
+        pages={otherPages}
+        restoredState={second}
+        storage={storage}
+      />,
+    );
+    expect(probe("posts").writes).toEqual([
+      { itemsRendered: 9, value: 450 },
+      { itemsRendered: 9, value: 450 },
+    ]);
+  });
+
   test("changed page counts: clamps the offset to the restored content instead of overshooting", () => {
     const storage = createMemoryRestorationStorage();
     saveInfiniteScrollRestoration(storage, "posts", {

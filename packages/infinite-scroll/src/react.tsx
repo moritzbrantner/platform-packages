@@ -158,6 +158,19 @@ export type UseInfiniteScrollRestorationResult = {
 };
 
 /**
+ * Stable identity of a snapshot's content, so equivalent objects compare equal while a
+ * different snapshot (other pages, cursors or offset) does not.
+ */
+function restorationFingerprint(state: InfiniteScrollRestorationState<unknown, unknown>): string {
+  return JSON.stringify([
+    state.contentKey ?? null,
+    state.scrollOffset,
+    state.pageParams,
+    state.pages.map((page) => [page.items.length, page.nextCursor]),
+  ]);
+}
+
+/**
  * Restores and saves the viewport of an infinite feed. The app owns reading the state and
  * seeding its pages (so restored pages are never refetched) and owns routing; this hook applies
  * the saved offset once the restored content is rendered, and saves on unmount or on demand.
@@ -176,15 +189,12 @@ function useInfiniteScrollRestoration<TItem, TCursor = string>({
   // snapshot, or `enabled` turning on is a new restoration and is applied once; a parent
   // passing a fresh but equivalent object each render is the same restoration.
   const [appliedRestoration, setAppliedRestoration] = React.useState<string | null>(null);
+  const snapshotFingerprint = React.useMemo(
+    () => (restoredState ? restorationFingerprint(restoredState) : null),
+    [restoredState],
+  );
   const restoration =
-    enabled && restoredState !== null
-      ? [
-          key,
-          restoredState.contentKey ?? "",
-          restoredState.scrollOffset,
-          restoredState.pages.length,
-        ].join("\u0000")
-      : null;
+    enabled && snapshotFingerprint !== null ? `${key}\u0000${snapshotFingerprint}` : null;
   const isRestoring = restoration !== null && appliedRestoration !== restoration;
   const offsetRef = React.useRef(0);
   const latestRef = React.useRef({
