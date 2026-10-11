@@ -1,42 +1,14 @@
 name: Refresh Prebuilt Dependencies
 
 on:
-  push:
-    branches:
-      - fix/isolated-deps-132
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  format:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: true
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: "1.4.2"
-      - name: Install formatter without lifecycle scripts
-        run: bun install --frozen-lockfile --ignore-scripts
-      - name: Apply repository formatter
-        run: bun run format
-      - name: Commit formatting corrections
-        run: |
-          git add .oxfmtrc.json scripts/verify-prebuilt-dependencies.mjs scripts/write-prebuilt-dependencies.mjs
-          if git diff --cached --quiet; then
-            echo "Already formatted."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "style: normalize prebuilt verification scripts with Oxfmt"
-          git push origin "HEAD:$GITHUB_REF_NAME"
   refresh:
-    if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
