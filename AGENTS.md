@@ -66,3 +66,7 @@ Do not add new release automation unless it preserves the existing GitHub Packag
 - Use existing package patterns and root scripts instead of introducing new task runners.
 - Keep changes project-local and avoid unrelated refactors.
 - Package-authored styling must follow the Tailwind rules in `README.md` and repository verifier scripts.
+
+## Checked-in Prebuilt Dependencies
+
+`vendor/prebuilt/` is a deliberate, content-verified generated-output exception for issue #132. Do not edit the outputs manually: change source pins, run `scripts/refresh-prebuilt-dependencies.sh` and regenerate `bun.lock`. See `docs/prebuilt-dependencies.md`.

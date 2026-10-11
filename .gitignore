@@ -18,3 +18,10 @@ packages/*/storybook-static/
 *.tgz
 
 /backups/
+
+# Intentional installable output of exact pinned producers (issue #132).
+!/vendor/
+!/vendor/prebuilt/
+!/vendor/prebuilt/maps/
+!/vendor/prebuilt/maps/dist/
+!/vendor/prebuilt/maps/dist/**
