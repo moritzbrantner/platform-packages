@@ -25,8 +25,9 @@ export interface HuggingFaceModelReference<Task extends HuggingFaceTextTask = Hu
   parameters?: Record<string, unknown>;
 }
 
-export type TextInferenceInput<Metadata extends Record<string, unknown> = Record<string, unknown>> =
-  string | TextDocument<Metadata>;
+export type TextInferenceInput<
+  Metadata extends Record<string, unknown> = Record<string, unknown>,
+> = string | TextDocument<Metadata>;
 
 export interface EnsureTextDocumentOptions<
   Metadata extends Record<string, unknown> = Record<string, unknown>,
