@@ -28,7 +28,7 @@
     "@moritzbrantner/subtitles": "workspace:*",
     "@moritzbrantner/timeline-editor": "git+https://github.com/moritzbrantner/timeline-editor.git#9917ede5590e43a9f6ec39e3d420243f060098ac",
     "@moritzbrantner/ui": "^1.0.0",
-    "@moritzbrantner/workflow-editor": "git+https://github.com/moritzbrantner/workflow-editor.git#7c676404e3bb361bec7c7057b686642ede2c4355",
+    "@moritzbrantner/workflow-editor": "git+https://github.com/moritzbrantner/workflow-editor.git#02afaf546f274c47b1eb4c4ea216c8a661b448a4",
     "@moritzbrantner/word-prediction": "workspace:*",
     "@moritzbrantner/word-vectors": "workspace:*",
     "maplibre-gl": "6.4.1",
