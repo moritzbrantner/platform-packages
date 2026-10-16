@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@a11ca7f3feaca0936803308cf4b150b4150cb99c
+    uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@5e4c334179c59bbc4a4768bf033ff1d27cd89c0c
     with:
       bun_version: "1.4.2"
       install_command: node scripts/verify-prebuilt-dependencies.mjs && bun install --frozen-lockfile
