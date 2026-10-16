@@ -8,6 +8,7 @@ import {
   verifyFileInventory,
   verifyPrebuiltDependencies,
 } from "./verify-prebuilt-dependencies.mjs";
+import { assertPublishableDependencies } from "./assert-publishable-dependencies.mjs";
 
 test("prebuilt dependency files match immutable source pins and SHA-256 manifests", () => {
   expect(verifyPrebuiltDependencies().schemaVersion).toBe(1);
@@ -38,4 +39,20 @@ test("artifact verification detects missing, extra and modified files", () => {
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("a release cannot publish workspace-local runtime dependencies", () => {
+  const pkg = {
+    name: "@moritzbrantner/remotion",
+    dependencies: { "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps" },
+  };
+  expect(() => assertPublishableDependencies(pkg)).toThrow(
+    /@moritzbrantner\/remotion.*@moritzbrantner\/maps.*file:/,
+  );
+  expect(() =>
+    assertPublishableDependencies({
+      ...pkg,
+      dependencies: { "@moritzbrantner/maps": "^0.1.5" },
+    }),
+  ).not.toThrow();
 });
