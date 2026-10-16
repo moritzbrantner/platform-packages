@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { assertPublishableDependencies } from "./assert-publishable-dependencies.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const packageDir = path.join(repoRoot, "packages/data-density");
@@ -14,6 +16,7 @@ const authToken = process.env.NPM_TOKEN;
 const extraPublishArgs = process.argv.slice(2);
 
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+assertPublishableDependencies(packageJson);
 
 function fail(message) {
   process.stderr.write(`${message}\n`);
