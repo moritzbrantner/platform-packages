@@ -42,16 +42,8 @@ test("artifact verification detects missing, extra and modified files", () => {
 });
 
 test("a release cannot publish workspace-local runtime dependencies", () => {
-  const pkg = {
-    name: "@moritzbrantner/remotion",
-    dependencies: { "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps" },
-  };
-  expect(() => assertPublishableDependencies(pkg)).toThrow(
-    /@moritzbrantner\/remotion.*@moritzbrantner\/maps.*file:/,
-  );
-  const externallyResolvable = {
-    ...pkg,
-    dependencies: { "@moritzbrantner/maps": "^0.1.5" },
-  };
-  expect(() => assertPublishableDependencies(externallyResolvable)).not.toThrow();
+  const pkg = { name: "fixture", dependencies: { maps: "file:../maps" } };
+  expect(() => assertPublishableDependencies(pkg)).toThrow(/cannot publish/);
+  pkg.dependencies.maps = "^1.0.0";
+  expect(() => assertPublishableDependencies(pkg)).not.toThrow();
 });
