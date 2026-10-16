@@ -17,7 +17,7 @@
     "@moritzbrantner/linguistics-core": "workspace:*",
     "@moritzbrantner/linguistics-corpus": "workspace:*",
     "@moritzbrantner/linguistics-learning": "workspace:*",
-    "@moritzbrantner/maps": "git+https://github.com/moritzbrantner/maps.git#6c52ff8f582984321a4e959ff5ffac44905deb73",
+    "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps",
     "@moritzbrantner/media-editor": "workspace:*",
     "@moritzbrantner/ocr": "workspace:*",
     "@moritzbrantner/parallel-text": "workspace:*",

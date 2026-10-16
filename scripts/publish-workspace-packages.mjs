@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { assertPublishableDependencies } from "./assert-publishable-dependencies.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const packagesRoot = path.join(repoRoot, "packages");
@@ -191,6 +193,7 @@ if (!authToken) {
 }
 
 const releasePackages = sortPackagesForPublishing(getWorkspacePackages());
+for (const { packageJson } of releasePackages) assertPublishableDependencies(packageJson);
 
 for (const { relativeDir, packageDir, packageJson: pkg } of releasePackages) {
   const publishedVersion = getPublishedVersion(pkg.name, pkg.version);

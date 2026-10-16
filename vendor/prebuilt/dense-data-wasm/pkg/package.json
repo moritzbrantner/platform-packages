@@ -1,0 +1,29 @@
+{
+  "name": "moenarch-dense-data-wasm",
+  "type": "module",
+  "description": "WASM bindings for dense-data.",
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moritzbrantner/rust-packages"
+  },
+  "files": [
+    "moenarch_dense_data_wasm_bg.wasm",
+    "moenarch_dense_data_wasm.js",
+    "moenarch_dense_data_wasm.d.ts"
+  ],
+  "main": "moenarch_dense_data_wasm.js",
+  "homepage": "https://github.com/moritzbrantner/rust-packages",
+  "types": "moenarch_dense_data_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "keywords": [
+    "video",
+    "audio",
+    "image",
+    "multimodal",
+    "analysis"
+  ]
+}

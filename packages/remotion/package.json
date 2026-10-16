@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@moritzbrantner/flat-design": "^0.1.1",
-    "@moritzbrantner/maps": "git+https://github.com/moritzbrantner/maps.git#6c52ff8f582984321a4e959ff5ffac44905deb73"
+    "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps"
   },
   "devDependencies": {
     "@moritzbrantner/ui": "^1.0.0",

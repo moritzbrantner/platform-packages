@@ -20,7 +20,7 @@
     }
   },
   "dependencies": {
-    "@mb-rust/text-core-wasm": "file:../../../rust-packages/packages/text-core-wasm"
+    "@mb-rust/text-core-wasm": "file:../../vendor/prebuilt/text-core-wasm"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

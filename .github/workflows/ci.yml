@@ -14,8 +14,6 @@ jobs:
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@a11ca7f3feaca0936803308cf4b150b4150cb99c
     with:
-      # Git-pinned owner packages build in their prepare scripts; Bun 1.4.2 is the
-      # version that produced bun.lock and runs those trusted prepare scripts.
       bun_version: "1.4.2"
-      install_command: bash scripts/prepare-compat-wasm-deps.sh && bash scripts/prepare-git-dependency-toolchain.sh && bun install --frozen-lockfile
-      command: ${{ github.event_name == 'pull_request' && 'bun run lint && bun run typecheck && bun run test' || 'bun run lint && bun run typecheck && bun run test && bun run build' }}
+      install_command: node scripts/verify-prebuilt-dependencies.mjs && bun install --frozen-lockfile
+      command: ${{ github.event_name == 'pull_request' && 'bun run lint && bun run typecheck && bun run test && bash scripts/verify-isolated-install.sh && bun run build' || 'bun run lint && bun run typecheck && bun run test && bun run build' }}

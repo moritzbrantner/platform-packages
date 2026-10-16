@@ -1,0 +1,92 @@
+{
+  "name": "@moritzbrantner/maps",
+  "version": "0.1.5",
+  "description": "React map components and temporal geo utilities backed by density-aware aggregation.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moritzbrantner/maps.git"
+  },
+  "files": [
+    "dist",
+    "maplibre.css",
+    "styles.css",
+    "styles.full.css"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./layers": {
+      "types": "./dist/layers.d.ts",
+      "import": "./dist/layers.js"
+    },
+    "./flat": {
+      "types": "./dist/flat.d.ts",
+      "import": "./dist/flat.js"
+    },
+    "./editor": {
+      "types": "./dist/editor.d.ts",
+      "import": "./dist/editor.js"
+    },
+    "./timeline": {
+      "types": "./dist/timeline.d.ts",
+      "import": "./dist/timeline.js"
+    },
+    "./geojson": {
+      "types": "./dist/geojson.d.ts",
+      "import": "./dist/geojson.js"
+    },
+    "./heat": {
+      "types": "./dist/heat.d.ts",
+      "import": "./dist/heat.js"
+    },
+    "./measurement": {
+      "types": "./dist/measurement.d.ts",
+      "import": "./dist/measurement.js"
+    },
+    "./temporal": {
+      "types": "./dist/temporal.d.ts",
+      "import": "./dist/temporal.js"
+    },
+    "./wasm": {
+      "types": "./dist/wasm/maps_wasm.d.ts",
+      "import": "./dist/wasm/maps_wasm.js"
+    },
+    "./package.json": "./package.json",
+    "./maplibre.css": "./maplibre.css",
+    "./styles.css": "./styles.css",
+    "./styles.full.css": "./styles.full.css"
+  },
+  "dependencies": {
+    "@turf/boolean-clockwise": "^7.3.5",
+    "@turf/centroid": "^7.3.5",
+    "@turf/helpers": "^7.3.5",
+    "d3-delaunay": "^6.0.4",
+    "maplibre-gl": "6.4.1",
+    "polygon-clipping": "^0.15.7",
+    "three": "^0.185.0"
+  },
+  "peerDependencies": {
+    "@moritzbrantner/timeline-editor": "^1.0.0",
+    "@moritzbrantner/ui": "^1.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@moritzbrantner/timeline-editor": {
+      "optional": true
+    }
+  }
+}

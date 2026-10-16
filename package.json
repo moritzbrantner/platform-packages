@@ -58,7 +58,6 @@
     "vitest": "^4.1.2"
   },
   "trustedDependencies": [
-    "@moritzbrantner/maps",
     "@moritzbrantner/timeline-editor",
     "@moritzbrantner/ui",
     "@moritzbrantner/workflow-editor"

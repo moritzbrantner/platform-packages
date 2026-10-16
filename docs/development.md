@@ -2,11 +2,11 @@
 
 ## Setup
 
-1. Install Bun `1.3.12`.
-2. Export `GH_PACKAGES_TOKEN` with a token that can read GitHub Packages, then install dependencies with `bun install`. This repository's own install still needs it because `@moritzbrantner/maps` resolves from `npm.pkg.github.com` (see the root `.npmrc`); drop this step once `maps` is consumed as a git pin.
-3. Check the worktree with `git status --short`.
+1. Install Bun `1.4.2` (the Fast Validation version).
+2. From an isolated checkout, run `node scripts/verify-prebuilt-dependencies.mjs && bun install --frozen-lockfile` without a sibling rust-packages repository or a Rust toolchain.
+3. Check git status with `git status --short`.
 
-The repository uses Bun workspaces and Turbo. The root lockfile is `bun.lock`.
+This repository uses Bun workspaces and Turbo. The root lockfile is `bun.lock`. See `docs/prebuilt-dependencies.md` for the explicit upstream artifact refresh procedure.
 
 ## Daily Development
 
