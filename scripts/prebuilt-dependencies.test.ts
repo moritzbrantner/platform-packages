@@ -49,10 +49,9 @@ test("a release cannot publish workspace-local runtime dependencies", () => {
   expect(() => assertPublishableDependencies(pkg)).toThrow(
     /@moritzbrantner\/remotion.*@moritzbrantner\/maps.*file:/,
   );
-  expect(() =>
-    assertPublishableDependencies({
-      ...pkg,
-      dependencies: { "@moritzbrantner/maps": "^0.1.5" },
-    }),
-  ).not.toThrow();
+  const externallyResolvable = {
+    ...pkg,
+    dependencies: { "@moritzbrantner/maps": "^0.1.5" },
+  };
+  expect(() => assertPublishableDependencies(externallyResolvable)).not.toThrow();
 });
