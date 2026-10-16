@@ -74,7 +74,7 @@
     "@turf/centroid": "^7.3.5",
     "@turf/helpers": "^7.3.5",
     "d3-delaunay": "^6.0.4",
-    "maplibre-gl": "6.4.1",
+    "maplibre-gl": "6.14.0",
     "polygon-clipping": "^0.15.7",
     "three": "^0.185.0"
   },
