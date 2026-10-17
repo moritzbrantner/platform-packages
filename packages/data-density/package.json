@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@mb-rust/dense-data-wasm": "file:../../vendor/prebuilt/dense-data-wasm",
-    "supercluster": "^8.0.1"
+    "supercluster": "^9.0.0"
   },
   "devDependencies": {
     "@types/supercluster": "^7.1.3"
