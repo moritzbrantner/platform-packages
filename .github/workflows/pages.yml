@@ -1,11 +1,7 @@
 name: Pages
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/pages.yml"
-      - "pages/flat-design/**"
-      - "packages/flat-design/**"
+  workflow_call:
   push:
     branches:
       - main
