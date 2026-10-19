@@ -35,7 +35,7 @@
     "release:typecheck": "bun run typecheck",
     "test:e2e": "playwright test",
     "typecheck": "turbo run check-types",
-    "test": "bun test ./scripts/*.test.ts && turbo run test",
+    "test": "bun test ./scripts/*.test.ts && turbo run test --concurrency=2",
     "verify": "bun run repo:hygiene && bun run lint && bun run typecheck && bun run test && bun run build"
   },
   "devDependencies": {

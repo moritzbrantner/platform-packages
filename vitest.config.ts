@@ -81,6 +81,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    maxWorkers: 2,
     globals: true,
     include: ["packages/*/src/**/*.test.ts", "packages/*/src/**/*.test.tsx"],
   },
