@@ -12,6 +12,14 @@ It does **not** own product workflow/timing semantics, audio/transcription, subt
 
 - German → English: `onnx-community/opus-mt-de-en`
 - English → German: `onnx-community/opus-mt-en-de`
+- French ↔ English: `onnx-community/opus-mt-fr-en`, `onnx-community/opus-mt-en-fr`
+- Spanish ↔ English: `onnx-community/opus-mt-es-en`, `onnx-community/opus-mt-en-es`
+- Dutch ↔ English: `onnx-community/opus-mt-nl-en`, `onnx-community/opus-mt-en-nl`
+
+Each curated profile includes an immutable Hugging Face revision, passed to the
+model loader and returned as `attributes.modelRevision`. Model reuse is scoped to
+model ID, revision and precision. Unsupported pairs fail before model acquisition.
+See [real browser model evidence](docs/language-models.md).
 
 The model is derived from the requested pair. Supplying a mismatched model id is rejected instead of relabeling output with incorrect language metadata.
 

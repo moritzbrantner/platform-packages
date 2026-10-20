@@ -7,6 +7,36 @@ import {
   resolveBrowserTranslationPair,
 } from "./browser";
 
+test("new language pairs acquire their pinned model and preserve segment identity", async () => {
+  for (const language of ["fr", "es", "nl"]) {
+    for (const [sourceLanguage, targetLanguage] of [
+      [language, "en"],
+      ["en", language],
+    ]) {
+      const profile = resolveBrowserTranslationPair(sourceLanguage, targetLanguage);
+      let loads = 0;
+      const adapter = createBrowserTranslationAdapter({
+        webGpuAvailable: async () => true,
+        loadPipeline: async (request) => {
+          loads += 1;
+          expect(request.modelId).toBe(profile.modelId);
+          expect(request).toHaveProperty("revision", expect.stringMatching(/^[a-f0-9]{40}$/));
+          return async () => [{ translation_text: "Translated fixture" }];
+        },
+      });
+      const options = { sourceLanguage, targetLanguage };
+      const first = await adapter.translateSegments([{ id: 7, text: "Input fixture" }], options);
+      await adapter.translateSegments([{ id: 9, text: "Second fixture" }], options);
+      expect(first.segments).toEqual([{ id: 7, text: "Translated fixture" }]);
+      expect(first.attributes).toHaveProperty(
+        "modelRevision",
+        expect.stringMatching(/^[a-f0-9]{40}$/),
+      );
+      expect(loads).toBe(1);
+    }
+  }
+});
+
 describe("browser translation adapter", () => {
   test("advertises WebGPU-only browser-cache execution", () => {
     expect(browserTranslationCapabilities()).toEqual({
@@ -19,11 +49,49 @@ describe("browser translation adapter", () => {
           sourceLanguage: "de",
           targetLanguage: "en",
           modelId: "onnx-community/opus-mt-de-en",
+          revision: "85f2f23c5f1863b741db8b9128cfbe7a5cbc0653",
         },
         {
           sourceLanguage: "en",
           targetLanguage: "de",
           modelId: "onnx-community/opus-mt-en-de",
+          revision: "b4306231768977e5956c21c26c3ae14d6b2713c4",
+        },
+        {
+          sourceLanguage: "fr",
+          targetLanguage: "en",
+          modelId: "onnx-community/opus-mt-fr-en",
+          revision: "f7e3c392bacfe300a66b0ddbd20de1d2dfc3b77e",
+        },
+        {
+          sourceLanguage: "en",
+          targetLanguage: "fr",
+          modelId: "onnx-community/opus-mt-en-fr",
+          revision: "060ab253b6aae185f277c1e048fb0cf61a02c6c0",
+        },
+        {
+          sourceLanguage: "es",
+          targetLanguage: "en",
+          modelId: "onnx-community/opus-mt-es-en",
+          revision: "0ca6ea53b39356aece8a15bd92eaf7bb40035ea6",
+        },
+        {
+          sourceLanguage: "en",
+          targetLanguage: "es",
+          modelId: "onnx-community/opus-mt-en-es",
+          revision: "b5eba94a023a1954c90401b43537f479f962981d",
+        },
+        {
+          sourceLanguage: "nl",
+          targetLanguage: "en",
+          modelId: "onnx-community/opus-mt-nl-en",
+          revision: "2da2cd590ecd6ed7f46907df7fa01435aef5a8b9",
+        },
+        {
+          sourceLanguage: "en",
+          targetLanguage: "nl",
+          modelId: "onnx-community/opus-mt-en-nl",
+          revision: "67fd5925ddb7382a131b7d3ee1a8cc1b1bd0cdf4",
         },
       ],
       input: { kind: "text-segments", identity: ["string", "number"] },
@@ -41,13 +109,15 @@ describe("browser translation adapter", () => {
       sourceLanguage: "de",
       targetLanguage: "en",
       modelId: "onnx-community/opus-mt-de-en",
+      revision: "85f2f23c5f1863b741db8b9128cfbe7a5cbc0653",
     });
     expect(resolveBrowserTranslationPair("EN", "de")).toEqual({
       sourceLanguage: "en",
       targetLanguage: "de",
       modelId: "onnx-community/opus-mt-en-de",
+      revision: "b4306231768977e5956c21c26c3ae14d6b2713c4",
     });
-    expect(() => resolveBrowserTranslationPair("fr", "en")).toThrow("does not support fr → en");
+    expect(() => resolveBrowserTranslationPair("ja", "en")).toThrow("does not support ja → en");
     expect(() => resolveBrowserTranslationPair("en", "de", "onnx-community/opus-mt-de-en")).toThrow(
       "does not match en → de",
     );
@@ -106,6 +176,7 @@ describe("browser translation adapter", () => {
       runtime: "platform-packages-transformers-js-webgpu-translation",
       acceleration: "webgpu",
       modelId: "onnx-community/opus-mt-de-en",
+      modelRevision: "85f2f23c5f1863b741db8b9128cfbe7a5cbc0653",
       dtype: "q4",
       modelProvisioning: "browser-cache",
     });
