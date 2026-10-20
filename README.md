@@ -76,7 +76,7 @@ local JavaScript inference.
 
 ## Packages
 
-- `@moritzbrantner/browser-translation`: WebGPU-only Transformers.js translation execution with curated German/English pair-to-model resolution, browser-cache reuse, progress reporting, and fail-closed output validation.
+- `@moritzbrantner/browser-translation`: WebGPU-only Transformers.js translation execution with curated German/French/Spanish/Dutch ↔ English pair-to-model resolution, browser-cache reuse, progress reporting, and fail-closed output validation.
 - `@moritzbrantner/collaboration`: Automerge-based collaboration state, active-session tracking, and overview helpers/components for table or tree views of who is working on which object.
 - `@moritzbrantner/card-games`: visual playing-card components with hover tilt, foil/glass styling, fanned hands, stacked decks, and themed tabletop surfaces.
 - `@moritzbrantner/data-density`: reusable indexing, windowing, binning, clustering, and metric aggregation helpers for high-volume maps, charts, tables, and timeline-style views.

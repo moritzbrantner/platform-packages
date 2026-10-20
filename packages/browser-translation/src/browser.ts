@@ -9,11 +9,49 @@ const PAIRS = [
     sourceLanguage: "de",
     targetLanguage: "en",
     modelId: "onnx-community/opus-mt-de-en",
+    revision: "85f2f23c5f1863b741db8b9128cfbe7a5cbc0653",
   },
   {
     sourceLanguage: "en",
     targetLanguage: "de",
     modelId: "onnx-community/opus-mt-en-de",
+    revision: "b4306231768977e5956c21c26c3ae14d6b2713c4",
+  },
+  {
+    sourceLanguage: "fr",
+    targetLanguage: "en",
+    modelId: "onnx-community/opus-mt-fr-en",
+    revision: "f7e3c392bacfe300a66b0ddbd20de1d2dfc3b77e",
+  },
+  {
+    sourceLanguage: "en",
+    targetLanguage: "fr",
+    modelId: "onnx-community/opus-mt-en-fr",
+    revision: "060ab253b6aae185f277c1e048fb0cf61a02c6c0",
+  },
+  {
+    sourceLanguage: "es",
+    targetLanguage: "en",
+    modelId: "onnx-community/opus-mt-es-en",
+    revision: "0ca6ea53b39356aece8a15bd92eaf7bb40035ea6",
+  },
+  {
+    sourceLanguage: "en",
+    targetLanguage: "es",
+    modelId: "onnx-community/opus-mt-en-es",
+    revision: "b5eba94a023a1954c90401b43537f479f962981d",
+  },
+  {
+    sourceLanguage: "nl",
+    targetLanguage: "en",
+    modelId: "onnx-community/opus-mt-nl-en",
+    revision: "2da2cd590ecd6ed7f46907df7fa01435aef5a8b9",
+  },
+  {
+    sourceLanguage: "en",
+    targetLanguage: "nl",
+    modelId: "onnx-community/opus-mt-en-nl",
+    revision: "67fd5925ddb7382a131b7d3ee1a8cc1b1bd0cdf4",
   },
 ] as const;
 
@@ -23,6 +61,7 @@ export interface BrowserTranslationPair {
   sourceLanguage: string;
   targetLanguage: string;
   modelId: string;
+  revision: string;
 }
 
 export interface BrowserTranslationSegment {
@@ -53,6 +92,7 @@ export interface BrowserTranslationResult {
     runtime: string;
     acceleration: "webgpu";
     modelId: string;
+    modelRevision: string;
     dtype: string;
     modelProvisioning: "browser-cache";
   };
@@ -60,6 +100,7 @@ export interface BrowserTranslationResult {
 
 interface PipelineLoaderRequest {
   modelId: string;
+  revision: string;
   dtype: string;
   onProgress: (detail: Record<string, unknown>) => void;
 }
@@ -194,7 +235,7 @@ export function createBrowserTranslationAdapter(options: BrowserTranslationAdapt
     config: NormalizedRequest,
     request: BrowserTranslationRequest,
   ): Promise<TranslationPipeline> {
-    const key = `${config.modelId}\n${config.dtype}`;
+    const key = `${config.modelId}\n${config.revision}\n${config.dtype}`;
     let promise = pipelineCache.get(key);
     if (!promise) {
       emitProgress(request, {
@@ -205,6 +246,7 @@ export function createBrowserTranslationAdapter(options: BrowserTranslationAdapt
       promise = Promise.resolve(
         loadPipeline({
           modelId: config.modelId,
+          revision: config.revision,
           dtype: config.dtype,
           onProgress: (detail) =>
             emitProgress(request, {
@@ -279,12 +321,14 @@ function normalizeRequest(request: BrowserTranslationRequest): NormalizedRequest
 
 async function loadBrowserTranslationPipeline({
   modelId,
+  revision,
   dtype,
   onProgress,
 }: PipelineLoaderRequest): Promise<TranslationPipeline> {
   const transformers = await importTransformers();
   return transformers.pipeline("translation", modelId, {
     device: "webgpu",
+    revision,
     dtype,
     progress_callback: onProgress,
   });
@@ -296,6 +340,7 @@ interface TransformersModule {
     modelId: string,
     options: {
       device: "webgpu";
+      revision: string;
       dtype: string;
       progress_callback: (detail: Record<string, unknown>) => void;
     },
@@ -366,6 +411,7 @@ function translationResult(
       runtime: RUNTIME_ID,
       acceleration: "webgpu",
       modelId: config.modelId,
+      modelRevision: config.revision,
       dtype: config.dtype,
       modelProvisioning: "browser-cache",
     },
