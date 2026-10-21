@@ -9,7 +9,8 @@
     "paths": {
       "@moritzbrantner/infinite-scroll": ["./src/index.ts"],
       "@moritzbrantner/infinite-scroll/core": ["./src/core.ts"],
-      "@moritzbrantner/infinite-scroll/react": ["./src/react.tsx"]
+      "@moritzbrantner/infinite-scroll/react": ["./src/react.tsx"],
+      "@moritzbrantner/infinite-scroll/tanstack-query": ["./src/tanstack-query.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
