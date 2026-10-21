@@ -182,7 +182,9 @@ function instrumentScrollContainer(node: HTMLElement, feedKey: string) {
   Object.defineProperty(node, "scrollTop", {
     configurable: true,
     get: () => top,
-    set: (value: number) => recordWrite(value),
+    set: (value: number) => {
+      recordWrite(value);
+    },
   });
   Object.defineProperty(node, "scrollHeight", {
     configurable: true,

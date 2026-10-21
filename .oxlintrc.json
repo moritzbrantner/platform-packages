@@ -10,6 +10,7 @@
     "eslint/no-debugger": "error",
     "eslint/no-loss-of-precision": "warn",
     "eslint/no-shadow": "off",
+    "eslint/no-underscore-dangle": "off",
     "eslint/no-unmodified-loop-condition": "warn",
     "eslint/no-useless-escape": "warn",
     "eslint/no-unused-vars": "warn",

@@ -29,15 +29,15 @@
     "@moritzbrantner/maps": "file:../../vendor/prebuilt/maps"
   },
   "devDependencies": {
-    "@moritzbrantner/ui": "^1.0.0",
-    "@remotion/player": "^4.0.379",
-    "@storybook/react-vite": "^10.3.5",
+    "@moritzbrantner/ui": "1.1.0",
+    "@remotion/player": "4.0.537",
+    "@storybook/react-vite": "10.6.3",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "remotion": "^4.0.379",
-    "storybook": "^10.3.5"
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.537",
+    "storybook": "10.6.3"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
