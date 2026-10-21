@@ -9,62 +9,141 @@ import {
   type InfiniteScrollRestorationStorage,
 } from "./core";
 
+/**
+ * - `automatic`: the observer loads; no manual control is needed.
+ * - `manual`: only the manual control loads; nothing is observed.
+ * - `automatic-with-fallback`: the observer loads, and the manual control is offered when
+ *   `IntersectionObserver` is unavailable or the last load failed.
+ */
+export type InfiniteScrollMode = "automatic" | "manual" | "automatic-with-fallback";
+
+export type InfiniteScrollStatus = "idle" | "loading" | "error" | "exhausted" | "disabled";
+
 export type UseInfiniteScrollOptions = {
   enabled?: boolean;
   hasMore: boolean;
+  /** The last load failed. Automatic loading pauses so it cannot retry in a loop. */
+  isError?: boolean;
   isLoading?: boolean;
+  mode?: InfiniteScrollMode;
   onLoadMore: () => void;
   root?: Element | Document | null;
   rootMargin?: string;
   threshold?: number;
 };
 
-export type UseInfiniteScrollResult<TElement extends Element> = {
-  loadMore: () => void;
-  ref: React.RefCallback<TElement>;
+export type InfiniteScrollLoadMoreProps = {
+  "aria-busy": boolean;
+  "data-slot": "infinite-scroll-load-more";
+  "data-state": InfiniteScrollStatus;
+  disabled: boolean;
+  onClick: () => void;
+  type: "button";
 };
 
-function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
-  enabled = true,
+export type UseInfiniteScrollResult<TElement extends Element> = {
+  /** Props for an app-rendered button (e.g. `@moritzbrantner/ui` Button) that loads (or retries) through the same guards. */
+  getLoadMoreProps: () => InfiniteScrollLoadMoreProps;
+  loadMore: () => void;
+  ref: React.RefCallback<TElement>;
+  /** Whether the current mode and state call for rendering the manual control. */
+  showManualControl: boolean;
+  status: InfiniteScrollStatus;
+};
+
+function infiniteScrollStatus({
+  enabled,
   hasMore,
-  isLoading = false,
-  onLoadMore,
-  root = null,
-  rootMargin = "0px 0px 400px 0px",
-  threshold = 0,
-}: UseInfiniteScrollOptions): UseInfiniteScrollResult<TElement> {
-  const [target, setTarget] = React.useState<TElement | null>(null);
-  const stateRef = React.useRef({ enabled, hasMore, isLoading, onLoadMore });
+  isError,
+  isLoading,
+}: {
+  enabled: boolean;
+  hasMore: boolean;
+  isError: boolean;
+  isLoading: boolean;
+}): InfiniteScrollStatus {
+  if (isLoading) {
+    return "loading";
+  }
+  if (!hasMore) {
+    return "exhausted";
+  }
+  if (!enabled) {
+    return "disabled";
+  }
+  return isError ? "error" : "idle";
+}
+
+/** False only after mount in environments without `IntersectionObserver`, so SSR markup matches. */
+function useObserverSupport(): boolean {
+  const [supported, setSupported] = React.useState(true);
+
+  React.useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      setSupported(false);
+    }
+  }, []);
+
+  return supported;
+}
+
+type GuardState = { enabled: boolean; hasMore: boolean; isLoading: boolean; onLoad: () => void };
+
+/**
+ * Returns a load function guarded by `enabled`, `hasMore` and `isLoading`. It also latches
+ * after a call until the next commit, so rapid observer callbacks or a manual trigger firing
+ * before the consumer re-renders with `isLoading` cannot load the same page twice.
+ */
+function useGuardedLoad(state: GuardState, beforeLoad?: () => void): () => void {
+  const stateRef = React.useRef(state);
+  const inFlightRef = React.useRef(false);
+  const beforeLoadRef = React.useRef(beforeLoad);
 
   // Sync during commit so an abandoned concurrent render never leaks into observer callbacks.
   React.useLayoutEffect(() => {
-    stateRef.current = { enabled, hasMore, isLoading, onLoadMore };
+    stateRef.current = state;
+    beforeLoadRef.current = beforeLoad;
+    inFlightRef.current = false;
   });
 
-  const loadMore = React.useCallback(() => {
-    const state = stateRef.current;
-    if (!state.enabled || !state.hasMore || state.isLoading) {
+  return React.useCallback(() => {
+    const current = stateRef.current;
+    if (inFlightRef.current || !current.enabled || !current.hasMore || current.isLoading) {
       return;
     }
 
-    state.onLoadMore();
+    inFlightRef.current = true;
+    beforeLoadRef.current?.();
+    current.onLoad();
   }, []);
+}
 
+type SentinelObserverOptions = {
+  active: boolean;
+  load: () => void;
+  root: Element | Document | null;
+  rootMargin: string;
+  target: Element | null;
+  threshold: number;
+};
+
+function useSentinelObserver({
+  active,
+  load,
+  root,
+  rootMargin,
+  target,
+  threshold,
+}: SentinelObserverOptions) {
   React.useEffect(() => {
-    if (
-      !target ||
-      !enabled ||
-      !hasMore ||
-      isLoading ||
-      typeof IntersectionObserver === "undefined"
-    ) {
+    if (!target || !active || typeof IntersectionObserver === "undefined") {
       return;
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          loadMore();
+          load();
         }
       },
       { root, rootMargin, threshold },
@@ -72,10 +151,175 @@ function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [enabled, hasMore, isLoading, loadMore, root, rootMargin, target, threshold]);
-
-  return { loadMore, ref: setTarget };
+  }, [active, load, root, rootMargin, target, threshold]);
 }
+
+function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
+  enabled = true,
+  hasMore,
+  isError = false,
+  isLoading = false,
+  mode = "automatic",
+  onLoadMore,
+  root = null,
+  rootMargin = "0px 0px 400px 0px",
+  threshold = 0,
+}: UseInfiniteScrollOptions): UseInfiniteScrollResult<TElement> {
+  const [target, setTarget] = React.useState<TElement | null>(null);
+  const observerSupported = useObserverSupport();
+  const loadMore = useGuardedLoad({ enabled, hasMore, isLoading, onLoad: onLoadMore });
+  const status = infiniteScrollStatus({ enabled, hasMore, isError, isLoading });
+
+  useSentinelObserver({
+    active: mode !== "manual" && status === "idle",
+    load: loadMore,
+    root,
+    rootMargin,
+    target,
+    threshold,
+  });
+
+  const showManualControl =
+    status !== "exhausted" &&
+    (mode === "manual" || (mode === "automatic-with-fallback" && (!observerSupported || isError)));
+
+  const getLoadMoreProps = React.useCallback(
+    (): InfiniteScrollLoadMoreProps => ({
+      "aria-busy": status === "loading",
+      "data-slot": "infinite-scroll-load-more",
+      "data-state": status,
+      disabled: status !== "idle" && status !== "error",
+      onClick: loadMore,
+      type: "button",
+    }),
+    [loadMore, status],
+  );
+
+  return { getLoadMoreProps, loadMore, ref: setTarget, showManualControl, status };
+}
+
+export type InfiniteScrollDirectionOptions = {
+  hasMore: boolean;
+  isLoading?: boolean;
+  onLoad: () => void;
+  /** Defaults to 400px beyond the sentinel's edge of the viewport in this direction. */
+  rootMargin?: string;
+};
+
+export type UseBidirectionalInfiniteScrollOptions = {
+  enabled?: boolean;
+  /** Loads pages after the current content; the sentinel goes after the last item. */
+  next?: InfiniteScrollDirectionOptions;
+  /** Loads pages before the current content; the sentinel goes before the first item. */
+  previous?: InfiniteScrollDirectionOptions;
+  /** Observer root when no scroll container is attached through `scrollRef`. */
+  root?: Element | Document | null;
+  threshold?: number;
+};
+
+export type UseBidirectionalInfiniteScrollResult<TElement extends Element> = {
+  loadNext: () => void;
+  loadPrevious: () => void;
+  nextRef: React.RefCallback<TElement>;
+  previousRef: React.RefCallback<TElement>;
+  /** Attach to the scroll container so prepended pages keep the visible content in place. */
+  scrollRef: React.RefCallback<HTMLElement>;
+};
+
+/**
+ * Infinite scrolling in both directions for chat history, logs and feeds entered mid-way.
+ * Each direction has its own sentinel, guards and loading state, so one never triggers the
+ * other. When a previous page is prepended, the scroll container keeps its distance from the
+ * bottom, so the content the user was looking at stays put.
+ */
+function useBidirectionalInfiniteScroll<TElement extends Element = HTMLDivElement>({
+  enabled = true,
+  next,
+  previous,
+  root = null,
+  threshold = 0,
+}: UseBidirectionalInfiniteScrollOptions): UseBidirectionalInfiniteScrollResult<TElement> {
+  const [nextTarget, setNextTarget] = React.useState<TElement | null>(null);
+  const [previousTarget, setPreviousTarget] = React.useState<TElement | null>(null);
+  const [container, setContainer] = React.useState<HTMLElement | null>(null);
+  // Distance from the bottom of the content while a previous page is pending; null otherwise.
+  const anchorRef = React.useRef<number | null>(null);
+  const previousLoading = previous?.isLoading ?? false;
+
+  const loadNext = useGuardedLoad({
+    enabled,
+    hasMore: next?.hasMore ?? false,
+    isLoading: next?.isLoading ?? false,
+    onLoad: next?.onLoad ?? noop,
+  });
+  const loadPrevious = useGuardedLoad(
+    {
+      enabled,
+      hasMore: previous?.hasMore ?? false,
+      isLoading: previousLoading,
+      onLoad: previous?.onLoad ?? noop,
+    },
+    () => {
+      anchorRef.current = container ? container.scrollHeight - container.scrollTop : null;
+    },
+  );
+
+  // Track user scrolling while a previous page is pending so the anchor follows the user.
+  React.useEffect(() => {
+    if (!container) {
+      return;
+    }
+
+    const onScroll = () => {
+      if (anchorRef.current !== null) {
+        anchorRef.current = container.scrollHeight - container.scrollTop;
+      }
+    };
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => container.removeEventListener("scroll", onScroll);
+  }, [container]);
+
+  // Restore the anchor in the commit that renders the prepended page, before paint. Runs
+  // before the observers re-arm, so the top sentinel is already out of view by then.
+  React.useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    if (anchor === null || previousLoading || !container) {
+      return;
+    }
+
+    anchorRef.current = null;
+    container.scrollTop = container.scrollHeight - anchor;
+  });
+
+  const observerRoot = container ?? root;
+
+  useSentinelObserver({
+    active: enabled && (next?.hasMore ?? false) && !(next?.isLoading ?? false),
+    load: loadNext,
+    root: observerRoot,
+    rootMargin: next?.rootMargin ?? "0px 0px 400px 0px",
+    target: nextTarget,
+    threshold,
+  });
+  useSentinelObserver({
+    active: enabled && (previous?.hasMore ?? false) && !previousLoading,
+    load: loadPrevious,
+    root: observerRoot,
+    rootMargin: previous?.rootMargin ?? "400px 0px 0px 0px",
+    target: previousTarget,
+    threshold,
+  });
+
+  return {
+    loadNext,
+    loadPrevious,
+    nextRef: setNextTarget,
+    previousRef: setPreviousTarget,
+    scrollRef: setContainer,
+  };
+}
+
+function noop() {}
 
 function setRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
   if (typeof ref === "function") {
@@ -96,7 +340,9 @@ const InfiniteScrollTrigger = React.forwardRef<HTMLDivElement, InfiniteScrollTri
     {
       enabled = true,
       hasMore,
+      isError,
       isLoading = false,
+      mode,
       onLoadMore,
       root,
       rootMargin,
@@ -105,10 +351,12 @@ const InfiniteScrollTrigger = React.forwardRef<HTMLDivElement, InfiniteScrollTri
     },
     forwardedRef,
   ) {
-    const { ref } = useInfiniteScroll<HTMLDivElement>({
+    const { ref, status } = useInfiniteScroll<HTMLDivElement>({
       enabled,
       hasMore,
+      isError,
       isLoading,
+      mode,
       onLoadMore,
       root,
       rootMargin,
@@ -129,6 +377,7 @@ const InfiniteScrollTrigger = React.forwardRef<HTMLDivElement, InfiniteScrollTri
         data-enabled={enabled ? "true" : "false"}
         data-has-more={hasMore ? "true" : "false"}
         data-loading={isLoading ? "true" : "false"}
+        data-state={status}
         {...props}
       />
     );
@@ -275,4 +524,9 @@ function useInfiniteScrollRestoration<TItem, TCursor = string>({
   return { isRestoring, save, scrollRef: setContainer };
 }
 
-export { InfiniteScrollTrigger, useInfiniteScroll, useInfiniteScrollRestoration };
+export {
+  InfiniteScrollTrigger,
+  useBidirectionalInfiniteScroll,
+  useInfiniteScroll,
+  useInfiniteScrollRestoration,
+};
