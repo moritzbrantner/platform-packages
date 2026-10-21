@@ -25,3 +25,4 @@ packages/*/storybook-static/
 !/vendor/prebuilt/maps/
 !/vendor/prebuilt/maps/dist/
 !/vendor/prebuilt/maps/dist/**
+target/
