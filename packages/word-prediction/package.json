@@ -36,7 +36,7 @@
     "@moritzbrantner/word-vectors": "^0.1.1"
   },
   "devDependencies": {
-    "@types/react": "^19.2.2",
+    "@types/react": "19.2.14",
     "react": "19.3.1"
   },
   "publishConfig": {
