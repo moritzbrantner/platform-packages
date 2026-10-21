@@ -51,7 +51,28 @@ const { ref, loadMore } = useInfiniteScroll({
 });
 ```
 
-`loadMore` applies the same `enabled`, `hasMore`, and `isLoading` guards as the observer and can be attached to a manual "Load more" button as a keyboard-friendly fallback.
+`loadMore` applies the same `enabled`, `hasMore`, and `isLoading` guards as the observer and can be attached to a manual "Load more" button as a keyboard-friendly fallback. After a call it also ignores further calls until the next render, so rapid observer callbacks cannot load the same page twice.
+
+## Bidirectional scrolling
+
+Chat history, logs, and feeds entered in the middle can load older pages above the content as well as newer pages below it. `CursorPage` accepts an optional `previousCursor` (`hasPreviousCursor(page)` checks it). Each direction has its own `hasMore`, `isLoading`, and guards, so loading one direction never triggers or blocks the other. Pass only `next` or only `previous` to scroll in a single direction.
+
+```tsx
+const { scrollRef, previousRef, nextRef } = useBidirectionalInfiniteScroll({
+  previous: { hasMore: hasOlder, isLoading: isLoadingOlder, onLoad: loadOlder },
+  next: { hasMore: hasNewer, isLoading: isLoadingNewer, onLoad: loadNewer },
+});
+
+return (
+  <div ref={scrollRef} style={{ overflowY: "auto" }}>
+    <div ref={previousRef} />
+    <MessageList />
+    <div ref={nextRef} />
+  </div>
+);
+```
+
+When a previous page is prepended, the hook keeps the scroll container's distance from the bottom before paint, so the content the user was looking at does not jump. The scroll container is also the observer root. `loadPrevious` and `loadNext` are returned for manual controls.
 
 ## TanStack Query
 

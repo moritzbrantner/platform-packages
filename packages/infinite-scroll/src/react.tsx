@@ -24,6 +24,73 @@ export type UseInfiniteScrollResult<TElement extends Element> = {
   ref: React.RefCallback<TElement>;
 };
 
+type GuardState = { enabled: boolean; hasMore: boolean; isLoading: boolean; onLoad: () => void };
+
+/**
+ * Returns a load function guarded by `enabled`, `hasMore` and `isLoading`. It also latches
+ * after a call until the next commit, so rapid observer callbacks or a manual trigger firing
+ * before the consumer re-renders with `isLoading` cannot load the same page twice.
+ */
+function useGuardedLoad(state: GuardState, beforeLoad?: () => void): () => void {
+  const stateRef = React.useRef(state);
+  const inFlightRef = React.useRef(false);
+  const beforeLoadRef = React.useRef(beforeLoad);
+
+  // Sync during commit so an abandoned concurrent render never leaks into observer callbacks.
+  React.useLayoutEffect(() => {
+    stateRef.current = state;
+    beforeLoadRef.current = beforeLoad;
+    inFlightRef.current = false;
+  });
+
+  return React.useCallback(() => {
+    const current = stateRef.current;
+    if (inFlightRef.current || !current.enabled || !current.hasMore || current.isLoading) {
+      return;
+    }
+
+    inFlightRef.current = true;
+    beforeLoadRef.current?.();
+    current.onLoad();
+  }, []);
+}
+
+type SentinelObserverOptions = {
+  active: boolean;
+  load: () => void;
+  root: Element | Document | null;
+  rootMargin: string;
+  target: Element | null;
+  threshold: number;
+};
+
+function useSentinelObserver({
+  active,
+  load,
+  root,
+  rootMargin,
+  target,
+  threshold,
+}: SentinelObserverOptions) {
+  React.useEffect(() => {
+    if (!target || !active || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          load();
+        }
+      },
+      { root, rootMargin, threshold },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [active, load, root, rootMargin, target, threshold]);
+}
+
 function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
   enabled = true,
   hasMore,
@@ -34,48 +101,142 @@ function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
   threshold = 0,
 }: UseInfiniteScrollOptions): UseInfiniteScrollResult<TElement> {
   const [target, setTarget] = React.useState<TElement | null>(null);
-  const stateRef = React.useRef({ enabled, hasMore, isLoading, onLoadMore });
+  const loadMore = useGuardedLoad({ enabled, hasMore, isLoading, onLoad: onLoadMore });
 
-  // Sync during commit so an abandoned concurrent render never leaks into observer callbacks.
-  React.useLayoutEffect(() => {
-    stateRef.current = { enabled, hasMore, isLoading, onLoadMore };
+  useSentinelObserver({
+    active: enabled && hasMore && !isLoading,
+    load: loadMore,
+    root,
+    rootMargin,
+    target,
+    threshold,
   });
-
-  const loadMore = React.useCallback(() => {
-    const state = stateRef.current;
-    if (!state.enabled || !state.hasMore || state.isLoading) {
-      return;
-    }
-
-    state.onLoadMore();
-  }, []);
-
-  React.useEffect(() => {
-    if (
-      !target ||
-      !enabled ||
-      !hasMore ||
-      isLoading ||
-      typeof IntersectionObserver === "undefined"
-    ) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          loadMore();
-        }
-      },
-      { root, rootMargin, threshold },
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [enabled, hasMore, isLoading, loadMore, root, rootMargin, target, threshold]);
 
   return { loadMore, ref: setTarget };
 }
+
+export type InfiniteScrollDirectionOptions = {
+  hasMore: boolean;
+  isLoading?: boolean;
+  onLoad: () => void;
+  /** Defaults to 400px beyond the sentinel's edge of the viewport in this direction. */
+  rootMargin?: string;
+};
+
+export type UseBidirectionalInfiniteScrollOptions = {
+  enabled?: boolean;
+  /** Loads pages after the current content; the sentinel goes after the last item. */
+  next?: InfiniteScrollDirectionOptions;
+  /** Loads pages before the current content; the sentinel goes before the first item. */
+  previous?: InfiniteScrollDirectionOptions;
+  /** Observer root when no scroll container is attached through `scrollRef`. */
+  root?: Element | Document | null;
+  threshold?: number;
+};
+
+export type UseBidirectionalInfiniteScrollResult<TElement extends Element> = {
+  loadNext: () => void;
+  loadPrevious: () => void;
+  nextRef: React.RefCallback<TElement>;
+  previousRef: React.RefCallback<TElement>;
+  /** Attach to the scroll container so prepended pages keep the visible content in place. */
+  scrollRef: React.RefCallback<HTMLElement>;
+};
+
+/**
+ * Infinite scrolling in both directions for chat history, logs and feeds entered mid-way.
+ * Each direction has its own sentinel, guards and loading state, so one never triggers the
+ * other. When a previous page is prepended, the scroll container keeps its distance from the
+ * bottom, so the content the user was looking at stays put.
+ */
+function useBidirectionalInfiniteScroll<TElement extends Element = HTMLDivElement>({
+  enabled = true,
+  next,
+  previous,
+  root = null,
+  threshold = 0,
+}: UseBidirectionalInfiniteScrollOptions): UseBidirectionalInfiniteScrollResult<TElement> {
+  const [nextTarget, setNextTarget] = React.useState<TElement | null>(null);
+  const [previousTarget, setPreviousTarget] = React.useState<TElement | null>(null);
+  const [container, setContainer] = React.useState<HTMLElement | null>(null);
+  // Distance from the bottom of the content while a previous page is pending; null otherwise.
+  const anchorRef = React.useRef<number | null>(null);
+  const previousLoading = previous?.isLoading ?? false;
+
+  const loadNext = useGuardedLoad({
+    enabled,
+    hasMore: next?.hasMore ?? false,
+    isLoading: next?.isLoading ?? false,
+    onLoad: next?.onLoad ?? noop,
+  });
+  const loadPrevious = useGuardedLoad(
+    {
+      enabled,
+      hasMore: previous?.hasMore ?? false,
+      isLoading: previousLoading,
+      onLoad: previous?.onLoad ?? noop,
+    },
+    () => {
+      anchorRef.current = container ? container.scrollHeight - container.scrollTop : null;
+    },
+  );
+
+  // Track user scrolling while a previous page is pending so the anchor follows the user.
+  React.useEffect(() => {
+    if (!container) {
+      return;
+    }
+
+    const onScroll = () => {
+      if (anchorRef.current !== null) {
+        anchorRef.current = container.scrollHeight - container.scrollTop;
+      }
+    };
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => container.removeEventListener("scroll", onScroll);
+  }, [container]);
+
+  // Restore the anchor in the commit that renders the prepended page, before paint. Runs
+  // before the observers re-arm, so the top sentinel is already out of view by then.
+  React.useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    if (anchor === null || previousLoading || !container) {
+      return;
+    }
+
+    anchorRef.current = null;
+    container.scrollTop = container.scrollHeight - anchor;
+  });
+
+  const observerRoot = container ?? root;
+
+  useSentinelObserver({
+    active: enabled && (next?.hasMore ?? false) && !(next?.isLoading ?? false),
+    load: loadNext,
+    root: observerRoot,
+    rootMargin: next?.rootMargin ?? "0px 0px 400px 0px",
+    target: nextTarget,
+    threshold,
+  });
+  useSentinelObserver({
+    active: enabled && (previous?.hasMore ?? false) && !previousLoading,
+    load: loadPrevious,
+    root: observerRoot,
+    rootMargin: previous?.rootMargin ?? "400px 0px 0px 0px",
+    target: previousTarget,
+    threshold,
+  });
+
+  return {
+    loadNext,
+    loadPrevious,
+    nextRef: setNextTarget,
+    previousRef: setPreviousTarget,
+    scrollRef: setContainer,
+  };
+}
+
+function noop() {}
 
 function setRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
   if (typeof ref === "function") {
@@ -275,4 +436,9 @@ function useInfiniteScrollRestoration<TItem, TCursor = string>({
   return { isRestoring, save, scrollRef: setContainer };
 }
 
-export { InfiniteScrollTrigger, useInfiniteScroll, useInfiniteScrollRestoration };
+export {
+  InfiniteScrollTrigger,
+  useBidirectionalInfiniteScroll,
+  useInfiniteScroll,
+  useInfiniteScrollRestoration,
+};
