@@ -164,13 +164,14 @@ export function VirtualPosts({ posts, hasMore, isLoading, loadMore }: Props) {
 
 ## TanStack Query
 
-The package does not depend on TanStack Query. Its state shape maps directly onto `useInfiniteQuery`:
+The optional `@moritzbrantner/infinite-scroll/tanstack-query` entrypoint maps a `useInfiniteQuery` result onto the hook and trigger options. It has no runtime dependency on TanStack Query, and the root, `/core`, and `/react` entrypoints never import it.
 
 ```tsx
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { InfiniteScrollTrigger } from "@moritzbrantner/infinite-scroll/react";
+import { useInfiniteScroll } from "@moritzbrantner/infinite-scroll/react";
+import { infiniteQueryScrollOptions } from "@moritzbrantner/infinite-scroll/tanstack-query";
 
 export function Posts() {
   const query = useInfiniteQuery({
@@ -179,6 +180,7 @@ export function Posts() {
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
+  const { ref } = useInfiniteScroll(infiniteQueryScrollOptions(query));
 
   return (
     <>
@@ -187,18 +189,19 @@ export function Posts() {
         .map((post) => (
           <Post key={post.id} post={post} />
         ))}
-
-      <InfiniteScrollTrigger
-        hasMore={query.hasNextPage}
-        isLoading={query.isFetchingNextPage}
-        onLoadMore={() => {
-          void query.fetchNextPage();
-        }}
-      />
+      <div ref={ref} />
     </>
   );
 }
 ```
+
+`infiniteQueryScrollOptions(query)` returns `{ hasMore, isLoading, isError, onLoadMore }`, so it also spreads into `<InfiniteScrollTrigger {...infiniteQueryScrollOptions(query)} />` and composes with `mode: "automatic-with-fallback"`.
+
+- `hasMore` is `hasNextPage`, and `isError` is `isFetchNextPageError`. A failed page pauses automatic loading. The error itself stays on the query for the app to render and retry.
+- `isLoading` is `isFetching`, not just `isFetchingNextPage`. TanStack Query fetches one page at a time per query, so starting a page fetch during a background refetch would overwrite fresh data.
+- `onLoadMore` calls `fetchNextPage({ cancelRefetch: false })`. A repeated observer notification joins the in-flight fetch instead of cancelling and restarting it.
+
+For queries with `getPreviousPageParam`, `infiniteQueryScrollDirections(query)` returns `{ next, previous }` for `useBidirectionalInfiniteScroll`. Both directions wait while either is fetching, because they share one query.
 
 ## Scroll restoration
 
