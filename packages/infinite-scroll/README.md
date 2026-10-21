@@ -53,6 +53,37 @@ const { ref, loadMore } = useInfiniteScroll({
 
 `loadMore` applies the same `enabled`, `hasMore`, and `isLoading` guards as the observer and can be attached to a manual "Load more" button as a keyboard-friendly fallback. After a call it also ignores further calls until the next render, so rapid observer callbacks cannot load the same page twice.
 
+## Manual load-more fallback
+
+`mode` selects how loading starts:
+
+- `"automatic"` (default): the observer loads.
+- `"manual"`: only the manual control loads. Nothing is observed, so it works without `IntersectionObserver`.
+- `"automatic-with-fallback"`: the observer loads, and `showManualControl` turns true when `IntersectionObserver` is unavailable or `isError` is set.
+
+Pass `isError` when the last page failed. Automatic loading then pauses so a failing request cannot retry in a loop, and the manual control retries through the same guarded path. The hook exposes `status` (`"idle" | "loading" | "error" | "exhausted" | "disabled"`) and `getLoadMoreProps()` for a native button. The package renders no button, loader, or error copy.
+
+```tsx
+const { ref, showManualControl, getLoadMoreProps, status } = useInfiniteScroll({
+  hasMore: query.hasNextPage,
+  isLoading: query.isFetchingNextPage,
+  isError: query.isFetchNextPageError,
+  mode: "automatic-with-fallback",
+  onLoadMore: () => void query.fetchNextPage(),
+});
+
+return (
+  <>
+    <PostList />
+    <div ref={ref} />
+    {status === "error" ? <p role="alert">Couldn't load more posts.</p> : null}
+    {showManualControl ? <Button {...getLoadMoreProps()}>Load more</Button> : null}
+  </>
+);
+```
+
+`getLoadMoreProps()` returns `type="button"`, `onClick`, `disabled` (while loading, disabled, or exhausted), `aria-busy`, and `data-state`. `showManualControl` is false once pagination is exhausted. Observer support is detected after mount, so server and client markup match, and the fallback button appears on the client when needed.
+
 ## Bidirectional scrolling
 
 Chat history, logs, and feeds entered in the middle can load older pages above the content as well as newer pages below it. `CursorPage` accepts an optional `previousCursor` (`hasPreviousCursor(page)` checks it). Each direction has its own `hasMore`, `isLoading`, and guards, so loading one direction never triggers or blocks the other. Pass only `next` or only `previous` to scroll in a single direction.

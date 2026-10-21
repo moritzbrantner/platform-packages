@@ -9,20 +9,83 @@ import {
   type InfiniteScrollRestorationStorage,
 } from "./core";
 
+/**
+ * - `automatic`: the observer loads; no manual control is needed.
+ * - `manual`: only the manual control loads; nothing is observed.
+ * - `automatic-with-fallback`: the observer loads, and the manual control is offered when
+ *   `IntersectionObserver` is unavailable or the last load failed.
+ */
+export type InfiniteScrollMode = "automatic" | "manual" | "automatic-with-fallback";
+
+export type InfiniteScrollStatus = "idle" | "loading" | "error" | "exhausted" | "disabled";
+
 export type UseInfiniteScrollOptions = {
   enabled?: boolean;
   hasMore: boolean;
+  /** The last load failed. Automatic loading pauses so it cannot retry in a loop. */
+  isError?: boolean;
   isLoading?: boolean;
+  mode?: InfiniteScrollMode;
   onLoadMore: () => void;
   root?: Element | Document | null;
   rootMargin?: string;
   threshold?: number;
 };
 
+export type InfiniteScrollLoadMoreProps = {
+  "aria-busy": boolean;
+  "data-slot": "infinite-scroll-load-more";
+  "data-state": InfiniteScrollStatus;
+  disabled: boolean;
+  onClick: () => void;
+  type: "button";
+};
+
 export type UseInfiniteScrollResult<TElement extends Element> = {
+  /** Props for an app-rendered `<button>` that loads (or retries) through the same guards. */
+  getLoadMoreProps: () => InfiniteScrollLoadMoreProps;
   loadMore: () => void;
   ref: React.RefCallback<TElement>;
+  /** Whether the current mode and state call for rendering the manual control. */
+  showManualControl: boolean;
+  status: InfiniteScrollStatus;
 };
+
+function infiniteScrollStatus({
+  enabled,
+  hasMore,
+  isError,
+  isLoading,
+}: {
+  enabled: boolean;
+  hasMore: boolean;
+  isError: boolean;
+  isLoading: boolean;
+}): InfiniteScrollStatus {
+  if (isLoading) {
+    return "loading";
+  }
+  if (!hasMore) {
+    return "exhausted";
+  }
+  if (!enabled) {
+    return "disabled";
+  }
+  return isError ? "error" : "idle";
+}
+
+/** False only after mount in environments without `IntersectionObserver`, so SSR markup matches. */
+function useObserverSupport(): boolean {
+  const [supported, setSupported] = React.useState(true);
+
+  React.useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      setSupported(false);
+    }
+  }, []);
+
+  return supported;
+}
 
 type GuardState = { enabled: boolean; hasMore: boolean; isLoading: boolean; onLoad: () => void };
 
@@ -94,17 +157,21 @@ function useSentinelObserver({
 function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
   enabled = true,
   hasMore,
+  isError = false,
   isLoading = false,
+  mode = "automatic",
   onLoadMore,
   root = null,
   rootMargin = "0px 0px 400px 0px",
   threshold = 0,
 }: UseInfiniteScrollOptions): UseInfiniteScrollResult<TElement> {
   const [target, setTarget] = React.useState<TElement | null>(null);
+  const observerSupported = useObserverSupport();
   const loadMore = useGuardedLoad({ enabled, hasMore, isLoading, onLoad: onLoadMore });
+  const status = infiniteScrollStatus({ enabled, hasMore, isError, isLoading });
 
   useSentinelObserver({
-    active: enabled && hasMore && !isLoading,
+    active: mode !== "manual" && status === "idle",
     load: loadMore,
     root,
     rootMargin,
@@ -112,7 +179,23 @@ function useInfiniteScroll<TElement extends Element = HTMLDivElement>({
     threshold,
   });
 
-  return { loadMore, ref: setTarget };
+  const showManualControl =
+    status !== "exhausted" &&
+    (mode === "manual" || (mode === "automatic-with-fallback" && (!observerSupported || isError)));
+
+  const getLoadMoreProps = React.useCallback(
+    (): InfiniteScrollLoadMoreProps => ({
+      "aria-busy": status === "loading",
+      "data-slot": "infinite-scroll-load-more",
+      "data-state": status,
+      disabled: status !== "idle" && status !== "error",
+      onClick: loadMore,
+      type: "button",
+    }),
+    [loadMore, status],
+  );
+
+  return { getLoadMoreProps, loadMore, ref: setTarget, showManualControl, status };
 }
 
 export type InfiniteScrollDirectionOptions = {
@@ -257,7 +340,9 @@ const InfiniteScrollTrigger = React.forwardRef<HTMLDivElement, InfiniteScrollTri
     {
       enabled = true,
       hasMore,
+      isError,
       isLoading = false,
+      mode,
       onLoadMore,
       root,
       rootMargin,
@@ -266,10 +351,12 @@ const InfiniteScrollTrigger = React.forwardRef<HTMLDivElement, InfiniteScrollTri
     },
     forwardedRef,
   ) {
-    const { ref } = useInfiniteScroll<HTMLDivElement>({
+    const { ref, status } = useInfiniteScroll<HTMLDivElement>({
       enabled,
       hasMore,
+      isError,
       isLoading,
+      mode,
       onLoadMore,
       root,
       rootMargin,
@@ -290,6 +377,7 @@ const InfiniteScrollTrigger = React.forwardRef<HTMLDivElement, InfiniteScrollTri
         data-enabled={enabled ? "true" : "false"}
         data-has-more={hasMore ? "true" : "false"}
         data-loading={isLoading ? "true" : "false"}
+        data-state={status}
         {...props}
       />
     );
