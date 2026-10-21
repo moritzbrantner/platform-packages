@@ -1,3 +1,4 @@
+import { Button } from "@moritzbrantner/ui";
 import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
@@ -25,7 +26,7 @@ function Feed({
     <>
       <div ref={ref} />
       {showManualControl || alwaysShowButton ? (
-        <button {...getLoadMoreProps()}>Load more</button>
+        <Button {...getLoadMoreProps()}>Load more</Button>
       ) : null}
     </>
   );

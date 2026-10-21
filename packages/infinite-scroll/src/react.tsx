@@ -42,7 +42,7 @@ export type InfiniteScrollLoadMoreProps = {
 };
 
 export type UseInfiniteScrollResult<TElement extends Element> = {
-  /** Props for an app-rendered `<button>` that loads (or retries) through the same guards. */
+  /** Props for an app-rendered button (e.g. `@moritzbrantner/ui` Button) that loads (or retries) through the same guards. */
   getLoadMoreProps: () => InfiniteScrollLoadMoreProps;
   loadMore: () => void;
   ref: React.RefCallback<TElement>;
