@@ -105,6 +105,63 @@ return (
 
 When a previous page is prepended, the hook keeps the scroll container's distance from the bottom before paint, so the content the user was looking at does not jump. The scroll container is also the observer root. `loadPrevious` and `loadNext` are returned for manual controls.
 
+## TanStack Virtual
+
+The package does not virtualize. For large feeds, render rows with TanStack Virtual (`@tanstack/react-virtual`) and keep the infinite-scroll sentinel outside the virtual window. Neither package depends on the other.
+
+```tsx
+"use client";
+
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useInfiniteScroll } from "@moritzbrantner/infinite-scroll/react";
+
+export function VirtualPosts({ posts, hasMore, isLoading, loadMore }: Props) {
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+  const virtualizer = useVirtualizer({
+    count: posts.length,
+    estimateSize: () => 72,
+    getItemKey: (index) => posts[index]!.id,
+    getScrollElement: () => scrollElement,
+    overscan: 5,
+  });
+  const { ref } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: loadMore,
+    root: scrollElement,
+  });
+
+  return (
+    <div ref={setScrollElement} style={{ height: 600, overflowY: "auto" }}>
+      <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        {virtualizer.getVirtualItems().map((row) => (
+          <div
+            key={row.key}
+            ref={virtualizer.measureElement}
+            data-index={row.index}
+            style={{
+              position: "absolute",
+              top: 0,
+              width: "100%",
+              transform: `translateY(${row.start}px)`,
+            }}
+          >
+            <Post post={posts[row.index]!} />
+          </div>
+        ))}
+      </div>
+      <div ref={ref} />
+    </div>
+  );
+}
+```
+
+- **Where the trigger lives.** Put the sentinel after the element sized by `getTotalSize()`, inside the scroll container, and pass that container as `root`. The sentinel is always mounted at the end of the full list height, so it does not depend on which rows are in the virtual window. Don't make the sentinel a virtual row: it would mount and unmount with the window.
+- **Overscan and root margin.** `overscan` only changes which rows render, not the sentinel position, so it cannot trigger fetches. `rootMargin` (default `400px` below the viewport) decides how early the next page starts. Each loading cycle fetches one page. While `isLoading` is true the observer is disconnected. When it re-arms after the page renders, the sentinel has moved down by the new page's height, so it fetches again only if the content still doesn't reach the margin.
+- **Variable heights.** Use `measureElement` with `data-index` and position rows with `start`, as above. `estimateSize` should be close to the typical row height: until rows are measured, `getTotalSize()` and therefore the sentinel position are based on estimates.
+- **Scroll restoration.** `useInfiniteScrollRestoration` and the virtualizer can share the scroll container. Attach the restoration `scrollRef` and the virtualizer's scroll element to the same node with one callback ref. The virtualizer follows the offset the hook applies. Restore with the same `estimateSize`, or pass the saved offset as `initialOffset`, so the restored position lands on the same rows.
+- **Prepending pages.** `useBidirectionalInfiniteScroll` keeps the distance from the bottom when a previous page is prepended, measured with the estimated sizes of the new rows. Use `getItemKey` with stable item keys so measured rows keep their sizes after the indexes shift. Rows that measure differently from their estimate shift the anchor by the difference.
+
 ## TanStack Query
 
 The package does not depend on TanStack Query. Its state shape maps directly onto `useInfiniteQuery`:
