@@ -222,17 +222,19 @@ function main(argv: string[]) {
   }
 }
 
-// Builds and packs every DIST_PACKAGES directory with `npm pack` (which runs `prepack`).
+// Builds and packs every DIST_PACKAGES directory.
 function packPackages(root: string, packDirectory: string): PackedArtifact[] {
   rmSync(packDirectory, { recursive: true, force: true });
   run("mkdir", ["-p", packDirectory], root);
   return DIST_PACKAGES.map((directory) => {
+    // Build first, then pack without lifecycle scripts so stdout is only npm's JSON report.
+    run("bun", ["run", "build"], resolve(root, directory));
     const output = run(
       "npm",
-      ["pack", "--json", "--pack-destination", packDirectory],
+      ["pack", "--json", "--ignore-scripts", "--pack-destination", packDirectory],
       resolve(root, directory),
     );
-    const [packed] = JSON.parse(output.slice(output.indexOf("["))) as Array<{
+    const [packed] = JSON.parse(output) as Array<{
       name: string;
       filename: string;
     }>;
