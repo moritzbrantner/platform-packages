@@ -42,7 +42,7 @@ jobs:
       packages: read
       pages: write
       id-token: write
-    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@3b15546083e66aeba487a2e653e3ffaacbfe7220 # workflow-standard-v1.3
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@123499ca4c735e84a26a65bbcc77ffbf129033b7 # workflow-standard-v1.3
     with:
       working_directory: "pages/flat-design"
       bun_version: "1.4.2"
