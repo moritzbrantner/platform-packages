@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: "1.4.3"
+          bun-version: latest
       - name: Install focused Pages dependencies
         run: bun install
       - name: Build focused Pages site
@@ -45,7 +45,7 @@ jobs:
     uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@3b15546083e66aeba487a2e653e3ffaacbfe7220 # workflow-standard-v1.3
     with:
       working_directory: "pages/flat-design"
-      bun_version: "1.4.2"
+      bun_version: latest
       install_command: bun install
       build_command: bun run build
       artifact_path: dist

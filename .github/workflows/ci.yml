@@ -76,7 +76,6 @@ jobs:
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@0e95813ce8b79998a8d96b87be854c24cad099ef
     with:
-      bun_version: "1.4.2"
       install_command: node scripts/verify-prebuilt-dependencies.mjs && bun install --frozen-lockfile
       command: ${{ github.event_name == 'pull_request' && 'bun run lint && bun run typecheck && bun run test && bash scripts/verify-isolated-install.sh && bun run build' || 'bun run lint && bun run typecheck && bun run test && bun run build' }}
 
