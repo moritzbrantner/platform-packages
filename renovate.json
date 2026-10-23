@@ -1,11 +1,22 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>moritzbrantner/coding-agent-conventions"],
+  "extends": [
+    "github>moritzbrantner/coding-agent-conventions"
+  ],
   "platformAutomerge": true,
   "packageRules": [
     {
-      "description": "@react-three/fiber 9.8.2 augments react/jsx-runtime's JSX namespace, which @types/react 19.3 re-exports instead of declaring; Three intrinsic elements (mesh, circleGeometry, ...) then fail to typecheck. Hold the React types on 19.2 until fiber supports 19.3.",
-      "matchPackageNames": ["@types/react", "@types/react-dom"],
+      "description": "@react-three/fiber 9.8.2 augments react/jsx-runtime's JSX namespace, which @types/react 19.2.16+ (and 19.3) re-exports instead of declaring; Three intrinsic elements (mesh, circleGeometry, ...) then fail to typecheck. Hold @types/react at 19.2.15 or older until fiber supports the re-exported JSX namespace.",
+      "matchPackageNames": [
+        "@types/react"
+      ],
+      "allowedVersions": "<19.2.16"
+    },
+    {
+      "description": "@types/react-dom stays on 19.2 alongside the held @types/react.",
+      "matchPackageNames": [
+        "@types/react-dom"
+      ],
       "allowedVersions": "<19.3.0"
     }
   ]
