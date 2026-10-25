@@ -1,7 +1,7 @@
 {
   "name": "platform-packages",
   "private": true,
-  "packageManager": "bun@1.4.3",
+  "packageManager": "bun@1.4.4",
   "workspaces": [
     "examples/*",
     "packages/*",
@@ -47,7 +47,7 @@
     "@playwright/test": "1.64.1",
     "@testing-library/react": "16.3.3",
     "@types/node": "26.6.5",
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.7",
     "@types/three": "0.186.0",
     "jsdom": "30.1.3",

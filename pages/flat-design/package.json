@@ -2,7 +2,7 @@
   "name": "@moritzbrantner/flat-design-pages",
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.4.3",
+  "packageManager": "bun@1.4.4",
   "scripts": {
     "build": "vite build"
   },
@@ -14,7 +14,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.1.2",
-    "vite": "8.3.4"
+    "vite": "8.3.5"
   },
   "trustedDependencies": [
     "@moritzbrantner/ui"
