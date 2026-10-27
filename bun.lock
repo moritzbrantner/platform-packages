@@ -491,7 +491,7 @@
     "@moritzbrantner/timeline-editor",
   ],
   "overrides": {
-    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#4dbaa4625133b549e38d4d2bfbea5ac1e63bf86d",
+    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#47425e078fbcd7ca51cf64a50ffad3bfb4204d8d",
     "react": "19.3.1",
     "react-dom": "19.3.1",
   },
@@ -806,7 +806,7 @@
 
     "@moritzbrantner/typescript-config": ["@moritzbrantner/typescript-config@workspace:packages/typescript-config"],
 
-    "@moritzbrantner/ui": ["@moritzbrantner/ui@github:moritzbrantner/ui#4dbaa46", { "dependencies": { "@base-ui/react": "^1.3.0", "@dnd-kit/react": "^0.5.0", "@tanstack/react-table": "^8.21.3", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "cmdk": "^1.1.1", "date-fns": "^4.1.0", "embla-carousel-react": "^8.6.0", "input-otp": "^1.4.2", "lucide-react": "^1.7.0", "motion": "^13.1.1", "radix-ui": "^1.4.3", "react-day-picker": "^9.14.0", "react-resizable-panels": "^4.9.0", "sonner": "^2.0.7", "tailwind-merge": "^3.4.0", "tailwindcss": "^4.1.14", "tw-animate-css": "^1.4.0", "vaul": "^1.1.2" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" }, "hasInstallScript": true }, "moritzbrantner-ui-4dbaa46", "sha512-m7Xt6Ba7R7C5DT9oiKwkXAPThJf8v0z36zF4kxKqGhtXENTTh6kG+wgBh5GcQW2HD+vdEBM/PALn+JiOzCBQGA=="],
+    "@moritzbrantner/ui": ["@moritzbrantner/ui@github:moritzbrantner/ui#47425e0", { "dependencies": { "@base-ui/react": "^1.3.0", "@dnd-kit/react": "^0.5.0", "@tanstack/react-table": "^8.21.3", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "cmdk": "^1.1.1", "date-fns": "^4.1.0", "embla-carousel-react": "^8.6.0", "input-otp": "^1.4.2", "lucide-react": "^1.7.0", "motion": "^13.1.1", "radix-ui": "^1.4.3", "react-day-picker": "^9.14.0", "react-resizable-panels": "^4.9.0", "sonner": "^2.0.7", "tailwind-merge": "^3.4.0", "tailwindcss": "^4.1.14", "tw-animate-css": "^1.4.0", "vaul": "^1.1.2" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" }, "hasInstallScript": true }, "moritzbrantner-ui-47425e0", "sha512-yTDPO0ALheDwzRWMiPXKXCItZjc8ti3tGjraXfiaGMKpyPsU+IsGnvSolSALMg1IvKw77kHhG3f/I8mCjaEtWQ=="],
 
     "@moritzbrantner/upload-playbook": ["@moritzbrantner/upload-playbook@workspace:packages/upload-playbook"],
 
