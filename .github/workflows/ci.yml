@@ -99,7 +99,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: moritzbrantner/reusable-workflows/.github/actions/merge-ready@123499ca4c735e84a26a65bbcc77ffbf129033b7
+      - uses: moritzbrantner/reusable-workflows/.github/actions/merge-ready@556f65c16362a73dc8a0a36849749fef0e3e64d9
         with:
           needs: ${{ toJSON(needs) }}
           required: '["verify", "validation-scope", "pages-validation"]'
