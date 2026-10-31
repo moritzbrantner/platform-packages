@@ -31,13 +31,13 @@
   "devDependencies": {
     "@moritzbrantner/ui": "1.1.0",
     "@remotion/player": "4.0.539",
-    "@storybook/react-vite": "10.6.4",
+    "@storybook/react-vite": "10.6.5",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.7",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "remotion": "4.0.539",
-    "storybook": "10.6.4"
+    "storybook": "10.6.5"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
