@@ -12,7 +12,7 @@
         "@types/node": "26.6.6",
         "@types/react": "19.2.15",
         "@types/react-dom": "19.2.7",
-        "@types/three": "0.186.0",
+        "@types/three": "0.187.0",
         "jsdom": "30.1.3",
         "oxfmt": "0.75.0",
         "oxlint": "1.90.0",
@@ -372,14 +372,14 @@
         "react": "19.3.1",
         "react-dom": "19.3.1",
         "remotion": "4.0.539",
-        "three": "0.186.1",
+        "three": "0.187.0",
       },
       "peerDependencies": {
         "@react-three/fiber": "^9.4.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "remotion": "^4.0.379",
-        "three": "^0.186.0",
+        "three": "^0.186.0 || ^0.187.0",
       },
       "optionalPeers": [
         "@react-three/fiber",
@@ -438,14 +438,14 @@
         "@types/react-dom": "19.2.7",
         "react": "19.3.1",
         "react-dom": "19.3.1",
-        "three": "0.186.1",
+        "three": "0.187.0",
       },
       "peerDependencies": {
         "@moritzbrantner/ui": "^1.0.0",
         "@react-three/fiber": "^9.4.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "three": "^0.186.0",
+        "three": "^0.186.0 || ^0.187.0",
       },
     },
     "packages/tree-structures": {
@@ -1360,7 +1360,7 @@
 
     "@types/supercluster": ["@types/supercluster@7.1.3", "", { "dependencies": { "@types/geojson": "7946.0.16" } }, "sha512-Z0pOY34GDFl3Q6hUFYf3HkTwKEE02e7QgtJppBt+beEAxnyOpJua+voGFvxINBHa06GwLFFym7gRPY2SiKIfIA=="],
 
-    "@types/three": ["@types/three@0.186.0", "", { "dependencies": { "@dimforge/rapier3d-compat": "~0.12.0", "@tweenjs/tween.js": "~23.1.3", "@types/stats.js": "*", "@types/webxr": ">=0.5.17", "fflate": "~0.8.3", "meshoptimizer": "~1.1.1" } }, "sha512-mxYSBpDC+D0pLfSP6sW4WZTcT+nrtmZcimMqnVmy36Hte3XpeYSrvgg4TRdaM1GemGog1AWzI5qL2VoIfMXbJQ=="],
+    "@types/three": ["@types/three@0.187.0", "", { "dependencies": { "@dimforge/rapier3d-compat": "~0.12.0", "@tweenjs/tween.js": "~23.1.3", "@types/stats.js": "*", "@types/webxr": ">=0.5.17", "fflate": "~0.8.3", "meshoptimizer": "~1.1.1" } }, "sha512-v+vKNarUtk4n2QRZ4+CN5ygMM0ARUjXjIQl0R/unMUfmStFeVqGbgqarbrpoGTXRZoulSH16ePrVJVxPJEbMUA=="],
 
     "@types/use-sync-external-store": ["@types/use-sync-external-store@0.0.6", "", {}, "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg=="],
 
@@ -1999,6 +1999,10 @@
     "@moritzbrantner/playground/@moritzbrantner/maps": ["@moritzbrantner/maps@file:vendor/prebuilt/maps", { "dependencies": { "@turf/boolean-clockwise": "^7.3.5", "@turf/centroid": "^7.3.5", "@turf/helpers": "^7.3.5", "d3-delaunay": "^6.0.4", "maplibre-gl": "6.4.1", "polygon-clipping": "^0.15.7", "three": "^0.185.0" }, "peerDependencies": { "@moritzbrantner/timeline-editor": "^1.0.0", "@moritzbrantner/ui": "^1.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@moritzbrantner/timeline-editor"] }],
 
     "@moritzbrantner/remotion/@moritzbrantner/maps": ["@moritzbrantner/maps@file:vendor/prebuilt/maps", { "dependencies": { "@turf/boolean-clockwise": "^7.3.5", "@turf/centroid": "^7.3.5", "@turf/helpers": "^7.3.5", "d3-delaunay": "^6.0.4", "maplibre-gl": "6.4.1", "polygon-clipping": "^0.15.7", "three": "^0.185.0" }, "peerDependencies": { "@moritzbrantner/timeline-editor": "^1.0.0", "@moritzbrantner/ui": "^1.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@moritzbrantner/timeline-editor"] }],
+
+    "@moritzbrantner/storytelling/three": ["three@0.187.0", "", {}, "sha512-Qiu7R+Cmh8CstZsY1uJOSWnVlfo7ZtNLV7mF8Jltk3LB3AtDu9cRZlcnRKkAk8Y4z6KKw35z7Y7Urd7jWY8etA=="],
+
+    "@moritzbrantner/three-starters/three": ["three@0.187.0", "", {}, "sha512-Qiu7R+Cmh8CstZsY1uJOSWnVlfo7ZtNLV7mF8Jltk3LB3AtDu9cRZlcnRKkAk8Y4z6KKw35z7Y7Urd7jWY8etA=="],
 
     "@moritzbrantner/ui/motion": ["motion@13.5.1", "", { "dependencies": { "framer-motion": "13.5.1", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-eV9SUem6KnzEa9+eT+dVBeDlhy5TTdn09YWR1WhUsKoZCJPw/n4TcYhjbxq2Gy5PTwDr//4H3r5vxkcZnNnO1w=="],
 
