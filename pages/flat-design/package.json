@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#21b3e4764beda65acdee3139270be824c234d69e",
+    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#e6a2f7d7995e9048c62bfe65e9672ccbd426af1c",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
