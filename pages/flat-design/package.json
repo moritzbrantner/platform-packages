@@ -14,7 +14,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.3.5",
     "@vitejs/plugin-react": "6.3.0",
-    "vite": "8.3.7"
+    "vite": "8.3.8"
   },
   "trustedDependencies": [
     "@moritzbrantner/ui"
