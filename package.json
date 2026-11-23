@@ -4,7 +4,8 @@
   "devEngines": {
     "packageManager": {
       "name": "bun",
-      "version": "^1"
+      "version": "^1",
+      "onFail": "ignore"
     }
   },
   "workspaces": [
