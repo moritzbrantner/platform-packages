@@ -16,7 +16,7 @@
     "packages/upload-playbook"
   ],
   "overrides": {
-    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#4f787b2dcd96bc50c3db5da37d9194a18d63eaf2",
+    "@moritzbrantner/ui": "git+https://github.com/moritzbrantner/ui.git#cbe2c2141e325ad4b915c4fa9f7fe19163cb3c6f",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
