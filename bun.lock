@@ -9,7 +9,7 @@
         "@changesets/cli": "3.0.3",
         "@playwright/test": "1.65.1",
         "@testing-library/react": "16.3.3",
-        "@types/node": "26.6.6",
+        "@types/node": "26.6.7",
         "@types/react": "19.2.15",
         "@types/react-dom": "19.2.7",
         "@types/three": "0.187.0",
@@ -304,13 +304,13 @@
       },
       "devDependencies": {
         "@moritzbrantner/ui": "1.1.0",
-        "@remotion/player": "4.0.546",
+        "@remotion/player": "4.0.547",
         "@storybook/react-vite": "10.6.8",
         "@types/react": "19.2.15",
         "@types/react-dom": "19.2.7",
         "react": "19.3.1",
         "react-dom": "19.3.1",
-        "remotion": "4.0.546",
+        "remotion": "4.0.547",
         "storybook": "10.6.8",
       },
       "peerDependencies": {
@@ -371,7 +371,7 @@
         "@types/react-dom": "19.2.7",
         "react": "19.3.1",
         "react-dom": "19.3.1",
-        "remotion": "4.0.546",
+        "remotion": "4.0.547",
         "three": "0.187.0",
       },
       "peerDependencies": {
@@ -1128,7 +1128,7 @@
 
     "@reduxjs/toolkit": ["@reduxjs/toolkit@2.11.2", "", { "dependencies": { "@standard-schema/spec": "1.1.0", "@standard-schema/utils": "0.3.0", "immer": "11.1.4", "redux": "5.0.1", "redux-thunk": "3.1.0", "reselect": "5.1.1" }, "optionalDependencies": { "react": "19.2.4", "react-redux": "9.2.0" } }, "sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ=="],
 
-    "@remotion/player": ["@remotion/player@4.0.546", "", { "dependencies": { "remotion": "4.0.546" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-U2jtGZOGpBcCrTbTbdImGL8CEpvrT/s4Fz71gQ37DPgLm7xLsh0ELqcR9kjdcAtHNMz7qAgnLa7VfaO2MHFBnQ=="],
+    "@remotion/player": ["@remotion/player@4.0.547", "", { "dependencies": { "remotion": "4.0.547" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-dxhkEPKmLONqa+4JMZPRqu04tchuWsIn475FzEzDsCFrP7qexx9URy3e4RMDCCWfgb9BPza3uvNf/7PL2CmrGw=="],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.0.0-rc.15", "", { "os": "android", "cpu": "arm64" }, "sha512-YYe6aWruPZDtHNpwu7+qAHEMbQ/yRl6atqb/AhznLTnD3UY99Q1jE7ihLSahNWkF4EqRPVC4SiR4O0UkLK02tA=="],
 
@@ -1346,7 +1346,7 @@
 
     "@types/geojson": ["@types/geojson@7946.0.16", "", {}, "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg=="],
 
-    "@types/node": ["@types/node@26.6.6", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog=="],
+    "@types/node": ["@types/node@26.6.7", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-tovuRfrUILu6v46bMG+BgXxMvsqPBx2WO2as8Rpln+JTff1dbexMtAM4KFTejmL0axsnSWViCW7MecUQpLuBRA=="],
 
     "@types/react": ["@types/react@19.2.15", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-eRwcGNHve+E8qtEQSSRl6urh+rFop4v8gm6O8rGv25CodbvFdLjA1vVQ1KkiFE0w0UPOnb8tDiFKL5lp0rtY5Q=="],
 
@@ -1812,7 +1812,7 @@
 
     "regenerator-runtime": ["regenerator-runtime@0.13.11", "", {}, "sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg=="],
 
-    "remotion": ["remotion@4.0.546", "", { "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-dTb/tVX0CsQFhvUdQdZY7Icl7B/9leswdnFwBPVucZUQKrma9IEQBDszEAYBEF/H3OLC58BQc7enU1PRrTa1Eg=="],
+    "remotion": ["remotion@4.0.547", "", { "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-71q/xWImdmMIpqp7nebkrRszltpwROrzxPbwnteDbR8S0Ny0WNCMuP/B/Zz4nHMdR687aiyx08ssL3zmw2yGmQ=="],
 
     "require-from-string": ["require-from-string@2.0.2", "", {}, "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw=="],
 

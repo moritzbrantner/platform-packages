@@ -52,7 +52,7 @@
     "@changesets/cli": "3.0.3",
     "@playwright/test": "1.65.1",
     "@testing-library/react": "16.3.3",
-    "@types/node": "26.6.6",
+    "@types/node": "26.6.7",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.7",
     "@types/three": "0.187.0",
